@@ -1,0 +1,22 @@
+.header-section {
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.app-title {
+  font-size: var(--font-size-xxxl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--spacing-sm);
+  line-height: var(--line-height-tight);
+}
+
+.app-subtitle {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-regular);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: var(--line-height-loose);
+}

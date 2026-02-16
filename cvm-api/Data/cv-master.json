@@ -1,0 +1,241 @@
+{
+  "header": {
+    "fullName": "Ezequiel Rindello",
+    "email": "rindelloezequiel@gmail.com",
+    "phone": "+54 9 341 279-3916",
+    "location": "Rosario, Argentina",
+    "linkedin": "linkedin.com/in/ezequiel-rindello",
+    "github": "github.com/ezequielrindello"
+  },
+  "education": [
+    {
+      "degree": "Software Development",
+      "institution": "Brigham Young University – Idaho",
+      "location": "Rexburg, Idaho, U.S.A.",
+      "graduationDate": "Sep 2023 – Present",
+      "gpa": "",
+      "relevantCourses": [
+        "Object-Oriented Programming",
+        "Web Development",
+        "Database Management",
+        "Software Engineering",
+        "Web Services"
+      ],
+      "honors": ""
+    },
+    {
+      "degree": "PathwayConnect Certificate",
+      "institution": "BYU–Pathway Worldwide",
+      "location": "U.S.A.",
+      "graduationDate": "Apr 2022 - Apr 2023",
+      "gpa": "",
+      "relevantCourses": [],
+      "honors": ""
+    }
+  ],
+  "experience": [
+    {
+      "role": "Junior Software Developer",
+      "company": "Primero Systems Inc.",
+      "location": "Remote · San Diego, CA",
+      "startDate": "Jun 2025",
+      "endDate": "Present",
+      "bullets": [
+        "Developed and maintained a large-scale internal SaaS application using React 19, Vite, and modular SCSS serving 500+ active users",
+        "Implemented complex UI features including Kanban-style boards, dynamic layouts, and workflow-driven components improving user productivity by 40%",
+        "Built and integrated REST APIs using ASP.NET Core (.NET) with PostgreSQL in a multi-tenant environment handling 10K+ daily requests",
+        "Worked with SQL-based migrations and versioned deployment scripts to support evolving requirements across 3 major releases",
+        "Implemented email batching and background-driven processes reducing server load by 60% and improving system reliability",
+        "Integrated frontend features through a custom Fetch-based API layer handling authentication, authorization, and error states",
+        "Applied layered architecture (controllers, services, helpers) to improve maintainability and scalability supporting future growth",
+        "Developed reusable components and helpers to standardize core functionalities reducing code duplication by 35%",
+        "Designed and queried relational databases using SQL/PostgreSQL for structured data storage optimizing query performance by 50%",
+        "Applied best practices for code organization, version control, and incremental delivery in an agile environment with 2-week sprints"
+      ],
+      "skills": [
+        "C#",
+        ".NET",
+        "ASP.NET Core",
+        "React",
+        "Vite",
+        "PostgreSQL",
+        "REST API",
+        "SQL",
+        "SCSS",
+        "Docker",
+        "Agile",
+        "Layered Architecture",
+        "JavaScript",
+        "TypeScript"
+      ]
+    },
+    {
+      "role": "Certification Specialist",
+      "company": "Preferred Compliance Solutions, LLC",
+      "location": "Remote · Logan, UT",
+      "startDate": "May 2024",
+      "endDate": "Jun 2025",
+      "bullets": [
+        "Managed a portfolio of 1,800 housing units using digital tools and data analysis ensuring 100% compliance accuracy",
+        "Automated compliance reporting processes using Excel macros and Python scripts improving accuracy and reducing turnaround time by 70%",
+        "Exceeded performance targets by 36% while maintaining high quality standards and zero compliance violations",
+        "Trained and mentored 8 new team members on workflows and internal systems reducing onboarding time from 6 weeks to 3 weeks",
+        "Developed standardized documentation procedures improving team efficiency by 25%",
+        "Collaborated with remote teams across 3 time zones to ensure seamless operations and communication"
+      ],
+      "skills": [
+        "Process Automation",
+        "Data Analysis",
+        "Reporting",
+        "Training",
+        "Remote Collaboration",
+        "Excel",
+        "Python",
+        "Documentation"
+      ]
+    },
+    {
+      "role": "Automated Production Machine Operator",
+      "company": "La Virginia",
+      "location": "Rosario, Argentina",
+      "startDate": "Jun 2023",
+      "endDate": "May 2024",
+      "bullets": [
+        "Improved machine performance to 86% uptime increasing production efficiency by 15% and output by 200 units per day",
+        "Reduced material loss by 10% through improved monitoring routines saving $15K annually in material costs",
+        "Documented production data to support scheduling and quality control enabling data-driven decision making",
+        "Performed preventive maintenance and troubleshooting reducing machine downtime by 20%",
+        "Collaborated with engineering team to implement process improvements resulting in 12% productivity increase"
+      ],
+      "skills": [
+        "Process Optimization",
+        "Data Monitoring",
+        "Quality Control",
+        "Preventive Maintenance",
+        "Lean Manufacturing"
+      ]
+    },
+    {
+      "role": "Industrial Painter",
+      "company": "John Deere",
+      "location": "Granadero Baigorria, Argentina",
+      "startDate": "Nov 2021",
+      "endDate": "Apr 2023",
+      "bullets": [
+        "Supported manufacturing operations using ERP-based production tracking systems processing 150+ work orders daily",
+        "Applied quality control standards to ensure product consistency achieving 98% first-time quality rate",
+        "Implemented 5S methodologies to streamline production workflows reducing setup time by 30%",
+        "Trained 5 new team members on safety protocols and quality standards ensuring zero safety incidents",
+        "Maintained detailed production records and participated in continuous improvement initiatives"
+      ],
+      "skills": [
+        "ERP Systems",
+        "5S Methodology",
+        "Manufacturing Processes",
+        "Quality Assurance",
+        "Safety Protocols",
+        "Team Training"
+      ]
+    }
+  ],
+  "skills": {
+    "languages": [
+      "C#",
+      "JavaScript",
+      "SQL",
+      "Python"
+    ],
+    "frameworks": [
+      "ASP.NET Core",
+      ".NET",
+      "React",
+      "Next.js",
+      "Node.js",
+      "Bootstrap",
+      "SCSS",
+      "Vite"
+    ],
+    "databases": [
+      "PostgreSQL",
+      "MongoDB",
+      "SQL Server",
+      "MySQL"
+    ],
+    "tools": [
+      "Git",
+      "GitHub",
+      "Postman",
+      "Docker",
+      "Vercel",
+      "Netlify",
+      "Bitbucket",
+      "Visual Studio",
+      "VS Code"
+    ],
+    "cloud": [
+      "Azure",
+      "AWS"
+    ],
+    "practices": [
+      "Agile",
+      "Scrum",
+      "REST API Design",
+      "Layered Architecture",
+      "Code Reusability",
+      "MVC Architecture",
+      "Test-Driven Development"
+    ]
+  },
+  "projects": [
+    {
+      "name": "E-Commerce Platform (CSE 430 Final Project)",
+      "description": "Team-based responsive e-commerce platform using Next.js, Node.js, and MongoDB. Implemented user authentication, secure REST APIs, and dynamic routes. Deployed via Vercel. Collaborated with a team using GitHub Projects and followed agile practices.",
+      "technologies": [
+        "Next.js",
+        "Node.js",
+        "MongoDB",
+        "REST API",
+        "Vercel"
+      ],
+      "highlights": [
+        "Implemented JWT-based authentication serving 100+ test users",
+        "Built dynamic product catalog with search and filter functionality",
+        "Achieved 95% test coverage using Jest and deployed to production"
+      ],
+      "link": ""
+    },
+    {
+      "name": "MVC Web Application (CSE 330 Final Project)",
+      "description": "Dynamic MVC-based website with SEO optimization and full client/server data validation. Included hashed passwords, user authentication/authorization, DOM manipulation, and custom error handling.",
+      "technologies": [
+        "JavaScript",
+        "HTML",
+        "CSS",
+        "MVC Architecture",
+        "Node.js"
+      ],
+      "highlights": [
+        "Implemented bcrypt password hashing and role-based access control",
+        "Achieved 90+ SEO score using Lighthouse audits",
+        "Built comprehensive error handling reducing user-facing errors by 85%"
+      ],
+      "link": ""
+    },
+    {
+      "name": "REST API Platform (WDD 330 Final Project)",
+      "description": "Secure REST API using Node.js and MongoDB, supporting full CRUD operations with authentication and role-based authorization. Implemented server-side rendering and input validation and deployed to the cloud.",
+      "technologies": [
+        "Node.js",
+        "MongoDB",
+        "Express.js",
+        "JWT"
+      ],
+      "highlights": [
+        "Designed RESTful endpoints following industry best practices",
+        "Implemented rate limiting and input sanitization for security",
+        "Documented API using Swagger/OpenAPI specifications"
+      ],
+      "link": ""
+    }
+  ]
+}
