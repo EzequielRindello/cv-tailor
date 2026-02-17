@@ -153,6 +153,8 @@ function App() {
     setDownloadSuccess(false);
     setShowBulletEditor(false);
     setError('');
+
+    document.getElementById('app-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   // Rendering
