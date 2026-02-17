@@ -4,7 +4,7 @@ namespace ErCvApi.Helpers
 {
     public class PageConstraintHelper
     {
-        private const int MaxLinesPerPage = 48;
+        private const int LinesPerPage = 48;
         private const int HeaderLines = 3;
         private const int SummaryLines = 3;
         private const int EducationLinesPerEntry = 2;
@@ -13,103 +13,75 @@ namespace ErCvApi.Helpers
         private const int SkillsSectionLines = 3;
         private const int ProjectLines = 4;
 
-        public GeneratedCV EnforceOnePageConstraint(GeneratedCV cv)
+        public GeneratedCV EnforcePageConstraint(GeneratedCV cv, bool allowTwoPages = false)
         {
+            var maxLines = allowTwoPages ? LinesPerPage * 2 : LinesPerPage;
             var currentLines = CalculateTotalLines(cv);
 
-            if (currentLines <= MaxLinesPerPage)
+            if (currentLines <= maxLines) return cv;
+
+            // 1. Reduce bullets (minimum 2 per experience)
+            while (currentLines > maxLines && cv.Experience.Any(e => e.Bullets.Count > 2))
             {
-                return cv;
+                var expWithMost = cv.Experience.OrderByDescending(e => e.Bullets.Count).First();
+                expWithMost.Bullets.RemoveAt(expWithMost.Bullets.Count - 1);
+                currentLines--;
             }
 
-            // Reduce bullets from experiences
-            while (currentLines > MaxLinesPerPage && cv.Experience.Any(e => e.Bullets.Count > 2))
-            {
-                // Find experience with most bullets
-                var expWithMostBullets = cv.Experience
-                    .OrderByDescending(e => e.Bullets.Count)
-                    .First();
-
-                if (expWithMostBullets.Bullets.Count > 2)
-                {
-                    // Remove last bullet
-                    expWithMostBullets.Bullets.RemoveAt(expWithMostBullets.Bullets.Count - 1);
-                    currentLines--;
-                }
-            }
-
-            // If still too long, remove last experience
-            while (currentLines > MaxLinesPerPage && cv.Experience.Count > 2)
+            // 2.Remove last experience if more than 2 remain
+            while (currentLines > maxLines && cv.Experience.Count > 2)
             {
                 var lastExp = cv.Experience.Last();
-                var linesInExp = ExperienceTitleLines + lastExp.Bullets.Count;
+                currentLines -= (ExperienceTitleLines + lastExp.Bullets.Count);
                 cv.Experience.RemoveAt(cv.Experience.Count - 1);
-                currentLines -= linesInExp;
             }
 
-            // Remove projects if still too long
-            if (currentLines > MaxLinesPerPage && cv.Projects.Any())
+            // 3. Delete projects
+            if (currentLines > maxLines && cv.Projects.Any())
             {
-                currentLines -= (cv.Projects.Count * ProjectLines);
+                currentLines -= (1 + cv.Projects.Count * ProjectLines);
                 cv.Projects.Clear();
             }
 
-            // Reduce skills if needed
-            while (currentLines > MaxLinesPerPage && cv.Skills.Count > 8)
+            // 4. Reducir skills si hay más de 8
+            while (currentLines > maxLines && cv.Skills.Count > 8)
             {
                 cv.Skills.RemoveAt(cv.Skills.Count - 1);
-                if (cv.Skills.Count % 5 == 0) // Assume skills wrap every 5
-                {
-                    currentLines--;
-                }
+                if (cv.Skills.Count % 5 == 0) currentLines--;
             }
 
             return cv;
         }
 
-        public bool CanFitProject(GeneratedCV cv)
+        // Backward compatibility with the previous method
+        public GeneratedCV EnforceOnePageConstraint(GeneratedCV cv) =>
+            EnforcePageConstraint(cv, allowTwoPages: false);
+
+        public bool CanFitProject(GeneratedCV cv, bool allowTwoPages = false)
         {
-            var currentLines = CalculateTotalLines(cv);
-            return (currentLines + ProjectLines) <= MaxLinesPerPage;
+            var maxLines = allowTwoPages ? LinesPerPage * 2 : LinesPerPage;
+            return (CalculateTotalLines(cv) + ProjectLines) <= maxLines;
         }
 
-        private int CalculateTotalLines(GeneratedCV cv)
+        public int CalculateTotalLines(GeneratedCV cv)
         {
-            int lines = 0;
+            int lines = HeaderLines;
 
-            // Header
-            lines += HeaderLines;
-
-            // Summary
             if (!string.IsNullOrEmpty(cv.Summary))
-            {
                 lines += SummaryLines;
-            }
 
-            // Education
-            lines += 1; // Section title
+            lines += 1; // Education section title
             lines += cv.Education.Count * EducationLinesPerEntry;
 
-            // Experience
-            lines += 1; // Section title
+            lines += 1; // Experience section title
             foreach (var exp in cv.Experience)
-            {
-                lines += ExperienceTitleLines;
-                lines += exp.Bullets.Count * BulletLines;
-            }
+                lines += ExperienceTitleLines + exp.Bullets.Count * BulletLines;
 
-            // Skills
             if (cv.Skills.Any())
-            {
                 lines += SkillsSectionLines;
-            }
 
-            // Projects
             if (cv.Projects.Any())
-            {
-                lines += 1; // Section title
-                lines += cv.Projects.Count * ProjectLines;
-            }
+                lines += 1 + cv.Projects.Count * ProjectLines;
 
             return lines;
         }

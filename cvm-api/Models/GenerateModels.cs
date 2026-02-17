@@ -1,11 +1,5 @@
 namespace ErCvApi.Models
 {
-    public class GenerateRequest
-    {
-        public string JobDescription { get; set; }
-        public List<string> Formats { get; set; } // ["pdf", "docx"]
-    }
-
     public class GeneratedCV
     {
         public Header Header { get; set; }
