@@ -127,3 +127,39 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
 }
+
+.keyword-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.keyword-title-icon {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.kw-group-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.kw-group-icon {
+  font-size: 14px;
+  line-height: 1;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.kw-status i {
+  font-size: var(--font-size-xs);
+  line-height: 1;
+}
+
+.toggle-icon i {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}

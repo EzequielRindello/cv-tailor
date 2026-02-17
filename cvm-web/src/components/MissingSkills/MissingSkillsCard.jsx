@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card, Collapse } from 'react-bootstrap';
 import './MissingSkillsCard.css';
 
@@ -13,7 +13,10 @@ export default function MissingSkillsCard({ data }) {
       <Card className="missing-skills-card">
         <Card.Body>
           <div className="missing-card-header">
-            <h5 className="missing-card-title">✅ Skills Coverage</h5>
+            <h5 className="missing-card-title">
+              <i className="bi bi-check-circle-fill missing-title-icon ok" />
+              Skills Coverage
+            </h5>
           </div>
           <p className="all-clear-text">All required skills are present in your CV Master!</p>
         </Card.Body>
@@ -26,14 +29,20 @@ export default function MissingSkillsCard({ data }) {
   return (
     <Card className="missing-skills-card">
       <Card.Body>
-        <div className="missing-card-header" onClick={() => setOpen(!open)}>
-          <h5 className="missing-card-title">⚠️ Missing Skills ({total})</h5>
-          <span className="toggle-icon">{open ? '▲' : '▼'}</span>
+        <div className="missing-card-header mb-3" onClick={() => setOpen(!open)}>
+          <h5 className="missing-card-title">
+            <i className="bi bi-exclamation-triangle-fill missing-title-icon warn" />
+            Missing Skills ({total})
+          </h5>
+          <span className="toggle-icon">
+            <i className={`bi ${open ? 'bi-chevron-up' : 'bi-chevron-down'}`} />
+          </span>
         </div>
 
         {data.potentialScoreIncrease > 0 && (
           <p className="tip-text">
-            💡 Adding missing skills could increase your match score by up to <strong>+{data.potentialScoreIncrease}%</strong>
+            <i className="bi bi-lightbulb-fill missing-tip-icon" />
+            Adding missing skills could increase your match score by up to <strong>+{data.potentialScoreIncrease}%</strong>
           </p>
         )}
 

@@ -103,3 +103,39 @@
 
 .breakdown-icon.ok   { background: var(--color-bg-selected); color: var(--color-success); }
 .breakdown-icon.warn { background: #fff3e0; color: var(--color-warning); }
+
+.missing-keywords {
+  margin-top: 1rem;
+}
+
+.missing-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.missing-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.missing-pill {
+  background: #ffecec;
+  color: #b02a37;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+}
+
+.match-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.match-title-icon {
+  font-size: 20px;
+  color: var(--color-text-secondary);
+}
+

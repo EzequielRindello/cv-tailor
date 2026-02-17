@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Button } from 'react-bootstrap';
 import './BulletEditor.css';
 
@@ -77,14 +77,27 @@ export default function BulletEditor({ generatedCV, onRegenerate, onCancel, load
   return (
     <Card className="bullet-editor-card">
       <Card.Body>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--spacing-md)' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: 'var(--spacing-md)',
+          }}
+        >
           <div>
-            <h5 className="bullet-editor-title">✏️ Edit Bullets</h5>
+            <h5 className="bullet-editor-title">
+              <i className="bi bi-pencil-square bullet-title-icon" />
+              Edit Bullets
+            </h5>
             <div className="bullet-editor-subtitle">
-              {totalSelected}/{totalBullets} selected · Uncheck to exclude · Drag ⠿ to reorder
+              {totalSelected}/{totalBullets} selected · Uncheck to exclude · Drag
+              <i className="bi bi-grip-vertical bullet-drag-icon" />
+              to reorder
             </div>
           </div>
         </div>
+
 
         {localCV.experience.map((exp, expIdx) => {
           const expKey = `exp${expIdx}`;

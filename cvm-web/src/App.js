@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Container, Row, Col, Alert, Card, Form } from 'react-bootstrap';
 import axios from 'axios';
 import Header from './components/Header/Header';
@@ -161,95 +161,114 @@ function App() {
   }
 
   return (
-    <div className="app-container">
-      <Container className="py-5">
-        <Row className="justify-content-center">
-          <Col lg={9} xl={8}>
-            <Header />
-            <Card className="main-card mb-4">
-              <Card.Body className="p-4 p-md-5">
-                {error && (
-                  <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>
-                )}
+  <div className="app-container">
+    <Container className="py-5">
+      <Header />
+      <Row>
+        <Col lg={6} className="mb-4">
+          <Card className="main-card">
+            <Card.Body className="p-4">
+              {error && (
+                <Alert
+                  variant="danger"
+                  dismissible
+                  onClose={() => setError('')}
+                >
+                  {error}
+                </Alert>
+              )}
+              <Form>
+                <h5 className="mb-4">Generate Your CV</h5>
+                <JobDescriptionInput
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  disabled={loading}
+                />
+                <TemplateSelector
+                  value={template}
+                  onChange={setTemplate}
+                  disabled={loading}
+                />
+                <Row>
+                  <Col md={6}>
+                    <FormatSelector
+                      selectedFormats={selectedFormats}
+                      onChange={handleFormatChange}
+                      disabled={loading}
+                    />
+                  </Col>
+                  <Col md={6}>
+                    <PageOptions
+                      allowTwoPages={allowTwoPages}
+                      onChange={setAllowTwoPages}
+                      disabled={loading}
+                    />
+                  </Col>
+                </Row>
+                <GenerateButton
+                  loading={loading}
+                  onClick={handleGenerate}
+                  disabled={loading}
+                />
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col lg={6}>
+          {analysisResult ? (
+            <>
+              <MatchScoreCard data={analysisResult.matchScore} />
+              <ATSScoreCard data={analysisResult.atsScore} />
+              <MissingSkillsCard data={analysisResult.missingSkills} />
+              <KeywordAnalysisCard data={analysisResult.keywordAnalysis} />
+              {!showBulletEditor && (
+                <div className="text-center mb-4">
+                  <button
+                    className="btn btn-outline-primary me-3"
+                    onClick={() => setShowBulletEditor(true)}
+                  >
+                    <i className="bi bi-pencil-square me-1" />
+                    Edit Bullets & Regenerate
+                  </button>
 
-                <Form>
-                  <JobDescriptionInput
-                    value={jobDescription}
-                    onChange={(e) => setJobDescription(e.target.value)}
-                    disabled={loading}
-                  />
-
-                  <TemplateSelector value={template} onChange={setTemplate} disabled={loading} />
-
-                  <Row>
-                    <Col md={6}>
-                      <FormatSelector
-                        selectedFormats={selectedFormats}
-                        onChange={handleFormatChange}
-                        disabled={loading}
-                      />
-                    </Col>
-                    <Col md={6}>
-                      <PageOptions
-                        allowTwoPages={allowTwoPages}
-                        onChange={setAllowTwoPages}
-                        disabled={loading}
-                      />
-                    </Col>
-                  </Row>
-
-                  <GenerateButton
-                    loading={loading}
-                    onClick={handleGenerate}
-                    disabled={loading}
-                  />
-                </Form>
+                  <button
+                    className="btn btn-outline-secondary"
+                    onClick={handleReset}
+                  >
+                    <i className="bi bi-arrow-counterclockwise me-1" />
+                    Start Over
+                  </button>
+                </div>
+              )}
+              {showBulletEditor && (
+                <BulletEditor
+                  generatedCV={analysisResult.generatedCV}
+                  onRegenerate={handleRegenerate}
+                  onCancel={() => setShowBulletEditor(false)}
+                  loading={loading}
+                />
+              )}
+            </>
+          ) : (
+            <Card className="main-card">
+              <Card.Body className="text-center text-muted">
+                <p className="mb-0">
+                  Generate results to see the analysis here
+                </p>
               </Card.Body>
             </Card>
-
-            {analysisResult && (
-              <>
-                <MatchScoreCard data={analysisResult.matchScore} />
-
-                <ATSScoreCard data={analysisResult.atsScore} />
-
-                <MissingSkillsCard data={analysisResult.missingSkills} />
-
-                <KeywordAnalysisCard data={analysisResult.keywordAnalysis} />
-
-                {!showBulletEditor && (
-                  <div className="text-center mb-4">
-                    <button
-                      className="btn btn-outline-primary me-3"
-                      onClick={() => setShowBulletEditor(true)}
-                    >
-                      ✏️ Edit Bullets & Regenerate
-                    </button>
-                    <button className="btn btn-outline-secondary" onClick={handleReset}>
-                      ↩ Start Over
-                    </button>
-                  </div>
-                )}
-
-                {showBulletEditor && (
-                  <BulletEditor
-                    generatedCV={analysisResult.generatedCV}
-                    onRegenerate={handleRegenerate}
-                    onCancel={() => setShowBulletEditor(false)}
-                    loading={loading}
-                  />
-                )}
-              </>
-            )}
-
-            <div className="footer-note">
-              <p>Your CV is generated based on a master profile and tailored to match the job requirements</p>
-            </div>
-          </Col>
-        </Row>
-      </Container>
-    </div>
-  );
+          )}
+        </Col>
+      </Row> 
+    </Container>
+    <div className="footer-note mt-4">
+        <p>
+          Your CV is generated based on a master profile and tailored to match
+          the job requirements
+        </p>
+      </div>
+  </div>
+);
 }
 
 export default App;

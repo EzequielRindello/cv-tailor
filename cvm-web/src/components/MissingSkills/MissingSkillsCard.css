@@ -111,3 +111,35 @@
   margin-top: var(--spacing-sm);
   margin-bottom: 0;
 }
+
+.missing-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.missing-title-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.missing-title-icon.ok {
+  color: var(--color-success);
+}
+
+.missing-title-icon.warn {
+  color: var(--color-warning);
+}
+
+.toggle-icon i {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.missing-tip-icon {
+  font-size: 16px;
+  margin-right: var(--spacing-xs);
+  color: var(--color-warning);
+  vertical-align: middle;
+}

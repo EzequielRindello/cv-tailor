@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card } from 'react-bootstrap';
 import './MatchScoreCard.css';
 
@@ -13,7 +12,10 @@ export default function MatchScoreCard({ data }) {
     <Card className="match-score-card">
       <Card.Body>
         <div className="match-card-header">
-          <h5 className="match-card-title">🎯 Match Score</h5>
+          <h5 className="match-card-title">
+            <i className="bi bi-bullseye match-title-icon" />
+            Match Score
+          </h5>
           <span className={`match-badge ${c}`}>{labelMap[c]}</span>
         </div>
 
@@ -28,19 +30,19 @@ export default function MatchScoreCard({ data }) {
         <div className="match-breakdown">
           <div className="breakdown-item">
             <span className={`breakdown-icon ${data.skillsMatched >= data.totalSkills * 0.6 ? 'ok' : 'warn'}`}>
-              {data.skillsMatched >= data.totalSkills * 0.6 ? '✓' : '○'}
+              <i className={`bi ${data.skillsMatched >= data.totalSkills * 0.6 ? 'bi-check' : 'bi-circle'}`} />
             </span>
             Technical skills: <strong>{data.skillsMatched}/{data.totalSkills}</strong> matched
           </div>
           <div className="breakdown-item">
             <span className={`breakdown-icon ${data.keywordsMatched >= data.totalKeywords * 0.5 ? 'ok' : 'warn'}`}>
-              {data.keywordsMatched >= data.totalKeywords * 0.5 ? '✓' : '○'}
+              <i className={`bi ${data.keywordsMatched >= data.totalKeywords * 0.5 ? 'bi-check' : 'bi-circle'}`} />
             </span>
             Keywords: <strong>{data.keywordsMatched}/{data.totalKeywords}</strong> present
           </div>
           <div className="breakdown-item">
             <span className={`breakdown-icon ${data.seniorityMatch ? 'ok' : 'warn'}`}>
-              {data.seniorityMatch ? '✓' : '○'}
+              <i className={`bi ${data.seniorityMatch ? 'bi-check' : 'bi-circle'}`} />
             </span>
             Seniority level: <strong>{data.seniorityMatch ? 'Match' : 'Mismatch'}</strong>
           </div>

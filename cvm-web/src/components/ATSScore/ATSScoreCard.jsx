@@ -15,14 +15,19 @@ export default function ATSScoreCard({ data }) {
       <Card.Body>
         <div className="ats-card-header" onClick={() => setOpen(!open)}>
           <div>
-            <h5 className="ats-card-title">🤖 ATS Compatibility</h5>
+            <h5 className="ats-card-title mb-3">
+              <i className="bi bi-cpu ats-title-icon" />
+              ATS Compatibility
+            </h5>
             <div className="ats-score-row">
               <span className={`ats-percent ${c}`}>{pct}</span>
               <span className="ats-denom">/100</span>
               <span className={`ats-badge ${c}`}>{labelMap[c]}</span>
             </div>
           </div>
-          <span className="toggle-icon">{open ? '▲' : '▼'}</span>
+          <span className="toggle-icon">
+            <i className={`bi ${open ? 'bi-chevron-up' : 'bi-chevron-down'}`} />
+          </span>
         </div>
 
         <div className="ats-bar-track">
@@ -32,7 +37,10 @@ export default function ATSScoreCard({ data }) {
         <Collapse in={open}>
           <div style={{ marginTop: 'var(--spacing-md)' }}>
             {!data.issues?.length ? (
-              <p className="ats-all-clear">✅ Your CV is fully optimized for ATS </p>
+              <p className="ats-all-clear">
+                <i className="bi bi-check-circle-fill ats-success-icon" />
+                Your CV is fully optimized for ATS
+              </p>
             ) : (
               <>
                 <div className="ats-issues-title">Issues found</div>

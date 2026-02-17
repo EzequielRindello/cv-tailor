@@ -137,3 +137,26 @@
   color: var(--color-text-tertiary);
   flex-shrink: 0;
 }
+
+.ats-title-icon {
+  font-size: 20px;
+  color: var(--color-text-secondary);
+  margin-right: var(--spacing-xs);
+  vertical-align: middle;
+}
+
+.toggle-icon i {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.ats-success-icon {
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+  margin-right: var(--spacing-xs);
+}
+.ats-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
