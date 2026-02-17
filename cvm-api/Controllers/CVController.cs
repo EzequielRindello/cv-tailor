@@ -23,21 +23,66 @@ namespace ErCvApi.Controllers
             try
             {
                 if (request == null || string.IsNullOrWhiteSpace(request.JobDescription))
-                {
                     return BadRequest(new { error = "Job description is required" });
-                }
 
                 if (request.Formats == null || !request.Formats.Any())
-                {
                     return BadRequest(new { error = "At least one format must be selected" });
-                }
 
-                _logger.LogInformation("Generating CV with formats: {Formats}", string.Join(", ", request.Formats));
+                _logger.LogInformation(
+                    "Generating CV | Formats: {F} | Template: {T} | TwoPages: {P}",
+                    string.Join(", ", request.Formats), request.Template, request.AllowTwoPages);
 
-                var documents = await _cvService.GenerateCVAsync(request);
+                var (documents, analysis) = await _cvService.GenerateCVAsync(request);
 
-                // Return file information for client to download
-                var result = new
+                // Save files in session for download
+                foreach (var doc in documents)
+                    HttpContext.Session.Set($"cv_{doc.Key}", doc.Value);
+
+                // Save the GeneratedCV in session
+                var cvJson = System.Text.Json.JsonSerializer.Serialize(analysis.GeneratedCV);
+                HttpContext.Session.SetString("cv_generated", cvJson);
+
+                return Ok(new
+                {
+                    success = true,
+                    files = documents.Select(d => new
+                    {
+                        format = d.Key,
+                        filename = $"CV_{DateTime.Now:yyyyMMdd_HHmmss}.{d.Key}",
+                        size = d.Value.Length
+                    }).ToList(),
+
+                    matchScore = analysis.MatchScore,
+                    missingSkills = analysis.MissingSkills,
+                    keywordAnalysis = analysis.KeywordAnalysis,
+                    atsScore = analysis.ATSScore,
+                    generatedCV = analysis.GeneratedCV
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating CV");
+                return StatusCode(500, new { error = "Error generating CV", details = ex.Message });
+            }
+        }
+
+        [HttpPost("regenerate")]
+        public async Task<IActionResult> Regenerate([FromBody] RegenerateRequest request)
+        {
+            try
+            {
+                if (request?.GeneratedCV == null)
+                    return BadRequest(new { error = "GeneratedCV is required" });
+
+                if (request.Formats == null || !request.Formats.Any())
+                    return BadRequest(new { error = "At least one format must be selected" });
+
+                var documents = await _cvService.RegenerateCVAsync(request);
+
+                foreach (var doc in documents)
+                    HttpContext.Session.Set($"cv_{doc.Key}", doc.Value);
+
+                return Ok(new
                 {
                     success = true,
                     files = documents.Select(d => new
@@ -46,20 +91,12 @@ namespace ErCvApi.Controllers
                         filename = $"CV_{DateTime.Now:yyyyMMdd_HHmmss}.{d.Key}",
                         size = d.Value.Length
                     }).ToList()
-                };
-
-                // Store files temporarily in memory for download
-                foreach (var doc in documents)
-                {
-                    HttpContext.Session.Set($"cv_{doc.Key}", doc.Value);
-                }
-
-                return Ok(result);
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error generating CV");
-                return StatusCode(500, new { error = "An error occurred while generating the CV", details = ex.Message });
+                _logger.LogError(ex, "Error regenerating CV");
+                return StatusCode(500, new { error = "Error regenerating CV", details = ex.Message });
             }
         }
 
@@ -69,31 +106,26 @@ namespace ErCvApi.Controllers
             try
             {
                 var fileBytes = HttpContext.Session.Get($"cv_{format}");
-                
-                if (fileBytes == null || fileBytes.Length == 0)
-                {
-                    return NotFound(new { error = "File not found" });
-                }
 
-                var contentType = format.ToLower() == "pdf" 
-                    ? "application/pdf" 
+                if (fileBytes == null || fileBytes.Length == 0)
+                    return NotFound(new { error = "File not found. Generate a CV first." });
+
+                var contentType = format.ToLower() == "pdf"
+                    ? "application/pdf"
                     : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
                 var filename = $"CV_{DateTime.Now:yyyyMMdd_HHmmss}.{format}";
-
                 return File(fileBytes, contentType, filename);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error downloading file");
-                return StatusCode(500, new { error = "An error occurred while downloading the file" });
+                return StatusCode(500, new { error = "Error downloading file" });
             }
         }
 
         [HttpGet("health")]
-        public IActionResult Health()
-        {
-            return Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
-        }
+        public IActionResult Health() =>
+            Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
     }
 }

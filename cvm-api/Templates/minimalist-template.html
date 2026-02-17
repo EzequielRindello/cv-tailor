@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{FullName}} - Resume</title>
+    <style>
+        @page { size: letter; margin: 0.7in 0.8in 0.6in 0.8in; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333333;
+            background: white;
+        }
+
+        /* ─── Header ─────────────────────────────────────────────── */
+        .header {
+            margin-bottom: 14pt;
+            padding-bottom: 10pt;
+            border-bottom: 0.5pt solid #cccccc;
+        }
+
+        .header h1 {
+            font-size: 20pt;
+            font-weight: 300;
+            letter-spacing: 4pt;
+            text-transform: uppercase;
+            color: #111;
+            margin-bottom: 4pt;
+        }
+
+        .header .contact {
+            font-size: 8.5pt;
+            color: #666;
+            letter-spacing: 0.3pt;
+        }
+
+        .header a { color: #555; text-decoration: none; }
+
+        /* ─── Section titles ─────────────────────────────────────── */
+        .section-title {
+            font-size: 8pt;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 3pt;
+            color: #999;
+            margin-top: 12pt;
+            margin-bottom: 6pt;
+        }
+
+        /* ─── Summary ────────────────────────────────────────────── */
+        .summary-text {
+            font-size: 10pt;
+            line-height: 1.6;
+            color: #444;
+            font-style: italic;
+            margin-bottom: 10pt;
+        }
+
+        /* ─── Education ──────────────────────────────────────────── */
+        .education-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5pt;
+        }
+
+        .edu-left .edu-institution { font-weight: 500; font-size: 10pt; }
+
+        .edu-left .edu-degree {
+            font-size: 9.5pt;
+            color: #666;
+        }
+
+        .edu-date {
+            font-size: 9pt;
+            color: #999;
+            white-space: nowrap;
+            margin-left: 8pt;
+        }
+
+        /* ─── Experience ─────────────────────────────────────────── */
+        .experience-entry { margin-bottom: 10pt; }
+
+        .exp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .exp-role { font-weight: 600; font-size: 10pt; }
+
+        .exp-dates { font-size: 9pt; color: #999; }
+
+        .exp-company {
+            font-size: 9.5pt;
+            color: #888;
+            margin-bottom: 4pt;
+        }
+
+        .exp-bullets {
+            list-style: none;
+            padding: 0;
+        }
+
+        .exp-bullets li {
+            font-size: 9.5pt;
+            padding-left: 12pt;
+            position: relative;
+            margin-bottom: 2pt;
+            color: #444;
+        }
+
+        .exp-bullets li::before {
+            content: '–';
+            position: absolute;
+            left: 0;
+            color: #bbb;
+        }
+
+        /* ─── Skills ─────────────────────────────────────────────── */
+        .skill-category { margin-bottom: 3pt; }
+
+        .skill-category-name {
+            font-size: 8.5pt;
+            font-weight: 500;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1pt;
+            display: inline;
+        }
+
+        .skill-category-items {
+            font-size: 9.5pt;
+            color: #444;
+            display: inline;
+        }
+
+        /* ─── Projects ───────────────────────────────────────────── */
+        .project-entry { margin-bottom: 6pt; }
+
+        .project-name {
+            font-weight: 500;
+            font-size: 10pt;
+        }
+
+        .project-desc {
+            font-size: 9.5pt;
+            color: #555;
+            margin-top: 1pt;
+        }
+
+        .project-tech {
+            font-size: 9pt;
+            color: #999;
+            margin-top: 1pt;
+        }
+
+        @media print { body { margin: 0; } }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>{{FullName}}</h1>
+        <div class="contact">
+            <a href="mailto:{{Email}}">{{Email}}</a>
+            &nbsp;&nbsp;·&nbsp;&nbsp; {{Phone}}
+            &nbsp;&nbsp;·&nbsp;&nbsp; {{Location}}
+            {{#LinkedIn}}&nbsp;&nbsp;·&nbsp;&nbsp; <a href="https://{{LinkedIn}}">{{LinkedIn}}</a>{{/LinkedIn}}
+            {{#GitHub}}&nbsp;&nbsp;·&nbsp;&nbsp; <a href="https://{{GitHub}}">{{GitHub}}</a>{{/GitHub}}
+        </div>
+    </div>
+
+    <!-- Summary -->
+    {{#HasSummary}}
+    <div class="section-title">Profile</div>
+    <div class="summary-text">{{Summary}}</div>
+    {{/HasSummary}}
+
+    <!-- Experience -->
+    <div class="section-title">Experience</div>
+    {{#Experience}}
+    <div class="experience-entry">
+        <div class="exp-header">
+            <span class="exp-role">{{Role}}</span>
+            <span class="exp-dates">{{StartDate}} – {{EndDate}}</span>
+        </div>
+        <div class="exp-company">{{Company}}, {{Location}}</div>
+        <ul class="exp-bullets">
+            {{#Bullets}}<li>{{.}}</li>{{/Bullets}}
+        </ul>
+    </div>
+    {{/Experience}}
+
+    <!-- Education -->
+    <div class="section-title">Education</div>
+    {{#Education}}
+    <div class="education-entry">
+        <div class="edu-left">
+            <div class="edu-institution">{{Institution}}</div>
+            <div class="edu-degree">{{Degree}}</div>
+        </div>
+        <div class="edu-date">{{GraduationDate}}</div>
+    </div>
+    {{/Education}}
+
+    <!-- Skills -->
+    {{#HasSkills}}
+    <div class="section-title">Skills</div>
+    {{#SkillCategories}}
+    <div class="skill-category">
+        <span class="skill-category-name">{{CategoryName}}: </span>
+        <span class="skill-category-items">{{CategoryItems}}</span>
+    </div>
+    {{/SkillCategories}}
+    {{/HasSkills}}
+
+    <!-- Projects -->
+    {{#HasProjects}}
+    <div class="section-title">Projects</div>
+    {{#Projects}}
+    <div class="project-entry">
+        <span class="project-name">{{Name}}</span>
+        {{#Link}}&nbsp;·&nbsp;<a href="https://{{Link}}" style="color:#999;font-size:9pt;">{{Link}}</a>{{/Link}}
+        <div class="project-desc">{{Description}}</div>
+        {{#Technologies}}<div class="project-tech">{{.}}</div>{{/Technologies}}
+    </div>
+    {{/Projects}}
+    {{/HasProjects}}
+</body>
+</html>
