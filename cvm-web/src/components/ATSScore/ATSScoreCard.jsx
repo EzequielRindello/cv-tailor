@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { Card, Collapse } from 'react-bootstrap';
+import { ATS_STATUS_LABEL, DEFAULT_ATS_STATUS, ATS_SCORE_MIN, ATS_SCORE_MAX } from './atsScore.const';
+
 import './ATSScoreCard.css';
 
 export default function ATSScoreCard({ data }) {
   const [open, setOpen] = useState(false);
-  if (!data) return null;
 
-  const c = data.colorClass || 'yellow';
-  const pct = Math.min(Math.max(data.overall, 0), 100);
-  const labelMap = { green: 'ATS Ready', yellow: 'Needs Attention', red: 'ATS Risk' };
+  // Happy path
+  if (!data)
+    return null;
+
+  const status = data.colorClass || DEFAULT_ATS_STATUS;
+  const score = Math.min(Math.max(data.overall, ATS_SCORE_MIN), ATS_SCORE_MAX);
 
   return (
     <Card className="ats-card">
@@ -19,19 +23,26 @@ export default function ATSScoreCard({ data }) {
               <i className="bi bi-cpu ats-title-icon" />
               ATS Compatibility
             </h5>
+
             <div className="ats-score-row">
-              <span className={`ats-percent ${c}`}>{pct}</span>
+              <span className={`ats-percent ${status}`}>{score}</span>
               <span className="ats-denom">/100</span>
-              <span className={`ats-badge ${c}`}>{labelMap[c]}</span>
+              <span className={`ats-badge ${status}`}>
+                {ATS_STATUS_LABEL[status]}
+              </span>
             </div>
           </div>
+
           <span className="toggle-icon">
             <i className={`bi ${open ? 'bi-chevron-up' : 'bi-chevron-down'}`} />
           </span>
         </div>
 
         <div className="ats-bar-track">
-          <div className={`ats-bar-fill ${c}`} style={{ width: `${pct}%` }} />
+          <div
+            className={`ats-bar-fill ${status}`}
+            style={{ width: `${score}%` }}
+          />
         </div>
 
         <Collapse in={open}>
@@ -46,7 +57,9 @@ export default function ATSScoreCard({ data }) {
                 <div className="ats-issues-title">Issues found</div>
                 {data.issues.map((issue, i) => (
                   <div key={i} className="ats-issue-row">
-                    <span className={`severity-badge ${issue.severity}`}>{issue.severity}</span>
+                    <span className={`severity-badge ${issue.severity}`}>
+                      {issue.severity}
+                    </span>
                     <div>
                       <div className="issue-text">{issue.issue}</div>
                       <div className="issue-fix">→ {issue.fix}</div>

@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Card, Button } from 'react-bootstrap';
+
 import './BulletEditor.css';
 
 export default function BulletEditor({ generatedCV, onRegenerate, onCancel, loading }) {
+  // States
   const [selections, setSelections] = useState({});
   const [localCV, setLocalCV] = useState(null);
   const [dragInfo, setDragInfo] = useState(null);
 
+  // Effects
   useEffect(() => {
     if (!generatedCV?.experience) return;
     // Deep copy - to avoid mutating parent state when reordering
@@ -20,8 +23,10 @@ export default function BulletEditor({ generatedCV, onRegenerate, onCancel, load
     setSelections(initial);
   }, [generatedCV]);
 
+  // Happy path
   if (!localCV?.experience) return null;
 
+  // Handlers
   const toggleBullet = (expKey, bulletIdx) => {
     setSelections(prev => {
       const arr = [...prev[expKey]];

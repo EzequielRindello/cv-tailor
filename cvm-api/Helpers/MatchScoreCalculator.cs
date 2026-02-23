@@ -1,4 +1,7 @@
+using ErCvApi.Constants;
 using ErCvApi.Models;
+using System;
+using System.Collections.Generic;
 
 namespace ErCvApi.Helpers
 {
@@ -11,33 +14,42 @@ namespace ErCvApi.Helpers
             var totalSkills = Math.Max(requirements.TechnicalSkills.Count, 1);
 
             var matchedSkills = requirements.TechnicalSkills
-                .Where(reqSkill => allCVSkills.Any(s =>
+                .Count(reqSkill => allCVSkills.Any(s =>
                     s.Equals(reqSkill, StringComparison.OrdinalIgnoreCase) ||
                     s.Contains(reqSkill, StringComparison.OrdinalIgnoreCase) ||
-                    reqSkill.Contains(s, StringComparison.OrdinalIgnoreCase)))
-                .Count();
+                    reqSkill.Contains(s, StringComparison.OrdinalIgnoreCase)));
 
-            var skillPercentage = (double)matchedSkills / totalSkills * 100;
+            var skillPercentage =
+                (double)matchedSkills / totalSkills * 100;
 
             // Keywords Score
-            // Search for JD keywords in all CV bullet points
             var allBullets = cv.Experience
                 .SelectMany(e => e.Bullets ?? new List<string>())
                 .Select(b => b.ToLower())
                 .ToList();
 
-            var totalKeywords = Math.Max(requirements.Keywords.Take(15).Count(), 1);
-            var matchedKeywords = requirements.Keywords
-                .Take(15)
+            var evaluatedKeywords = requirements.Keywords
+                .Take(MatchScoreConstants.MaxKeywordEvaluation)
+                .ToList();
+
+            var totalKeywords = Math.Max(evaluatedKeywords.Count, 1);
+
+            var matchedKeywords = evaluatedKeywords
                 .Count(k => allBullets.Any(b => b.Contains(k.ToLower())));
 
-            // Normalize: We expect each keyword to appear ~2 times in bullet points
-            var keywordPercentage = Math.Min((double)matchedKeywords / totalKeywords * 100 * 1.5, 100);
+            var keywordPercentage = Math.Min(
+                (double)matchedKeywords / totalKeywords * 100 *
+                MatchScoreConstants.KeywordBoostMultiplier,
+                100);
 
             // Seniority Score
             var seniorityScore = CalculateSeniorityMatch(cv, requirements);
 
-            var overall = (skillPercentage * 0.5) + (keywordPercentage * 0.3) + (seniorityScore * 0.2);
+            var overall =
+                (skillPercentage * MatchScoreConstants.SkillWeight) +
+                (keywordPercentage * MatchScoreConstants.KeywordWeight) +
+                (seniorityScore * MatchScoreConstants.SeniorityWeight);
+
             overall = Math.Min(Math.Round(overall), 100);
 
             return new MatchScore
@@ -47,53 +59,85 @@ namespace ErCvApi.Helpers
                 TotalSkills = totalSkills,
                 KeywordsMatched = matchedKeywords,
                 TotalKeywords = totalKeywords,
-                SeniorityMatch = seniorityScore >= 70,
-                ColorClass = overall >= 80 ? "green" : overall >= 60 ? "yellow" : "red"
+                SeniorityMatch = seniorityScore >=
+                                 MatchScoreConstants.CloseMatchScore,
+                ColorClass = ResolveColorClass(overall)
             };
         }
 
-        private double CalculateSeniorityMatch(CVMaster cv, JobRequirements requirements)
+        private double CalculateSeniorityMatch(
+            CVMaster cv,
+            JobRequirements requirements)
         {
             if (string.IsNullOrEmpty(requirements.SeniorityLevel))
-                return 70;
+                return MatchScoreConstants.DefaultSeniorityScore;
 
-            var seniorityMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "intern", 1 }, { "junior", 2 }, { "entry", 2 }, { "entry-level", 2 },
-                { "mid", 3 }, { "mid-level", 3 }, { "senior", 4 }, { "lead", 5 },
-                { "principal", 6 }, { "staff", 6 }, { "architect", 6 }
-            };
+            var seniorityMap = MatchScoreConstants.SeniorityMap;
 
-            // Detect CV seniority from most recent role
             var mostRecentRole = cv.Experience
-                .OrderByDescending(e => e.EndDate?.ToLower() == "present" ? "zzz" : e.EndDate ?? "")
-                .FirstOrDefault()?.Role?.ToLower() ?? "";
+                .OrderByDescending(e =>
+                    e.EndDate?.ToLower() ==
+                    MatchScoreConstants.PresentKeyword
+                        ? "zzz"
+                        : e.EndDate ?? "")
+                .FirstOrDefault()
+                ?.Role?.ToLower() ?? "";
 
-            var cvLevel = 3;
-            foreach (var kvp in seniorityMap)
-                if (mostRecentRole.Contains(kvp.Key)) { cvLevel = kvp.Value; break; }
+            var cvLevel = MatchScoreConstants.DefaultLevel;
 
-            var targetLevel = 3;
             foreach (var kvp in seniorityMap)
-                if (requirements.SeniorityLevel.Contains(kvp.Key)) { targetLevel = kvp.Value; break; }
+            {
+                if (mostRecentRole.Contains(kvp.Key))
+                {
+                    cvLevel = kvp.Value;
+                    break;
+                }
+            }
+
+            var targetLevel = MatchScoreConstants.DefaultLevel;
+
+            foreach (var kvp in seniorityMap)
+            {
+                if (requirements.SeniorityLevel
+                    .Contains(kvp.Key, StringComparison.OrdinalIgnoreCase))
+                {
+                    targetLevel = kvp.Value;
+                    break;
+                }
+            }
 
             var diff = Math.Abs(cvLevel - targetLevel);
-            if (diff == 0) return 100;
-            if (diff == 1) return 70;
-            if (diff == 2) return 40;
-            return 10;
+
+            if (diff == 0) return MatchScoreConstants.PerfectMatchScore;
+            if (diff == 1) return MatchScoreConstants.CloseMatchScore;
+            if (diff == 2) return MatchScoreConstants.PartialMatchScore;
+
+            return MatchScoreConstants.LowMatchScore;
+        }
+
+        private string ResolveColorClass(double overall)
+        {
+            if (overall >= MatchScoreConstants.GreenThreshold)
+                return MatchScoreConstants.GreenClass;
+
+            if (overall >= MatchScoreConstants.YellowThreshold)
+                return MatchScoreConstants.YellowClass;
+
+            return MatchScoreConstants.RedClass;
         }
 
         public static List<string> FlattenSkills(Skills skills)
         {
             var all = new List<string>();
             if (skills == null) return all;
+
             all.AddRange(skills.Languages ?? new());
             all.AddRange(skills.Frameworks ?? new());
             all.AddRange(skills.Databases ?? new());
             all.AddRange(skills.Tools ?? new());
             all.AddRange(skills.Cloud ?? new());
             all.AddRange(skills.Practices ?? new());
+
             return all;
         }
     }
