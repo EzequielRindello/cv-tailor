@@ -14,7 +14,6 @@ import KeywordAnalysisCard from './components/KeywordAnalysis/KeywordAnalysisCar
 import ATSScoreCard from './components/ATSScore/ATSScoreCard';
 import BulletEditor from './components/BulletEditor/BulletEditor';
 import './styles/variables.css';
-import './styles/reset.css';
 import './App.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
