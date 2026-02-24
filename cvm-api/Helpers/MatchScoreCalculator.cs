@@ -1,7 +1,5 @@
 using ErCvApi.Constants;
 using ErCvApi.Models;
-using System;
-using System.Collections.Generic;
 
 namespace ErCvApi.Helpers
 {
@@ -9,20 +7,16 @@ namespace ErCvApi.Helpers
     {
         public MatchScore Calculate(CVMaster cv, JobRequirements requirements)
         {
-            // Skills Score
-            var allCVSkills = FlattenSkills(cv.Skills);
+            // ── Skills Score ─────────────────────────────────────────────────
+            var allCVSkills = RelevanceScorer.FlattenSkills(cv.Skills);
             var totalSkills = Math.Max(requirements.TechnicalSkills.Count, 1);
 
             var matchedSkills = requirements.TechnicalSkills
-                .Count(reqSkill => allCVSkills.Any(s =>
-                    s.Equals(reqSkill, StringComparison.OrdinalIgnoreCase) ||
-                    s.Contains(reqSkill, StringComparison.OrdinalIgnoreCase) ||
-                    reqSkill.Contains(s, StringComparison.OrdinalIgnoreCase)));
+                .Count(reqSkill => SkillNormalizer.MatchesAny(reqSkill, allCVSkills));
 
-            var skillPercentage =
-                (double)matchedSkills / totalSkills * 100;
+            var skillPercentage = (double)matchedSkills / totalSkills * 100;
 
-            // Keywords Score
+            // ── Keywords Score ───────────────────────────────────────────────
             var allBullets = cv.Experience
                 .SelectMany(e => e.Bullets ?? new List<string>())
                 .Select(b => b.ToLower())
@@ -42,7 +36,7 @@ namespace ErCvApi.Helpers
                 MatchScoreConstants.KeywordBoostMultiplier,
                 100);
 
-            // Seniority Score
+            // ── Seniority Score ──────────────────────────────────────────────
             var seniorityScore = CalculateSeniorityMatch(cv, requirements);
 
             var overall =
@@ -52,6 +46,9 @@ namespace ErCvApi.Helpers
 
             overall = Math.Min(Math.Round(overall), 100);
 
+            // ── Role mismatch warning ────────────────────────────────────────
+            var isLowMatch = overall < 30;
+
             return new MatchScore
             {
                 Overall = (int)overall,
@@ -59,15 +56,15 @@ namespace ErCvApi.Helpers
                 TotalSkills = totalSkills,
                 KeywordsMatched = matchedKeywords,
                 TotalKeywords = totalKeywords,
-                SeniorityMatch = seniorityScore >=
-                                 MatchScoreConstants.CloseMatchScore,
-                ColorClass = ResolveColorClass(overall)
+                SeniorityMatch = seniorityScore >= MatchScoreConstants.CloseMatchScore,
+                ColorClass = ResolveColorClass(overall),
+                LowMatchWarning = isLowMatch
+                    ? "Low match detected — this JD may not align with your profile. The generated CV may not be competitive."
+                    : null
             };
         }
 
-        private double CalculateSeniorityMatch(
-            CVMaster cv,
-            JobRequirements requirements)
+        private double CalculateSeniorityMatch(CVMaster cv, JobRequirements requirements)
         {
             if (string.IsNullOrEmpty(requirements.SeniorityLevel))
                 return MatchScoreConstants.DefaultSeniorityScore;
@@ -76,69 +73,35 @@ namespace ErCvApi.Helpers
 
             var mostRecentRole = cv.Experience
                 .OrderByDescending(e =>
-                    e.EndDate?.ToLower() ==
-                    MatchScoreConstants.PresentKeyword
-                        ? "zzz"
-                        : e.EndDate ?? "")
+                    e.EndDate?.ToLower() == MatchScoreConstants.PresentKeyword ? "zzz" : e.EndDate ?? "")
                 .FirstOrDefault()
                 ?.Role?.ToLower() ?? "";
 
             var cvLevel = MatchScoreConstants.DefaultLevel;
-
-            foreach (var kvp in seniorityMap)
-            {
-                if (mostRecentRole.Contains(kvp.Key))
-                {
-                    cvLevel = kvp.Value;
-                    break;
-                }
-            }
-
             var targetLevel = MatchScoreConstants.DefaultLevel;
 
             foreach (var kvp in seniorityMap)
             {
-                if (requirements.SeniorityLevel
-                    .Contains(kvp.Key, StringComparison.OrdinalIgnoreCase))
-                {
+                if (mostRecentRole.Contains(kvp.Key)) cvLevel = kvp.Value;
+                if (requirements.SeniorityLevel.Contains(kvp.Key, StringComparison.OrdinalIgnoreCase))
                     targetLevel = kvp.Value;
-                    break;
-                }
             }
 
             var diff = Math.Abs(cvLevel - targetLevel);
-
-            if (diff == 0) return MatchScoreConstants.PerfectMatchScore;
-            if (diff == 1) return MatchScoreConstants.CloseMatchScore;
-            if (diff == 2) return MatchScoreConstants.PartialMatchScore;
-
-            return MatchScoreConstants.LowMatchScore;
+            return diff switch
+            {
+                0 => MatchScoreConstants.PerfectMatchScore,
+                1 => MatchScoreConstants.CloseMatchScore,
+                2 => MatchScoreConstants.PartialMatchScore,
+                _ => MatchScoreConstants.LowMatchScore
+            };
         }
 
         private string ResolveColorClass(double overall)
         {
-            if (overall >= MatchScoreConstants.GreenThreshold)
-                return MatchScoreConstants.GreenClass;
-
-            if (overall >= MatchScoreConstants.YellowThreshold)
-                return MatchScoreConstants.YellowClass;
-
+            if (overall >= MatchScoreConstants.GreenThreshold) return MatchScoreConstants.GreenClass;
+            if (overall >= MatchScoreConstants.YellowThreshold) return MatchScoreConstants.YellowClass;
             return MatchScoreConstants.RedClass;
-        }
-
-        public static List<string> FlattenSkills(Skills skills)
-        {
-            var all = new List<string>();
-            if (skills == null) return all;
-
-            all.AddRange(skills.Languages ?? new());
-            all.AddRange(skills.Frameworks ?? new());
-            all.AddRange(skills.Databases ?? new());
-            all.AddRange(skills.Tools ?? new());
-            all.AddRange(skills.Cloud ?? new());
-            all.AddRange(skills.Practices ?? new());
-
-            return all;
         }
     }
 }

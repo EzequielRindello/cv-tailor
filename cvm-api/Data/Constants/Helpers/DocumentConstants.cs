@@ -3,21 +3,22 @@ namespace ErCvApi.Constants
     public static class DocumentConstants
     {
         // Sections
+        public const string SectionSummary = "PROFESSIONAL SUMMARY";
         public const string SectionEducation = "EDUCATION";
         public const string SectionExperience = "EXPERIENCE";
         public const string SectionSkills = "SKILLS";
         public const string SectionProjects = "PROJECTS";
 
-        // Fonts
-        public const string FontSizeName = "32";
-        public const string FontSizeSection = "24";
-        public const string FontSizeContact = "20";
+        // Font sizes (half-points in OpenXML)
+        public const string FontSizeName = "32";       // 16pt
+        public const string FontSizeSection = "22";    // 11pt
+        public const string FontSizeContact = "18";    // 9pt
 
         // Layout
-        public const string BulletSymbol = "•";
+        public const string BulletSymbol = "â€¢";
         public const string IndentationLeft = "360";
 
-        // PDF
+        // PDF margins
         public const string PdfMarginTop = "0.5in";
         public const string PdfMarginBottom = "0.5in";
         public const string PdfMarginLeft = "0.75in";
@@ -32,21 +33,27 @@ namespace ErCvApi.Constants
         {
             "C#", "JavaScript", "TypeScript", "Python", "Java", "SQL",
             "HTML", "CSS", "PHP", "Ruby", "Go", "Rust",
-            "Kotlin", "Swift", "C++", "C"
+            "Kotlin", "Swift", "C++", "C", "Scala", "Dart", "Elixir",
+            "R", "Perl", "Lua", "Groovy", "Shell", "Bash", "PowerShell",
+            "PL/SQL", "T-SQL"
         };
 
         public static readonly string[] SoftSkillKeywords =
         {
-            "Agile","Scrum","Leadership","Communication","Team Collaboration",
-            "Problem Solving","Time Management","Adaptability","Critical Thinking",
-            "Training","Mentoring","Remote Collaboration"
+            "Agile", "Scrum", "Kanban", "Leadership", "Communication",
+            "Team Collaboration", "Cross-functional", "Problem Solving",
+            "Time Management", "Adaptability", "Critical Thinking",
+            "Training", "Mentoring", "Remote Collaboration",
+            "Stakeholder Management", "Decision Making", "Ownership",
+            "Pair Programming", "Code Review"
         };
 
-        // Chromium
+        // Chromium launch args
         public static readonly string[] ChromiumArgs =
         {
             "--no-sandbox",
-            "--disable-setuid-sandbox"
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage"
         };
     }
 }

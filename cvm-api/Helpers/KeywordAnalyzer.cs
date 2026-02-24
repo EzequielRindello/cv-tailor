@@ -1,7 +1,5 @@
 using ErCvApi.Constants;
 using ErCvApi.Models;
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace ErCvApi.Helpers
@@ -17,9 +15,13 @@ namespace ErCvApi.Helpers
         private static readonly HashSet<string> StopWords =
             new(KeywordAnalyzerConstants.StopWords, StringComparer.OrdinalIgnoreCase);
 
-        public KeywordAnalysis Analyze(string jobDescription, CVMaster cv)
+        /// <summary>
+        /// Analyzes keyword presence against the GENERATED CV (not the master),
+        /// so results reflect what will actually be in the output document.
+        /// </summary>
+        public KeywordAnalysis Analyze(string jobDescription, GeneratedCV generatedCV)
         {
-            var cvText = BuildCVText(cv);
+            var cvText = BuildCVText(generatedCV);
             var wordFrequencies = ExtractWordFrequencies(jobDescription);
 
             var technical = new List<KeywordItem>();
@@ -39,7 +41,8 @@ namespace ErCvApi.Helpers
                     PresentInCV = present
                 };
 
-                if (TechWords.Contains(word))
+                if (TechWords.Contains(word) ||
+                    SkillNormalizer.MatchesAny(word, TechWords.ToList()))
                     technical.Add(item);
                 else if (SoftSkillWords.Contains(word))
                     softSkills.Add(item);
@@ -67,18 +70,9 @@ namespace ErCvApi.Helpers
 
             return new KeywordAnalysis
             {
-                TechnicalKeywords = technical
-                    .Take(KeywordAnalyzerConstants.MaxTechnicalKeywords)
-                    .ToList(),
-
-                SoftSkillKeywords = softSkills
-                    .Take(KeywordAnalyzerConstants.MaxSoftSkillKeywords)
-                    .ToList(),
-
-                IndustryKeywords = industry
-                    .Take(KeywordAnalyzerConstants.MaxIndustryKeywords)
-                    .ToList(),
-
+                TechnicalKeywords = technical.Take(KeywordAnalyzerConstants.MaxTechnicalKeywords).ToList(),
+                SoftSkillKeywords = softSkills.Take(KeywordAnalyzerConstants.MaxSoftSkillKeywords).ToList(),
+                IndustryKeywords = industry.Take(KeywordAnalyzerConstants.MaxIndustryKeywords).ToList(),
                 PresentInCV = presentList,
                 MissingFromCV = missingList,
                 KeywordDensity = Math.Round(density, 2),
@@ -88,25 +82,37 @@ namespace ErCvApi.Helpers
 
         private Dictionary<string, int> ExtractWordFrequencies(string text)
         {
-            return Regex.Split(
-                    text.ToLower(),
-                    KeywordAnalyzerConstants.WordSplitPattern)
+            return Regex.Split(text.ToLower(), KeywordAnalyzerConstants.WordSplitPattern)
                 .Where(w => w.Length > 3 && !StopWords.Contains(w))
                 .GroupBy(w => w)
                 .ToDictionary(g => g.Key, g => g.Count());
         }
 
-        private string BuildCVText(CVMaster cv)
+        /// <summary>
+        /// Builds CV text from the GENERATED CV — only experiences/skills that
+        /// will actually appear in the output document.
+        /// </summary>
+        private string BuildCVText(GeneratedCV cv)
         {
             var parts = new List<string>();
 
-            parts.AddRange(MatchScoreCalculator.FlattenSkills(cv.Skills));
+            parts.AddRange(cv.Skills ?? new List<string>());
 
-            foreach (var exp in cv.Experience)
+            if (!string.IsNullOrEmpty(cv.Summary))
+                parts.Add(cv.Summary);
+
+            foreach (var exp in cv.Experience ?? new List<Experience>())
             {
                 parts.Add(exp.Role ?? "");
                 parts.AddRange(exp.Bullets ?? new List<string>());
                 parts.AddRange(exp.Skills ?? new List<string>());
+            }
+
+            foreach (var proj in cv.Projects ?? new List<Project>())
+            {
+                parts.Add(proj.Name ?? "");
+                parts.Add(proj.Description ?? "");
+                parts.AddRange(proj.Technologies ?? new List<string>());
             }
 
             return string.Join(" ", parts);
@@ -119,27 +125,13 @@ namespace ErCvApi.Helpers
         {
             var suggestions = new List<string>();
 
-            var missingTech = technical
-                .Where(x => !x.PresentInCV)
-                .Take(KeywordAnalyzerConstants.MaxMissingTechSuggestions);
+            foreach (var item in technical.Where(x => !x.PresentInCV)
+                .Take(KeywordAnalyzerConstants.MaxMissingTechSuggestions))
+                suggestions.Add(string.Format(KeywordAnalyzerConstants.AddTechSuggestionTemplate, item.Word));
 
-            foreach (var item in missingTech)
-            {
-                suggestions.Add(string.Format(
-                    KeywordAnalyzerConstants.AddTechSuggestionTemplate,
-                    item.Word));
-            }
-
-            var missingSoft = softSkills
-                .Where(x => !x.PresentInCV)
-                .Take(KeywordAnalyzerConstants.MaxMissingSoftSuggestions);
-
-            foreach (var item in missingSoft)
-            {
-                suggestions.Add(string.Format(
-                    KeywordAnalyzerConstants.AddSoftSuggestionTemplate,
-                    item.Word));
-            }
+            foreach (var item in softSkills.Where(x => !x.PresentInCV)
+                .Take(KeywordAnalyzerConstants.MaxMissingSoftSuggestions))
+                suggestions.Add(string.Format(KeywordAnalyzerConstants.AddSoftSuggestionTemplate, item.Word));
 
             return suggestions;
         }

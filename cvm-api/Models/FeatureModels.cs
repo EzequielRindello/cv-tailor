@@ -9,6 +9,11 @@ namespace ErCvApi.Models
         public int TotalKeywords { get; set; }
         public bool SeniorityMatch { get; set; }
         public string ColorClass { get; set; }
+
+        /// <summary>
+        /// Non-null when Overall < 30 — warns the user that this JD is a poor fit.
+        /// </summary>
+        public string? LowMatchWarning { get; set; }
     }
 
     public class MissingSkillsAnalysis
@@ -74,6 +79,12 @@ namespace ErCvApi.Models
         public List<string> Formats { get; set; }
         public CVTemplate Template { get; set; } = CVTemplate.Harvard;
         public bool AllowTwoPages { get; set; } = false;
+
+        /// <summary>
+        /// Profile to use from Data/. Defaults to "cv-master".
+        /// Enables FEATURE-202 multi-profile support.
+        /// </summary>
+        public string ProfileId { get; set; } = "cv-master";
     }
 
     public class AnalysisResult
@@ -83,5 +94,10 @@ namespace ErCvApi.Models
         public KeywordAnalysis KeywordAnalysis { get; set; }
         public ATSScore ATSScore { get; set; }
         public GeneratedCV GeneratedCV { get; set; }
+
+        /// <summary>
+        /// Rendered HTML of the CV template — used for inline preview (FEATURE-102).
+        /// </summary>
+        public string? PreviewHtml { get; set; }
     }
 }

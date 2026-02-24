@@ -1,185 +1,164 @@
 # ER CV Generator
 
-> Automatically generate ATS-optimized, tailored resumes from any job description.
-
-[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=.net)](https://dotnet.microsoft.com/)
-[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://reactjs.org/)
+ASP.NET Core + React app that generates ATS-optimized, tailored resumes from a job description. It never fabricates content — it selects, reorders, and summarizes what's already in `cv-master.json`.
 
 ---
 
-## What it does
-
-You paste a job description. The system analyzes it, scores your experiences from a master CV file, selects the most relevant content, and generates a downloadable PDF and/or DOCX — tailored to that specific role, in seconds.
-
-It never fabricates content. It only selects, reorders, and summarizes what's already in your `cv-master.json`.
-
----
-
-## Features
-
-- **Smart matching** — Scores each experience by skill overlap, keyword presence, recency, and seniority alignment
-- **Auto-selected bullets** — Picks the 3 best bullets per experience based on relevance and quantifiable results
-- **Dynamic summary** — Generates a 2–3 line professional summary with matched skills and a key achievement
-- **Match Score** — Shows overall match % with breakdown (skills, keywords, seniority)
-- **Missing Skills** — Lists required skills from the JD absent in your CV Master, with suggestions
-- **Keyword Analysis** — Categorizes JD keywords (technical, soft skills) and shows which are present/missing
-- **ATS Score** — Checks contact format, keyword density, section structure, and bullet quality
-- **Bullet Editor** — After generation, select/deselect and reorder bullets before re-downloading
-- **3 Templates** — Harvard (classic), Modern (two-column), Minimalist (clean)
-- **1 or 2 page** — Strict page enforcement; optional 2-page mode for senior profiles
-- **PDF + DOCX** — Both formats from the same generation
-
----
-
-## How it works
+## Architecture
 
 ```
-Job Description
-      │
-      ▼
-JobDescriptionParser        → extracts skills, keywords, seniority level
-      │
-      ▼
-RelevanceScorer             → scores each experience (skill match 40%, keywords 30%,
-      │                        recency 20%, seniority 10%)
-      ▼
-CVSelector                  → picks top 3 experiences, top 3 bullets each, top 15 skills
-      │
-      ▼
-SummaryGenerator            → builds summary: role + years + skills + achievement + soft skills
-      │
-      ▼
-PageConstraintHelper        → enforces 1-page (or 2-page) limit by trimming bullets/experiences
-      │
-      ▼
-DocumentRenderer            → renders Mustache HTML template → PDF (PuppeteerSharp) + DOCX (OpenXML)
-      │
-      ▼
-Analysis (returned with CV)
-  ├─ MatchScoreCalculator   → overall % with skill/keyword/seniority breakdown
-  ├─ MissingSkillsAnalyzer  → required vs nice-to-have gaps + suggestions
-  ├─ KeywordAnalyzer        → frequency + presence per keyword category
-  └─ ATSChecker             → contact format, keyword density, structure, bullets
+POST /api/cv/generate
+  JobDescription (string) → JobDescriptionParser → JobRequirements
+  JobRequirements + CVMaster → RelevanceScorer → scored experiences
+  scored experiences → CVSelector → GeneratedCV (top 3 exp, top 3 bullets each, top 15 skills)
+  CVMaster + requirements → SummaryGenerator → professional summary
+  GeneratedCV → PageConstraintHelper → enforced 1 or 2 page CV
+  GeneratedCV → DocumentRenderer → PDF (PuppeteerSharp) + DOCX (OpenXML)
+  GeneratedCV + requirements → [MatchScoreCalculator, MissingSkillsAnalyzer, KeywordAnalyzer, ATSChecker] → AnalysisResult
+  → returns { generatedCV, files[], matchScore, missingSkills, keywordAnalysis, atsScore }
+
+POST /api/cv/regenerate
+  GeneratedCV + BulletSelections (user-edited) → PageConstraintHelper → DocumentRenderer
+  → returns { files[] }
+
+GET /api/cv/download/{pdf|docx}
+  → returns file from session
 ```
 
 ---
 
-## Project structure
+## Project Structure
 
 ```
 er-cv-generator/
-├── er-cv-api/                    # ASP.NET Core backend
-│   ├── Controllers/
-│   │   └── CVController.cs       # POST /generate, POST /regenerate, GET /download/:format
-│   ├── Services/
-│   │   └── CVGeneratorService.cs # Orchestrates the full flow
+├── er-cv-api/
+│   ├── Controllers/CVController.cs          # POST /generate, /regenerate, GET /download/:format
+│   ├── Services/CVGeneratorService.cs       # orchestrates full flow
 │   ├── Helpers/
-│   │   ├── JobDescriptionParser.cs
-│   │   ├── RelevanceScorer.cs
-│   │   ├── CVSelector.cs
-│   │   ├── SummaryGenerator.cs
-│   │   ├── PageConstraintHelper.cs
-│   │   ├── DocumentRenderer.cs
-│   │   ├── MatchScoreCalculator.cs
-│   │   ├── MissingSkillsAnalyzer.cs
-│   │   ├── KeywordAnalyzer.cs
-│   │   └── ATSChecker.cs
+│   │   ├── JobDescriptionParser.cs          # extracts TechnicalSkills, Keywords, SeniorityLevel
+│   │   ├── RelevanceScorer.cs               # scores each experience: skills 40%, keywords 30%, recency 20%, seniority 10%
+│   │   ├── CVSelector.cs                    # picks top experiences/bullets; deprioritizes non-tech roles for tech JDs
+│   │   ├── SummaryGenerator.cs              # builds 2-3 line summary: role + tech YoE + skills + achievement + soft skills
+│   │   ├── PageConstraintHelper.cs          # trims bullets → projects → experiences to enforce page limit
+│   │   ├── DocumentRenderer.cs              # Mustache HTML → PDF via PuppeteerSharp, DOCX via OpenXML
+│   │   ├── MatchScoreCalculator.cs          # overall % = skills(50%) + keywords(30%) + seniority(20%)
+│   │   ├── MissingSkillsAnalyzer.cs         # required vs nice-to-have gaps with suggestions
+│   │   ├── KeywordAnalyzer.cs               # frequency + present/missing per category
+│   │   └── ATSChecker.cs                    # email, phone, keyword density, sections, bullet length, metrics, template
+│   ├── Constants/
+│   │   ├── JobDescriptionConstants.cs       # 250+ tech keywords, seniority keywords, negation words, stopwords
+│   │   ├── KeywordAnalyzerConstants.cs      # soft skills, tech words for categorization, stopwords
+│   │   ├── MatchScoreConstants.cs           # weights, seniority map, color thresholds
+│   │   ├── MissingSkillsConstants.cs        # nice-to-have keyword list, limits, suggestion templates
+│   │   ├── ATSConstants.cs                  # penalties, thresholds, issue messages
+│   │   ├── DocumentConstants.cs             # section names, font sizes, language/soft-skill keyword lists
+│   │   ├── ApiConstants.cs                  # session keys, error messages, content types
+│   │   └── TemplatePaths.cs                 # file path constants for templates and data
 │   ├── Models/
-│   │   ├── CVMaster.cs
-│   │   ├── GenerateModels.cs
-│   │   └── FeatureModels.cs
+│   │   ├── CVMaster.cs                      # Header, Education, Experience, Skills, Project
+│   │   ├── GenerateModels.cs                # GeneratedCV, JobRequirements, RelevanceScore
+│   │   └── FeatureModels.cs                 # MatchScore, MissingSkillsAnalysis, KeywordAnalysis, ATSScore, enums
 │   ├── Templates/
-│   │   ├── harvard-template.html
-│   │   ├── modern-template.html
-│   │   └── minimalist-template.html
-│   ├── Data/
-│   │   └── cv-master.json        # ← customize this
-│   └── Program.cs
+│   │   ├── harvard-template.html            # single-column, Times New Roman — best ATS compatibility
+│   │   ├── minimalist-template.html         # single-column, Helvetica — clean modern look, ATS-safe
+│   │   └── modern-template.html             # two-column grid — NOT recommended for ATS portals
+│   └── Data/cv-master.json                  # master CV source — all experiences, skills, projects
 │
-└── er-cv-web/                    # React frontend
+└── er-cv-web/
     └── src/
         ├── App.js
         └── components/
             ├── JobDescriptionInput/
-            ├── TemplateSelector/
-            ├── FormatSelector/
-            ├── PageOptions/
+            ├── TemplateSelector/            # Harvard | Modern | Minimalist
+            ├── FormatSelector/              # PDF | DOCX | both
+            ├── PageOptions/                 # 1-page | 2-page toggle
             ├── GenerateButton/
-            ├── MatchScore/
-            ├── MissingSkills/
-            ├── KeywordAnalysis/
-            ├── ATSScore/
-            └── BulletEditor/
+            ├── MatchScore/                  # overall % + skills/keywords/seniority breakdown
+            ├── MissingSkills/               # required + nice-to-have gaps
+            ├── KeywordAnalysis/             # technical / soft / industry keyword presence
+            ├── ATSScore/                    # score + issues + recommendations
+            └── BulletEditor/               # select/deselect/reorder bullets → re-download
+```
+
+---
+
+## Key Data Shapes
+
+```jsonc
+// cv-master.json — the only file to customize
+{
+  "header": { "fullName", "email", "phone", "location", "linkedin", "github" },
+  "education": [{ "degree", "institution", "location", "graduationDate", "gpa", "honors" }],
+  "experience": [{
+    "role": "Junior Software Developer",
+    "company": "Acme Corp",
+    "location": "Remote",
+    "startDate": "Jun 2024",
+    "endDate": "Present",             // use "Present" for current role
+    "bullets": ["Did X resulting in Y%..."],
+    "skills": ["React", "PostgreSQL"] // used for relevance scoring — be complete
+  }],
+  "skills": {
+    "languages": [], "frameworks": [], "databases": [],
+    "tools": [], "cloud": [], "practices": []
+  },
+  "projects": [{ "name", "description", "technologies": [], "highlights": [], "link" }]
+}
+
+// POST /api/cv/generate — request
+{ "jobDescription": "...", "formats": ["pdf", "docx"], "template": "Harvard", "allowTwoPages": false }
+
+// POST /api/cv/generate — response
+{
+  "success": true,
+  "files": [{ "format", "filename", "size" }],
+  "generatedCV": { "header", "summary", "education", "experience", "skills", "projects" },
+  "matchScore": { "overall", "skillsMatched", "totalSkills", "keywordsMatched", "seniorityMatch", "colorClass" },
+  "missingSkills": { "requiredMissing": [], "niceToHaveMissing": [], "suggestions": [], "potentialScoreIncrease" },
+  "keywordAnalysis": { "technicalKeywords": [], "softSkillKeywords": [], "presentInCV": [], "missingFromCV": [] },
+  "atsScore": { "overall", "issues": [{ "severity", "issue", "fix" }], "recommendations": [], "colorClass" }
+}
+
+// POST /api/cv/regenerate — request
+{
+  "generatedCV": { ... },             // full GeneratedCV object from generate response
+  "bulletSelections": { "exp0": [0,2], "exp1": [1] }, // indices of selected bullets per experience
+  "formats": ["pdf"],
+  "template": "Harvard",
+  "allowTwoPages": false
+}
 ```
 
 ---
 
 ## Setup
 
-**Prerequisites:** .NET 8.0 SDK, Node.js 18+
+**Prerequisites:** .NET 8 SDK, Node.js 18+
 
 ```bash
-# Backend
-cd er-cv-api
-dotnet restore && dotnet run
+# Backend — first run downloads Chromium (~150MB, one-time)
+cd er-cv-api && dotnet restore && dotnet run
 # → http://localhost:5000
-# Note: first run downloads Chromium (~150MB, one-time)
 
-# Frontend (new terminal)
-cd er-cv-web
-npm install && npm start
+# Frontend
+cd er-cv-web && npm install && npm start
 # → http://localhost:3000
 ```
 
-Create `.env` in `er-cv-web/`:
+`.env` in `er-cv-web/`:
 ```
 REACT_APP_API_URL=http://localhost:5000/api
 ```
 
 ---
 
-## Customizing your CV
+## cv-master.json Tips
 
-Edit `er-cv-api/Data/cv-master.json`:
-
-```json
-{
-  "header": {
-    "fullName": "Your Name",
-    "email": "you@example.com",
-    "phone": "+1 234 567 8900",
-    "location": "City, Country",
-    "linkedin": "linkedin.com/in/yourprofile",
-    "github": "github.com/yourusername"
-  },
-  "education": [...],
-  "experience": [
-    {
-      "role": "Software Developer",
-      "company": "Company Name",
-      "location": "Remote",
-      "startDate": "Jan 2023",
-      "endDate": "Present",
-      "bullets": ["Did X resulting in Y%...", "Built Z using A and B..."],
-      "skills": ["React", "PostgreSQL", "Docker"]
-    }
-  ],
-  "skills": {
-    "languages": ["C#", "JavaScript"],
-    "frameworks": ["React", "ASP.NET Core"],
-    "databases": ["PostgreSQL"],
-    "tools": ["Docker", "Git"],
-    "cloud": ["AWS"],
-    "practices": ["Agile", "Scrum"]
-  },
-  "projects": [...]
-}
-```
-
-**Tips:**
-- Include all your experiences — the system picks the best 3 for each JD
-- Write bullets with numbers and percentages; they score higher
-- Tag each experience with its `skills` array for better matching
+- **Include all experiences** — the system picks the best 3 per JD; don't pre-filter
+- **Tag skills on each experience** — `"skills": []` drives relevance scoring; incomplete tags = lower match
+- **Write bullets with metrics** — `"Reduced X by 30%"` scores higher than `"Improved X"`
+- **Tech role detection** — roles containing "developer", "engineer", "software", "data", "devops", etc. are treated as tech; others are deprioritized when applying to tech JDs
+- **Years of experience** — calculated from earliest *tech* role start date only, not all roles
 
 ---
 
@@ -193,7 +172,3 @@ Edit `er-cv-api/Data/cv-master.json`:
 | Templating | Stubble (Mustache) |
 | Frontend | React 18, React Bootstrap |
 | HTTP | Axios |
-
----
-
-*Version 2.0 · Last updated February 2026*

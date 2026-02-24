@@ -4,74 +4,73 @@ namespace ErCvApi.Helpers
 {
     public class RelevanceScorer
     {
+        private const int MaxSkillPoints = 40;
+        private const double SkillPointsPerMatch = 4.0;
+        private const double BulletSkillHalfCredit = 2.0;
+        private const double KeywordPointsPerMatch = 2.0;
+        private const int MaxKeywordsEvaluated = 15;
+
         public List<RelevanceScore> ScoreExperiences(
-            List<Experience> experiences, 
+            List<Experience> experiences,
             JobRequirements requirements)
         {
-            var scores = new List<RelevanceScore>();
-
-            foreach (var exp in experiences)
-            {
-                var score = CalculateRelevanceScore(exp, requirements);
-                scores.Add(score);
-            }
-
-            return scores.OrderByDescending(s => s.Score).ToList();
+            return experiences
+                .Select(exp => CalculateRelevanceScore(exp, requirements))
+                .OrderByDescending(s => s.Score)
+                .ToList();
         }
 
         private RelevanceScore CalculateRelevanceScore(
-            Experience experience, 
+            Experience experience,
             JobRequirements requirements)
         {
             double score = 0;
             var matchedSkills = new List<string>();
 
-            // Score based on skill matching (40% weight)
+            // ── Skill match (tagged skills) ──────────────────────────────────
             if (experience.Skills != null && requirements.TechnicalSkills.Any())
             {
                 foreach (var reqSkill in requirements.TechnicalSkills)
                 {
-                    var match = experience.Skills.FirstOrDefault(s => 
-                        s.Equals(reqSkill, StringComparison.OrdinalIgnoreCase) ||
-                        s.Contains(reqSkill, StringComparison.OrdinalIgnoreCase) ||
-                        reqSkill.Contains(s, StringComparison.OrdinalIgnoreCase));
+                    var match = experience.Skills.FirstOrDefault(s =>
+                        SkillNormalizer.FuzzyMatch(s, reqSkill));
 
                     if (match != null)
                     {
-                        score += 4.0;
-                        if (!matchedSkills.Contains(match))
-                        {
+                        score += SkillPointsPerMatch;
+                        if (!SkillNormalizer.MatchesAny(match, matchedSkills))
                             matchedSkills.Add(match);
-                        }
                     }
                 }
-            }
 
-            // Score based on keyword presence in bullets (30% weight)
-            var bulletText = string.Join(" ", experience.Bullets ?? new List<string>()).ToLower();
-            
-            foreach (var keyword in requirements.Keywords.Take(15))
-            {
-                if (bulletText.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                // Half credit for skill mentions found only in bullet text
+                var bulletText = string.Join(" ", experience.Bullets ?? new List<string>());
+                foreach (var reqSkill in requirements.TechnicalSkills)
                 {
-                    score += 2.0;
+                    if (!SkillNormalizer.MatchesAny(reqSkill, matchedSkills) &&
+                        bulletText.Contains(reqSkill, StringComparison.OrdinalIgnoreCase))
+                    {
+                        score += BulletSkillHalfCredit;
+                        matchedSkills.Add(reqSkill);
+                    }
                 }
+
+                score = Math.Min(score, MaxSkillPoints);
             }
 
-            // Score based on recency (20% weight)
-            if (experience.EndDate?.ToLower() == "present")
+            // ── Keyword match ────────────────────────────────────────────────
+            var fullBulletText = string.Join(" ", experience.Bullets ?? new List<string>()).ToLower();
+            foreach (var keyword in requirements.Keywords.Take(MaxKeywordsEvaluated))
             {
-                score += 20.0;
-            }
-            else
-            {
-                var recencyScore = CalculateRecencyScore(experience.EndDate);
-                score += recencyScore;
+                if (fullBulletText.Contains(keyword.ToLower()))
+                    score += KeywordPointsPerMatch;
             }
 
-            // Score based on seniority match (10% weight)
-            var seniorityScore = CalculateSeniorityScore(experience.Role, requirements.SeniorityLevel);
-            score += seniorityScore;
+            // ── Recency ──────────────────────────────────────────────────────
+            score += CalculateRecencyScore(experience.EndDate);
+
+            // ── Seniority ────────────────────────────────────────────────────
+            score += CalculateSeniorityScore(experience.Role, requirements.SeniorityLevel);
 
             return new RelevanceScore
             {
@@ -81,128 +80,89 @@ namespace ErCvApi.Helpers
             };
         }
 
-        private double CalculateRecencyScore(string endDate)
+        private double CalculateRecencyScore(string? endDate)
         {
-            if (string.IsNullOrWhiteSpace(endDate))
-                return 5.0;
+            if (string.IsNullOrWhiteSpace(endDate)) return 5.0;
+            if (endDate.Trim().ToLower() == "present") return 18.0;
 
             try
             {
-                // Try to parse the date
                 var parts = endDate.Split(' ');
-                if (parts.Length >= 2 && int.TryParse(parts[1], out int year))
+                if (parts.Length >= 2 && int.TryParse(parts[parts.Length - 1], out int year))
                 {
-                    var currentYear = DateTime.Now.Year;
-                    var yearsDiff = currentYear - year;
-
-                    if (yearsDiff <= 1) return 18.0;
-                    if (yearsDiff <= 2) return 15.0;
-                    if (yearsDiff <= 3) return 12.0;
-                    if (yearsDiff <= 5) return 8.0;
-                    return 5.0;
+                    var diff = DateTime.Now.Year - year;
+                    if (diff <= 1) return 16.0;
+                    if (diff <= 2) return 13.0;
+                    if (diff <= 3) return 10.0;
+                    if (diff <= 5) return 7.0;
+                    return 4.0;
                 }
             }
-            catch
-            {
-                // Ignore parsing errors
-            }
+            catch { }
 
             return 5.0;
         }
 
-        private double CalculateSeniorityScore(string role, string targetSeniority)
+        private double CalculateSeniorityScore(string? role, string? targetSeniority)
         {
-            var roleNormalized = role.ToLower();
-            var targetNormalized = targetSeniority.ToLower();
+            if (string.IsNullOrEmpty(role) || string.IsNullOrEmpty(targetSeniority))
+                return 5.0;
 
-            var seniorityMap = new Dictionary<string, int>
+            var seniorityMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
             {
-                { "intern", 1 },
-                { "junior", 2 },
-                { "entry", 2 },
-                { "mid", 3 },
-                { "senior", 4 },
-                { "lead", 5 },
-                { "principal", 6 },
-                { "staff", 6 },
-                { "architect", 6 }
+                { "intern", 1 }, { "junior", 2 }, { "entry", 2 }, { "associate", 2 },
+                { "mid", 3 }, { "mid-level", 3 },
+                { "senior", 4 }, { "lead", 5 }, { "principal", 6 },
+                { "staff", 6 }, { "architect", 6 }
             };
 
-            var roleLevel = 3; // default mid-level
+            var roleLevel = 3;
             var targetLevel = 3;
 
             foreach (var kvp in seniorityMap)
             {
-                if (roleNormalized.Contains(kvp.Key))
-                {
-                    roleLevel = kvp.Value;
-                }
-                if (targetNormalized.Contains(kvp.Key))
-                {
-                    targetLevel = kvp.Value;
-                }
+                if (role.ToLower().Contains(kvp.Key)) roleLevel = kvp.Value;
+                if (targetSeniority.ToLower().Contains(kvp.Key)) targetLevel = kvp.Value;
             }
 
-            // Perfect match
-            if (roleLevel == targetLevel)
-                return 10.0;
-
-            // Close match (within 1 level)
-            if (Math.Abs(roleLevel - targetLevel) == 1)
-                return 7.0;
-
-            // Partial match
-            return 4.0;
+            return Math.Abs(roleLevel - targetLevel) switch
+            {
+                0 => 10.0, 1 => 7.0, 2 => 4.0, _ => 1.0
+            };
         }
 
         public List<string> GetTopSkills(
-            List<Experience> experiences, 
-            JobRequirements requirements, 
-            Skills allSkills, 
+            List<Experience> experiences,
+            JobRequirements requirements,
+            Skills allSkills,
             int maxSkills = 15)
         {
             var skillScores = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+            var allCVSkills = FlattenSkills(allSkills);
 
-            // Flatten all skills from CV Master
-            var allCVSkills = new List<string>();
-            if (allSkills != null)
-            {
-                allCVSkills.AddRange(allSkills.Languages ?? new List<string>());
-                allCVSkills.AddRange(allSkills.Frameworks ?? new List<string>());
-                allCVSkills.AddRange(allSkills.Databases ?? new List<string>());
-                allCVSkills.AddRange(allSkills.Tools ?? new List<string>());
-                allCVSkills.AddRange(allSkills.Cloud ?? new List<string>());
-                allCVSkills.AddRange(allSkills.Practices ?? new List<string>());
-            }
-
-            // Score skills based on job requirements
             foreach (var skill in allCVSkills)
             {
                 double score = 0;
 
-                // Check if mentioned in job requirements
-                var isInRequirements = requirements.TechnicalSkills.Any(reqSkill =>
-                    skill.Equals(reqSkill, StringComparison.OrdinalIgnoreCase) ||
-                    skill.Contains(reqSkill, StringComparison.OrdinalIgnoreCase) ||
-                    reqSkill.Contains(skill, StringComparison.OrdinalIgnoreCase));
-
-                if (isInRequirements)
-                {
+                if (SkillNormalizer.MatchesAny(skill, requirements.TechnicalSkills))
                     score += 10.0;
-                }
 
-                // Check how many selected experiences use this skill
                 foreach (var exp in experiences)
                 {
-                    if (exp.Skills?.Any(s => s.Equals(skill, StringComparison.OrdinalIgnoreCase)) == true)
-                    {
+                    if (exp.Skills?.Any(s => SkillNormalizer.FuzzyMatch(s, skill)) == true)
                         score += 3.0;
-                    }
                 }
 
                 if (score > 0 && !skillScores.ContainsKey(skill))
-                {
                     skillScores[skill] = score;
+            }
+
+            if (skillScores.Count < maxSkills)
+            {
+                foreach (var skill in allCVSkills)
+                {
+                    if (!skillScores.ContainsKey(skill) && skillScores.Count < maxSkills)
+                        skillScores[skill] = 0.5;
                 }
             }
 
@@ -211,6 +171,19 @@ namespace ErCvApi.Helpers
                 .Take(maxSkills)
                 .Select(kvp => kvp.Key)
                 .ToList();
+        }
+
+        public static List<string> FlattenSkills(Skills? skills)
+        {
+            var all = new List<string>();
+            if (skills == null) return all;
+            all.AddRange(skills.Languages ?? new());
+            all.AddRange(skills.Frameworks ?? new());
+            all.AddRange(skills.Databases ?? new());
+            all.AddRange(skills.Tools ?? new());
+            all.AddRange(skills.Cloud ?? new());
+            all.AddRange(skills.Practices ?? new());
+            return all;
         }
     }
 }
