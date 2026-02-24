@@ -47,7 +47,9 @@ namespace ErCvApi.Helpers
             overall = Math.Min(Math.Round(overall), 100);
 
             // ── Role mismatch warning ────────────────────────────────────────
-            var isLowMatch = overall < 30;
+            // 40% threshold: scores below this indicate the JD is a poor fit
+            // (e.g. iOS JD against a backend CV scores ~35% due to React Native nice-to-have)
+            var isLowMatch = overall < 40;
 
             return new MatchScore
             {

@@ -8,20 +8,35 @@ namespace ErCvApi.Helpers
     {
         private readonly HashSet<string> _seniorityKeywords =
             new(JobDescriptionConstants.SeniorityKeywords, StringComparer.OrdinalIgnoreCase);
-
-        private readonly HashSet<string> _techKeywords =
+        private readonly HashSet<string> _commonTechKeywords =
             new(JobDescriptionConstants.CommonTechKeywords, StringComparer.OrdinalIgnoreCase);
-
         private readonly HashSet<string> _commonWords =
             new(JobDescriptionConstants.CommonWords, StringComparer.OrdinalIgnoreCase);
 
-        private readonly HashSet<string> _negationWords =
-            new(JobDescriptionConstants.NegationWords, StringComparer.OrdinalIgnoreCase);
+        private static readonly HashSet<string> _neverSkills = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "experience","familiarity","understanding","knowledge","proficiency",
+            "ability","background","exposure","awareness","skill","skills",
+            "strong","solid","deep","good","basic","advanced","proven",
+            "excellent","nice","required","preferred","plus","bonus",
+            "including","following","similar","relevant","related",
+            "technology","technologies","tools","tool","stack","platform",
+            "systems","system","solutions","services","applications",
+            "backend","frontend","fullstack","full","stack",
+            "engineer","engineering","developer","development","software",
+            "technical","senior","junior","lead","principal","manager",
+            "manage","monitor","cost","write","build","design","implement",
+            "collaborate","work","team","teams","environment","practices",
+            "responsibilities","requirements","qualifications","about",
+            "company","role","position","candidate","ideal","looking",
+            "seeking","hire","join","opportunity","what","will",
+            "have","with","that","this","from","your",
+            "library","libraries","framework","frameworks","methodology",
+        };
 
         public JobRequirements Parse(string jobDescription)
         {
             if (string.IsNullOrWhiteSpace(jobDescription))
-            {
                 return new JobRequirements
                 {
                     TechnicalSkills = new List<string>(),
@@ -29,180 +44,78 @@ namespace ErCvApi.Helpers
                     SeniorityLevel = JobDescriptionConstants.DefaultSeniority,
                     RequiredExperience = new List<string>()
                 };
-            }
+
+            var normalizedText = jobDescription.ToLower();
 
             return new JobRequirements
             {
-                TechnicalSkills = ExtractTechnicalSkills(jobDescription),
-                Keywords = ExtractKeywords(jobDescription),
-                SeniorityLevel = ExtractSeniorityLevel(jobDescription),
-                RequiredExperience = ExtractRequiredExperience(jobDescription)
+                TechnicalSkills = ExtractTechnicalSkills(jobDescription, normalizedText),
+                Keywords = ExtractKeywords(normalizedText),
+                SeniorityLevel = ExtractSeniorityLevel(normalizedText),
+                RequiredExperience = ExtractRequiredExperience(normalizedText)
             };
         }
 
-        // ─── Technical Skills ────────────────────────────────────────────────
-        // Strategy: match against known list, then also extract unknown
-        // capitalized/versioned tokens that look like tech (e.g. "Prisma", "tRPC")
-        private List<string> ExtractTechnicalSkills(string text)
+        private List<string> ExtractTechnicalSkills(string originalText, string normalizedText)
         {
-            var found = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var textLower = text.ToLower();
+            var foundSkills = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            // 1. Match against the full known list
-            foreach (var tech in _techKeywords)
+            // Whitelist scan — only accept tokens in our known tech keyword list
+            foreach (var tech in _commonTechKeywords)
             {
-                // Build pattern: word boundary, but support dots and # in the middle
-                var escaped = Regex.Escape(tech);
-                // For multi-word techs like "asp.net core", simple contains check
-                if (tech.Contains(' '))
-                {
-                    if (textLower.Contains(tech.ToLower()))
-                        found.Add(NormalizeTechName(tech));
-                }
-                else
-                {
-                    var pattern = $@"(?<![a-z0-9\.\#\+]){escaped}(?![a-z0-9\.\#\+])";
-                    if (Regex.IsMatch(textLower, pattern, RegexOptions.IgnoreCase))
-                        found.Add(NormalizeTechName(tech));
-                }
+                var pattern = $@"(?<![a-zA-Z]){Regex.Escape(tech)}(?![a-zA-Z])";
+                if (Regex.IsMatch(normalizedText, pattern, RegexOptions.IgnoreCase))
+                    foundSkills.Add(tech);
             }
 
-            // 2. Extract "X years of/with Y" patterns to catch unlisted tech
-            var yearsMatches = Regex.Matches(
-                text,
-                JobDescriptionConstants.YearsWithTechPattern,
-                RegexOptions.IgnoreCase);
-
+            // "X years experience with [TECH]" pattern — only if passes neverSkills
+            var yearsMatches = Regex.Matches(originalText, JobDescriptionConstants.YearsWithTechPattern, RegexOptions.IgnoreCase);
             foreach (Match match in yearsMatches)
             {
                 if (match.Groups.Count > 2)
                 {
                     var tech = match.Groups[2].Value.Trim();
-                    if (!string.IsNullOrWhiteSpace(tech) && tech.Length > 1 && !_commonWords.Contains(tech))
-                        found.Add(NormalizeTechName(tech));
+                    if (!string.IsNullOrWhiteSpace(tech) && tech.Length > 1 && tech.Length < 40
+                        && !_neverSkills.Contains(tech) && !_commonWords.Contains(tech))
+                        foundSkills.Add(tech);
                 }
             }
 
-            // 3. Extract capitalized tokens that look like tech names
-            // Pattern: standalone words of 2-20 chars starting with uppercase
-            // OR all-uppercase acronyms of 2-8 chars
-            // This catches things like "Prisma", "tRPC", "NestJS", "Supabase" etc.
-            var tokenMatches = Regex.Matches(text, @"\b([A-Z][a-zA-Z0-9\.\#\+\-]{1,19}|[A-Z]{2,8})\b");
-            foreach (Match match in tokenMatches)
-            {
-                var token = match.Value;
-                // Skip if it looks like a regular sentence word or common stopword
-                if (_commonWords.Contains(token.ToLower())) continue;
-                if (token.Length < 2) continue;
-                // Skip all-uppercase words that are not acronyms (too generic like "MUST", "WILL")
-                if (token == token.ToUpper() && token.Length > 6) continue;
-                // If it's already in found (case-insensitive), skip
-                if (found.Any(f => f.Equals(token, StringComparison.OrdinalIgnoreCase))) continue;
-                // Only add if it appears in a tech context (near tech section keywords)
-                if (IsInTechContext(text, match.Index))
-                    found.Add(token);
-            }
-
-            return found
-                .OrderBy(s => s)
+            // Normalize through SkillNormalizer to collapse aliases
+            return foundSkills
+                .Select(s => SkillNormalizer.Normalize(s))
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
 
-        // Check if a match position is near tech-indicating words
-        private bool IsInTechContext(string text, int position)
-        {
-            var contextStart = Math.Max(0, position - 80);
-            var contextEnd = Math.Min(text.Length, position + 80);
-            var context = text.Substring(contextStart, contextEnd - contextStart).ToLower();
-
-            var techContextWords = new[]
-            {
-                "experience", "proficient", "knowledge", "familiar", "skill",
-                "using", "with", "stack", "tool", "technology", "framework",
-                "library", "platform", "language", "database", "cloud",
-                "work", "build", "develop", "design", "implement", "deploy"
-            };
-
-            return techContextWords.Any(w => context.Contains(w));
-        }
-
-        // Normalize common aliases to canonical names
-        private string NormalizeTechName(string tech)
-        {
-            var aliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "csharp", "C#" },
-                { "c sharp", "C#" },
-                { "dotnet", ".NET" },
-                { "dot net", ".NET" },
-                { "reactjs", "React" },
-                { "react.js", "React" },
-                { "nodejs", "Node.js" },
-                { "node.js", "Node.js" },
-                { "vuejs", "Vue" },
-                { "vue.js", "Vue" },
-                { "nextjs", "Next.js" },
-                { "next.js", "Next.js" },
-                { "nestjs", "NestJS" },
-                { "nest.js", "NestJS" },
-                { "angularjs", "Angular" },
-                { "asp.net", "ASP.NET Core" },
-                { "asp.net core", "ASP.NET Core" },
-                { "postgres", "PostgreSQL" },
-                { "mongo", "MongoDB" },
-                { "k8s", "Kubernetes" },
-                { "ts", "TypeScript" },
-                { "js", "JavaScript" },
-                { "golang", "Go" },
-                { "sklearn", "scikit-learn" },
-                { "ml", "Machine Learning" },
-            };
-
-            return aliases.TryGetValue(tech, out var canonical) ? canonical : tech;
-        }
-
-        // ─── Keywords ────────────────────────────────────────────────────────
-        private List<string> ExtractKeywords(string text)
-        {
-            return Regex.Split(text.ToLower(), JobDescriptionConstants.WordSplitPattern)
-                .Where(w => w.Length > 3 && !_commonWords.Contains(w))
-                .GroupBy(w => w)
+        private List<string> ExtractKeywords(string text) =>
+            Regex.Split(text, JobDescriptionConstants.WordSplitPattern)
+                .Where(w => w.Length > 3 && !_commonWords.Contains(w) && !_neverSkills.Contains(w))
+                .GroupBy(w => w.ToLower())
                 .OrderByDescending(g => g.Count())
                 .Take(30)
                 .Select(g => g.Key)
                 .ToList();
-        }
 
-        // ─── Seniority ───────────────────────────────────────────────────────
-        // Context-aware: ignores seniority keywords preceded by negation words
         private string ExtractSeniorityLevel(string text)
         {
-            var textLower = text.ToLower();
-
-            // Check each seniority keyword in priority order
-            foreach (var keyword in JobDescriptionConstants.SeniorityKeywords)
+            foreach (var keyword in _seniorityKeywords)
             {
-                var keywordLower = keyword.ToLower();
-                var index = textLower.IndexOf(keywordLower, StringComparison.OrdinalIgnoreCase);
-
-                while (index >= 0)
+                var pattern = $@"\b{Regex.Escape(keyword)}\b";
+                var matches = Regex.Matches(text, pattern, RegexOptions.IgnoreCase);
+                foreach (Match match in matches)
                 {
-                    // Check if this occurrence is preceded by a negation
-                    if (!IsPrecededByNegation(textLower, index))
-                        return NormalizeSeniority(keywordLower);
-
-                    // Look for next occurrence
-                    index = textLower.IndexOf(keywordLower, index + 1, StringComparison.OrdinalIgnoreCase);
+                    var start = Math.Max(0, match.Index - 60);
+                    var context = text.Substring(start, match.Index - start).ToLower();
+                    var negations = new[] { "no ", "not ", "without ", "don't ", "dont ", "non-", "doesn't require" };
+                    if (!negations.Any(n => context.Contains(n)))
+                        return keyword.ToLower();
                 }
             }
 
-            // Fallback: infer from years of experience
-            var yearsMatch = Regex.Match(
-                textLower,
-                JobDescriptionConstants.YearsOfExperiencePattern);
-
-            if (yearsMatch.Success &&
-                int.TryParse(yearsMatch.Groups[1].Value, out int years))
+            var yearsMatch = Regex.Match(text, JobDescriptionConstants.YearsOfExperiencePattern);
+            if (yearsMatch.Success && int.TryParse(yearsMatch.Groups[1].Value, out int years))
             {
                 if (years >= 7) return "senior";
                 if (years >= 4) return JobDescriptionConstants.DefaultSeniority;
@@ -212,52 +125,23 @@ namespace ErCvApi.Helpers
             return JobDescriptionConstants.DefaultSeniority;
         }
 
-        private bool IsPrecededByNegation(string text, int keywordIndex)
-        {
-            // Look at the 50 chars before the keyword
-            var start = Math.Max(0, keywordIndex - 50);
-            var preceding = text.Substring(start, keywordIndex - start);
-
-            var words = Regex.Split(preceding.Trim(), @"\s+");
-            // Check last 4 words before keyword
-            return words.TakeLast(4).Any(w => _negationWords.Contains(w));
-        }
-
-        private string NormalizeSeniority(string keyword)
-        {
-            if (keyword.StartsWith("sr")) return "senior";
-            if (keyword.StartsWith("jr")) return "junior";
-            if (keyword == "entry" || keyword == "entry level" || keyword == "entry-level") return "junior";
-            if (keyword == "associate") return "junior";
-            if (keyword == "intern" || keyword == "graduate" || keyword == "new grad") return "intern";
-            if (keyword == "mid level" || keyword == "intermediate") return "mid-level";
-            if (keyword == "tech lead" || keyword == "team lead") return "lead";
-            if (keyword == "staff engineer") return "staff";
-            return keyword;
-        }
-
-        // ─── Required Experience ─────────────────────────────────────────────
         private List<string> ExtractRequiredExperience(string text)
         {
             var requirements = new List<string>();
             var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-
             foreach (var line in lines)
             {
                 var trimmed = line.Trim();
-
                 if (Regex.IsMatch(trimmed, JobDescriptionConstants.BulletLinePattern) ||
                     trimmed.StartsWith(JobDescriptionConstants.ExperienceKeyword, StringComparison.OrdinalIgnoreCase) ||
                     trimmed.Contains(JobDescriptionConstants.RequiredKeyword, StringComparison.OrdinalIgnoreCase) ||
                     trimmed.Contains(JobDescriptionConstants.MustHaveKeyword, StringComparison.OrdinalIgnoreCase))
                 {
                     var cleaned = Regex.Replace(trimmed, JobDescriptionConstants.BulletLinePattern, "").Trim();
-
                     if (cleaned.Length > 10 && cleaned.Length < 200)
                         requirements.Add(cleaned);
                 }
             }
-
             return requirements.Take(10).ToList();
         }
     }
