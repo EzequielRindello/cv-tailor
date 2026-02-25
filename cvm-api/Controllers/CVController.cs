@@ -17,26 +17,26 @@ namespace ErCvApi.Controllers
 
         [HttpPost("generate")]
         public async Task<IActionResult> Generate([FromBody] GenerateRequest request)
-        {
-            return await _service.GenerateAsync(request, HttpContext);
-        }
+            => await _service.GenerateAsync(request, HttpContext);
 
         [HttpPost("regenerate")]
         public async Task<IActionResult> Regenerate([FromBody] RegenerateRequest request)
-        {
-            return await _service.RegenerateAsync(request, HttpContext);
-        }
+            => await _service.RegenerateAsync(request, HttpContext);
 
         [HttpGet("download/{format}")]
         public IActionResult Download(string format)
-        {
-            return _service.Download(format, HttpContext);
-        }
+            => _service.Download(format, HttpContext);
+
+        /// <summary>
+        /// FEATURE-202: Returns list of available CV profiles from the Data folder.
+        /// Response: [{ id: "cv-master", name: "Default" }, { id: "cv-master-tech", name: "tech" }]
+        /// </summary>
+        [HttpGet("profiles")]
+        public IActionResult GetProfiles()
+            => _service.GetProfiles();
 
         [HttpGet("health")]
         public IActionResult Health()
-        {
-            return _service.Health();
-        }
+            => _service.Health();
     }
 }

@@ -1,43 +1,35 @@
 using ErCvApi.Constants;
 using ErCvApi.Models;
-using System;
-using System.Collections.Generic;
 
 namespace ErCvApi.Helpers
 {
     public class MissingSkillsAnalyzer
     {
         private static readonly HashSet<string> NiceToHaveKeywords =
-            new(MissingSkillsConstants.NiceToHaveKeywords,
-                StringComparer.OrdinalIgnoreCase);
+            new(MissingSkillsConstants.NiceToHaveKeywords, StringComparer.OrdinalIgnoreCase);
 
-        public MissingSkillsAnalysis Analyze(CVMaster cv,JobRequirements requirements)
+        public MissingSkillsAnalysis Analyze(CVMaster cv, JobRequirements requirements)
         {
-            var allCVSkills = MatchScoreCalculator
-                .FlattenSkills(cv.Skills)
-                .Select(s => s.ToLower())
-                .ToHashSet();
+            var allCVSkills = RelevanceScorer.FlattenSkills(cv.Skills);
 
             var allBulletsText = string.Join(" ",
-                cv.Experience
-                    .SelectMany(e => e.Bullets ?? new List<string>()))
-                .ToLower();
+                cv.Experience.SelectMany(e => e.Bullets ?? new List<string>())).ToLower();
 
             var requiredMissing = new List<string>();
             var niceToHaveMissing = new List<string>();
 
             foreach (var skill in requirements.TechnicalSkills)
             {
-                var skillLower = skill.ToLower();
+                // Fuzzy match against tagged skills
+                var foundInSkills = SkillNormalizer.MatchesAny(skill, allCVSkills);
 
-                var foundInSkills = allCVSkills.Any(s =>
-                    s.Contains(skillLower) || skillLower.Contains(s));
-
-                var foundInBullets = allBulletsText.Contains(skillLower);
+                // Fallback: plain contains in bullet text
+                var foundInBullets = allBulletsText.Contains(skill.ToLower());
 
                 if (!foundInSkills && !foundInBullets)
                 {
-                    if (NiceToHaveKeywords.Contains(skill))
+                    if (NiceToHaveKeywords.Contains(skill) ||
+                        SkillNormalizer.MatchesAny(skill, NiceToHaveKeywords))
                         niceToHaveMissing.Add(skill);
                     else
                         requiredMissing.Add(skill);
@@ -47,29 +39,19 @@ namespace ErCvApi.Helpers
             var suggestions = BuildSuggestions(requiredMissing, niceToHaveMissing);
 
             var totalSkills = Math.Max(requirements.TechnicalSkills.Count, 1);
-
             var currentMatched = totalSkills - requiredMissing.Count - niceToHaveMissing.Count;
-
             var potentialMatched = currentMatched + requiredMissing.Count;
 
             var potentialIncrease = (int)Math.Round(
-                (double)(potentialMatched - currentMatched)
-                / totalSkills
-                * MissingSkillsConstants.SkillWeightImpact);
+                (double)(potentialMatched - currentMatched) / totalSkills *
+                MissingSkillsConstants.SkillWeightImpact);
 
             return new MissingSkillsAnalysis
             {
-                RequiredMissing = requiredMissing
-                    .Take(MissingSkillsConstants.MaxRequiredMissing)
-                    .ToList(),
-
-                NiceToHaveMissing = niceToHaveMissing
-                    .Take(MissingSkillsConstants.MaxNiceToHaveMissing)
-                    .ToList(),
-
+                RequiredMissing = requiredMissing.Take(MissingSkillsConstants.MaxRequiredMissing).ToList(),
+                NiceToHaveMissing = niceToHaveMissing.Take(MissingSkillsConstants.MaxNiceToHaveMissing).ToList(),
                 Suggestions = suggestions,
-
-                PotentialScoreIncrease =Math.Min(potentialIncrease,MissingSkillsConstants.MaxPotentialIncrease)
+                PotentialScoreIncrease = Math.Min(potentialIncrease, MissingSkillsConstants.MaxPotentialIncrease)
             };
         }
 
@@ -78,23 +60,15 @@ namespace ErCvApi.Helpers
             var suggestions = new List<string>();
 
             foreach (var skill in required.Take(MissingSkillsConstants.MaxRequiredSuggestions))
-            {
-                suggestions.Add(string.Format(
-                    MissingSkillsConstants.RequiredSuggestionTemplate,
-                    skill));
-            }
+                suggestions.Add(string.Format(MissingSkillsConstants.RequiredSuggestionTemplate, skill));
 
             foreach (var skill in niceToHave.Take(MissingSkillsConstants.MaxNiceToHaveSuggestions))
-            {
-                suggestions.Add(string.Format(MissingSkillsConstants.NiceToHaveSuggestionTemplate,skill));
-            }
+                suggestions.Add(string.Format(MissingSkillsConstants.NiceToHaveSuggestionTemplate, skill));
 
             if (required.Count > MissingSkillsConstants.MaxRequiredSuggestions)
-            {
-                var remaining =required.Count - MissingSkillsConstants.MaxRequiredSuggestions;
-
-                suggestions.Add(string.Format(MissingSkillsConstants.ExtraRequiredSuggestionTemplate,remaining));
-            }
+                suggestions.Add(string.Format(
+                    MissingSkillsConstants.ExtraRequiredSuggestionTemplate,
+                    required.Count - MissingSkillsConstants.MaxRequiredSuggestions));
 
             return suggestions;
         }

@@ -35,37 +35,22 @@
             margin-bottom: 7pt;
         }
 
-            .header h1 {
-                font-size: 19pt;
-                font-weight: bold;
-                margin-bottom: 3pt;
-                text-transform: uppercase;
-                letter-spacing: 1pt;
-            }
-
-            .header .contact {
-                font-size: 9pt;
-                line-height: 1.3;
-            }
-
-            .header a {
-                color: #000;
-                text-decoration: none;
-            }
-
-                .header a:hover {
-                    text-decoration: underline;
-                }
-
-        /* Summary */
-        .summary-section {
-            margin-bottom: 6pt;
+        .header h1 {
+            font-size: 19pt;
+            font-weight: bold;
+            margin-bottom: 3pt;
+            text-transform: uppercase;
+            letter-spacing: 1pt;
         }
 
-        .summary-content {
-            text-align: justify;
-            line-height: 1.35;
-            font-size: 10pt;
+        .header .contact {
+            font-size: 9pt;
+            line-height: 1.3;
+        }
+
+        .header a {
+            color: #000;
+            text-decoration: none;
         }
 
         /* Section */
@@ -81,6 +66,13 @@
             margin-bottom: 3pt;
             padding-bottom: 1pt;
             letter-spacing: 0.5pt;
+        }
+
+        /* Summary */
+        .summary-content {
+            text-align: justify;
+            line-height: 1.35;
+            font-size: 10pt;
         }
 
         /* Education */
@@ -120,17 +112,15 @@
         }
 
         .experience-bullets {
-            margin-left: 0;
-            padding-left: 0;
             list-style-position: outside;
             margin-left: 15pt;
         }
 
-            .experience-bullets li {
-                margin-bottom: 1pt;
-                padding-left: 2pt;
-                font-size: 10pt;
-            }
+        .experience-bullets li {
+            margin-bottom: 1pt;
+            padding-left: 2pt;
+            font-size: 10pt;
+        }
 
         /* Skills */
         .skills-content {
@@ -153,16 +143,11 @@
 
         /* Projects */
         .project-entry {
-            margin-bottom: 3pt;
+            margin-bottom: 4pt;
         }
 
         .project-title {
             font-weight: bold;
-            font-size: 10pt;
-        }
-
-        .project-description {
-            margin-top: 1pt;
             font-size: 10pt;
         }
 
@@ -172,17 +157,14 @@
             font-size: 9.5pt;
         }
 
-        /* Print adjustments */
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-            }
+        .project-description {
+            margin-top: 1pt;
+            font-size: 10pt;
+        }
 
-            .container {
-                width: 100%;
-                max-width: none;
-            }
+        @media print {
+            body { margin: 0; padding: 0; }
+            .container { width: 100%; max-width: none; }
         }
     </style>
 </head>
@@ -192,7 +174,9 @@
         <div class="header">
             <h1>{{FullName}}</h1>
             <div class="contact">
-                <a href="mailto:{{Email}}">{{Email}}</a> • {{Phone}} • {{Location}} • <a href="https://{{LinkedIn}}" target="_blank">{{LinkedIn}}</a> • <a href="https://{{GitHub}}" target="_blank">{{GitHub}}</a>
+                <a href="mailto:{{Email}}">{{Email}}</a> • {{Phone}} • {{Location}}
+                {{#LinkedIn}} • <a href="https://{{LinkedIn}}" target="_blank">{{LinkedIn}}</a>{{/LinkedIn}}
+                {{#GitHub}} • <a href="https://{{GitHub}}" target="_blank">{{GitHub}}</a>{{/GitHub}}
             </div>
         </div>
 
@@ -210,7 +194,7 @@
             {{#Education}}
             <div class="education-entry">
                 <div class="education-first-line">
-                    <span><strong>{{Institution}}</strong>, {{Location}}</span>
+                    <span>{{Institution}}, {{Location}}</span>
                     <span>{{GraduationDate}}</span>
                 </div>
                 <div class="education-second-line">{{Degree}}</div>
@@ -224,7 +208,7 @@
             {{#Experience}}
             <div class="experience-entry">
                 <div class="experience-first-line">
-                    <span><strong>{{Role}}</strong></span>
+                    <span>{{Role}}</span>
                     <span>{{StartDate}} – {{EndDate}}</span>
                 </div>
                 <div class="experience-second-line">{{Company}}, {{Location}}</div>
@@ -245,7 +229,7 @@
                 {{#SkillCategories}}
                 <div class="skill-category">
                     <span class="skill-category-name">{{CategoryName}}:</span>
-                    <span class="skill-category-items">{{CategoryItems}}</span>
+                    <span class="skill-category-items"> {{CategoryItems}}</span>
                 </div>
                 {{/SkillCategories}}
             </div>
@@ -258,9 +242,13 @@
             <div class="section-title">Projects</div>
             {{#Projects}}
             <div class="project-entry">
-                <div class="project-title">{{Name}}</div>
+                <div class="project-title">
+                    {{Name}}{{#Link}} · <a href="https://{{Link}}" style="font-weight:normal;font-size:9.5pt;">{{Link}}</a>{{/Link}}
+                </div>
                 <div class="project-description">{{Description}}</div>
-                {{#Technologies}}<div class="project-tech">Technologies: {{.}}</div>{{/Technologies}}
+                {{#Technologies}}
+                <div class="project-tech">Technologies: {{Technologies}}</div>
+                {{/Technologies}}
             </div>
             {{/Projects}}
         </div>

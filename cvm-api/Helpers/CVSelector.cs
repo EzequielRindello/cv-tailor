@@ -1,4 +1,5 @@
 using ErCvApi.Models;
+using System.Text.RegularExpressions;
 
 namespace ErCvApi.Helpers
 {
@@ -7,6 +8,24 @@ namespace ErCvApi.Helpers
         private readonly RelevanceScorer _scorer;
         private readonly PageConstraintHelper _pageConstraint;
         private readonly SummaryGenerator _summaryGenerator;
+
+        private static readonly string[] TechRoleIndicators =
+        {
+            "developer", "engineer", "software", "programmer", "architect",
+            "devops", "sre", "data", "backend", "frontend", "fullstack",
+            "full stack", "full-stack", "tech", "cloud", "analyst",
+            "consultant", "specialist"
+        };
+
+        // Strong action verbs that indicate a well-structured bullet
+        private static readonly string[] StrongActionVerbs =
+        {
+            "built", "developed", "designed", "implemented", "architected",
+            "led", "launched", "delivered", "reduced", "improved", "increased",
+            "optimized", "automated", "migrated", "refactored", "scaled",
+            "deployed", "integrated", "created", "established", "streamlined",
+            "engineered", "shipped", "transformed", "drove", "accelerated"
+        };
 
         public CVSelector()
         {
@@ -23,21 +42,19 @@ namespace ErCvApi.Helpers
             var maxExperiences = allowTwoPages ? 4 : 3;
             var maxBulletsPerExp = allowTwoPages ? 4 : 3;
 
-            // Score and rank experiences
+            var isTechJD = requirements.TechnicalSkills.Any();
+
             var scoredExperiences = _scorer.ScoreExperiences(cvMaster.Experience, requirements);
 
-            // Select top N according to allowTwoPages
+            if (isTechJD)
+                scoredExperiences = PrioritizeTechExperiences(scoredExperiences, maxExperiences);
+
             var selectedExperiences = SelectExperiences(
                 scoredExperiences, requirements, maxExperiences, maxBulletsPerExp);
 
-            // Relevant Skills
             var topSkills = _scorer.GetTopSkills(
-                selectedExperiences,
-                requirements,
-                cvMaster.Skills,
-                maxSkills: 15);
+                selectedExperiences, requirements, cvMaster.Skills, maxSkills: 15);
 
-            // Dynamic summary
             var summary = _summaryGenerator.GenerateSummary(
                 cvMaster, requirements, selectedExperiences, topSkills);
 
@@ -51,8 +68,7 @@ namespace ErCvApi.Helpers
                 Projects = new List<Project>()
             };
 
-            // Projects — only two pages
-            if (cvMaster.Projects != null && cvMaster.Projects.Any())
+            if (cvMaster.Projects?.Any() == true)
             {
                 var maxProjects = allowTwoPages ? 2 : 1;
                 var rankedProjects = RankProjects(cvMaster.Projects, requirements);
@@ -64,27 +80,48 @@ namespace ErCvApi.Helpers
                 }
             }
 
-            // Final page adjustment
             generatedCV = _pageConstraint.EnforcePageConstraint(generatedCV, allowTwoPages);
-
             return generatedCV;
         }
 
+        // ─── Tech prioritization ─────────────────────────────────────────────
+        private List<RelevanceScore> PrioritizeTechExperiences(
+            List<RelevanceScore> scored, int maxNeeded)
+        {
+            var tech = scored.Where(s => IsTechExperience(s.Experience)).ToList();
+            var nonTech = scored.Where(s => !IsTechExperience(s.Experience)).ToList();
+
+            if (tech.Count >= maxNeeded) return tech;
+
+            var needed = maxNeeded - tech.Count;
+            var penalized = nonTech
+                .Select(s => new RelevanceScore
+                {
+                    Experience = s.Experience,
+                    Score = s.Score * 0.4,
+                    MatchedSkills = s.MatchedSkills
+                })
+                .Take(needed)
+                .ToList();
+
+            return tech.Concat(penalized).OrderByDescending(s => s.Score).ToList();
+        }
+
+        private bool IsTechExperience(Experience e) =>
+            !string.IsNullOrEmpty(e.Role) &&
+            TechRoleIndicators.Any(k => e.Role.Contains(k, StringComparison.OrdinalIgnoreCase));
+
+        // ─── Experience selection ────────────────────────────────────────────
         private List<Experience> SelectExperiences(
-            List<RelevanceScore> scoredExperiences,
+            List<RelevanceScore> scored,
             JobRequirements requirements,
             int maxExperiences,
             int maxBulletsPerExp)
         {
-            var selected = new List<Experience>();
-
-            foreach (var scored in scoredExperiences.Take(maxExperiences))
-            {
-                var adapted = AdaptExperience(scored.Experience, scored.MatchedSkills, requirements, maxBulletsPerExp);
-                selected.Add(adapted);
-            }
-
-            return selected;
+            return scored
+                .Take(maxExperiences)
+                .Select(s => AdaptExperience(s.Experience, s.MatchedSkills, requirements, maxBulletsPerExp))
+                .ToList();
         }
 
         private Experience AdaptExperience(
@@ -93,7 +130,17 @@ namespace ErCvApi.Helpers
             JobRequirements requirements,
             int maxBullets = 3)
         {
-            var adapted = new Experience
+            var bulletScores = ScoreBullets(
+                original.Bullets ?? new List<string>(), matchedSkills, requirements);
+
+            var selected = bulletScores
+                .OrderByDescending(bs => bs.Score)
+                .Take(maxBullets)
+                .OrderBy(bs => bs.OriginalIndex)  // preserve original order
+                .Select(bs => bs.Bullet)
+                .ToList();
+
+            return new Experience
             {
                 Role = original.Role,
                 Company = original.Company,
@@ -101,22 +148,12 @@ namespace ErCvApi.Helpers
                 StartDate = original.StartDate,
                 EndDate = original.EndDate,
                 Skills = original.Skills,
-                Bullets = new List<string>()
+                Bullets = selected
             };
-
-            var bulletScores = ScoreBullets(original.Bullets, matchedSkills, requirements);
-
-            var selectedBullets = bulletScores
-                .OrderByDescending(bs => bs.Score)
-                .Take(maxBullets)
-                .OrderBy(bs => bs.OriginalIndex)
-                .Select(bs => bs.Bullet)
-                .ToList();
-
-            adapted.Bullets = selectedBullets;
-            return adapted;
         }
 
+        // ─── Bullet scoring ──────────────────────────────────────────────────
+        // Scores based on: skill/keyword overlap + quantifiable metrics + STAR structure
         private List<BulletScore> ScoreBullets(
             List<string> bullets,
             List<string> matchedSkills,
@@ -129,20 +166,36 @@ namespace ErCvApi.Helpers
                 var bullet = bullets[i];
                 double score = 0;
 
+                // Matched skill mention
                 foreach (var skill in matchedSkills)
                     if (bullet.Contains(skill, StringComparison.OrdinalIgnoreCase))
                         score += 10.0;
 
+                // Technical skill mention (fuzzy)
+                foreach (var techSkill in requirements.TechnicalSkills)
+                    if (SkillNormalizer.MatchesAny(techSkill, new[] { bullet }))
+                        score += 8.0;
+
+                // JD keyword mention
                 foreach (var keyword in requirements.Keywords.Take(10))
                     if (bullet.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                         score += 3.0;
 
-                foreach (var techSkill in requirements.TechnicalSkills)
-                    if (bullet.Contains(techSkill, StringComparison.OrdinalIgnoreCase))
-                        score += 8.0;
+                // Quantifiable metric bonus
+                if (Regex.IsMatch(bullet, @"\d+[%x]|\d+[MK]\+?|[\d,]{3,}\+?"))
+                    score += 6.0;
 
-                if (System.Text.RegularExpressions.Regex.IsMatch(bullet, @"\d+[%+]|\d+[MK]\+?|[\d,]+\+?"))
-                    score += 5.0;
+                // Strong action verb at start (STAR structure indicator)
+                var firstWord = bullet.Split(' ').FirstOrDefault()?.ToLower() ?? "";
+                if (StrongActionVerbs.Any(v => firstWord.StartsWith(v, StringComparison.OrdinalIgnoreCase)))
+                    score += 4.0;
+
+                // Penalize very short bullets (likely low-value)
+                if (bullet.Length < 40) score -= 5.0;
+
+                // Bonus for medium-long bullets (detailed and descriptive)
+                if (bullet.Length > 80) score += 2.0;
+                if (bullet.Length > 120) score += 1.0;
 
                 scores.Add(new BulletScore { Bullet = bullet, Score = score, OriginalIndex = i });
             }
@@ -150,22 +203,23 @@ namespace ErCvApi.Helpers
             return scores;
         }
 
+        // ─── Project ranking ─────────────────────────────────────────────────
         private List<Project> RankProjects(List<Project> projects, JobRequirements requirements)
         {
             return projects
                 .Select(p =>
                 {
                     double score = 0;
+
                     foreach (var tech in p.Technologies ?? new List<string>())
-                        if (requirements.TechnicalSkills.Any(ts =>
-                            tech.Contains(ts, StringComparison.OrdinalIgnoreCase) ||
-                            ts.Contains(tech, StringComparison.OrdinalIgnoreCase)))
+                        if (SkillNormalizer.MatchesAny(tech, requirements.TechnicalSkills))
                             score += 5.0;
 
-                    var projectText = (p.Description + " " + string.Join(" ", p.Highlights ?? new List<string>())).ToLower();
-                    foreach (var keyword in requirements.Keywords.Take(10))
-                        if (projectText.Contains(keyword, StringComparison.OrdinalIgnoreCase))
-                            score += 2.0;
+                    var text = (p.Description + " " +
+                        string.Join(" ", p.Highlights ?? new List<string>())).ToLower();
+
+                    foreach (var kw in requirements.Keywords.Take(10))
+                        if (text.Contains(kw)) score += 2.0;
 
                     return (Project: p, Score: score);
                 })
@@ -176,7 +230,7 @@ namespace ErCvApi.Helpers
 
         private class BulletScore
         {
-            public string Bullet { get; set; }
+            public string Bullet { get; set; } = "";
             public double Score { get; set; }
             public int OriginalIndex { get; set; }
         }

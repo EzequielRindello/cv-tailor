@@ -48,7 +48,7 @@ namespace ErCvApi.Helpers
             }
         }
 
-        private void ValidatePhone(GeneratedCV cv, List<ATSIssue> issues,ref int score)
+        private void ValidatePhone(GeneratedCV cv, List<ATSIssue> issues, ref int score)
         {
             if (!IsValidPhone(cv.Header?.Phone))
             {
@@ -62,16 +62,17 @@ namespace ErCvApi.Helpers
             }
         }
 
-        private void EvaluateKeywordDensity(GeneratedCV cv, JobRequirements requirements, List<ATSIssue> issues, ref int score)
+        private void EvaluateKeywordDensity(
+            GeneratedCV cv,
+            JobRequirements requirements,
+            List<ATSIssue> issues,
+            ref int score)
         {
             var cvText = BuildCVText(cv);
+            var totalKeywords = Math.Max(requirements.TechnicalSkills.Count, 1);
 
-            var totalKeywords =
-                Math.Max(requirements.TechnicalSkills.Count, 1);
-
-            var matchedKeywords =
-                requirements.TechnicalSkills.Count(s =>
-                    cvText.Contains(s, StringComparison.OrdinalIgnoreCase));
+            var matchedKeywords = requirements.TechnicalSkills
+                .Count(s => cvText.Contains(s, StringComparison.OrdinalIgnoreCase));
 
             var density = (double)matchedKeywords / totalKeywords;
 
@@ -82,7 +83,7 @@ namespace ErCvApi.Helpers
                 {
                     Severity = ATSConstants.SeverityHigh,
                     Issue = $"Low keyword density ({density:P0}) — ATS may reject the CV",
-                    Fix = "Include more keywords from the job description in bullets and skills"
+                    Fix = "Include more keywords from the job description in bullets and skills section"
                 });
             }
             else if (density < ATSConstants.DensityMediumThreshold)
@@ -91,8 +92,8 @@ namespace ErCvApi.Helpers
                 issues.Add(new ATSIssue
                 {
                     Severity = ATSConstants.SeverityMedium,
-                    Issue = $"Medium keyword density ({density:P0})",
-                    Fix = "Add 2–3 more keywords from the job description to improve ranking"
+                    Issue = $"Medium keyword density ({density:P0}) — could be improved",
+                    Fix = "Add 2–3 more keywords from the job description to improve ATS ranking"
                 });
             }
         }
@@ -117,17 +118,18 @@ namespace ErCvApi.Helpers
 
         private void ValidateBulletLength(GeneratedCV cv, List<ATSIssue> issues, ref int score)
         {
-            var hasShortBullets = cv.Experience?
+            var shortBullets = cv.Experience?
                 .SelectMany(e => e.Bullets ?? new List<string>())
-                .Any(b => b.Length < ATSConstants.ShortBulletLength) == true;
+                .Where(b => b.Length < ATSConstants.ShortBulletLength)
+                .ToList() ?? new List<string>();
 
-            if (hasShortBullets)
+            if (shortBullets.Any())
             {
                 score -= ATSConstants.PenaltyShortBullets;
                 issues.Add(new ATSIssue
                 {
                     Severity = ATSConstants.SeverityLow,
-                    Issue = ATSConstants.ShortBulletIssue,
+                    Issue = $"{shortBullets.Count} bullet point(s) are too short (<{ATSConstants.ShortBulletLength} chars)",
                     Fix = ATSConstants.ShortBulletFix
                 });
             }
@@ -135,11 +137,18 @@ namespace ErCvApi.Helpers
 
         private void ValidateMetrics(GeneratedCV cv, List<ATSIssue> issues, ref int score)
         {
-            var hasMetrics = cv.Experience?
+            var allBullets = cv.Experience?
                 .SelectMany(e => e.Bullets ?? new List<string>())
-                .Any(b => Regex.IsMatch(b, ATSConstants.MetricsRegex)) == true;
+                .ToList() ?? new List<string>();
 
-            if (!hasMetrics)
+            if (!allBullets.Any()) return;
+
+            var bulletsWithMetrics = allBullets
+                .Count(b => Regex.IsMatch(b, ATSConstants.MetricsRegex));
+
+            var ratio = (double)bulletsWithMetrics / allBullets.Count;
+
+            if (bulletsWithMetrics == 0)
             {
                 score -= ATSConstants.PenaltyNoMetrics;
                 issues.Add(new ATSIssue
@@ -149,38 +158,48 @@ namespace ErCvApi.Helpers
                     Fix = ATSConstants.NoMetricsFix
                 });
             }
-        }
-
-        private void ValidateTemplate(CVTemplate template,List<ATSIssue> issues,ref int score)
-        {
-            if (template == CVTemplate.Modern)
+            else if (ratio < 0.4)
             {
-                score -= ATSConstants.PenaltyModernTemplate;
+                score -= ATSConstants.PenaltyNoMetrics / 2;
                 issues.Add(new ATSIssue
                 {
                     Severity = ATSConstants.SeverityLow,
+                    Issue = $"Only {bulletsWithMetrics}/{allBullets.Count} bullets have quantifiable results",
+                    Fix = "Add more numbers and percentages to your bullets"
+                });
+            }
+        }
+
+        private void ValidateTemplate(CVTemplate template, List<ATSIssue> issues, ref int score)
+        {
+            if (template == CVTemplate.Modern)
+            {
+                // Higher penalty — two-column layouts can break ATS parsing
+                score -= ATSConstants.PenaltyModernTemplate;
+                issues.Add(new ATSIssue
+                {
+                    Severity = ATSConstants.SeverityMedium,
                     Issue = ATSConstants.ModernTemplateIssue,
                     Fix = ATSConstants.ModernTemplateFix
                 });
             }
         }
 
-        private bool IsValidEmail(string email)
+        // ─── Helpers ─────────────────────────────────────────────────────────
+        private bool IsValidEmail(string? email)
         {
             return !string.IsNullOrEmpty(email) &&
                    Regex.IsMatch(email, ATSConstants.EmailRegex);
         }
 
-        private bool IsValidPhone(string phone)
+        private bool IsValidPhone(string? phone)
         {
-            return !string.IsNullOrEmpty(phone) &&
-                   phone.Length >= 8;
+            return !string.IsNullOrEmpty(phone) && phone.Length >= 8;
         }
 
         private string BuildCVText(GeneratedCV cv)
         {
             var parts = new List<string>();
-
             parts.AddRange(cv.Skills ?? new List<string>());
 
             foreach (var exp in cv.Experience ?? new List<Experience>())
@@ -193,14 +212,14 @@ namespace ErCvApi.Helpers
             return string.Join(" ", parts);
         }
 
-        private int GetSeverityWeight(string severity)
+        private int GetSeverityWeight(string severity) => severity switch
         {
-            if (severity == ATSConstants.SeverityCritical) return 4;
-            if (severity == ATSConstants.SeverityHigh) return 3;
-            if (severity == ATSConstants.SeverityMedium) return 2;
-            if (severity == ATSConstants.SeverityLow) return 1;
-            return 0;
-        }
+            ATSConstants.SeverityCritical => 4,
+            ATSConstants.SeverityHigh => 3,
+            ATSConstants.SeverityMedium => 2,
+            ATSConstants.SeverityLow => 1,
+            _ => 0
+        };
 
         private string ResolveColor(int score)
         {
@@ -220,9 +239,8 @@ namespace ErCvApi.Helpers
             }
 
             recs.Add($"{issues.Count} improvement point(s) detected:");
-
             foreach (var issue in issues.Take(4))
-                recs.Add("• " + issue.Issue + " → " + issue.Fix);
+                recs.Add($"• {issue.Issue} → {issue.Fix}");
 
             return recs;
         }
