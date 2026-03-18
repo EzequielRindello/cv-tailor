@@ -10,6 +10,7 @@ function formatDate(isoDate) {
 export default function HistoryPanel({
   entries,
   onLoad,
+  onDelete,
   onClear,
   onClose,
   disabled,
@@ -48,14 +49,24 @@ export default function HistoryPanel({
                     <span>Match: {entry.matchScore ?? 'N/A'}%</span>
                   </div>
                 </div>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  onClick={() => onLoad(entry)}
-                  disabled={disabled}
-                >
-                  Regenerate
-                </Button>
+                <div className="history-item-actions">
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => onLoad(entry)}
+                    disabled={disabled}
+                  >
+                    Regenerate
+                  </Button>
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    onClick={() => onDelete(entry.id)}
+                    disabled={disabled}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

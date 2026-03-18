@@ -17,7 +17,7 @@ import KeywordAnalysisCard from './components/KeywordAnalysis/KeywordAnalysisCar
 import ATSScoreCard from './components/ATSScore/ATSScoreCard';
 import BulletEditor from './components/BulletEditor/BulletEditor';
 import { defaultSettings, loadSettings, saveSettings } from './utils/settings';
-import { clearHistory, getHistory, saveToHistory } from './utils/history';
+import { clearHistory, getHistory, removeHistoryEntry, saveToHistory } from './utils/history';
 import './styles/variables.css';
 import './App.css';
 
@@ -39,6 +39,7 @@ function App() {
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [historyEntries, setHistoryEntries] = useState([]);
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
+  const [currentView, setCurrentView] = useState('generate');
 
   useEffect(() => {
     let mounted = true;
@@ -140,6 +141,7 @@ function App() {
         });
         setHistoryEntries(updatedHistory);
 
+        setCurrentView('details');
         setDownloadSuccess(true);
         setLoading(false);
       } else {
@@ -180,7 +182,7 @@ function App() {
         !event.shiftKey &&
         event.key === 'Enter';
 
-      if (isGenerateShortcut && !loading && jobDescription.trim()) {
+      if (isGenerateShortcut && currentView === 'generate' && !loading && jobDescription.trim()) {
         event.preventDefault();
         handleGenerate();
       }
@@ -188,7 +190,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
-  }, [handleGenerate, jobDescription, loading]);
+  }, [currentView, handleGenerate, jobDescription, loading]);
   const handleFormatChange = (format) => {
     setSelectedFormats(prev => ({ ...prev, [format]: !prev[format] }));
   };
@@ -198,6 +200,11 @@ function App() {
     setShowHistoryPanel(false);
     setError('');
     document.getElementById('app-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleDeleteHistoryEntry = (entryId) => {
+    const updatedHistory = removeHistoryEntry(entryId);
+    setHistoryEntries(updatedHistory);
   };
 
   const handleClearHistory = () => {
@@ -252,142 +259,196 @@ function App() {
     setAnalysisResult(null);
     setDownloadSuccess(false);
     setShowBulletEditor(false);
+    setShowHistoryPanel(false);
+    setCurrentView('generate');
     setError('');
 
     document.getElementById('app-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  const handleBackToGenerate = () => {
+    setCurrentView('generate');
+    setShowHistoryPanel(false);
+    setShowBulletEditor(false);
+    setError('');
+    document.getElementById('app-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   if (downloadSuccess && !analysisResult) {
     return <SuccessScreen onGoBack={handleReset} />;
   }
 
   return (
   <div className="app-container">
-    <Container className="py-5">
-      <Header />
-      <Row>
-        <Col lg={6} className="mb-4">
-          <Card className="main-card">
-            <Card.Body className="p-4">
-              {error && (
-                <Alert
-                  variant="danger"
-                  dismissible
-                  onClose={() => setError('')}
-                >
-                  {error}
-                </Alert>
-              )}
-              <Form>
-                <div className="form-title-row mb-4">
-                  <h5 className="mb-0">Generate Your CV</h5>
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={() => setShowHistoryPanel((prev) => !prev)}
-                    disabled={loading}
-                  >
-                    {showHistoryPanel ? 'Hide History' : 'History'}
-                  </button>
-                </div>
-                <ProfileSelector
-                  profiles={profiles}
-                  value={selectedProfileId}
-                  onChange={setSelectedProfileId}
-                  disabled={loading}
-                />
-                <JobDescriptionInput
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  disabled={loading}
-                  helperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate"
-                />
-                <TemplateSelector
-                  value={template}
-                  onChange={setTemplate}
-                  disabled={loading}
-                />
-                <Row>
-                  <Col md={6}>
-                    <FormatSelector
-                      selectedFormats={selectedFormats}
-                      onChange={handleFormatChange}
-                      disabled={loading}
-                    />
-                  </Col>
-                  <Col md={6}>
-                    <PageOptions
-                      allowTwoPages={allowTwoPages}
-                      onChange={setAllowTwoPages}
-                      disabled={loading}
-                    />
-                  </Col>
-                </Row>
-                <GenerateButton
-                  loading={loading}
-                  onClick={handleGenerate}
-                  disabled={loading}
-                />
-              </Form>
-              {showHistoryPanel && (
-                <HistoryPanel
-                  entries={historyEntries}
-                  onLoad={handleLoadHistoryEntry}
-                  onClear={handleClearHistory}
-                  onClose={() => setShowHistoryPanel(false)}
-                  disabled={loading}
-                />
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col lg={6}>
-          {analysisResult ? (
-            <>
-              <CVPreview html={analysisResult.previewHtml} />
-              <MatchScoreCard data={analysisResult.matchScore} />
-              <ATSScoreCard data={analysisResult.atsScore} />
-              <MissingSkillsCard data={analysisResult.missingSkills} />
-              <KeywordAnalysisCard data={analysisResult.keywordAnalysis} />
-              {!showBulletEditor && (
-                <div className="text-center mb-4">
-                  <button
-                    className="btn btn-outline-primary me-3"
-                    onClick={() => setShowBulletEditor(true)}
-                  >
-                    <i className="bi bi-pencil-square me-1" />
-                    Edit Bullets & Regenerate
-                  </button>
-
-                  <button
-                    className="btn btn-outline-secondary"
-                    onClick={handleReset}
-                  >
-                    <i className="bi bi-arrow-counterclockwise me-1" />
-                    Start Over
-                  </button>
-                </div>
-              )}
-              {showBulletEditor && (
-                <BulletEditor
-                  generatedCV={analysisResult.generatedCV}
-                  onRegenerate={handleRegenerate}
-                  onCancel={() => setShowBulletEditor(false)}
-                  loading={loading}
-                />
-              )}
-            </>
-          ) : (
+    {currentView === 'generate' && (
+      <Container className="app-shell py-4 py-lg-5">
+        <Header />
+        <Row className="justify-content-center">
+          <Col lg={8} xl={7}>
             <Card className="main-card">
-              <Card.Body className="text-center text-muted">
-                <p className="mb-0">
-                  Generate results to see the analysis here
-                </p>
+              <Card.Body className="form-card-body">
+                {error && (
+                  <Alert
+                    variant="danger"
+                    dismissible
+                    onClose={() => setError('')}
+                  >
+                    {error}
+                  </Alert>
+                )}
+                {showHistoryPanel && (
+                  <HistoryPanel
+                    entries={historyEntries}
+                    onLoad={handleLoadHistoryEntry}
+                    onDelete={handleDeleteHistoryEntry}
+                    onClear={handleClearHistory}
+                    onClose={() => setShowHistoryPanel(false)}
+                    disabled={loading}
+                  />
+                )}
+                <Form className="generator-form">
+                  <div className="form-title-row">
+                    <h5 className="form-title mb-0">Generate Your CV</h5>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary btn-sm history-toggle-btn"
+                      onClick={() => setShowHistoryPanel((prev) => !prev)}
+                      disabled={loading}
+                    >
+                      {showHistoryPanel ? 'Hide History' : 'History'}
+                    </button>
+                  </div>
+                  <div className="form-section form-section-primary">
+                    <ProfileSelector
+                      profiles={profiles}
+                      value={selectedProfileId}
+                      onChange={setSelectedProfileId}
+                      disabled={loading}
+                    />
+                    <JobDescriptionInput
+                      value={jobDescription}
+                      onChange={(e) => setJobDescription(e.target.value)}
+                      disabled={loading}
+                      helperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate"
+                    />
+                  </div>
+                  <div className="form-section">
+                    <TemplateSelector
+                      value={template}
+                      onChange={setTemplate}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="form-section form-section-inline">
+                    <Row className="g-3">
+                      <Col md={6}>
+                        <FormatSelector
+                          selectedFormats={selectedFormats}
+                          onChange={handleFormatChange}
+                          disabled={loading}
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <PageOptions
+                          allowTwoPages={allowTwoPages}
+                          onChange={setAllowTwoPages}
+                          disabled={loading}
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                  <div className="form-section form-actions">
+                    <GenerateButton
+                      loading={loading}
+                      onClick={handleGenerate}
+                      disabled={loading}
+                    />
+                  </div>
+                </Form>
               </Card.Body>
             </Card>
-          )}
-        </Col>
-      </Row> 
-    </Container>
+          </Col>
+        </Row>
+      </Container>
+    )}
+
+    {currentView === 'details' && (
+      <div className="details-fullscreen">
+        <Header />
+        <div className="details-header">
+          <div className="details-header-inner">
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={handleBackToGenerate}
+              disabled={loading}
+            >
+              <i className="bi bi-arrow-left me-1" />
+              Back to Generate
+            </button>
+          </div>
+        </div>
+        <div className="details-layout">
+          <div className="details-preview-panel">
+              {analysisResult ? (
+                <CVPreview html={analysisResult.previewHtml} />
+              ) : (
+                <Card className="main-card">
+                  <Card.Body className="text-center">
+                    <p className="analysis-empty">No details to display yet.</p>
+                  </Card.Body>
+                </Card>
+              )}
+          </div>
+
+          <div className="details-analysis-panel">
+              {analysisResult ? (
+                <div className="analysis-stack">
+                  <div className="analysis-cards">
+                    <MatchScoreCard data={analysisResult.matchScore} />
+                    <ATSScoreCard data={analysisResult.atsScore} />
+                    <MissingSkillsCard data={analysisResult.missingSkills} />
+                    <KeywordAnalysisCard data={analysisResult.keywordAnalysis} />
+                  </div>
+                  {!showBulletEditor && (
+                    <div className="analysis-actions">
+                      <button
+                        className="btn btn-outline-primary me-3"
+                        onClick={() => setShowBulletEditor(true)}
+                      >
+                        <i className="bi bi-pencil-square me-1" />
+                        Edit Bullets & Regenerate
+                      </button>
+
+                      <button
+                        className="btn btn-outline-secondary"
+                        onClick={handleReset}
+                      >
+                        <i className="bi bi-arrow-counterclockwise me-1" />
+                        Start Over
+                      </button>
+                    </div>
+                  )}
+                  {showBulletEditor && (
+                    <BulletEditor
+                      generatedCV={analysisResult.generatedCV}
+                      onRegenerate={handleRegenerate}
+                      onCancel={() => setShowBulletEditor(false)}
+                      loading={loading}
+                    />
+                  )}
+                </div>
+              ) : (
+                <Card className="main-card">
+                  <Card.Body className="text-center">
+                    <p className="analysis-empty">Generate a CV to view details.</p>
+                  </Card.Body>
+                </Card>
+              )}
+          </div>
+        </div>
+      </div>
+    )}
     <div className="footer-note mt-4">
         <p>
           Your CV is generated based on a master profile and tailored to match

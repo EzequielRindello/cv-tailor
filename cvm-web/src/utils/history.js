@@ -39,3 +39,10 @@ export function saveToHistory(entry) {
 export function clearHistory() {
   localStorage.removeItem(STORAGE_KEY);
 }
+
+export function removeHistoryEntry(id) {
+  const current = getHistory();
+  const updated = current.filter((entry) => entry.id !== id);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  return updated;
+}
