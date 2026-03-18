@@ -16,6 +16,14 @@
 | FIX-002 | Role mismatch warning: `LowMatchWarning` en `MatchScore` cuando Overall < 30% |
 | FIX-003 | Bullet scoring mejorado: bonus por verbos de acción, penalización bullets cortos |
 | FIX-004 | `SkillNormalizer` reemplaza todas las comparaciones string dispersas |
+| FIX-005 | Reorder de bullets persiste correctamente en `/regenerate` |
+| FIX-006 | Validación estricta de formatos (`pdf`, `docx`) con `400 BadRequest` |
+| FIX-007 | Parsing robusto de años en scoring y summary con warning logs |
+| FIX-008 | Frontend usa fallback de `API_BASE_URL` + mensaje claro de conectividad |
+| FIX-009 | Matching con límites de palabra para evitar falsos positivos |
+| FIX-010 | Límites de tamaño para archivos en session + respuesta 413 controlada |
+| FIX-011 | Modelos inicializados para eliminar warnings CS8618 (nullable clean build) |
+| FIX-012 | Security baseline: rate limiting, HTTPS redirection no-dev y postura de acceso explícita |
 
 ---
 
@@ -332,4 +340,6 @@ export function saveSettings(s) { localStorage.setItem(KEY, JSON.stringify(s)); 
 | FIX-003: Bullet STAR scoring | Medio | Bajo | ✅ Done |
 | FIX-004: SkillNormalizer centralizado | Alto | Bajo | ✅ Done |
 
-**Orden recomendado frontend:** 102-FE → 103 → 303 → 201 → 202-FE → 301 → 203 (cuando haya key)
+**Orden recomendado de implementacion (actualizado):**
+1) FEATURE-102-FE → FEATURE-202-FE → FEATURE-103 → FEATURE-303 → FEATURE-201
+2) FEATURE-301 → FEATURE-203 (cuando haya API key y budget)

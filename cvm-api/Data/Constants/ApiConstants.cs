@@ -12,6 +12,8 @@ namespace ErCvApi.Constants
         public const string ErrorRegeneratingCv = "Error regenerating CV";
         public const string ErrorDownloadingFile = "Error downloading file";
         public const string ErrorFileNotFound = "File not found. Generate a CV first.";
+        public const string ErrorSessionFileTooLarge = "Generated file is too large for session storage.";
+        public const string ErrorSessionStorageLimit = "Session storage limit exceeded for generated files.";
 
         public const string StatusHealthy = "healthy";
 
@@ -23,5 +25,8 @@ namespace ErCvApi.Constants
 
         public const string FileNamePrefix = "CV_";
         public const string FileNameDateFormat = "yyyyMMdd_HHmmss";
+
+        public const int MaxSessionFileSizeBytes = 10 * 1024 * 1024; // 10 MB per file
+        public const int MaxSessionTotalSizeBytes = 20 * 1024 * 1024; // 20 MB per session
     }
 }

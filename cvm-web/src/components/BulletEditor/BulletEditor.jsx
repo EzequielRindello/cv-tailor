@@ -73,7 +73,7 @@ export default function BulletEditor({ generatedCV, onRegenerate, onCancel, load
         .map((selected, i) => (selected ? i : -1))
         .filter(i => i >= 0);
     });
-    onRegenerate(bulletSelections);
+    onRegenerate(bulletSelections, localCV);
   };
 
   const totalSelected = Object.values(selections).flat().filter(Boolean).length;

@@ -16,7 +16,8 @@ import BulletEditor from './components/BulletEditor/BulletEditor';
 import './styles/variables.css';
 import './App.css';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+const API_BASE_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+const buildApiUrl = (path) => `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 
 function App() {
   // Form states
@@ -44,7 +45,7 @@ function App() {
 
   const downloadFile = async (format) => {
     const response = await axios.get(
-      `${API_BASE_URL}/cv/download/${format}`,
+      buildApiUrl(`/cv/download/${format}`),
       { responseType: 'blob', withCredentials: true }
     );
     const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -70,7 +71,7 @@ function App() {
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/cv/generate`,
+        buildApiUrl('/cv/generate'),
         {
           jobDescription,
           formats: getFormats(),
@@ -97,9 +98,16 @@ function App() {
 
         setDownloadSuccess(true);
         setLoading(false);
+      } else {
+        setError('The API did not return a successful generation response.');
+        setLoading(false);
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred while generating the CV');
+      if (!err.response) {
+        setError(`Cannot reach API at ${API_BASE_URL}. Check REACT_APP_API_URL or start the backend on http://localhost:5000.`);
+      } else {
+        setError(err.response?.data?.error || 'An error occurred while generating the CV');
+      }
       setLoading(false);
     }
   };
@@ -109,7 +117,7 @@ function App() {
     setSelectedFormats(prev => ({ ...prev, [format]: !prev[format] }));
   };
 
-  const handleRegenerate = async (bulletSelections) => {
+  const handleRegenerate = async (bulletSelections, editedCv) => {
     if (!analysisResult?.generatedCV) return;
 
     setLoading(true);
@@ -117,9 +125,9 @@ function App() {
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/cv/regenerate`,
+        buildApiUrl('/cv/regenerate'),
         {
-          generatedCV: analysisResult.generatedCV,
+          generatedCV: editedCv || analysisResult.generatedCV,
           bulletSelections,
           formats: getFormats(),
           template: template.charAt(0).toUpperCase() + template.slice(1),
@@ -131,6 +139,9 @@ function App() {
       if (response.data.success) {
         for (const file of response.data.files) {
           await downloadFile(file.format);
+        }
+        if (editedCv) {
+          setAnalysisResult(prev => ({ ...prev, generatedCV: editedCv }));
         }
         setDownloadSuccess(true);
         setShowBulletEditor(false);

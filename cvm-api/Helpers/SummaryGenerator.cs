@@ -111,11 +111,25 @@ namespace ErCvApi.Helpers
             var earliestYear = DateTime.Now.Year;
             foreach (var exp in pool)
             {
-                var parts = (exp.StartDate ?? "").Split(' ');
-                if (parts.Length >= 2 && int.TryParse(parts[parts.Length - 1], out int year))
+                if (TryExtractYear(exp.StartDate, out int year))
                     earliestYear = Math.Min(earliestYear, year);
+                else if (!string.IsNullOrWhiteSpace(exp.StartDate))
+                    Console.WriteLine($"[WARN] SummaryGenerator: could not parse startDate '{exp.StartDate}', ignoring entry for years calculation.");
             }
             return Math.Max(0, DateTime.Now.Year - earliestYear);
+        }
+
+        private static bool TryExtractYear(string? value, out int year)
+        {
+            year = 0;
+            if (string.IsNullOrWhiteSpace(value)) return false;
+
+            var match = Regex.Match(value, @"\b(19|20)\d{2}\b");
+            if (!match.Success) return false;
+            if (!int.TryParse(match.Value, out year)) return false;
+
+            var currentYear = DateTime.Now.Year;
+            return year >= 1950 && year <= currentYear + 1;
         }
 
         private bool IsTechRole(string? role) =>
