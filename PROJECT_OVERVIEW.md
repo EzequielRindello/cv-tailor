@@ -43,10 +43,16 @@
 - Template selection (Harvard, Modern, Minimalist).
 - PDF/DOCX export and bullet-level regeneration flow.
 - Multi-profile backend support (`/api/cv/profiles`, `profileId`).
+- Frontend profile selector with automatic hide when only one profile exists.
+- Inline HTML preview (`previewHtml`) rendered in-app for quick visual validation.
+- Keyboard productivity shortcuts (`Ctrl/Cmd+Enter`, `Ctrl/Cmd+Shift+V`).
+- Generation history in localStorage (top 10, quick reload, clear).
+- Export/template/page settings persistence in localStorage.
 
 ## Technical Highlights
 - **State management:**
-  - React local state (`useState`) coordinates generation lifecycle, analysis payloads, and bullet-edit regeneration.
+  - React local state (`useState`) coordinates generation lifecycle, analysis payloads, bullet-edit regeneration, profile selection, and history panel state.
+  - LocalStorage-backed persistence for export settings and generation history.
   - Deterministic UI flow: input -> generate -> analyze -> optional bullet edits -> regenerate.
 - **API handling:**
   - Typed backend models for generation and analysis payloads.
@@ -55,6 +61,7 @@
 - **Performance-oriented logic:**
   - Top-N limits for skills/keywords/experiences/projects to bound response size and rendering work.
   - Page-fit enforcement heuristics reduce overflow risk before document render.
+  - Shared Puppeteer browser instance for PDF rendering to reduce launch overhead.
   - Reuse of parsed/selected structures across analysis outputs.
 - **Patterns used:**
   - Service orchestration pattern (`CVGeneratorService`) for endpoint business flow.
@@ -63,8 +70,9 @@
   - Template-based rendering for output format flexibility.
 
 ## Possible Improvements
-- Frontend integration of backend-delivered HTML preview (`previewHtml`).
-- Frontend profile selector to use existing backend multi-profile support.
+- Return updated `previewHtml` from `/regenerate` to keep preview in sync after bullet edits.
+- Cover letter generation flow (template-driven, no hallucinated content).
+- Optional LLM-assisted matching with controlled fallback and budget guardrails.
 - Replace direct helper instantiation with DI for easier testing and configurability.
 - Add robust date parsing/normalization and structured validation errors.
 - Add unit/integration tests for parser, scorer, selector, and rendering pipelines.

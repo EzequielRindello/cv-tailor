@@ -37,8 +37,6 @@ namespace ErCvApi.Services
             _minimalistTemplatePath= TemplatePath(TemplatePaths.MinimalistTemplate);
         }
 
-        // ─── Public endpoints ────────────────────────────────────────────────
-
         public async Task<IActionResult> GenerateAsync(GenerateRequest request, HttpContext context)
         {
             try
@@ -73,10 +71,15 @@ namespace ErCvApi.Services
             {
                 ValidateRegenerateRequest(request);
 
-                var documents = await RegenerateCVInternalAsync(request);
+                var (documents, previewHtml) = await RegenerateCVInternalAsync(request);
                 SaveDocumentsToSession(documents, context);
 
-                return new OkObjectResult(new { success = true, files = BuildFileMetadata(documents) });
+                return new OkObjectResult(new
+                {
+                    success = true,
+                    files = BuildFileMetadata(documents),
+                    previewHtml
+                });
             }
             catch (InvalidOperationException ex)
             {
@@ -117,11 +120,6 @@ namespace ErCvApi.Services
                 return new ObjectResult(new { error = ApiConstants.ErrorDownloadingFile }) { StatusCode = 500 };
             }
         }
-
-        /// <summary>
-        /// FEATURE-202: Lists available CV profiles from the Data directory.
-        /// Returns id (filename without extension) and display name.
-        /// </summary>
         public IActionResult GetProfiles()
         {
             try
@@ -151,8 +149,6 @@ namespace ErCvApi.Services
         public IActionResult Health() =>
             new OkObjectResult(new { status = ApiConstants.StatusHealthy, timestamp = DateTime.UtcNow });
 
-        // ─── Internal ────────────────────────────────────────────────────────
-
         private async Task<(Dictionary<string, byte[]>, AnalysisResult)>
             GenerateCVInternalAsync(GenerateRequest request)
         {
@@ -162,9 +158,6 @@ namespace ErCvApi.Services
             var matchScore      = _matchScoreCalc.Calculate(cvMaster, requirements);
             var missingSkills   = _missingSkillsAnalyzer.Analyze(cvMaster, requirements);
             var generatedCV     = _selector.SelectAndAdaptCV(cvMaster, requirements, request.AllowTwoPages);
-
-            // KeywordAnalyzer now uses GeneratedCV (not CVMaster) so results
-            // reflect only what's actually in the output document
             var keywordAnalysis = _keywordAnalyzer.Analyze(request.JobDescription, generatedCV);
             var atsScore        = _atsChecker.Check(generatedCV, requirements, request.Template);
 
@@ -172,8 +165,6 @@ namespace ErCvApi.Services
             var renderer = new DocumentRenderer(templatePath);
 
             var documents = await RenderDocumentsAsync(request.Formats, renderer, generatedCV);
-
-            // Generate preview HTML for inline display (FEATURE-102)
             var previewHtml = renderer.RenderHtmlPublic(generatedCV);
 
             var analysis = new AnalysisResult
@@ -189,7 +180,7 @@ namespace ErCvApi.Services
             return (documents, analysis);
         }
 
-        private async Task<Dictionary<string, byte[]>> RegenerateCVInternalAsync(RegenerateRequest request)
+        private async Task<(Dictionary<string, byte[]> Documents, string PreviewHtml)> RegenerateCVInternalAsync(RegenerateRequest request)
         {
             var cv = request.GeneratedCV;
 
@@ -209,7 +200,10 @@ namespace ErCvApi.Services
             cv = new PageConstraintHelper().EnforcePageConstraint(cv, request.AllowTwoPages);
 
             var renderer = new DocumentRenderer(ResolveTemplatePath(request.Template));
-            return await RenderDocumentsAsync(request.Formats, renderer, cv);
+            var documents = await RenderDocumentsAsync(request.Formats, renderer, cv);
+            var previewHtml = renderer.RenderHtmlPublic(cv);
+
+            return (documents, previewHtml);
         }
 
         private async Task<Dictionary<string, byte[]>> RenderDocumentsAsync(
@@ -230,8 +224,6 @@ namespace ErCvApi.Services
             return docs;
         }
 
-        // ─── Helpers ─────────────────────────────────────────────────────────
-
         private string ResolveTemplatePath(CVTemplate template) => template switch
         {
             CVTemplate.Modern     => _modernTemplatePath,
@@ -241,11 +233,8 @@ namespace ErCvApi.Services
 
         private string TemplatePath(string filename) =>
             Path.Combine(_env.ContentRootPath, TemplatePaths.TemplatesFolder, filename);
-
-        /// <summary>FEATURE-202: Loads a named profile from Data/.</summary>
         private async Task<CVMaster> LoadCVMasterAsync(string profileId = "cv-master")
         {
-            // Sanitize: strip path separators to prevent directory traversal
             var safeId = Path.GetFileName(profileId);
             if (string.IsNullOrWhiteSpace(safeId)) safeId = "cv-master";
 

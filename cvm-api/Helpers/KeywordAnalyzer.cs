@@ -29,8 +29,6 @@ namespace ErCvApi.Helpers
             {
                 var word = kvp.Key;
                 var freq = kvp.Value;
-
-                // FuzzyMatch catches "nodejs"→"Node.js", "postgres"→"PostgreSQL", etc.
                 var presentInCV =
                     SkillNormalizer.MatchesAny(word, cvSkills) ||
                     ContainsTerm(cvText, word);

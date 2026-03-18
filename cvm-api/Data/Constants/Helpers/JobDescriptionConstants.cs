@@ -2,21 +2,14 @@ namespace ErCvApi.Constants
 {
     public static class JobDescriptionConstants
     {
-        // Default Values
         public const string DefaultSeniority = "mid-level";
-
-        // Regex Patterns
         public const string YearsOfExperiencePattern = @"(\d+)\+?\s*(?:years?|yrs?)";
         public const string YearsWithTechPattern = @"(\d+)\+?\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience\s*)?(?:with\s*)?([a-z0-9\.\#\+\-\/]+)";
         public const string WordSplitPattern = @"\W+";
         public const string BulletLinePattern = @"^[\-\*\•\d\.]+\s*";
-
-        // Requirement Keywords
         public const string ExperienceKeyword = "experience";
         public const string RequiredKeyword = "required";
         public const string MustHaveKeyword = "must have";
-
-        // Seniority Keywords — order matters: more specific first
         public static readonly string[] SeniorityKeywords =
         {
             "principal", "staff engineer", "distinguished", "fellow",
@@ -26,22 +19,14 @@ namespace ErCvApi.Constants
             "junior", "jr.", "entry-level", "entry level",
             "associate", "intern", "graduate", "new grad"
         };
-
-        // Negation words — if these precede a seniority keyword, ignore it
         public static readonly string[] NegationWords =
         {
             "no", "not", "without", "non", "don't", "doesn't", "require",
             "required", "necessary", "needed", "prefer", "need"
         };
 
-        // ─────────────────────────────────────────────────────────────────────
-        // TECH KEYWORDS — comprehensive list for skill extraction
-        // Grouped by category for maintainability
-        // ─────────────────────────────────────────────────────────────────────
-
         public static readonly string[] CommonTechKeywords =
         {
-            // ── Languages ───────────────────────────────────────────────────
             "c#", "csharp", "c sharp",
             ".net", "dotnet", "dot net",
             "java",
@@ -77,8 +62,6 @@ namespace ErCvApi.Constants
             "sql",
             "plsql", "pl/sql",
             "t-sql",
-
-            // ── Frontend Frameworks & Libraries ─────────────────────────────
             "react", "react.js", "reactjs",
             "angular", "angularjs",
             "vue", "vue.js", "vuejs",
@@ -98,8 +81,6 @@ namespace ErCvApi.Constants
             "preact",
             "stencil",
             "qwik",
-
-            // ── CSS / Styling ────────────────────────────────────────────────
             "css", "css3",
             "scss", "sass",
             "less",
@@ -115,8 +96,6 @@ namespace ErCvApi.Constants
             "bulma",
             "foundation",
             "storybook",
-
-            // ── Backend Frameworks ───────────────────────────────────────────
             "asp.net", "asp.net core",
             "node.js", "nodejs", "node",
             "express", "express.js",
@@ -142,8 +121,6 @@ namespace ErCvApi.Constants
             "axum",
             "phoenix",
             "ktor",
-
-            // ── Databases — SQL ──────────────────────────────────────────────
             "postgresql", "postgres",
             "mysql",
             "sql server", "mssql",
@@ -153,8 +130,6 @@ namespace ErCvApi.Constants
             "cockroachdb",
             "tidb",
             "aurora",
-
-            // ── Databases — NoSQL ────────────────────────────────────────────
             "mongodb", "mongo",
             "dynamodb",
             "cosmosdb",
@@ -166,22 +141,16 @@ namespace ErCvApi.Constants
             "arangodb",
             "rethinkdb",
             "faunadb",
-
-            // ── Cache / KV ───────────────────────────────────────────────────
             "redis",
             "memcached",
             "hazelcast",
             "etcd",
-
-            // ── Search ───────────────────────────────────────────────────────
             "elasticsearch", "elastic",
             "opensearch",
             "solr",
             "typesense",
             "algolia",
             "meilisearch",
-
-            // ── Message Brokers / Queues ─────────────────────────────────────
             "kafka",
             "rabbitmq",
             "activemq",
@@ -192,8 +161,6 @@ namespace ErCvApi.Constants
             "celery",
             "bull", "bullmq",
             "sidekiq",
-
-            // ── Cloud — AWS ──────────────────────────────────────────────────
             "aws", "amazon web services",
             "ec2",
             "s3",
@@ -213,8 +180,6 @@ namespace ErCvApi.Constants
             "elastic beanstalk",
             "fargate",
             "step functions",
-
-            // ── Cloud — Azure ────────────────────────────────────────────────
             "azure",
             "azure devops",
             "azure functions",
@@ -228,8 +193,6 @@ namespace ErCvApi.Constants
             "azure event hub",
             "azure logic apps",
             "azure app service",
-
-            // ── Cloud — GCP ──────────────────────────────────────────────────
             "gcp", "google cloud",
             "bigquery",
             "cloud run",
@@ -239,8 +202,6 @@ namespace ErCvApi.Constants
             "cloud storage",
             "spanner",
             "vertex ai",
-
-            // ── Containers & Orchestration ───────────────────────────────────
             "docker",
             "kubernetes", "k8s",
             "helm",
@@ -249,8 +210,6 @@ namespace ErCvApi.Constants
             "openshift",
             "rancher",
             "nomad",
-
-            // ── CI/CD ────────────────────────────────────────────────────────
             "ci/cd", "cicd",
             "github actions",
             "gitlab ci", "gitlab",
@@ -262,8 +221,6 @@ namespace ErCvApi.Constants
             "argo cd", "argocd",
             "flux",
             "spinnaker",
-
-            // ── IaC & Config ─────────────────────────────────────────────────
             "terraform",
             "ansible",
             "chef",
@@ -272,8 +229,6 @@ namespace ErCvApi.Constants
             "cloudformation",
             "cdk",
             "bicep",
-
-            // ── Monitoring & Observability ───────────────────────────────────
             "prometheus",
             "grafana",
             "datadog",
@@ -286,8 +241,6 @@ namespace ErCvApi.Constants
             "dynatrace",
             "kibana",
             "logstash",
-
-            // ── API & Integration ────────────────────────────────────────────
             "rest", "restful", "rest api",
             "graphql",
             "grpc",
@@ -300,8 +253,6 @@ namespace ErCvApi.Constants
             "jwt",
             "saml",
             "webhooks",
-
-            // ── Architecture Patterns ────────────────────────────────────────
             "microservices",
             "monorepo",
             "event-driven",
@@ -314,8 +265,6 @@ namespace ErCvApi.Constants
             "serverless",
             "soa",
             "mvc", "mvvm", "mvp",
-
-            // ── Testing ──────────────────────────────────────────────────────
             "unit testing",
             "integration testing",
             "e2e testing", "end-to-end",
@@ -337,15 +286,11 @@ namespace ErCvApi.Constants
             "testng",
             "enzyme",
             "testing library",
-
-            // ── Version Control ──────────────────────────────────────────────
             "git",
             "github",
             "gitlab",
             "bitbucket",
             "svn", "subversion",
-
-            // ── AI / ML ──────────────────────────────────────────────────────
             "machine learning", "ml",
             "deep learning",
             "tensorflow",
@@ -362,8 +307,6 @@ namespace ErCvApi.Constants
             "numpy",
             "jupyter",
             "spark", "apache spark",
-
-            // ── Data Engineering ─────────────────────────────────────────────
             "dbt",
             "airflow", "apache airflow",
             "hadoop",
@@ -376,8 +319,6 @@ namespace ErCvApi.Constants
             "looker",
             "tableau",
             "power bi",
-
-            // ── Tools & Misc ─────────────────────────────────────────────────
             "linux",
             "unix",
             "nginx",
@@ -414,8 +355,6 @@ namespace ErCvApi.Constants
             "confluence",
             "notion",
             "linear",
-
-            // ── Security ────────────────────────────────────────────────────
             "oauth", "oauth2",
             "openid connect", "oidc",
             "sso",
@@ -427,8 +366,6 @@ namespace ErCvApi.Constants
             "encryption",
             "vault", "hashicorp vault",
             "owasp",
-
-            // ── Mobile ──────────────────────────────────────────────────────
             "react native",
             "flutter",
             "xamarin",
@@ -439,8 +376,6 @@ namespace ErCvApi.Constants
             "ios",
             "xcode",
             "android studio",
-
-            // ── Practices (detectable from JD text) ─────────────────────────
             "agile",
             "scrum",
             "kanban",
@@ -455,8 +390,6 @@ namespace ErCvApi.Constants
             "continuous deployment",
             "continuous delivery",
         };
-
-        // Common Words (Stopwords) — expanded
         public static readonly string[] CommonWords =
         {
             "the", "and", "for", "with", "you", "that", "this", "will", "from",

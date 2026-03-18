@@ -41,6 +41,13 @@
   border-left: 3px solid var(--color-error);
 }
 
+.form-title-row {
+  align-items: center;
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: space-between;
+}
+
 @media (max-width: 768px) {
   .app-container {
     padding: var(--spacing-lg) var(--spacing-md);

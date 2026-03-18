@@ -174,7 +174,6 @@ namespace ErCvApi.Helpers
         {
             if (template == CVTemplate.Modern)
             {
-                // Higher penalty — two-column layouts can break ATS parsing
                 score -= ATSConstants.PenaltyModernTemplate;
                 issues.Add(new ATSIssue
                 {
@@ -184,8 +183,6 @@ namespace ErCvApi.Helpers
                 });
             }
         }
-
-        // ─── Helpers ─────────────────────────────────────────────────────────
         private bool IsValidEmail(string? email)
         {
             return !string.IsNullOrEmpty(email) &&

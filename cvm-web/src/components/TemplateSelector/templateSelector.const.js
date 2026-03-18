@@ -33,7 +33,7 @@ export  const TEMPLATES = [
         <rect width="60" height="12" fill="#2563eb" />
         <rect x="4" y="3" width="28" height="3" rx="1" fill="white" />
         <rect x="4" y="8" width="40" height="1.5" rx="0.5" fill="rgba(255,255,255,0.7)" />
-        {/* Left column */}
+        
         <rect x="4" y="16" width="18" height="1" fill="#2563eb" />
         <rect x="4" y="19" width="14" height="1.5" rx="0.5" fill="#dbeafe" />
         <rect x="4" y="22" width="16" height="1.5" rx="0.5" fill="#dbeafe" />
@@ -41,7 +41,7 @@ export  const TEMPLATES = [
         <rect x="4" y="31" width="18" height="1" fill="#2563eb" />
         <rect x="4" y="34" width="15" height="1.5" rx="0.5" fill="#888" />
         <rect x="4" y="37" width="14" height="1.5" rx="0.5" fill="#aaa" />
-        {/* Right column */}
+        
         <rect x="26" y="16" width="30" height="1" fill="#2563eb" />
         <rect x="26" y="19" width="22" height="2" rx="1" fill="#444" />
         <rect x="26" y="23" width="30" height="1.5" rx="0.5" fill="#888" />

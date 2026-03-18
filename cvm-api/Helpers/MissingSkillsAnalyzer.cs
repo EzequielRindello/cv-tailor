@@ -21,10 +21,7 @@ namespace ErCvApi.Helpers
 
             foreach (var skill in requirements.TechnicalSkills)
             {
-                // Fuzzy match against tagged skills
                 var foundInSkills = SkillNormalizer.MatchesAny(skill, allCVSkills);
-
-                // Fallback: plain contains in bullet text
                 var foundInBullets = ContainsTerm(allBulletsText, skill);
 
                 if (!foundInSkills && !foundInBullets)

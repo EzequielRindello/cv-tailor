@@ -5,6 +5,7 @@
  * Usage:
  *   node test-runner.js                  # runs all test cases
  *   node test-runner.js --tc TC-01       # runs a single test case
+ *   node test-runner.js --profile cv-master  # override profile id
  *   node test-runner.js --report html    # output format: html | json | text (default)
  *
  * Requirements:
@@ -19,6 +20,8 @@ const API_BASE = process.env.API_URL || "http://localhost:5000/api";
 const args = process.argv.slice(2);
 const filterTC = args.includes("--tc") ? args[args.indexOf("--tc") + 1] : null;
 const reportFormat = args.includes("--report") ? args[args.indexOf("--report") + 1] : "text";
+const profileArg = args.includes("--profile") ? args[args.indexOf("--profile") + 1] : null;
+const PROFILE_ID = profileArg || process.env.PROFILE_ID || "cv-master";
 
 // ─── Assertions ─────────────────────────────────────────────────────────────
 
@@ -290,7 +293,7 @@ async function runTest(tc) {
       formats: tc.config.formats,
       template: tc.config.template,
       allowTwoPages: tc.config.allowTwoPages,
-      profileId: "cv-master-senior",
+      profileId: PROFILE_ID,
     };
 
     const res = await fetch(`${API_BASE}/cv/generate`, {
@@ -436,7 +439,7 @@ function printHtml(results) {
 </head>
 <body>
   <h1>ER CV Generator — Test Report</h1>
-  <p class="meta">Generated: ${new Date().toLocaleString()} · API: ${API_BASE} · Profile: cv-master-senior</p>
+  <p class="meta">Generated: ${new Date().toLocaleString()} · API: ${API_BASE} · Profile: ${PROFILE_ID}</p>
   <table>
     <thead>
       <tr>
@@ -470,7 +473,7 @@ function printHtml(results) {
     process.exit(1);
   }
 
-  console.log(`\nRunning ${cases.length} test case(s) against ${API_BASE}...\n`);
+  console.log(`\nRunning ${cases.length} test case(s) against ${API_BASE} (profile: ${PROFILE_ID})...\n`);
 
   const results = [];
   for (const tc of cases) {

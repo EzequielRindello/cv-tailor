@@ -1,47 +1,87 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Container, Row, Col, Alert, Card, Form } from 'react-bootstrap';
 import axios from 'axios';
 import Header from './components/Header/Header';
 import JobDescriptionInput from './components/JobDescriptionInput/JobDescriptionInput';
+import ProfileSelector from './components/ProfileSelector/ProfileSelector';
 import FormatSelector from './components/FormatSelector/FormatSelector';
 import GenerateButton from './components/GenerateButton/GenerateButton';
 import SuccessScreen from './components/SuccessScreen/SuccessScreen';
 import TemplateSelector from './components/TemplateSelector/TemplateSelector';
 import PageOptions from './components/PageOptions/PageOptions';
+import CVPreview from './components/CVPreview/CVPreview';
+import HistoryPanel from './components/HistoryPanel/HistoryPanel';
 import MatchScoreCard from './components/MatchScore/MatchScoreCard';
 import MissingSkillsCard from './components/MissingSkills/MissingSkillsCard';
 import KeywordAnalysisCard from './components/KeywordAnalysis/KeywordAnalysisCard';
 import ATSScoreCard from './components/ATSScore/ATSScoreCard';
 import BulletEditor from './components/BulletEditor/BulletEditor';
+import { defaultSettings, loadSettings, saveSettings } from './utils/settings';
+import { clearHistory, getHistory, saveToHistory } from './utils/history';
 import './styles/variables.css';
 import './App.css';
 
 const API_BASE_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
 const buildApiUrl = (path) => `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+const initialSettings = loadSettings();
 
 function App() {
-  // Form states
   const [jobDescription, setJobDescription] = useState('');
-  const [selectedFormats, setSelectedFormats] = useState({ pdf: true, docx: false });
-  const [template, setTemplate] = useState('harvard');
-  const [allowTwoPages, setAllowTwoPages] = useState(false);
-
-  // Flow states
+  const [selectedFormats, setSelectedFormats] = useState(initialSettings.selectedFormats);
+  const [template, setTemplate] = useState(initialSettings.template);
+  const [allowTwoPages, setAllowTwoPages] = useState(initialSettings.allowTwoPages);
+  const [profiles, setProfiles] = useState([{ id: 'cv-master', name: 'Default' }]);
+  const [selectedProfileId, setSelectedProfileId] = useState('cv-master');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  //Results states
   const [analysisResult, setAnalysisResult] = useState(null);
   const [showBulletEditor, setShowBulletEditor] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState([]);
+  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
 
-  // Helpers
-  const getFormats = () => {
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchProfiles = async () => {
+      try {
+        const response = await axios.get(buildApiUrl('/cv/profiles'));
+        if (!mounted || !Array.isArray(response.data) || response.data.length === 0) return;
+
+        setProfiles(response.data);
+        setSelectedProfileId((currentId) =>
+          response.data.some((profile) => profile.id === currentId)
+            ? currentId
+            : response.data[0].id
+        );
+      } catch {
+      }
+    };
+
+    fetchProfiles();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    setHistoryEntries(getHistory());
+  }, []);
+
+  useEffect(() => {
+    saveSettings({
+      template,
+      selectedFormats,
+      allowTwoPages,
+    });
+  }, [template, selectedFormats, allowTwoPages]);
+  const getFormats = useCallback(() => {
     const formats = [];
     if (selectedFormats.pdf) formats.push('pdf');
     if (selectedFormats.docx) formats.push('docx');
     return formats;
-  };
+  }, [selectedFormats]);
 
   const downloadFile = async (format) => {
     const response = await axios.get(
@@ -57,9 +97,7 @@ function App() {
     link.remove();
     window.URL.revokeObjectURL(url);
   };
-
-  // Generate CV
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     if (!jobDescription.trim()) { setError('Please paste a job description'); return; }
     if (!selectedFormats.pdf && !selectedFormats.docx) { setError('Please select at least one format'); return; }
 
@@ -76,25 +114,31 @@ function App() {
           jobDescription,
           formats: getFormats(),
           template: template.charAt(0).toUpperCase() + template.slice(1),
-          allowTwoPages
+          allowTwoPages,
+          profileId: selectedProfileId,
         },
         { withCredentials: true }
       );
 
       if (response.data.success) {
-        // Download files
         for (const file of response.data.files) {
           await downloadFile(file.format);
         }
-
-        // Save analysis results for display
         setAnalysisResult({
           matchScore: response.data.matchScore,
           missingSkills: response.data.missingSkills,
           keywordAnalysis: response.data.keywordAnalysis,
           atsScore: response.data.atsScore,
           generatedCV: response.data.generatedCV,
+          previewHtml: response.data.previewHtml,
         });
+
+        const updatedHistory = saveToHistory({
+          jobDescription,
+          matchScore: response.data.matchScore?.overall,
+          template: template.charAt(0).toUpperCase() + template.slice(1),
+        });
+        setHistoryEntries(updatedHistory);
 
         setDownloadSuccess(true);
         setLoading(false);
@@ -110,11 +154,55 @@ function App() {
       }
       setLoading(false);
     }
-  };
+  }, [allowTwoPages, getFormats, jobDescription, selectedFormats, selectedProfileId, template]);
 
-  // Handlers
+  useEffect(() => {
+    const handleKeydown = async (event) => {
+      if (event.repeat) return;
+
+      const isPasteShortcut =
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key.toLowerCase() === 'v';
+
+      if (isPasteShortcut && !loading) {
+        event.preventDefault();
+        try {
+          const text = await navigator.clipboard.readText();
+          if (text) setJobDescription(text);
+        } catch {
+        }
+        return;
+      }
+
+      const isGenerateShortcut =
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        event.key === 'Enter';
+
+      if (isGenerateShortcut && !loading && jobDescription.trim()) {
+        event.preventDefault();
+        handleGenerate();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeydown);
+    return () => window.removeEventListener('keydown', handleKeydown);
+  }, [handleGenerate, jobDescription, loading]);
   const handleFormatChange = (format) => {
     setSelectedFormats(prev => ({ ...prev, [format]: !prev[format] }));
+  };
+
+  const handleLoadHistoryEntry = (entry) => {
+    setJobDescription(entry.jobDescription || '');
+    setShowHistoryPanel(false);
+    setError('');
+    document.getElementById('app-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleClearHistory = () => {
+    clearHistory();
+    setHistoryEntries([]);
   };
 
   const handleRegenerate = async (bulletSelections, editedCv) => {
@@ -140,9 +228,11 @@ function App() {
         for (const file of response.data.files) {
           await downloadFile(file.format);
         }
-        if (editedCv) {
-          setAnalysisResult(prev => ({ ...prev, generatedCV: editedCv }));
-        }
+        setAnalysisResult((prev) => ({
+          ...prev,
+          generatedCV: editedCv || prev.generatedCV,
+          previewHtml: response.data.previewHtml ?? prev.previewHtml,
+        }));
         setDownloadSuccess(true);
         setShowBulletEditor(false);
       }
@@ -156,9 +246,9 @@ function App() {
   
   const handleReset = () => {
     setJobDescription('');
-    setSelectedFormats({ pdf: true, docx: false });
-    setTemplate('harvard');
-    setAllowTwoPages(false);
+    setSelectedFormats({ ...defaultSettings.selectedFormats });
+    setTemplate(defaultSettings.template);
+    setAllowTwoPages(defaultSettings.allowTwoPages);
     setAnalysisResult(null);
     setDownloadSuccess(false);
     setShowBulletEditor(false);
@@ -166,8 +256,6 @@ function App() {
 
     document.getElementById('app-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
-
-  // Rendering
   if (downloadSuccess && !analysisResult) {
     return <SuccessScreen onGoBack={handleReset} />;
   }
@@ -190,11 +278,28 @@ function App() {
                 </Alert>
               )}
               <Form>
-                <h5 className="mb-4">Generate Your CV</h5>
+                <div className="form-title-row mb-4">
+                  <h5 className="mb-0">Generate Your CV</h5>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => setShowHistoryPanel((prev) => !prev)}
+                    disabled={loading}
+                  >
+                    {showHistoryPanel ? 'Hide History' : 'History'}
+                  </button>
+                </div>
+                <ProfileSelector
+                  profiles={profiles}
+                  value={selectedProfileId}
+                  onChange={setSelectedProfileId}
+                  disabled={loading}
+                />
                 <JobDescriptionInput
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                   disabled={loading}
+                  helperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate"
                 />
                 <TemplateSelector
                   value={template}
@@ -223,12 +328,22 @@ function App() {
                   disabled={loading}
                 />
               </Form>
+              {showHistoryPanel && (
+                <HistoryPanel
+                  entries={historyEntries}
+                  onLoad={handleLoadHistoryEntry}
+                  onClear={handleClearHistory}
+                  onClose={() => setShowHistoryPanel(false)}
+                  disabled={loading}
+                />
+              )}
             </Card.Body>
           </Card>
         </Col>
         <Col lg={6}>
           {analysisResult ? (
             <>
+              <CVPreview html={analysisResult.previewHtml} />
               <MatchScoreCard data={analysisResult.matchScore} />
               <ATSScoreCard data={analysisResult.atsScore} />
               <MissingSkillsCard data={analysisResult.missingSkills} />

@@ -4,15 +4,11 @@ import { Card, Button } from 'react-bootstrap';
 import './BulletEditor.css';
 
 export default function BulletEditor({ generatedCV, onRegenerate, onCancel, loading }) {
-  // States
   const [selections, setSelections] = useState({});
   const [localCV, setLocalCV] = useState(null);
   const [dragInfo, setDragInfo] = useState(null);
-
-  // Effects
   useEffect(() => {
     if (!generatedCV?.experience) return;
-    // Deep copy - to avoid mutating parent state when reordering
     const cvCopy = JSON.parse(JSON.stringify(generatedCV));
     setLocalCV(cvCopy);
 
@@ -22,11 +18,7 @@ export default function BulletEditor({ generatedCV, onRegenerate, onCancel, load
     });
     setSelections(initial);
   }, [generatedCV]);
-
-  // Happy path
   if (!localCV?.experience) return null;
-
-  // Handlers
   const toggleBullet = (expKey, bulletIdx) => {
     setSelections(prev => {
       const arr = [...prev[expKey]];
@@ -42,8 +34,6 @@ export default function BulletEditor({ generatedCV, onRegenerate, onCancel, load
   const handleDragOver = (e, expKey, idx) => {
     e.preventDefault();
     if (!dragInfo || dragInfo.expKey !== expKey || dragInfo.idx === idx) return;
-
-    // Reorder bullets in localCV
     setLocalCV(prev => {
       const copy = JSON.parse(JSON.stringify(prev));
       const expIdx = parseInt(expKey.replace('exp', ''));
@@ -52,8 +42,6 @@ export default function BulletEditor({ generatedCV, onRegenerate, onCancel, load
       bullets.splice(idx, 0, moved);
       return copy;
     });
-
-    // Reorder selections to match new bullet order
     setSelections(prev => {
       const arr = [...prev[expKey]];
       const [moved] = arr.splice(dragInfo.idx, 1);

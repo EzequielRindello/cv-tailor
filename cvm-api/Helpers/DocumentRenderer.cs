@@ -7,6 +7,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using CvHeader = ErCvApi.Models.Header;
 using PuppeteerSharp.Media;
+using System.Threading;
 
 namespace ErCvApi.Helpers
 {
@@ -14,30 +15,23 @@ namespace ErCvApi.Helpers
     {
         private readonly string _templatePath;
         private readonly StubbleBuilder _stubble;
+        private static readonly SemaphoreSlim BrowserInitSemaphore = new(1, 1);
+        private static Task<IBrowser>? _sharedBrowserTask;
+        private static bool _chromiumReady;
 
         public DocumentRenderer(string templatePath)
         {
             _templatePath = templatePath;
             _stubble = new StubbleBuilder();
         }
-
-        // ─── PDF ─────────────────────────────────────────────────────────────
         public async Task<byte[]> RenderPdfAsync(GeneratedCV cv)
         {
             var html = RenderHtml(cv);
-
-            var browserFetcher = new BrowserFetcher();
-            await browserFetcher.DownloadAsync();
-
-            var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-            {
-                Headless = true,
-                Args = DocumentConstants.ChromiumArgs
-            });
+            var browser = await GetSharedBrowserAsync();
+            var page = await browser.NewPageAsync();
 
             try
             {
-                var page = await browser.NewPageAsync();
                 await page.SetContentAsync(html);
 
                 return await page.PdfDataAsync(new PdfOptions
@@ -55,14 +49,50 @@ namespace ErCvApi.Helpers
             }
             finally
             {
-                await browser.CloseAsync();
+                await page.CloseAsync();
             }
         }
 
-        // ─── HTML (public) — used for inline preview (FEATURE-102) ───────────
-        public string RenderHtmlPublic(GeneratedCV cv) => RenderHtml(cv);
+        private static async Task<IBrowser> GetSharedBrowserAsync()
+        {
+            if (_sharedBrowserTask != null)
+            {
+                var existing = await _sharedBrowserTask;
+                if (!existing.IsClosed)
+                    return existing;
+            }
 
-        // ─── DOCX ────────────────────────────────────────────────────────────
+            await BrowserInitSemaphore.WaitAsync();
+            try
+            {
+                if (_sharedBrowserTask != null)
+                {
+                    var cached = await _sharedBrowserTask;
+                    if (!cached.IsClosed)
+                        return cached;
+                }
+
+                if (!_chromiumReady)
+                {
+                    var browserFetcher = new BrowserFetcher();
+                    await browserFetcher.DownloadAsync();
+                    _chromiumReady = true;
+                }
+
+                _sharedBrowserTask = Puppeteer.LaunchAsync(new LaunchOptions
+                {
+                    Headless = true,
+                    Args = DocumentConstants.ChromiumArgs
+                });
+
+                return await _sharedBrowserTask;
+            }
+            finally
+            {
+                BrowserInitSemaphore.Release();
+            }
+        }
+        public string RenderHtmlPublic(GeneratedCV cv) => RenderHtml(cv);
         public byte[] RenderDocx(GeneratedCV cv)
         {
             using var memoryStream = new MemoryStream();
@@ -111,8 +141,6 @@ namespace ErCvApi.Helpers
 
             return memoryStream.ToArray();
         }
-
-        // ─── HTML Rendering ──────────────────────────────────────────────────
         private string RenderHtml(GeneratedCV cv)
         {
             var template = File.ReadAllText(_templatePath);
@@ -175,8 +203,6 @@ namespace ErCvApi.Helpers
 
             return categories;
         }
-
-        // ─── DOCX Helpers ────────────────────────────────────────────────────
         private void AddHeader(Body body, CvHeader? header)
         {
             if (header == null) return;

@@ -38,3 +38,9 @@
 .job-description-input::placeholder {
   color: var(--color-neutral-500);
 }
+
+.input-helper-text {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  margin-top: var(--spacing-xs);
+}
