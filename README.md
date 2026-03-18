@@ -4,6 +4,18 @@ ASP.NET Core + React app that generates ATS-optimized, tailored resumes from a j
 
 ---
 
+## Frontend API Configuration
+
+- Frontend reads `REACT_APP_API_URL` as API base URL.
+- If not provided, app falls back to `http://localhost:5000/api`.
+- Expected examples:
+  - `REACT_APP_API_URL=http://localhost:5000/api`
+  - `REACT_APP_API_URL=https://your-domain.com/api`
+
+If the frontend cannot reach the configured API, it now shows an explicit runtime error with the resolved API URL.
+
+---
+
 ## Architecture
 
 ```

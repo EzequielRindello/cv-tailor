@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ErCvApi.Services;
 using ErCvApi.Models;
 
@@ -6,6 +7,7 @@ namespace ErCvApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [AllowAnonymous]
     public class CVController : ControllerBase
     {
         private readonly CVGeneratorService _service;

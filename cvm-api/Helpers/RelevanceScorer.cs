@@ -1,4 +1,5 @@
 using ErCvApi.Models;
+using System.Text.RegularExpressions;
 
 namespace ErCvApi.Helpers
 {
@@ -48,7 +49,7 @@ namespace ErCvApi.Helpers
                 foreach (var reqSkill in requirements.TechnicalSkills)
                 {
                     if (!SkillNormalizer.MatchesAny(reqSkill, matchedSkills) &&
-                        bulletText.Contains(reqSkill, StringComparison.OrdinalIgnoreCase))
+                        ContainsTerm(bulletText, reqSkill))
                     {
                         score += BulletSkillHalfCredit;
                         matchedSkills.Add(reqSkill);
@@ -62,7 +63,7 @@ namespace ErCvApi.Helpers
             var fullBulletText = string.Join(" ", experience.Bullets ?? new List<string>()).ToLower();
             foreach (var keyword in requirements.Keywords.Take(MaxKeywordsEvaluated))
             {
-                if (fullBulletText.Contains(keyword.ToLower()))
+                if (ContainsTerm(fullBulletText, keyword))
                     score += KeywordPointsPerMatch;
             }
 
@@ -83,24 +84,47 @@ namespace ErCvApi.Helpers
         private double CalculateRecencyScore(string? endDate)
         {
             if (string.IsNullOrWhiteSpace(endDate)) return 5.0;
-            if (endDate.Trim().ToLower() == "present") return 18.0;
+            if (IsPresent(endDate)) return 18.0;
 
-            try
+            if (TryExtractYear(endDate, out var year))
             {
-                var parts = endDate.Split(' ');
-                if (parts.Length >= 2 && int.TryParse(parts[parts.Length - 1], out int year))
-                {
-                    var diff = DateTime.Now.Year - year;
-                    if (diff <= 1) return 16.0;
-                    if (diff <= 2) return 13.0;
-                    if (diff <= 3) return 10.0;
-                    if (diff <= 5) return 7.0;
-                    return 4.0;
-                }
+                var diff = DateTime.Now.Year - year;
+                if (diff <= 1) return 16.0;
+                if (diff <= 2) return 13.0;
+                if (diff <= 3) return 10.0;
+                if (diff <= 5) return 7.0;
+                return 4.0;
             }
-            catch { }
+
+            Console.WriteLine($"[WARN] RelevanceScorer: could not parse endDate '{endDate}', using fallback score.");
 
             return 5.0;
+        }
+
+        private static bool IsPresent(string value) =>
+            value.Trim().Equals("present", StringComparison.OrdinalIgnoreCase) ||
+            value.Trim().Equals("current", StringComparison.OrdinalIgnoreCase) ||
+            value.Trim().Equals("now", StringComparison.OrdinalIgnoreCase);
+
+        private static bool TryExtractYear(string? value, out int year)
+        {
+            year = 0;
+            if (string.IsNullOrWhiteSpace(value)) return false;
+
+            var match = Regex.Match(value, @"\b(19|20)\d{2}\b");
+            if (!match.Success) return false;
+
+            if (!int.TryParse(match.Value, out year)) return false;
+
+            var currentYear = DateTime.Now.Year;
+            return year >= 1950 && year <= currentYear + 1;
+        }
+
+        private static bool ContainsTerm(string text, string term)
+        {
+            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(term)) return false;
+            var pattern = $@"(?<![A-Za-z0-9]){Regex.Escape(term.Trim())}(?![A-Za-z0-9])";
+            return Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase);
         }
 
         private double CalculateSeniorityScore(string? role, string? targetSeniority)

@@ -8,7 +8,7 @@ namespace ErCvApi.Models
         public int KeywordsMatched { get; set; }
         public int TotalKeywords { get; set; }
         public bool SeniorityMatch { get; set; }
-        public string ColorClass { get; set; }
+        public string ColorClass { get; set; } = string.Empty;
 
         /// <summary>
         /// Non-null when Overall < 30 — warns the user that this JD is a poor fit.
@@ -37,7 +37,7 @@ namespace ErCvApi.Models
 
     public class KeywordItem
     {
-        public string Word { get; set; }
+        public string Word { get; set; } = string.Empty;
         public int Frequency { get; set; }
         public bool PresentInCV { get; set; }
     }
@@ -47,19 +47,19 @@ namespace ErCvApi.Models
         public int Overall { get; set; }
         public List<ATSIssue> Issues { get; set; } = new();
         public List<string> Recommendations { get; set; } = new();
-        public string ColorClass { get; set; }
+        public string ColorClass { get; set; } = string.Empty;
     }
 
     public class ATSIssue
     {
-        public string Severity { get; set; }
-        public string Issue { get; set; }
-        public string Fix { get; set; }
+        public string Severity { get; set; } = string.Empty;
+        public string Issue { get; set; } = string.Empty;
+        public string Fix { get; set; } = string.Empty;
     }
 
     public class RegenerateRequest
     {
-        public GeneratedCV GeneratedCV { get; set; }
+        public GeneratedCV GeneratedCV { get; set; } = new();
         public Dictionary<string, List<int>> BulletSelections { get; set; } = new();
         public List<string> Formats { get; set; } = new();
         public CVTemplate Template { get; set; } = CVTemplate.Harvard;
@@ -75,8 +75,8 @@ namespace ErCvApi.Models
 
     public class GenerateRequest
     {
-        public string JobDescription { get; set; }
-        public List<string> Formats { get; set; }
+        public string JobDescription { get; set; } = string.Empty;
+        public List<string> Formats { get; set; } = new();
         public CVTemplate Template { get; set; } = CVTemplate.Harvard;
         public bool AllowTwoPages { get; set; } = false;
 
@@ -89,11 +89,11 @@ namespace ErCvApi.Models
 
     public class AnalysisResult
     {
-        public MatchScore MatchScore { get; set; }
-        public MissingSkillsAnalysis MissingSkills { get; set; }
-        public KeywordAnalysis KeywordAnalysis { get; set; }
-        public ATSScore ATSScore { get; set; }
-        public GeneratedCV GeneratedCV { get; set; }
+        public MatchScore MatchScore { get; set; } = new();
+        public MissingSkillsAnalysis MissingSkills { get; set; } = new();
+        public KeywordAnalysis KeywordAnalysis { get; set; } = new();
+        public ATSScore ATSScore { get; set; } = new();
+        public GeneratedCV GeneratedCV { get; set; } = new();
 
         /// <summary>
         /// Rendered HTML of the CV template — used for inline preview (FEATURE-102).

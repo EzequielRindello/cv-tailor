@@ -1,5 +1,6 @@
 using ErCvApi.Constants;
 using ErCvApi.Models;
+using System.Text.RegularExpressions;
 
 namespace ErCvApi.Helpers
 {
@@ -24,7 +25,7 @@ namespace ErCvApi.Helpers
                 var foundInSkills = SkillNormalizer.MatchesAny(skill, allCVSkills);
 
                 // Fallback: plain contains in bullet text
-                var foundInBullets = allBulletsText.Contains(skill.ToLower());
+                var foundInBullets = ContainsTerm(allBulletsText, skill);
 
                 if (!foundInSkills && !foundInBullets)
                 {
@@ -71,6 +72,13 @@ namespace ErCvApi.Helpers
                     required.Count - MissingSkillsConstants.MaxRequiredSuggestions));
 
             return suggestions;
+        }
+
+        private static bool ContainsTerm(string text, string term)
+        {
+            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(term)) return false;
+            var pattern = $@"(?<![A-Za-z0-9]){Regex.Escape(term.Trim())}(?![A-Za-z0-9])";
+            return Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase);
         }
     }
 }

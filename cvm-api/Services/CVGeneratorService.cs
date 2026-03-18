@@ -8,6 +8,9 @@ namespace ErCvApi.Services
 {
     public class CVGeneratorService
     {
+        private static readonly HashSet<string> SupportedFormats =
+            new(StringComparer.OrdinalIgnoreCase) { ApiConstants.FormatPdf, ApiConstants.FormatDocx };
+
         private readonly JobDescriptionParser _parser;
         private readonly CVSelector _selector;
         private readonly MatchScoreCalculator _matchScoreCalc;
@@ -49,6 +52,14 @@ namespace ErCvApi.Services
 
                 return new OkObjectResult(BuildGenerateResponse(documents, analysis));
             }
+            catch (InvalidOperationException ex)
+            {
+                return new ObjectResult(new { error = ex.Message }) { StatusCode = 413 };
+            }
+            catch (ArgumentException ex)
+            {
+                return new BadRequestObjectResult(new { error = ex.Message });
+            }
             catch (Exception ex)
             {
                 return new ObjectResult(new { error = ApiConstants.ErrorGeneratingCv, details = ex.Message })
@@ -67,6 +78,14 @@ namespace ErCvApi.Services
 
                 return new OkObjectResult(new { success = true, files = BuildFileMetadata(documents) });
             }
+            catch (InvalidOperationException ex)
+            {
+                return new ObjectResult(new { error = ex.Message }) { StatusCode = 413 };
+            }
+            catch (ArgumentException ex)
+            {
+                return new BadRequestObjectResult(new { error = ex.Message });
+            }
             catch (Exception ex)
             {
                 return new ObjectResult(new { error = ApiConstants.ErrorRegeneratingCv, details = ex.Message })
@@ -78,15 +97,20 @@ namespace ErCvApi.Services
         {
             try
             {
-                var fileBytes = context.Session.Get(ApiConstants.SessionCvPrefix + format);
+                var normalizedFormat = NormalizeAndValidateFormat(format);
+                var fileBytes = context.Session.Get(ApiConstants.SessionCvPrefix + normalizedFormat);
 
                 if (fileBytes == null || fileBytes.Length == 0)
                     return new NotFoundObjectResult(new { error = ApiConstants.ErrorFileNotFound });
 
-                return new FileContentResult(fileBytes, GetContentType(format))
+                return new FileContentResult(fileBytes, GetContentType(normalizedFormat))
                 {
-                    FileDownloadName = BuildFileName(format)
+                    FileDownloadName = BuildFileName(normalizedFormat)
                 };
+            }
+            catch (ArgumentException ex)
+            {
+                return new BadRequestObjectResult(new { error = ex.Message });
             }
             catch
             {
@@ -192,11 +216,15 @@ namespace ErCvApi.Services
             IEnumerable<string> formats, DocumentRenderer renderer, GeneratedCV cv)
         {
             var docs = new Dictionary<string, byte[]>();
+            var normalized = formats
+                .Where(f => !string.IsNullOrWhiteSpace(f))
+                .Select(f => f.Trim().ToLowerInvariant())
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            if (formats.Contains(ApiConstants.FormatPdf, StringComparer.OrdinalIgnoreCase))
+            if (normalized.Contains(ApiConstants.FormatPdf))
                 docs[ApiConstants.FormatPdf] = await renderer.RenderPdfAsync(cv);
 
-            if (formats.Contains(ApiConstants.FormatDocx, StringComparer.OrdinalIgnoreCase))
+            if (normalized.Contains(ApiConstants.FormatDocx))
                 docs[ApiConstants.FormatDocx] = renderer.RenderDocx(cv);
 
             return docs;
@@ -241,6 +269,8 @@ namespace ErCvApi.Services
 
             if (request.Formats == null || !request.Formats.Any())
                 throw new ArgumentException(ApiConstants.ErrorFormatsRequired);
+
+            ValidateFormats(request.Formats);
         }
 
         private void ValidateRegenerateRequest(RegenerateRequest request)
@@ -250,12 +280,66 @@ namespace ErCvApi.Services
 
             if (request.Formats == null || !request.Formats.Any())
                 throw new ArgumentException(ApiConstants.ErrorFormatsRequired);
+
+            ValidateFormats(request.Formats);
+        }
+
+        private void ValidateFormats(IEnumerable<string> formats)
+        {
+            var invalid = formats
+                .Where(f => string.IsNullOrWhiteSpace(f) || !SupportedFormats.Contains(f.Trim()))
+                .ToList();
+
+            if (invalid.Any())
+            {
+                var invalidList = string.Join(", ", invalid.Select(f => string.IsNullOrWhiteSpace(f) ? "<empty>" : f));
+                throw new ArgumentException($"Unsupported format(s): {invalidList}. Allowed formats: pdf, docx.");
+            }
+        }
+
+        private string NormalizeAndValidateFormat(string format)
+        {
+            if (string.IsNullOrWhiteSpace(format))
+                throw new ArgumentException("Format is required. Allowed formats: pdf, docx.");
+
+            var normalized = format.Trim().ToLowerInvariant();
+            if (!SupportedFormats.Contains(normalized))
+                throw new ArgumentException($"Unsupported format: {format}. Allowed formats: pdf, docx.");
+
+            return normalized;
         }
 
         private void SaveDocumentsToSession(Dictionary<string, byte[]> documents, HttpContext context)
         {
+            var currentBytes = GetCurrentSessionDocumentBytes(context);
+
             foreach (var doc in documents)
+            {
+                if (doc.Value.Length > ApiConstants.MaxSessionFileSizeBytes)
+                    throw new InvalidOperationException(ApiConstants.ErrorSessionFileTooLarge);
+
+                var projected = currentBytes + doc.Value.Length;
+                if (projected > ApiConstants.MaxSessionTotalSizeBytes)
+                    throw new InvalidOperationException(ApiConstants.ErrorSessionStorageLimit);
+
                 context.Session.Set(ApiConstants.SessionCvPrefix + doc.Key, doc.Value);
+                currentBytes = projected;
+            }
+
+            Console.WriteLine($"[INFO] Saved {documents.Count} generated document(s) in session. Total session bytes: {currentBytes}");
+        }
+
+        private static int GetCurrentSessionDocumentBytes(HttpContext context)
+        {
+            var total = 0;
+
+            foreach (var format in SupportedFormats)
+            {
+                var bytes = context.Session.Get(ApiConstants.SessionCvPrefix + format);
+                if (bytes != null) total += bytes.Length;
+            }
+
+            return total;
         }
 
         private void SaveGeneratedCvToSession(GeneratedCV cv, HttpContext context)
