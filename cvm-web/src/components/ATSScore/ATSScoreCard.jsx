@@ -6,8 +6,6 @@ import './ATSScoreCard.css';
 
 export default function ATSScoreCard({ data }) {
   const [open, setOpen] = useState(false);
-
-  // Happy path
   if (!data)
     return null;
 

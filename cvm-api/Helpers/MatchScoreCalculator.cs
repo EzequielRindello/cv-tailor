@@ -7,7 +7,6 @@ namespace ErCvApi.Helpers
     {
         public MatchScore Calculate(CVMaster cv, JobRequirements requirements)
         {
-            // ── Skills Score ─────────────────────────────────────────────────
             var allCVSkills = RelevanceScorer.FlattenSkills(cv.Skills);
             var totalSkills = Math.Max(requirements.TechnicalSkills.Count, 1);
 
@@ -15,8 +14,6 @@ namespace ErCvApi.Helpers
                 .Count(reqSkill => SkillNormalizer.MatchesAny(reqSkill, allCVSkills));
 
             var skillPercentage = (double)matchedSkills / totalSkills * 100;
-
-            // ── Keywords Score ───────────────────────────────────────────────
             var allBullets = cv.Experience
                 .SelectMany(e => e.Bullets ?? new List<string>())
                 .Select(b => b.ToLower())
@@ -35,8 +32,6 @@ namespace ErCvApi.Helpers
                 (double)matchedKeywords / totalKeywords * 100 *
                 MatchScoreConstants.KeywordBoostMultiplier,
                 100);
-
-            // ── Seniority Score ──────────────────────────────────────────────
             var seniorityScore = CalculateSeniorityMatch(cv, requirements);
 
             var overall =
@@ -45,10 +40,6 @@ namespace ErCvApi.Helpers
                 (seniorityScore * MatchScoreConstants.SeniorityWeight);
 
             overall = Math.Min(Math.Round(overall), 100);
-
-            // ── Role mismatch warning ────────────────────────────────────────
-            // 40% threshold: scores below this indicate the JD is a poor fit
-            // (e.g. iOS JD against a backend CV scores ~35% due to React Native nice-to-have)
             var isLowMatch = overall < 40;
 
             return new MatchScore

@@ -2,29 +2,20 @@ namespace ErCvApi.Constants
 {
     public static class DocumentConstants
     {
-        // Sections
         public const string SectionSummary = "PROFESSIONAL SUMMARY";
         public const string SectionEducation = "EDUCATION";
         public const string SectionExperience = "EXPERIENCE";
         public const string SectionSkills = "SKILLS";
         public const string SectionProjects = "PROJECTS";
-
-        // Font sizes (half-points in OpenXML)
         public const string FontSizeName = "32";       // 16pt
         public const string FontSizeSection = "22";    // 11pt
         public const string FontSizeContact = "18";    // 9pt
-
-        // Layout
         public const string BulletSymbol = "•";
         public const string IndentationLeft = "360";
-
-        // PDF margins
         public const string PdfMarginTop = "0.5in";
         public const string PdfMarginBottom = "0.5in";
         public const string PdfMarginLeft = "0.75in";
         public const string PdfMarginRight = "0.75in";
-
-        // Skill Categories
         public const string CategoryTechnical = "Technical";
         public const string CategoryLanguages = "Languages";
         public const string CategorySoftSkills = "Soft Skills";
@@ -47,8 +38,6 @@ namespace ErCvApi.Constants
             "Stakeholder Management", "Decision Making", "Ownership",
             "Pair Programming", "Code Review"
         };
-
-        // Chromium launch args
         public static readonly string[] ChromiumArgs =
         {
             "--no-sandbox",

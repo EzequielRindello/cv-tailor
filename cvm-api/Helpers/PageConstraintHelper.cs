@@ -2,14 +2,6 @@ using ErCvApi.Models;
 
 namespace ErCvApi.Helpers
 {
-    /// <summary>
-    /// Estimates page fit using character-aware line counting.
-    /// Each text block is estimated by (text.Length / CharsPerLine) instead
-    /// of a flat 1-line-per-bullet constant, so long bullets count correctly.
-    ///
-    /// Still a heuristic — actual rendering depends on Chromium layout.
-    /// Calibrated for Harvard template: Letter, 10pt Times New Roman, ~0.65in margins.
-    /// </summary>
     public class PageConstraintHelper
     {
         private const int LinesPerPage = 52;
@@ -29,8 +21,6 @@ namespace ErCvApi.Helpers
             var current = CalculateTotalLines(cv);
 
             if (current <= maxLines) return cv;
-
-            // Step 1: Reduce bullets (floor: 2 per experience)
             while (current > maxLines &&
                    cv.Experience.Any(e => (e.Bullets?.Count ?? 0) > 2))
             {
@@ -41,22 +31,16 @@ namespace ErCvApi.Helpers
                 exp.Bullets!.RemoveAt(exp.Bullets.Count - 1);
                 current = CalculateTotalLines(cv);
             }
-
-            // Step 2: Remove projects before experiences
             if (current > maxLines && cv.Projects.Any())
             {
                 cv.Projects.Clear();
                 current = CalculateTotalLines(cv);
             }
-
-            // Step 3: Remove least relevant experience (keep minimum 2)
             while (current > maxLines && cv.Experience.Count > 2)
             {
                 cv.Experience.RemoveAt(cv.Experience.Count - 1);
                 current = CalculateTotalLines(cv);
             }
-
-            // Step 4: Trim skills if still over
             while (current > maxLines && cv.Skills.Count > 8)
             {
                 cv.Skills.RemoveAt(cv.Skills.Count - 1);
@@ -82,12 +66,8 @@ namespace ErCvApi.Helpers
 
             if (!string.IsNullOrEmpty(cv.Summary))
                 lines += EstimateLines(cv.Summary, SummaryMinLines);
-
-            // Education
             lines += SectionTitleLines;
             lines += (cv.Education?.Count ?? 0) * EducationLinesPerEntry;
-
-            // Experience
             lines += SectionTitleLines;
             foreach (var exp in cv.Experience ?? new List<Experience>())
             {
@@ -95,12 +75,8 @@ namespace ErCvApi.Helpers
                 foreach (var bullet in exp.Bullets ?? new List<string>())
                     lines += EstimateLines(bullet, 1);
             }
-
-            // Skills
             if (cv.Skills?.Any() == true)
                 lines += SkillsSectionLines;
-
-            // Projects
             if (cv.Projects?.Any() == true)
             {
                 lines += SectionTitleLines;
@@ -110,8 +86,6 @@ namespace ErCvApi.Helpers
 
             return lines;
         }
-
-        // Estimates lines based on character count, with a minimum floor
         private int EstimateLines(string text, int minimumLines)
         {
             if (string.IsNullOrEmpty(text)) return minimumLines;

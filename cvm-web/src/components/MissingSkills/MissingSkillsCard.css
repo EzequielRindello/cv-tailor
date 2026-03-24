@@ -3,7 +3,7 @@
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 0;
   overflow: hidden;
 }
 
@@ -51,7 +51,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.02em;
   margin-bottom: var(--spacing-xs);
   color: var(--color-text-tertiary);
 }

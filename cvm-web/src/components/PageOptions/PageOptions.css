@@ -1,13 +1,13 @@
 .page-options-group {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
 }
 
 .page-option-card {
   flex: 1;
   border: 2px solid var(--color-border-default);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-sm) var(--spacing-sm);
+  padding: var(--spacing-md);
   cursor: pointer;
   transition: all var(--transition-default);
   background: var(--color-bg-card);
@@ -30,9 +30,10 @@
 }
 
 .page-option-icon {
-  font-size: var(--font-size-xl);
-  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-xxl);
+  margin-bottom: var(--spacing-sm);
   line-height: 1;
+  color: var(--color-text-secondary);
 }
 
 .page-option-label {
@@ -44,21 +45,10 @@
 .page-option-desc {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
-  margin-top: 2px;
-}
-
-.page-option-icon {
-  font-size: 24px;
-  color: #495057;
-  margin-bottom: 6px;
+  margin-top: var(--spacing-xs);
 }
 
 .page-option-card.selected .page-option-icon {
-  color: #0d6efd;
-}
-
-.page-option-card.disabled {
-  opacity: 0.5;
-  pointer-events: none;
+  color: var(--color-primary-400);
 }
 

@@ -27,8 +27,6 @@ namespace ErCvApi.Helpers
         {
             double score = 0;
             var matchedSkills = new List<string>();
-
-            // ── Skill match (tagged skills) ──────────────────────────────────
             if (experience.Skills != null && requirements.TechnicalSkills.Any())
             {
                 foreach (var reqSkill in requirements.TechnicalSkills)
@@ -43,8 +41,6 @@ namespace ErCvApi.Helpers
                             matchedSkills.Add(match);
                     }
                 }
-
-                // Half credit for skill mentions found only in bullet text
                 var bulletText = string.Join(" ", experience.Bullets ?? new List<string>());
                 foreach (var reqSkill in requirements.TechnicalSkills)
                 {
@@ -58,19 +54,13 @@ namespace ErCvApi.Helpers
 
                 score = Math.Min(score, MaxSkillPoints);
             }
-
-            // ── Keyword match ────────────────────────────────────────────────
             var fullBulletText = string.Join(" ", experience.Bullets ?? new List<string>()).ToLower();
             foreach (var keyword in requirements.Keywords.Take(MaxKeywordsEvaluated))
             {
                 if (ContainsTerm(fullBulletText, keyword))
                     score += KeywordPointsPerMatch;
             }
-
-            // ── Recency ──────────────────────────────────────────────────────
             score += CalculateRecencyScore(experience.EndDate);
-
-            // ── Seniority ────────────────────────────────────────────────────
             score += CalculateSeniorityScore(experience.Role, requirements.SeniorityLevel);
 
             return new RelevanceScore

@@ -59,16 +59,12 @@ namespace ErCvApi.Helpers
         private List<string> ExtractTechnicalSkills(string originalText, string normalizedText)
         {
             var foundSkills = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            // Whitelist scan — only accept tokens in our known tech keyword list
             foreach (var tech in _commonTechKeywords)
             {
                 var pattern = $@"(?<![a-zA-Z]){Regex.Escape(tech)}(?![a-zA-Z])";
                 if (Regex.IsMatch(normalizedText, pattern, RegexOptions.IgnoreCase))
                     foundSkills.Add(tech);
             }
-
-            // "X years experience with [TECH]" pattern — only if passes neverSkills
             var yearsMatches = Regex.Matches(originalText, JobDescriptionConstants.YearsWithTechPattern, RegexOptions.IgnoreCase);
             foreach (Match match in yearsMatches)
             {
@@ -80,8 +76,6 @@ namespace ErCvApi.Helpers
                         foundSkills.Add(tech);
                 }
             }
-
-            // Normalize through SkillNormalizer to collapse aliases
             return foundSkills
                 .Select(s => SkillNormalizer.Normalize(s))
                 .Where(s => !string.IsNullOrWhiteSpace(s))

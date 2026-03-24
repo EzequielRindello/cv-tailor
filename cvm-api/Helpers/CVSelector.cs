@@ -16,8 +16,6 @@ namespace ErCvApi.Helpers
             "full stack", "full-stack", "tech", "cloud", "analyst",
             "consultant", "specialist"
         };
-
-        // Strong action verbs that indicate a well-structured bullet
         private static readonly string[] StrongActionVerbs =
         {
             "built", "developed", "designed", "implemented", "architected",
@@ -83,8 +81,6 @@ namespace ErCvApi.Helpers
             generatedCV = _pageConstraint.EnforcePageConstraint(generatedCV, allowTwoPages);
             return generatedCV;
         }
-
-        // ─── Tech prioritization ─────────────────────────────────────────────
         private List<RelevanceScore> PrioritizeTechExperiences(
             List<RelevanceScore> scored, int maxNeeded)
         {
@@ -110,8 +106,6 @@ namespace ErCvApi.Helpers
         private bool IsTechExperience(Experience e) =>
             !string.IsNullOrEmpty(e.Role) &&
             TechRoleIndicators.Any(k => e.Role.Contains(k, StringComparison.OrdinalIgnoreCase));
-
-        // ─── Experience selection ────────────────────────────────────────────
         private List<Experience> SelectExperiences(
             List<RelevanceScore> scored,
             JobRequirements requirements,
@@ -151,9 +145,6 @@ namespace ErCvApi.Helpers
                 Bullets = selected
             };
         }
-
-        // ─── Bullet scoring ──────────────────────────────────────────────────
-        // Scores based on: skill/keyword overlap + quantifiable metrics + STAR structure
         private List<BulletScore> ScoreBullets(
             List<string> bullets,
             List<string> matchedSkills,
@@ -165,35 +156,21 @@ namespace ErCvApi.Helpers
             {
                 var bullet = bullets[i];
                 double score = 0;
-
-                // Matched skill mention
                 foreach (var skill in matchedSkills)
                     if (bullet.Contains(skill, StringComparison.OrdinalIgnoreCase))
                         score += 10.0;
-
-                // Technical skill mention (fuzzy)
                 foreach (var techSkill in requirements.TechnicalSkills)
                     if (SkillNormalizer.MatchesAny(techSkill, new[] { bullet }))
                         score += 8.0;
-
-                // JD keyword mention
                 foreach (var keyword in requirements.Keywords.Take(10))
                     if (bullet.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                         score += 3.0;
-
-                // Quantifiable metric bonus
                 if (Regex.IsMatch(bullet, @"\d+[%x]|\d+[MK]\+?|[\d,]{3,}\+?"))
                     score += 6.0;
-
-                // Strong action verb at start (STAR structure indicator)
                 var firstWord = bullet.Split(' ').FirstOrDefault()?.ToLower() ?? "";
                 if (StrongActionVerbs.Any(v => firstWord.StartsWith(v, StringComparison.OrdinalIgnoreCase)))
                     score += 4.0;
-
-                // Penalize very short bullets (likely low-value)
                 if (bullet.Length < 40) score -= 5.0;
-
-                // Bonus for medium-long bullets (detailed and descriptive)
                 if (bullet.Length > 80) score += 2.0;
                 if (bullet.Length > 120) score += 1.0;
 
@@ -202,8 +179,6 @@ namespace ErCvApi.Helpers
 
             return scores;
         }
-
-        // ─── Project ranking ─────────────────────────────────────────────────
         private List<Project> RankProjects(List<Project> projects, JobRequirements requirements)
         {
             return projects

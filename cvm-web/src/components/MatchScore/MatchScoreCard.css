@@ -3,7 +3,7 @@
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 0;
   overflow: hidden;
 }
 
@@ -32,7 +32,7 @@
   font-weight: var(--font-weight-bold);
   padding: 2px var(--spacing-sm);
   border-radius: var(--radius-sm);
-  letter-spacing: 0.3px;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
@@ -48,7 +48,7 @@
 }
 
 .match-percent {
-  font-size: 40px;
+  font-size: var(--font-size-score-lg);
   font-weight: var(--font-weight-bold);
   line-height: 1;
 }
@@ -105,26 +105,26 @@
 .breakdown-icon.warn { background: #fff3e0; color: var(--color-warning); }
 
 .missing-keywords {
-  margin-top: 1rem;
+  margin-top: var(--spacing-md);
 }
 
 .missing-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-sm);
 }
 
 .missing-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: var(--spacing-xs);
 }
 
 .missing-pill {
   background: #ffecec;
   color: #b02a37;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-sm);
   border-radius: 12px;
 }
 

@@ -16,6 +16,18 @@ If the frontend cannot reach the configured API, it now shows an explicit runtim
 
 ---
 
+## Frontend UX Features
+
+- Inline CV preview via `previewHtml` (iframe `srcDoc`).
+- Profile selector powered by `GET /api/cv/profiles`.
+- Keyboard shortcuts:
+  - `Ctrl/Cmd+Enter` to generate.
+  - `Ctrl/Cmd+Shift+V` to paste clipboard into JD textarea.
+- Generation history (`localStorage`, top 10) with quick re-load.
+- Persisted export settings (`template`, `formats`, `allowTwoPages`).
+
+---
+
 ## Architecture
 
 ```
@@ -27,7 +39,7 @@ POST /api/cv/generate
   GeneratedCV → PageConstraintHelper → enforced 1 or 2 page CV
   GeneratedCV → DocumentRenderer → PDF (PuppeteerSharp) + DOCX (OpenXML)
   GeneratedCV + requirements → [MatchScoreCalculator, MissingSkillsAnalyzer, KeywordAnalyzer, ATSChecker] → AnalysisResult
-  → returns { generatedCV, files[], matchScore, missingSkills, keywordAnalysis, atsScore }
+  → returns { generatedCV, files[], matchScore, missingSkills, keywordAnalysis, atsScore, previewHtml }
 
 POST /api/cv/regenerate
   GeneratedCV + BulletSelections (user-edited) → PageConstraintHelper → DocumentRenderer
@@ -79,17 +91,23 @@ er-cv-generator/
 └── er-cv-web/
     └── src/
         ├── App.js
-        └── components/
+      ├── components/
             ├── JobDescriptionInput/
+            ├── ProfileSelector/            # profile picker (hidden when <=1 profile)
             ├── TemplateSelector/            # Harvard | Modern | Minimalist
             ├── FormatSelector/              # PDF | DOCX | both
             ├── PageOptions/                 # 1-page | 2-page toggle
             ├── GenerateButton/
+            ├── CVPreview/                  # inline rendered HTML preview
+            ├── HistoryPanel/               # local history (top 10) + quick reload
             ├── MatchScore/                  # overall % + skills/keywords/seniority breakdown
             ├── MissingSkills/               # required + nice-to-have gaps
             ├── KeywordAnalysis/             # technical / soft / industry keyword presence
             ├── ATSScore/                    # score + issues + recommendations
             └── BulletEditor/               # select/deselect/reorder bullets → re-download
+        └── utils/
+            ├── settings.js                 # persisted template/formats/page-mode
+            └── history.js                  # persisted generation history
 ```
 
 ---
@@ -118,7 +136,13 @@ er-cv-generator/
 }
 
 // POST /api/cv/generate — request
-{ "jobDescription": "...", "formats": ["pdf", "docx"], "template": "Harvard", "allowTwoPages": false }
+{
+  "jobDescription": "...",
+  "formats": ["pdf", "docx"],
+  "template": "Harvard",
+  "allowTwoPages": false,
+  "profileId": "cv-master"
+}
 
 // POST /api/cv/generate — response
 {
@@ -128,7 +152,8 @@ er-cv-generator/
   "matchScore": { "overall", "skillsMatched", "totalSkills", "keywordsMatched", "seniorityMatch", "colorClass" },
   "missingSkills": { "requiredMissing": [], "niceToHaveMissing": [], "suggestions": [], "potentialScoreIncrease" },
   "keywordAnalysis": { "technicalKeywords": [], "softSkillKeywords": [], "presentInCV": [], "missingFromCV": [] },
-  "atsScore": { "overall", "issues": [{ "severity", "issue", "fix" }], "recommendations": [], "colorClass" }
+  "atsScore": { "overall", "issues": [{ "severity", "issue", "fix" }], "recommendations": [], "colorClass" },
+  "previewHtml": "<html>...rendered cv...</html>"
 }
 
 // POST /api/cv/regenerate — request
@@ -144,3 +169,15 @@ er-cv-generator/
 ---
 ### version 2.0.1
 ---
+
+## Testing Scripts
+
+- `node testing/test-runner-2.0.1.js`
+- `node testing/test-runner-2.0.1.js --tc TC-01`
+- `node testing/test-runner-2.0.1.js --profile cv-master`
+- `PROFILE_ID=cv-master node testing/test-runner-2.0.1.js`
+
+The runner now supports profile override via CLI or env:
+- CLI flag: `--profile`
+- Env var: `PROFILE_ID`
+- Default: `cv-master`

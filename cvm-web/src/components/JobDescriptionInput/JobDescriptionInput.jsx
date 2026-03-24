@@ -1,7 +1,7 @@
 import { Form } from 'react-bootstrap';
 import './JobDescriptionInput.css';
 
-const JobDescriptionInput = ({ value, onChange, disabled }) => {
+const JobDescriptionInput = ({ value, onChange, disabled, helperText }) => {
   return (
     <Form.Group className="mb-4">
       <Form.Label className="form-label-custom">
@@ -15,7 +15,9 @@ const JobDescriptionInput = ({ value, onChange, disabled }) => {
         placeholder="Paste the job description here..."
         disabled={disabled}
         className="job-description-input"
+        title={helperText || ''}
       />
+      {helperText && <div className="input-helper-text">{helperText}</div>}
     </Form.Group>
   );
 };

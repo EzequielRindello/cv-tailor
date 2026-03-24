@@ -28,11 +28,6 @@ namespace ErCvApi.Controllers
         [HttpGet("download/{format}")]
         public IActionResult Download(string format)
             => _service.Download(format, HttpContext);
-
-        /// <summary>
-        /// FEATURE-202: Returns list of available CV profiles from the Data folder.
-        /// Response: [{ id: "cv-master", name: "Default" }, { id: "cv-master-tech", name: "tech" }]
-        /// </summary>
         [HttpGet("profiles")]
         public IActionResult GetProfiles()
             => _service.GetProfiles();

@@ -2,7 +2,6 @@ namespace ErCvApi.Constants
 {
     public static class ATSConstants
     {
-        // Fonts
         public static readonly string[] AtsFriendlyFonts =
         {
             "times new roman",
@@ -12,8 +11,6 @@ namespace ErCvApi.Constants
             "helvetica",
             "garamond"
         };
-
-        // Sections
         public static readonly string[] StandardSections =
         {
             "education",
@@ -22,14 +19,10 @@ namespace ErCvApi.Constants
             "projects",
             "summary"
         };
-
-        // Severities
         public const string SeverityCritical = "Critical";
         public const string SeverityHigh = "High";
         public const string SeverityMedium = "Medium";
         public const string SeverityLow = "Low";
-
-        // Score penalties
         public const int PenaltyInvalidEmail = 5;
         public const int PenaltyInvalidPhone = 5;
         public const int PenaltyLowDensityHigh = 20;
@@ -37,23 +30,14 @@ namespace ErCvApi.Constants
         public const int PenaltyMissingSections = 10;
         public const int PenaltyShortBullets = 5;
         public const int PenaltyNoMetrics = 5;
-
-        // Modern template penalty raised — two-column layouts cause real ATS parsing failures
-        // in Taleo, Workday, and Greenhouse. Users should be clearly warned.
         public const int PenaltyModernTemplate = 15;
-
-        // Thresholds
         public const double DensityLowThreshold = 0.4;
         public const double DensityMediumThreshold = 0.6;
         public const int ShortBulletLength = 40;
         public const int ScoreGreen = 85;
         public const int ScoreYellow = 65;
-
-        // Regex
         public const string EmailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
         public const string MetricsRegex = @"\d+[%x]|\d+[MK]\+?|[\d,]{3,}\+?";
-
-        // Messages
         public const string EmailInvalidIssue = "Email not detected or invalid format";
         public const string EmailInvalidFix = "Use the format: name@domain.com";
 

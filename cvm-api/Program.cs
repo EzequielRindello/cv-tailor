@@ -2,8 +2,6 @@ using ErCvApi.Services;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -14,8 +12,6 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
-
-// Basic production hardening: per-IP fixed window limiter
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -32,8 +28,6 @@ builder.Services.AddRateLimiter(options =>
         });
     });
 });
-
-// Add session support for temporary file storage
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -41,8 +35,6 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
-// Add CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -53,13 +45,9 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
-
-// Register services
 builder.Services.AddScoped<CVGeneratorService>();
 
 var app = builder.Build();
-
-// Configure middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
