@@ -3,12 +3,13 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--color-neutral-100);
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
 }
 
 .cv-preview-frame {
   display: block;
-  width: min(100%, 920px);
+  width: 100%;
+  max-width: 920px;
   margin: 0 auto;
   height: clamp(620px, 72vh, 920px);
   border: 0;
@@ -23,6 +24,10 @@
 }
 
 @media (max-width: 576px) {
+  .cv-preview-frame-wrapper {
+    padding: var(--spacing-sm);
+  }
+
   .cv-preview-frame {
     height: clamp(420px, 62vh, 620px);
   }
