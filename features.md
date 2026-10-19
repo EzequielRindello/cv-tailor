@@ -33,7 +33,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 |---|---|---|---|---|---|
 | TEST-01 | xUnit test project + fixtures + JD corpus | E1 Tests | P0 | M | Done |
 | TEST-02 | Unit tests per helper | E1 Tests | P0 | L | Done |
-| TEST-03 | Invariant tests (no fabrication, ordering, bounds) | E1 Tests | P0 | M | Todo |
+| TEST-03 | Invariant tests (no fabrication, ordering, bounds) | E1 Tests | P0 | M | Done |
 | TEST-04 | Document tests (DOCX structure, PDF pages + text extraction) | E1 Tests | P0 | M | Todo |
 | TEST-05 | API integration tests (WebApplicationFactory) | E1 Tests | P0 | M | Todo |
 | TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | Todo |
@@ -168,17 +168,19 @@ Files: `ErCv.Tests/Helpers/*`
 Verify: `dotnet test --filter Category=Unit`.
 
 ### TEST-03: Invariant ("truth") tests
-**Status:** Todo · **Priority:** P0 · **Effort:** M
+**Status:** Done · **Priority:** P0 · **Effort:** M
 
 Why: these prove the core promise of the product. Run for every JD in the corpus x every template x 1-page and 2-page.
 
-- [ ] Every output bullet exists verbatim in the master profile (no fabrication)
-- [ ] Every output skill, project and education entry exists in the master
-- [ ] No duplicate experiences in the output
-- [ ] Bullets keep their original relative order inside each role
-- [ ] Contact header is identical to the master
-- [ ] Match and ATS scores stay within 0 to 100
-- [ ] Master profile object is not mutated by generation (F5)
+- [x] Every output bullet exists verbatim in the master profile (no fabrication)
+- [x] Every output skill, project and education entry exists in the master
+- [x] No duplicate experiences in the output
+- [x] Bullets keep their original relative order inside each role
+- [x] Contact header is identical to the master
+- [x] Match and ATS scores stay within 0 to 100
+- [x] Master profile object is not mutated by generation (F5)
+
+Note: the "no mutation" invariant passes today for generation itself. The stricter aliasing check (editing the generated CV must not touch the master) is written and skipped until ENG-02, because Header and Education are shared references (F5).
 
 Files: `ErCv.Tests/Invariants/*`
 Verify: theory tests over the corpus pass.
