@@ -1,0 +1,9 @@
+Senior Backend Engineer (Go)
+
+We are looking for a Senior Backend Engineer with 6+ years of experience building high-throughput services in Go. You will design event-driven systems on Kafka, own services running on Kubernetes, and work with PostgreSQL and Redis.
+
+Requirements:
+- Strong Go experience and distributed systems fundamentals
+- Hands-on Kafka, gRPC and REST API design
+- PostgreSQL, Redis, AWS
+- CI/CD, observability, on-call ownership

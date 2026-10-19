@@ -1,0 +1,9 @@
+DevOps Engineer
+
+Own our cloud platform. You will manage infrastructure as code with Terraform, run workloads on Kubernetes and Docker, build CI/CD pipelines with GitHub Actions and improve monitoring with Prometheus and Grafana.
+
+Requirements:
+- 5+ years in DevOps or SRE
+- AWS, Terraform, Kubernetes, Docker
+- Linux, Bash, Python scripting
+- Incident response and observability

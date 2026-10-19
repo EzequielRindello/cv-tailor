@@ -1,0 +1,8 @@
+Ingeniero de Software Backend Senior
+
+Buscamos un ingeniero con más de 5 años de experiencia para diseñar y mantener servicios backend. Trabajarás con Node.js, TypeScript, PostgreSQL y AWS, y participarás en revisiones de código y despliegues continuos.
+
+Requisitos:
+- Experiencia sólida en APIs REST y microservicios
+- Conocimientos de Docker y CI/CD
+- Capacidad para trabajar en equipo y comunicarte con claridad

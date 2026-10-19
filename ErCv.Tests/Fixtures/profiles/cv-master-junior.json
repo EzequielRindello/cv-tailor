@@ -1,0 +1,65 @@
+{
+  "header": {
+    "fullName": "Sam Carter",
+    "email": "sam.carter@email.com",
+    "phone": "+1 (512) 555-0147",
+    "location": "Austin, TX",
+    "linkedin": "linkedin.com/in/sam-carter-dev",
+    "github": "github.com/samcarter-dev"
+  },
+  "education": [
+    {
+      "degree": "B.S. Computer Science",
+      "institution": "University of Texas at Austin",
+      "location": "Austin, TX",
+      "graduationDate": "May 2024",
+      "gpa": "3.5",
+      "relevantCourses": ["Data Structures", "Web Development", "Databases"],
+      "honors": ""
+    }
+  ],
+  "experience": [
+    {
+      "role": "Junior Software Engineer",
+      "company": "BrightApps",
+      "location": "Austin, TX",
+      "startDate": "Jul 2024",
+      "endDate": "Present",
+      "bullets": [
+        "Built REST endpoints in Node.js and Express serving a React dashboard used by 300 internal users",
+        "Wrote Jest unit tests that raised coverage of the billing module from 40% to 75%",
+        "Fixed 25+ production bugs and shipped fixes through a GitHub Actions CI pipeline"
+      ],
+      "skills": ["Node.js", "Express", "React", "Jest", "GitHub Actions"]
+    },
+    {
+      "role": "Software Engineering Intern",
+      "company": "CloudNest",
+      "location": "Remote",
+      "startDate": "Jun 2023",
+      "endDate": "Aug 2023",
+      "bullets": [
+        "Developed a internal tool in Python and Flask that automated weekly report generation",
+        "Added PostgreSQL queries and indexes that cut report time from 40s to 6s"
+      ],
+      "skills": ["Python", "Flask", "PostgreSQL"]
+    }
+  ],
+  "skills": {
+    "languages": ["JavaScript", "TypeScript", "Python", "SQL"],
+    "frameworks": ["React", "Express", "Flask"],
+    "databases": ["PostgreSQL", "MongoDB"],
+    "tools": ["Git", "Docker", "Jest"],
+    "cloud": ["AWS"],
+    "practices": ["Agile", "Code Review", "CI/CD"]
+  },
+  "projects": [
+    {
+      "name": "Budget Tracker",
+      "description": "Full-stack expense tracker with charts and CSV export",
+      "technologies": ["React", "Node.js", "MongoDB"],
+      "highlights": ["Deployed on AWS with 100+ monthly users"],
+      "link": "github.com/samcarter-dev/budget-tracker"
+    }
+  ]
+}
