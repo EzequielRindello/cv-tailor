@@ -18,6 +18,7 @@ namespace ErCvApi.Helpers
         private static readonly SemaphoreSlim BrowserInitSemaphore = new(1, 1);
         private static Task<IBrowser>? _sharedBrowserTask;
         private static bool _chromiumReady;
+        private static string? _downloadedExecutablePath;
 
         public DocumentRenderer(string templatePath)
         {
@@ -76,10 +77,17 @@ namespace ErCvApi.Helpers
 
                 if (string.IsNullOrWhiteSpace(executablePath) && !_chromiumReady)
                 {
-                    var browserFetcher = new BrowserFetcher();
-                    await browserFetcher.DownloadAsync();
+                    var cachePath = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        "er-cv-generator", "chromium");
+                    var browserFetcher = new BrowserFetcher(new BrowserFetcherOptions { Path = cachePath });
+                    var installed = await browserFetcher.DownloadAsync();
+                    _downloadedExecutablePath = installed.GetExecutablePath();
                     _chromiumReady = true;
                 }
+
+                if (string.IsNullOrWhiteSpace(executablePath))
+                    executablePath = _downloadedExecutablePath;
 
                 _sharedBrowserTask = Puppeteer.LaunchAsync(new LaunchOptions
                 {
@@ -95,6 +103,22 @@ namespace ErCvApi.Helpers
                 BrowserInitSemaphore.Release();
             }
         }
+
+        public static async Task ShutdownAsync()
+        {
+            if (_sharedBrowserTask == null)
+                return;
+
+            try
+            {
+                var browser = await _sharedBrowserTask;
+                await browser.CloseAsync();
+            }
+            catch
+            {
+            }
+        }
+
         public string RenderHtmlPublic(GeneratedCV cv) => RenderHtml(cv);
         public byte[] RenderDocx(GeneratedCV cv)
         {

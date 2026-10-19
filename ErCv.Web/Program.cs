@@ -79,4 +79,6 @@ app.MapControllers().RequireRateLimiting("api");
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+app.Lifetime.ApplicationStopping.Register(() => ErCvApi.Helpers.DocumentRenderer.ShutdownAsync().GetAwaiter().GetResult());
+
 app.Run();
