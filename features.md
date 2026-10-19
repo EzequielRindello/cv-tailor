@@ -32,7 +32,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | ID | Title | Epic | Priority | Effort | Status |
 |---|---|---|---|---|---|
 | TEST-01 | xUnit test project + fixtures + JD corpus | E1 Tests | P0 | M | Done |
-| TEST-02 | Unit tests per helper | E1 Tests | P0 | L | Todo |
+| TEST-02 | Unit tests per helper | E1 Tests | P0 | L | Done |
 | TEST-03 | Invariant tests (no fabrication, ordering, bounds) | E1 Tests | P0 | M | Todo |
 | TEST-04 | Document tests (DOCX structure, PDF pages + text extraction) | E1 Tests | P0 | M | Todo |
 | TEST-05 | API integration tests (WebApplicationFactory) | E1 Tests | P0 | M | Todo |
@@ -122,6 +122,16 @@ Found during the roadmap review. Each one is covered by a feature below.
 | F10 | Docs drift: legacy FIX-002 says low match is below 30%, code uses below 40%. Node runner expectations depend on a fixture in `testing/`. | `Helpers/MatchScoreCalculator.cs:43`, `testing/` | OPS-04, TEST-09 |
 | F11 | Bullet reordering is drag-only, not keyboard accessible. | `Components/Shared/BulletEditor.razor` | UX-08 |
 
+### New findings (from TEST-02)
+
+Not covered by any feature yet. Each has a skipped test in `ErCv.Tests/Helpers/`.
+
+| # | Finding | Where |
+|---|---|---|
+| F12 | `YearsWithTechPattern` captures the word after "N years of" as a skill: `b2b` in a sales JD, `or` in "experience or relevant". A non-tech JD is then treated as technical. | `Helpers/JobDescriptionParser.cs:60`, `JobDescriptionConstants.YearsWithTechPattern` |
+| F13 | `MatchScoreCalculator` keyword matching uses substring `Contains` (same class as F1/F2). | `Helpers/MatchScoreCalculator.cs:30` |
+| F14 | `FuzzyMatch` also misfiles skills as nice-to-have (`rust` matches `zero trust`). Covered by the MATCH-01 fix. | `Helpers/MissingSkillsAnalyzer.cs:30` |
+
 ---
 
 ## E1. Test foundation
@@ -142,15 +152,17 @@ Files: `ErCv.Tests/*`, `er-cv-generator.sln`
 Verify: `dotnet test` passes.
 
 ### TEST-02: Unit tests per helper
-**Status:** Todo · **Priority:** P0 · **Effort:** L
+**Status:** Done · **Priority:** P0 · **Effort:** L
 
-- [ ] `JobDescriptionParser`: skill extraction, seniority (including negation like "no senior experience needed"), years-of-experience fallback, empty input
-- [ ] `SkillNormalizer`: every alias maps correctly; false positives from F1 are rejected
-- [ ] `RelevanceScorer`: recency tiers, seniority distance, skill cap at 40
-- [ ] `CVSelector`: tech roles prioritized for tech JDs, bullet order preserved, max experiences/bullets per mode
-- [ ] `PageConstraintHelper`: trimming order (bullets, then projects, then experiences, then skills)
-- [ ] `MatchScoreCalculator`, `MissingSkillsAnalyzer`, `KeywordAnalyzer`, `ATSChecker`: scores, thresholds, color classes, issue ordering
-- [ ] `SummaryGenerator`: role type detection, years of experience, 300-char cap
+- [x] `JobDescriptionParser`: skill extraction, seniority (including negation like "no senior experience needed"), years-of-experience fallback, empty input
+- [x] `SkillNormalizer`: every alias maps correctly; false positives from F1 are rejected
+- [x] `RelevanceScorer`: recency tiers, seniority distance, skill cap at 40
+- [x] `CVSelector`: tech roles prioritized for tech JDs, bullet order preserved, max experiences/bullets per mode
+- [x] `PageConstraintHelper`: trimming order (bullets, then projects, then experiences, then skills)
+- [x] `MatchScoreCalculator`, `MissingSkillsAnalyzer`, `KeywordAnalyzer`, `ATSChecker`: scores, thresholds, color classes, issue ordering
+- [x] `SummaryGenerator`: role type detection, years of experience, 300-char cap
+
+Notes: tests for bugs F1 (substring matching), F2 and F3 are written and skipped with the ticket id (`MATCH-01`, `MATCH-02`, `MATCH-03`); remove the `Skip` when each fix lands. Two parser findings found while writing these (`b2b` and `or` captured as skills from "N years of ...") are also skipped, see "New findings" below.
 
 Files: `ErCv.Tests/Helpers/*`
 Verify: `dotnet test --filter Category=Unit`.
