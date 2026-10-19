@@ -1,0 +1,58 @@
+@{
+    var c = string.IsNullOrEmpty(Data.ColorClass) ? "yellow" : Data.ColorClass;
+    var pct = Math.Clamp(Data.Overall, 0, 100);
+    var skillsOk = Data.SkillsMatched >= Data.TotalSkills * 0.6;
+    var keywordsOk = Data.KeywordsMatched >= Data.TotalKeywords * 0.5;
+}
+
+<div class="card match-score-card">
+    <div class="card-body">
+        <div class="match-card-header">
+            <h5 class="match-card-title">
+                <i class="bi bi-bullseye match-title-icon"></i>
+                Match Score
+            </h5>
+            <span class="match-badge @c">@Label(c)</span>
+        </div>
+
+        <div class="match-percent-row">
+            <span class="match-percent @c">@pct%</span>
+        </div>
+
+        <div class="match-bar-track">
+            <div class="match-bar-fill @c" style="width: @(pct)%"></div>
+        </div>
+
+        <div class="match-breakdown">
+            <div class="breakdown-item">
+                <span class="breakdown-icon @(skillsOk ? "ok" : "warn")">
+                    <i class="bi @(skillsOk ? "bi-check" : "bi-circle")"></i>
+                </span>
+                Technical skills: <strong>@Data.SkillsMatched/@Data.TotalSkills</strong> matched
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-icon @(keywordsOk ? "ok" : "warn")">
+                    <i class="bi @(keywordsOk ? "bi-check" : "bi-circle")"></i>
+                </span>
+                Keywords: <strong>@Data.KeywordsMatched/@Data.TotalKeywords</strong> present
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-icon @(Data.SeniorityMatch ? "ok" : "warn")">
+                    <i class="bi @(Data.SeniorityMatch ? "bi-check" : "bi-circle")"></i>
+                </span>
+                Seniority level: <strong>@(Data.SeniorityMatch ? "Match" : "Mismatch")</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public MatchScore Data { get; set; } = new();
+
+    private static string Label(string color) => color switch
+    {
+        "green" => "Strong Match",
+        "red" => "Weak Match",
+        _ => "Moderate Match"
+    };
+}

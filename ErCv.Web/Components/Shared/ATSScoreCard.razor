@@ -1,0 +1,71 @@
+@{
+    var status = string.IsNullOrEmpty(Data.ColorClass) ? "yellow" : Data.ColorClass;
+    var score = Math.Clamp(Data.Overall, 0, 100);
+}
+
+<div class="card ats-card">
+    <div class="card-body">
+        <div class="ats-card-header" @onclick="() => _open = !_open">
+            <div>
+                <h5 class="ats-card-title mb-3">
+                    <i class="bi bi-cpu ats-title-icon"></i>
+                    ATS Compatibility
+                </h5>
+
+                <div class="ats-score-row">
+                    <span class="ats-percent @status">@score</span>
+                    <span class="ats-denom">/100</span>
+                    <span class="ats-badge @status">@Label(status)</span>
+                </div>
+            </div>
+
+            <span class="toggle-icon">
+                <i class="bi @(_open ? "bi-chevron-up" : "bi-chevron-down")"></i>
+            </span>
+        </div>
+
+        <div class="ats-bar-track">
+            <div class="ats-bar-fill @status" style="width: @(score)%"></div>
+        </div>
+
+        @if (_open)
+        {
+            <div style="margin-top: var(--spacing-md)">
+                @if (Data.Issues.Count == 0)
+                {
+                    <p class="ats-all-clear">
+                        <i class="bi bi-check-circle-fill ats-success-icon"></i>
+                        Your CV is fully optimized for ATS
+                    </p>
+                }
+                else
+                {
+                    <div class="ats-issues-title">Issues found</div>
+                    @foreach (var issue in Data.Issues)
+                    {
+                        <div class="ats-issue-row">
+                            <span class="severity-badge @issue.Severity">@issue.Severity</span>
+                            <div>
+                                <div class="issue-text">@issue.Issue</div>
+                                <div class="issue-fix">→ @issue.Fix</div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ATSScore Data { get; set; } = new();
+
+    private bool _open;
+
+    private static string Label(string status) => status switch
+    {
+        "green" => "ATS Ready",
+        "red" => "ATS Risk",
+        _ => "Needs Attention"
+    };
+}

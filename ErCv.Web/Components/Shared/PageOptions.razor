@@ -1,0 +1,28 @@
+<div class="mb-4">
+    <label class="form-label form-label-custom mb-3">Page Options</label>
+    <div class="page-options-group">
+        <div class="page-option-card @(!AllowTwoPages ? "selected" : "") @(Disabled ? "disabled" : "")"
+             @onclick="() => Select(false)">
+            <div class="page-option-icon"><i class="bi bi-file-earmark-text"></i></div>
+            <div class="page-option-label">1 Page</div>
+            <div class="page-option-desc">Recommended</div>
+        </div>
+        <div class="page-option-card @(AllowTwoPages ? "selected" : "") @(Disabled ? "disabled" : "")"
+             @onclick="() => Select(true)">
+            <div class="page-option-icon"><i class="bi bi-files"></i></div>
+            <div class="page-option-label">Up to 2 Pages</div>
+            <div class="page-option-desc">8+ years exp.</div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool AllowTwoPages { get; set; }
+    [Parameter] public EventCallback<bool> AllowTwoPagesChanged { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    private async Task Select(bool value)
+    {
+        if (!Disabled) await AllowTwoPagesChanged.InvokeAsync(value);
+    }
+}

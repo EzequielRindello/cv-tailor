@@ -1,0 +1,89 @@
+@{
+    var hasAnything = Data.RequiredMissing.Count > 0 || Data.NiceToHaveMissing.Count > 0;
+    var total = Data.RequiredMissing.Count + Data.NiceToHaveMissing.Count;
+}
+
+<div class="card missing-skills-card">
+    <div class="card-body">
+        @if (!hasAnything)
+        {
+            <div class="missing-card-header">
+                <h5 class="missing-card-title">
+                    <i class="bi bi-check-circle-fill missing-title-icon ok"></i>
+                    Skills Coverage
+                </h5>
+            </div>
+            <p class="all-clear-text">All required skills are present in your CV Master!</p>
+        }
+        else
+        {
+            <div class="missing-card-header mb-3" @onclick="() => _open = !_open">
+                <h5 class="missing-card-title">
+                    <i class="bi bi-exclamation-triangle-fill missing-title-icon warn"></i>
+                    Missing Skills (@total)
+                </h5>
+                <span class="toggle-icon">
+                    <i class="bi @(_open ? "bi-chevron-up" : "bi-chevron-down")"></i>
+                </span>
+            </div>
+
+            @if (Data.PotentialScoreIncrease > 0)
+            {
+                <p class="tip-text">
+                    <i class="bi bi-lightbulb-fill missing-tip-icon"></i>
+                    Adding missing skills could increase your match score by up to <strong>+@Data.PotentialScoreIncrease%</strong>
+                </p>
+            }
+
+            @if (_open)
+            {
+                <div style="margin-top: var(--spacing-md)">
+                    @if (Data.RequiredMissing.Count > 0)
+                    {
+                        <div class="missing-group">
+                            <div class="group-label required">Required - Missing</div>
+                            <div class="skill-tags">
+                                @foreach (var s in Data.RequiredMissing)
+                                {
+                                    <span class="skill-pill required">@s</span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (Data.NiceToHaveMissing.Count > 0)
+                    {
+                        <div class="missing-group">
+                            <div class="group-label nice">Nice to Have - Missing</div>
+                            <div class="skill-tags">
+                                @foreach (var s in Data.NiceToHaveMissing)
+                                {
+                                    <span class="skill-pill nice">@s</span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (Data.Suggestions.Count > 0)
+                    {
+                        <div class="suggestions">
+                            <div class="group-label">Suggestions</div>
+                            <ul class="suggestion-list">
+                                @foreach (var s in Data.Suggestions)
+                                {
+                                    <li>@s</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public MissingSkillsAnalysis Data { get; set; } = new();
+
+    private bool _open;
+}

@@ -1,0 +1,388 @@
+@page "/"
+@using System.Text.Json
+@using ErCvApi.Services
+@using static ErCvApi.Services.CVGeneratorService
+@implements IAsyncDisposable
+@inject CVGeneratorService CvService
+@inject BrowserStore Store
+@inject IJSRuntime JS
+@inject ILogger<Home> Logger
+
+<PageTitle>CV Generator - Tailored Professional Resumes</PageTitle>
+
+@if (_view == "generate")
+{
+    <div class="container app-shell py-4 py-lg-5">
+        <AppHeader />
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+                <div class="card main-card">
+                    <div class="card-body form-card-body">
+                        @if (!string.IsNullOrEmpty(_error))
+                        {
+                            <div class="alert alert-danger alert-dismissible" role="alert">
+                                @_error
+                                <button type="button" class="btn-close" aria-label="Close" @onclick="() => _error = string.Empty"></button>
+                            </div>
+                        }
+                        @if (_showHistory)
+                        {
+                            <HistoryPanel Entries="_history"
+                                          OnLoad="LoadHistoryEntry"
+                                          OnDelete="DeleteHistoryEntry"
+                                          OnClear="ClearHistory"
+                                          OnClose="() => _showHistory = false"
+                                          Disabled="_loading" />
+                        }
+                        <form class="generator-form" @onsubmit:preventDefault>
+                            <div class="form-title-row">
+                                <h5 class="form-title mb-0">Generate Your CV</h5>
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-sm history-toggle-btn"
+                                        disabled="@_loading"
+                                        @onclick="() => _showHistory = !_showHistory">
+                                    @(_showHistory ? "Hide History" : "History")
+                                </button>
+                            </div>
+                            <div class="form-section form-section-primary">
+                                <ProfileSelector Profiles="_profiles"
+                                                 @bind-Value="_profileId"
+                                                 Disabled="_loading" />
+                                <JobDescriptionInput @bind-Value="_jobDescription"
+                                                     Disabled="_loading"
+                                                     HelperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate" />
+                            </div>
+                            <div class="form-section">
+                                <TemplateSelector Value="_settings.Template"
+                                                  ValueChanged="SetTemplate"
+                                                  Disabled="_loading" />
+                            </div>
+                            <div class="form-section form-section-inline">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <FormatSelector Selected="_settings.SelectedFormats"
+                                                        OnToggle="ToggleFormat"
+                                                        Disabled="_loading" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <PageOptions AllowTwoPages="_settings.AllowTwoPages"
+                                                     AllowTwoPagesChanged="SetAllowTwoPages"
+                                                     Disabled="_loading" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-section form-actions">
+                                <GenerateButton Loading="_loading" Disabled="_loading" OnClick="GenerateAsync" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="details-fullscreen">
+        <AppHeader />
+        <div class="details-header">
+            <div class="details-header-inner">
+                <button type="button" class="btn btn-outline-secondary" disabled="@_loading" @onclick="BackToGenerate">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Back to Generate
+                </button>
+            </div>
+        </div>
+        <div class="details-layout">
+            <div class="details-preview-panel">
+                @if (_analysis != null)
+                {
+                    <CVPreview Html="@_analysis.PreviewHtml" />
+                }
+                else
+                {
+                    <div class="card main-card">
+                        <div class="card-body text-center">
+                            <p class="analysis-empty">No details to display yet.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="details-analysis-panel">
+                @if (_analysis != null)
+                {
+                    <div class="analysis-stack">
+                        <div class="analysis-cards">
+                            <MatchScoreCard Data="_analysis.MatchScore" />
+                            <ATSScoreCard Data="_analysis.ATSScore" />
+                            <MissingSkillsCard Data="_analysis.MissingSkills" />
+                            <KeywordAnalysisCard Data="_analysis.KeywordAnalysis" />
+                        </div>
+                        @if (!_showBulletEditor)
+                        {
+                            <div class="analysis-actions">
+                                <button type="button" class="btn btn-outline-primary me-3" @onclick="() => _showBulletEditor = true">
+                                    <i class="bi bi-pencil-square me-1"></i>
+                                    Edit Bullets &amp; Regenerate
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" @onclick="ResetAsync">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>
+                                    Start Over
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <BulletEditor GeneratedCv="_analysis.GeneratedCV"
+                                          OnRegenerate="RegenerateAsync"
+                                          OnCancel="() => _showBulletEditor = false"
+                                          Loading="_loading" />
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="card main-card">
+                        <div class="card-body text-center">
+                            <p class="analysis-empty">Generate a CV to view details.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private static readonly JsonSerializerOptions CloneOptions = new();
+
+    private string _view = "generate";
+    private string _jobDescription = string.Empty;
+    private string _profileId = "cv-master";
+    private List<ProfileInfo> _profiles = new() { new("cv-master", "Default") };
+    private AppSettings _settings = new();
+    private List<HistoryEntry> _history = new();
+    private AnalysisResult? _analysis;
+    private bool _loading;
+    private bool _showHistory;
+    private bool _showBulletEditor;
+    private string _error = string.Empty;
+    private DotNetObjectReference<Home>? _selfRef;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var profiles = CvService.ListProfiles();
+            if (profiles.Count > 0)
+            {
+                _profiles = profiles;
+                if (_profiles.All(p => p.Id != _profileId))
+                    _profileId = _profiles[0].Id;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Could not list CV profiles; falling back to default.");
+        }
+
+        _settings = await Store.LoadSettingsAsync();
+        _history = await Store.GetHistoryAsync();
+
+        _selfRef = DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("cvApp.registerShortcuts", _selfRef);
+    }
+
+    [JSInvokable]
+    public Task OnPasteShortcut(string text) => InvokeAsync(() =>
+    {
+        if (_loading || _view != "generate") return;
+        _jobDescription = text;
+        StateHasChanged();
+    });
+
+    [JSInvokable]
+    public Task OnGenerateShortcut(string textareaValue) => InvokeAsync(async () =>
+    {
+        if (_view != "generate" || _loading || string.IsNullOrWhiteSpace(textareaValue)) return;
+        _jobDescription = textareaValue;
+        await GenerateAsync();
+    });
+
+    private async Task SetTemplate(string template)
+    {
+        _settings.Template = template;
+        await Store.SaveSettingsAsync(_settings);
+    }
+
+    private async Task SetAllowTwoPages(bool value)
+    {
+        _settings.AllowTwoPages = value;
+        await Store.SaveSettingsAsync(_settings);
+    }
+
+    private async Task ToggleFormat(string format)
+    {
+        _settings.SelectedFormats[format] = !(_settings.SelectedFormats.TryGetValue(format, out var v) && v);
+        await Store.SaveSettingsAsync(_settings);
+    }
+
+    private List<string> SelectedFormats() =>
+        _settings.SelectedFormats.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
+
+    private CVTemplate TemplateEnum() =>
+        Enum.TryParse<CVTemplate>(_settings.Template, ignoreCase: true, out var t) ? t : CVTemplate.Harvard;
+
+    private string TemplateLabel() => TemplateEnum().ToString();
+
+    private async Task DownloadAsync(string format, byte[] bytes)
+    {
+        using var stream = new MemoryStream(bytes);
+        using var reference = new DotNetStreamReference(stream);
+        await JS.InvokeVoidAsync("cvApp.downloadFile", CvService.BuildFileName(format), reference);
+    }
+
+    private async Task GenerateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_jobDescription)) { _error = "Please paste a job description"; return; }
+        if (SelectedFormats().Count == 0) { _error = "Please select at least one format"; return; }
+
+        _error = string.Empty;
+        _loading = true;
+        _analysis = null;
+        _showBulletEditor = false;
+        StateHasChanged();
+
+        try
+        {
+            var (documents, analysis) = await CvService.BuildCvAsync(new GenerateRequest
+            {
+                JobDescription = _jobDescription,
+                Formats = SelectedFormats(),
+                Template = TemplateEnum(),
+                AllowTwoPages = _settings.AllowTwoPages,
+                ProfileId = _profileId
+            });
+
+            foreach (var (format, bytes) in documents)
+                await DownloadAsync(format, bytes);
+
+            _analysis = analysis;
+            _history = await Store.AddToHistoryAsync(_jobDescription, analysis.MatchScore.Overall, TemplateLabel());
+            _view = "details";
+        }
+        catch (ArgumentException ex)
+        {
+            _error = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error generating CV");
+            _error = "An error occurred while generating the CV";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task RegenerateAsync((Dictionary<string, List<int>> Selections, GeneratedCV Cv) edit)
+    {
+        if (_analysis == null) return;
+
+        _loading = true;
+        _error = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            // The service trims bullets in place, so hand it a copy and keep the edited CV intact
+            var cvCopy = JsonSerializer.Deserialize<GeneratedCV>(JsonSerializer.Serialize(edit.Cv, CloneOptions), CloneOptions)!;
+
+            var (documents, previewHtml) = await CvService.RebuildCvAsync(new RegenerateRequest
+            {
+                GeneratedCV = cvCopy,
+                BulletSelections = edit.Selections,
+                Formats = SelectedFormats(),
+                Template = TemplateEnum(),
+                AllowTwoPages = _settings.AllowTwoPages
+            });
+
+            foreach (var (format, bytes) in documents)
+                await DownloadAsync(format, bytes);
+
+            _analysis.GeneratedCV = edit.Cv;
+            _analysis.PreviewHtml = previewHtml;
+            _showBulletEditor = false;
+        }
+        catch (ArgumentException ex)
+        {
+            _error = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error regenerating CV");
+            _error = "Error regenerating CV";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadHistoryEntry(HistoryEntry entry)
+    {
+        _jobDescription = entry.JobDescription;
+        _showHistory = false;
+        _error = string.Empty;
+        await JS.InvokeVoidAsync("cvApp.scrollToTop");
+    }
+
+    private async Task DeleteHistoryEntry(long id) => _history = await Store.RemoveFromHistoryAsync(id);
+
+    private async Task ClearHistory()
+    {
+        await Store.ClearHistoryAsync();
+        _history = new();
+    }
+
+    private async Task BackToGenerate()
+    {
+        _view = "generate";
+        _showHistory = false;
+        _showBulletEditor = false;
+        _error = string.Empty;
+        await JS.InvokeVoidAsync("cvApp.scrollToTop");
+    }
+
+    private async Task ResetAsync()
+    {
+        var defaults = new AppSettings();
+        _jobDescription = string.Empty;
+        _settings.SelectedFormats = defaults.SelectedFormats;
+        _settings.Template = defaults.Template;
+        _settings.AllowTwoPages = defaults.AllowTwoPages;
+        await Store.SaveSettingsAsync(_settings);
+
+        _analysis = null;
+        _showBulletEditor = false;
+        _showHistory = false;
+        _view = "generate";
+        _error = string.Empty;
+        await JS.InvokeVoidAsync("cvApp.scrollToTop");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("cvApp.unregisterShortcuts");
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+
+        _selfRef?.Dispose();
+    }
+}

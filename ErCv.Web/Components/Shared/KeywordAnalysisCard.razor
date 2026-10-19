@@ -1,0 +1,88 @@
+@{
+    var densityPct = (int)Math.Round(Data.KeywordDensity * 100, MidpointRounding.AwayFromZero);
+    var densityColor = densityPct >= 70
+        ? "var(--color-success)"
+        : densityPct >= 50 ? "var(--color-warning)" : "var(--color-error)";
+}
+
+<div class="card keyword-card">
+    <div class="card-body">
+        <div class="keyword-card-header" @onclick="() => _open = !_open">
+            <h5 class="keyword-card-title">
+                <i class="bi bi-bar-chart-fill keyword-title-icon"></i>
+                Keyword Analysis
+            </h5>
+            <div style="display: flex; align-items: center; gap: var(--spacing-sm)">
+                <span class="density-badge" style="background: @densityColor">@densityPct% density</span>
+                <span class="toggle-icon">
+                    <i class="bi @(_open ? "bi-chevron-up" : "bi-chevron-down")"></i>
+                </span>
+            </div>
+        </div>
+
+        @if (_open)
+        {
+            <div>
+                <div class="kw-grid">
+                    @if (Data.TechnicalKeywords.Count > 0)
+                    {
+                        <div class="kw-group">
+                            <div class="kw-group-title">
+                                <i class="bi bi-gear-fill kw-group-icon"></i>
+                                Technical
+                            </div>
+                            @foreach (var item in Data.TechnicalKeywords)
+                            {
+                                @KeywordRow(item)
+                            }
+                        </div>
+                    }
+
+                    @if (Data.SoftSkillKeywords.Count > 0)
+                    {
+                        <div class="kw-group">
+                            <div class="kw-group-title">
+                                <i class="bi bi-people-fill kw-group-icon"></i>
+                                Soft Skills
+                            </div>
+                            @foreach (var item in Data.SoftSkillKeywords)
+                            {
+                                @KeywordRow(item)
+                            }
+                        </div>
+                    }
+                </div>
+
+                @if (Data.Suggestions.Count > 0)
+                {
+                    <div class="kw-suggestions">
+                        <div class="kw-group-title">
+                            <i class="bi bi-lightbulb-fill kw-group-icon"></i>
+                            Suggestions
+                        </div>
+                        <ul class="kw-suggestion-list">
+                            @foreach (var s in Data.Suggestions)
+                            {
+                                <li>@s</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public KeywordAnalysis Data { get; set; } = new();
+
+    private bool _open;
+
+    private RenderFragment KeywordRow(KeywordItem item) => @<div class="keyword-row">
+        <span class="kw-status @(item.PresentInCV ? "present" : "missing")">
+            <i class="bi @(item.PresentInCV ? "bi-check" : "bi-x")"></i>
+        </span>
+        <span class="kw-word">@item.Word</span>
+        <span class="kw-freq">×@item.Frequency</span>
+    </div>;
+}
