@@ -11,22 +11,22 @@
   - Return diagnostics: match score, missing skills, keyword analysis, ATS score.
 
 ## Tech Stack
-- **Languages:** C#, JavaScript, HTML, CSS.
-- **Backend:** ASP.NET Core 8 Web API.
-- **Frontend:** React 18 + React Bootstrap.
+- **Languages:** C#, Razor, HTML, CSS, a little JavaScript (interop).
+- **App:** ASP.NET Core 10 monolith: REST API + Blazor Server UI in one project, deployed as one Docker service on Render.
+- **UI:** Blazor Server components + Bootstrap 5.
 - **Document generation:**
   - PDF via PuppeteerSharp (Chromium).
   - DOCX via Open XML SDK.
   - Template rendering via Stubble (Mustache-style templates).
-- **HTTP/data tools:** Axios (frontend), System.Text.Json (backend).
-- **Dev/runtime tooling:** Swagger/OpenAPI, npm/react-scripts, .NET SDK.
+- **Data tools:** System.Text.Json.
+- **Dev/runtime tooling:** Swagger/OpenAPI, Docker, .NET SDK.
 
 ## Architecture
-- **High-level design:** Layered API + component-based SPA.
+- **High-level design:** Layered monolith: API + Blazor Server components in one project.
   - Controller layer: HTTP endpoints (`/generate`, `/regenerate`, `/download`, `/profiles`, `/health`).
   - Service orchestration layer: `CVGeneratorService` coordinates parsing, scoring, selection, rendering, and analysis.
   - Helper domain layer: focused classes for parser, scorer, selector, ATS checks, and constraints.
-  - UI layer: single-page React app with feature cards and editor-driven regeneration.
+  - UI layer: Blazor Server page (`Components/Pages/Home.razor`) with feature cards and editor-driven regeneration.
 - **Key design decisions:**
   - Keep CV source-of-truth in JSON profiles (`Data/cv-master*.json`) for deterministic generation.
   - Use heuristic ranking/scoring (transparent logic) instead of opaque model-only matching.
@@ -51,13 +51,13 @@
 
 ## Technical Highlights
 - **State management:**
-  - React local state (`useState`) coordinates generation lifecycle, analysis payloads, bullet-edit regeneration, profile selection, and history panel state.
+  - Component state in `Home.razor` coordinates generation lifecycle, analysis payloads, bullet-edit regeneration, profile selection, and history panel state.
   - LocalStorage-backed persistence for export settings and generation history.
   - Deterministic UI flow: input -> generate -> analyze -> optional bullet edits -> regenerate.
 - **API handling:**
   - Typed backend models for generation and analysis payloads.
   - Session-backed download pattern separates generation and retrieval endpoints.
-  - CORS + credentials enabled for local multi-port frontend integration.
+  - UI and API share one origin, so no CORS is needed; the UI calls `CVGeneratorService` in-process.
 - **Performance-oriented logic:**
   - Top-N limits for skills/keywords/experiences/projects to bound response size and rendering work.
   - Page-fit enforcement heuristics reduce overflow risk before document render.

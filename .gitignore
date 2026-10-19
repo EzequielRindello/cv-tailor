@@ -1,0 +1,124 @@
+# ---------- .NET build output ----------
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+[Ll]og/
+[Ll]ogs/
+publish/
+artifacts/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.nupkg
+*.snupkg
+*.pdb
+*.dbmdl
+project.lock.json
+launchSettings.local.json
+TestResults/
+*.trx
+coverage/
+*.coverage
+*.coveragexml
+
+# ---------- IDEs and editors ----------
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.DotSettings.user
+_ReSharper*/
+.ionide/
+.fleet/
+
+# ---------- Secrets and local config ----------
+.env
+.env.*
+!.env.example
+appsettings.Development.local.json
+appsettings.*.local.json
+secrets.json
+*.pfx
+*.p12
+*.key
+*.pem
+
+# ---------- OS junk ----------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ---------- Crash dumps and temp files ----------
+*.stackdump
+*.dmp
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*.log
+npm-debug.log*
+
+# ---------- Node (in case a JS tool is added back) ----------
+node_modules/
+
+# ---------- AI coding agents: local state, caches and scratch ----------
+# Claude Code
+.claude/settings.local.json
+.claude/worktrees/
+.claude/scratch/
+.claude/cache/
+CLAUDE.local.md
+# Cursor
+.cursor/
+.cursorrules
+.cursorignore
+.cursorindexingignore
+# Windsurf / Codeium
+.windsurf/
+.windsurfrules
+.codeium/
+# Cline / Roo / Kilo
+.clinerules/
+.cline/
+.roo/
+.roomodes
+.kilocode/
+# Aider
+.aider*
+# Continue
+.continue/
+# OpenAI Codex CLI
+.codex/
+# Gemini CLI
+.gemini/
+GEMINI.local.md
+# GitHub Copilot local files
+.copilot/
+.github/copilot-instructions.local.md
+# Amp / Sourcegraph Cody
+.amp/
+.cody/
+# Other agent tooling
+.agent/
+.agents/
+.superpowers/
+.serena/
+.zed/
+.taskmaster/
+.mcp.local.json
+.opencode/
+.goose/
+.trae/
+# Generic scratch and transcripts agents like to leave behind
+scratchpad/
+.scratch/
+.agent-memory/
+*.transcript.md
+*.chat.md

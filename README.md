@@ -1,30 +1,57 @@
 # ER CV Generator
 
-ASP.NET Core + React app that generates ATS-optimized, tailored resumes from a job description. It never fabricates content — it selects, reorders, and summarizes what's already in `cv-master.json`.
+ASP.NET Core monolith (.NET 10) that generates ATS-optimized, tailored resumes from a job description. The UI is Blazor Server and the REST API lives in the same project, so the whole app ships as a single deploy. It never fabricates content: it selects, reorders, and summarizes what's already in `cv-master.json`.
 
 ---
 
-## Frontend API Configuration
+## Run locally
 
-- Frontend reads `REACT_APP_API_URL` as API base URL.
-- If not provided, app falls back to `http://localhost:5000/api`.
-- Expected examples:
-  - `REACT_APP_API_URL=http://localhost:5000/api`
-  - `REACT_APP_API_URL=https://your-domain.com/api`
+```
+dotnet run --project ErCv.Web      # or: dotnet watch --project ErCv.Web   (hot reload while editing UI)
+```
 
-If the frontend cannot reach the configured API, it now shows an explicit runtime error with the resolved API URL.
+The app serves the UI at `/` and the API at `/api/cv/*` on `http://localhost:5000` (override with the `PORT` env var). PDF export needs Chrome/Chromium: locally PuppeteerSharp downloads it on first use, or set `PUPPETEER_EXECUTABLE_PATH` to an installed Chrome/Chromium.
+
+With Docker (same image Render builds):
+
+```
+docker build -t er-cv-generator .
+docker run --rm -m 512m -e PORT=10000 -p 10000:10000 er-cv-generator
+```
+
+## Deploy (Render)
+
+One Docker web service, defined in `render.yaml` (`Dockerfile` at the repo root):
+
+- Multi-stage build on the .NET 10 SDK, runtime image installs Google Chrome (Ubuntu's chromium package is a snap stub) and sets `PUPPETEER_EXECUTABLE_PATH`.
+- Binds to the `PORT` Render provides; health check at `/api/cv/health`.
+- Forwarded headers are enabled so the rate limiter sees the real client IP behind Render's proxy.
+- Memory: with the container capped at 512 MB (the free plan limit), 6 concurrent PDF generations peaked around 250 MiB. Move to Starter if that ever stops being enough.
 
 ---
 
-## Frontend UX Features
+## Blazor UI
 
-- Inline CV preview via `previewHtml` (iframe `srcDoc`).
-- Profile selector powered by `GET /api/cv/profiles`.
-- Keyboard shortcuts:
-  - `Ctrl/Cmd+Enter` to generate.
-  - `Ctrl/Cmd+Shift+V` to paste clipboard into JD textarea.
-- Generation history (`localStorage`, top 10) with quick re-load.
-- Persisted export settings (`template`, `formats`, `allowTwoPages`).
+- `Components/Pages/Home.razor`: single page with the generate and details views.
+- `Components/Shared/*.razor`: one component per UI piece (selectors, history, cards, bullet editor, preview).
+- `UI/BrowserStore.cs`: template/format settings and generation history (top 10) persisted in the visitor's `localStorage` via JS interop.
+- The page calls `CVGeneratorService` in-process (`BuildCvAsync` / `RebuildCvAsync`); the `/api/cv/*` controller endpoints are unchanged.
+- Generated files are streamed to the browser through `wwwroot/js/app.js`.
+- Keyboard shortcuts: `Ctrl/Cmd+Enter` generate, `Ctrl/Cmd+Shift+V` paste into the job description.
+- CV preview renders the template HTML in an iframe (`srcdoc`).
+- Bootstrap 5.3.2 and Bootstrap Icons 1.13.1 are vendored under `wwwroot/lib` (no CDN at runtime).
+
+### Restyling the UI
+
+Markup and style are separate, so a redesign does not touch the C# logic:
+
+- **Look and feel**: `wwwroot/css/site.css`. The first block holds the design tokens as CSS variables (`--color-*`, `--spacing-*`, `--radius-*`, `--shadow-*`). Changing those restyles most of the app at once.
+- **Markup**: each `.razor` file in `Components/Shared` is plain HTML plus `@code` for its parameters. Edit the HTML and class names freely; keep the `@onclick`/`@bind` bindings.
+- **Layout and page flow**: `Components/Layout/MainLayout.razor` and `Components/Pages/Home.razor`.
+- **Per-component CSS (optional)**: add `Foo.razor.css` next to `Foo.razor`; Blazor scopes it to that component automatically (CSS isolation), which is the closest equivalent to CSS modules.
+- **Bootstrap**: override its variables in `site.css` (`:root { --bs-primary: ...; }`) or swap `wwwroot/lib/bootstrap` for another theme build.
+- **Workflow**: run `dotnet watch --project ErCv.Web` and edit `.razor`/`.css` files; the browser updates on save.
+- **CV templates** (the generated PDF/DOCX) are separate from the app UI: `ErCv.Web/Templates/*.html`.
 
 ---
 
@@ -55,7 +82,7 @@ GET /api/cv/download/{pdf|docx}
 
 ```
 er-cv-generator/
-├── er-cv-api/
+├── ErCv.Web/
 │   ├── Controllers/CVController.cs          # POST /generate, /regenerate, GET /download/:format
 │   ├── Services/CVGeneratorService.cs       # orchestrates full flow
 │   ├── Helpers/
@@ -86,28 +113,13 @@ er-cv-generator/
 │   │   ├── harvard-template.html            # single-column, Times New Roman — best ATS compatibility
 │   │   ├── minimalist-template.html         # single-column, Helvetica — clean modern look, ATS-safe
 │   │   └── modern-template.html             # two-column grid — NOT recommended for ATS portals
-│   └── Data/cv-master.json                  # master CV source — all experiences, skills, projects
-│
-└── er-cv-web/
-    └── src/
-        ├── App.js
-      ├── components/
-            ├── JobDescriptionInput/
-            ├── ProfileSelector/            # profile picker (hidden when <=1 profile)
-            ├── TemplateSelector/            # Harvard | Modern | Minimalist
-            ├── FormatSelector/              # PDF | DOCX | both
-            ├── PageOptions/                 # 1-page | 2-page toggle
-            ├── GenerateButton/
-            ├── CVPreview/                  # inline rendered HTML preview
-            ├── HistoryPanel/               # local history (top 10) + quick reload
-            ├── MatchScore/                  # overall % + skills/keywords/seniority breakdown
-            ├── MissingSkills/               # required + nice-to-have gaps
-            ├── KeywordAnalysis/             # technical / soft / industry keyword presence
-            ├── ATSScore/                    # score + issues + recommendations
-            └── BulletEditor/               # select/deselect/reorder bullets → re-download
-        └── utils/
-            ├── settings.js                 # persisted template/formats/page-mode
-            └── history.js                  # persisted generation history
+│   ├── Data/cv-master.json                  # master CV source — all experiences, skills, projects
+│   ├── Components/                          # Blazor Server UI (App, Routes, Layout, Pages/Home, Shared/*)
+│   ├── UI/                                  # BrowserStore (localStorage) + UI models
+│   ├── wwwroot/                             # css/site.css, js/app.js, lib/ (Bootstrap 5.3.2 + Icons 1.13.1, vendored)
+│   └── Program.cs                           # Blazor + API + rate limiter + forwarded headers, binds to PORT
+├── Dockerfile                               # build + runtime image with Chromium
+└── render.yaml                              # Render web service (Docker)
 ```
 
 ---

@@ -1,0 +1,55 @@
+<div class="card main-card mt-3">
+    <div class="card-body p-3">
+        <div class="history-header">
+            <h6 class="mb-0">Generation History</h6>
+            <div class="history-header-actions">
+                <button type="button" class="btn btn-outline-danger btn-sm"
+                        disabled="@(Disabled || Entries.Count == 0)" @onclick="OnClear">Clear</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="OnClose">Close</button>
+            </div>
+        </div>
+
+        @if (Entries.Count == 0)
+        {
+            <p class="history-empty mb-0">No generations yet.</p>
+        }
+        else
+        {
+            <div class="history-list">
+                @foreach (var entry in Entries)
+                {
+                    <div class="history-item" @key="entry.Id">
+                        <div class="history-meta">
+                            <div class="history-title" title="@entry.JobTitle">@entry.JobTitle</div>
+                            <div class="history-subtitle">
+                                <span>@FormatDate(entry.GeneratedAt)</span>
+                                <span>Template: @entry.Template</span>
+                                <span>Match: @(entry.MatchScore?.ToString() ?? "N/A")%</span>
+                            </div>
+                        </div>
+                        <div class="history-item-actions">
+                            <button type="button" class="btn btn-outline-primary btn-sm"
+                                    disabled="@Disabled" @onclick="() => OnLoad.InvokeAsync(entry)">Regenerate</button>
+                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                    disabled="@Disabled" @onclick="() => OnDelete.InvokeAsync(entry.Id)">Delete</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<HistoryEntry> Entries { get; set; } = new();
+    [Parameter] public EventCallback<HistoryEntry> OnLoad { get; set; }
+    [Parameter] public EventCallback<long> OnDelete { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    private static string FormatDate(string iso) =>
+        DateTime.TryParse(iso, null, System.Globalization.DateTimeStyles.RoundtripKind, out var d)
+            ? d.ToString("yyyy-MM-dd HH:mm") + " UTC"
+            : "-";
+}
