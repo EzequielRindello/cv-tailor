@@ -62,8 +62,9 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | MATCH-04 | Explainability: "why this was chosen" | E4 Matching | P1 | M | Done |
 | MATCH-05 | JD highlighter | E4 Matching | P1 | M | Done |
 | MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Todo |
-| MATCH-07 | Skill/alias dictionary as data file | E4 Matching | P2 | S | Todo |
+| MATCH-07 | Skill/alias dictionary as data file, tuned on real posts | E4 Matching | P1 | M | Todo |
 | MATCH-08 | Page fit measured on the rendered PDF | E4 Matching | P1 | M | Todo |
+| MATCH-09 | Seniority detection from the title and wording | E4 Matching | P1 | S | Todo |
 | EDIT-01 | Inline editing in the workspace | E5 Editing | P2 | L | Todo |
 | EDIT-02 | Live HTML preview, documents on download | E5 Editing | P2 | M | Todo |
 | EDIT-03 | Cover letter generator | E5 Editing | P2 | M | Todo |
@@ -74,7 +75,8 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | APP-02 | Re-open a past generation | E6 Workflow | P2 | S | Done |
 | APP-03 | Sample JD gallery | E6 Workflow | P0 | S | Done |
 | APP-04 | Import JD from URL (Greenhouse/Lever) | E6 Workflow | P3 | M | Todo |
-| APP-05 | Real job-post corpus, dated and kept fresh | E6 Workflow | P1 | L | Todo |
+| APP-05 | Real job-post corpus, dated and kept fresh | E6 Workflow | P1 | L | Done |
+| APP-06 | Corpus follow-ups: sample picker rules, first Action run | E6 Workflow | P2 | S | Todo |
 | AI-01 | LLM options + feature flag | E7 AI | P3 | S | Parked |
 | AI-02 | Semantic matching (indices only) | E7 AI | P3 | M | Parked |
 | AI-03 | Bullet rewrite suggestions (user accepts) | E7 AI | P3 | M | Parked |
@@ -98,14 +100,15 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 
 1. **M1 Foundation** (v2.0.2, released): TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, MATCH-01, MATCH-02, MATCH-03, ENG-02, ENG-03, OPS-01. Fixes ship with their tests from day one.
 2. **M2 Redesign** (v2.0.3, released): UX-01 to UX-09, APP-03, TEST-07 (E2E written against the new UI).
-3. **M3 Your data** (v2.0.4): PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
+3. **M3 Your data** (v2.0.4, released): PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
+3.2. **M3.2 Real-post fixes** (v2.0.4.1, before M4): MATCH-07, MATCH-09, APP-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
 4. **M4 Output** (v2.0.5): EDIT-01 to EDIT-06, MATCH-08, UX-10.
 5. **M5 Polish & presentation** (v2.0.6): OPS-02 to OPS-05, ENG-01, ENG-04, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05.
 
 ### Versioning
 
-One milestone is one version: `2.0.<N+1>` for milestone `M<N>`. The version before the roadmap was 2.0.1.
+One milestone is one version: `2.0.<N+1>` for milestone `M<N>`. The version before the roadmap was 2.0.1. A milestone added between two others takes a fourth number so nothing is renumbered (M3.2 is `2.0.4.1`, its branch `feature/m3-2-real-post-fixes`).
 
 **PR names.** Branch `feature/m<N>-<short-name>` (for example `feature/m3-your-data`). PR title `v2.0.<N+1>: M<N> <name>` (for example `v2.0.4: M3 Your data`). A fix to something already released goes in its own small PR titled `fix: <what>` and does not change the version.
 
@@ -147,6 +150,29 @@ Found while writing the tests. All fixed at the end of M1, each with a regressio
 | F15 | DOCX was schema-invalid: `SectionProperties` was the first child of `w:body`, the schema requires it last. | Fixed |
 | F16 | Modern template PDF lost the last characters of long lines: the grid was `38% 62%` plus a 10pt gap, wider than the printable area, so Chromium clipped it. Now `38% 1fr`. | Fixed |
 | F17 | `POST /api/cv/regenerate` without `generatedCV` answered 200 with an empty document (the property defaulted to `new()`). Now 400. | Fixed |
+
+### New findings (from APP-05, real posts)
+
+Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixed in APP-05: they change scoring, so they belong to the matching work.
+
+| # | Finding | Status |
+|---|---|---|
+| F18 | Dictionary entries that are ordinary English match prose: the alias `next` (Next.js) hits 40% of posts ("the next generation"), plus `end-to-end`, `foundation`, `less`, `solid`, `rails`. | Open (MATCH-07, M3.2) |
+| F19 | `YearsWithTechPattern` still takes the word after "N years of" as a skill when it is not one: `professional`, `building`, `industry`, `hands-on`. | Open (MATCH-07, M3.2) |
+| F20 | Seniority: "Staff ..." titles are not recognized (only the phrase "staff engineer" is), "II", "internship" and "early career" are not keywords, and the first level word in the text wins ("lead the design" reads as lead). The parser agrees with the title level in 46% of posts. | Open (MATCH-09, M3.2) |
+| F21 | The single-letter skill `c` matches "Washington D.C." in pay-range text. | Open (MATCH-07, M3.2) |
+
+### Open items after M3
+
+Nothing in M3 is blocked. Left to M3.2 (v2.0.4.1, before M4):
+
+| Item | Why it is not in M3 | Owner |
+|---|---|---|
+| F18, F19, F21: dictionary words that match ordinary English, junk after "N years of", `c` in "D.C." | They change scoring, so they need their own before/after review. | MATCH-07 (M3.2) |
+| F20: seniority wording ("Staff", "II", internship) and 46% agreement with the title | Same reason. | MATCH-09 (M3.2) |
+| Sample picker picks an accelerator post for Full stack | Needs a rule change, reviewed on its own. | APP-06 (M3.2) |
+| Corpus refresh workflow never ran on GitHub | Needs the repo setting and a first look at the PR it opens. | APP-06 (M3.2) |
+| TEST-08 snapshots over `FixtureLoader.CorpusJdNames` | Snapshots are not built yet. | TEST-08 (M5) |
 
 ### Open items after M1
 
@@ -275,6 +301,7 @@ Verify: `dotnet test ErCv.E2E`; runs in CI as its own job.
 
 - [ ] Approved `GeneratedCV` + scores JSON per corpus JD
 - [ ] Scoring changes show up as a reviewable diff instead of silent drift
+- [ ] Snapshots also cover the real posts from the APP-05 corpus (`FixtureLoader.CorpusJdNames`)
 
 Verify: snapshot tests pass; intentional changes are re-approved.
 
@@ -539,13 +566,20 @@ Verify: `JdHighlighterTests` (lossless split over profiles x corpus, whole token
 
 Verify: unit tests with corpus JDs.
 
-### MATCH-07: Skill dictionary as data
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+### MATCH-07: Skill dictionary as data, tuned on real posts
+**Status:** Todo · **Priority:** P1 · **Effort:** M
 
 - [ ] Aliases and tech keywords moved to `Data/skills.json`
 - [ ] One test per alias
+- [ ] Ordinary English words stop matching as skills: `next`, `end-to-end`, `foundation`, `less`, `solid`, `rails` need context or a stricter match (F18)
+- [ ] The word after "N years of" is a skill only if it is in the dictionary: `professional`, `building`, `industry`, `hands-on` stop appearing (F19)
+- [ ] The single-letter skill `c` no longer matches "Washington D.C." or `objective-c` (F21)
+- [ ] Add the skills recent posts ask for and the dictionary lacks: AI agents/agentic, observability, distributed systems, on-call, incident response, system design, LLMs, MCP, evals, data modeling, ETL, lakehouse, Iceberg, accessibility, networking
+- [ ] Review the 205 dictionary skills no post asks for: keep the ones a real CV can list (they still help matching a profile), drop duplicates and typos; do not delete a skill only because it is rare in 194 posts
 
-Verify: tests pass; adding an alias requires no code change.
+Notes: `corpus/report.md` is the evidence and the acceptance check: regenerate it after the change (`dotnet run --project ErCv.Collector -- report`) and the false positives above must be gone. The change moves scores, so review the corpus impact by hand as in MATCH-01.
+
+Verify: unit tests with corpus posts (a post with "the next generation" has no `next` skill); adding an alias requires no code change; `CorpusTests` still pass; report before/after attached to the PR.
 
 ### MATCH-08: Page fit measured on the rendered PDF
 **Status:** Todo · **Priority:** P1 · **Effort:** M
@@ -554,6 +588,15 @@ Verify: tests pass; adding an alias requires no code change.
 - [ ] Character estimate kept only as a first pass
 
 Verify: TEST-04 page count assertion over the whole corpus.
+
+### MATCH-09: Seniority detection
+**Status:** Todo · **Priority:** P1 · **Effort:** S
+
+- [ ] "Staff", "Principal", "II/III", "Intern/Internship" and "Early career" are recognized as levels (F20)
+- [ ] The title decides when it names a level; the first level word in the body ("lead the design") only breaks ties
+- [ ] Agreement with the title level in the corpus goes from 46% to a target recorded in the PR (aim: above 85%)
+
+Verify: unit tests per title pattern; `corpus/report.md` shows the new agreement figure.
 
 ---
 
@@ -641,6 +684,8 @@ Why: portfolio visitors rarely have a JD at hand.
 - [x] 6 curated JDs (backend, frontend, full stack, data, DevOps, junior) in `Data/SampleJobDescriptions.cs`
 - [x] One click fills the composer (`SampleJobPicker.razor`)
 
+Notes: since APP-05 the six samples are real posts picked from `corpus/` by the collector and stored in `Data/sample-jobs.json` (same labels); the hand-written texts are gone.
+
 Verify: E2E: pick sample, generate.
 
 ### APP-04: Import JD from URL
@@ -651,21 +696,56 @@ Verify: E2E: pick sample, generate.
 Verify: integration tests with mocked HTTP; disallowed hosts rejected.
 
 ### APP-05: Real job-post corpus, dated and kept fresh
-**Status:** Todo · **Priority:** P1 · **Effort:** L
+**Status:** Done · **Priority:** P1 · **Effort:** L
 
 Why: the sample JDs (APP-03), the test corpus (`ErCv.Tests/Fixtures/jds`) and the skill dictionary behind the parser were all written by hand. They are plausible, but they are not what employers are posting now, so the demo, the tests and the scoring are tuned to guesses. Real, recent posts make the demo convincing, the tests honest, and show where the app drifts from the market (new tools, renamed skills, different seniority wording).
 
-- [ ] Collector (a console tool, not part of the web app) that gathers current postings from sources that allow it: the public job-board APIs of Greenhouse, Lever, Ashby and Workable, plus feeds that publish their data on purpose. No scraping of sites whose terms forbid it; respect `robots.txt`, rate limits and a clear User-Agent
-- [ ] One JSON file per posting with metadata: source, url, company, title, `postedAt`, `retrievedAt`, role family, seniority, location, and the clean text. Keep only what is needed and link back to the original post
-- [ ] Freshness window (for example 90 days) and a refresh command that drops expired posts and adds new ones; a scheduled GitHub Action runs it and opens a PR, so a person reviews every change
-- [ ] A relevance report with dates: skill frequency over time, skills the parser misses (`MATCH-07` dictionary), skills in the dictionary nobody asks for any more, and seniority wording, so the app can be adjusted to what recent posts actually say
-- [ ] APP-03 samples are picked from the corpus (one per role family) and show where and when they were posted
-- [ ] Test fixtures read the same corpus: the parser and scoring tests run over real posts, and `TEST-08` golden snapshots use them
-- [ ] Removal path: honor takedown requests and keep a short note of the licensing and terms of each source
+- [x] Collector (a console tool, not part of the web app) that gathers current postings from sources that allow it: the public job-board APIs of Greenhouse, Lever, Ashby and Workable, plus feeds that publish their data on purpose. No scraping of sites whose terms forbid it; respect `robots.txt`, rate limits and a clear User-Agent
+- [x] One JSON file per posting with metadata: source, url, company, title, `postedAt`, `retrievedAt`, role family, seniority, location, and the clean text. Keep only what is needed and link back to the original post
+- [x] Freshness window (for example 90 days) and a refresh command that drops expired posts and adds new ones
+- [x] A GitHub Action runs the refresh command and opens a PR, so a person reviews every change (`.github/workflows/corpus-refresh.yml`, manual trigger only, cron commented out; its first run on GitHub is APP-06)
+- [x] A relevance report with dates: skill frequency over time, skills the parser misses (`MATCH-07` dictionary), skills in the dictionary nobody asks for any more, and seniority wording, so the app can be adjusted to what recent posts actually say
+- [x] APP-03 samples are picked from the corpus (one per role family) and show where and when they were posted
+- [x] Test fixtures read the same corpus: the parser and scoring tests run over real posts, and `TEST-08` golden snapshots use them (TEST-08 is not built yet; its own checklist now says to snapshot `FixtureLoader.CorpusJdNames`)
+- [x] Removal path: honor takedown requests and keep a short note of the licensing and terms of each source
+
+Workflow: `corpus-refresh.yml` runs `refresh`, `report` and `check`, then opens a PR with `gh` (it never pushes to master). It was written but not run on GitHub yet. One-time repo setting needed: Settings > Actions > General > allow Actions to create pull requests. The weekly cron is commented out for the owner to enable.
 
 Notes: the legal and terms-of-use review of each source is part of the work, not an afterthought. `APP-04` (import one JD from a URL) is related but separate: that one is the user's own action on one post, this one is a maintained dataset.
 Recommended model for the implementation: Opus. It is a multi-part design task (source adapters, data model, scheduled automation, a report that has to be judged, and terms-of-use trade-offs), and a wrong call silently ships stale or unlicensed data.
-Verify: the refresh command is idempotent; no posting older than the window survives; every sample and fixture has `postedAt` and a source url; the relevance report runs on the committed corpus.
+
+What was built:
+- `ErCv.Collector` (console, BCL only: `HttpClient` + `System.Text.Json`, no new packages). One adapter per source (`Sources.cs`), `PoliteHttp` (User-Agent `ErCvCorpusCollector/1.0 (+repo url)`, `robots.txt` per host as in RFC 9309, one request per host every 1.5 s or the host's `Crawl-delay`, no redirects, timeout and size cap), `Classifier` (role family and seniority from the title; only individual-contributor software roles are kept), `Refresher`, `SamplePicker`, `RelevanceReport`, `CorpusCheck`. It references `ErCv.Web` so the report and the sample picker use the real parser and dictionary.
+- `corpus/`: `sources.json` (37 boards, window and limits), `postings/*.json` (one file per post, fields as listed above), `takedowns.json`, `manifest.json`, `report.md`, and `README.md` with the per-source terms note and the removal steps.
+- Commands: `dotnet run --project ErCv.Collector -- refresh` (the single refresh command), `-- report`, `-- check`, `-- remove <id-or-url> --reason "..."`.
+- Window: 90 days from the source's own publish date (Greenhouse `first_published`, Lever `createdAt`, Ashby `publishedAt`, Workable `published_on`). At most 6 posts per board (newest, spread over role families and seniority), text cut at 15,000 characters, em dashes in post text turned into hyphens. Posts that expire, close at the source or are taken down are removed; a board that cannot be read keeps its posts until they expire. Unchanged posts are not rewritten and `manifest.json` only changes when the corpus changes, which makes the refresh idempotent.
+- APP-03: the six samples (labels unchanged: Backend, Frontend, Full stack, Data, DevOps, Junior) are written by `refresh` to `ErCv.Web/Data/sample-jobs.json`, embedded in the web app (so the Docker image does not need `corpus/`). The picker shows "Title at Company (location), posted d MMM yyyy on Source. View the original post" for the active sample.
+- Tests: `FixtureLoader` reads `corpus/` from the repository; `CorpusJdNames` (the newest real post of each role family) join the hand-written JDs in the invariant, highlighter and selection-explanation matrices (`AllJdNames`). The hand-written JDs stay for their edge cases (empty, Spanish, very long, non-tech). The DOCX/PDF matrices still use the hand-written set only, to keep render time down.
+- Removal: `remove` deletes the file and records the takedown by id and url; a whole company is a `board` takedown. A removed post stays in git history; rewriting history is the owner's call.
+
+Sources (terms reviewed 2026-10-20, details in `corpus/README.md`): Greenhouse, Lever, Ashby and Workable public job-board APIs, all documented as public and unauthenticated, none disallowed by `robots.txt`. None publishes a license for third-party reuse of post text, hence the minimal fields, the link back, the small size and the takedown path. Ashby posts marked `isListed: false` are skipped. Not used: job sites whose terms forbid automated collection (LinkedIn, Indeed, Glassdoor), hosted job pages and Greenhouse `/embed/` (pages, not APIs; `/embed/` is disallowed), and other feeds (Remotive, RemoteOK, Hacker News "Who is hiring"), which were not evaluated because only the four ATS APIs were approved for download; each needs its own terms review. Boards dropped: `lever/plaid` (404) and `lever/mistral` (no posts).
+
+Corpus on 2026-10-20: 194 posts from 35 companies (Greenhouse 114, Ashby 48, Lever 28, Workable 4), posted 2026-07-22 to 2026-10-20. Families: software 41, ml 32, devops 29, data 25, security 20, backend 13, mobile 11, frontend 10, full stack 9, qa 4.
+
+Decisions taken when closing M3: the corpus (194 posts, 1.7 MB, with the terms note and the takedown path) stays committed in git, because the tests and the Docker-free samples need it and a takedown request is the only reason to rewrite history. The six samples stay as the picker chose them for the release; the picker rule is reviewed in APP-06.
+
+Headline findings from `corpus/report.md` (not fixed here, see F18 to F21, owned by M3.2):
+- The dictionary matches ordinary English: `next` (alias of Next.js) is "found" in 40% of posts, almost always "the next generation"; also `end-to-end` (25%), `foundation`, `less`, `solid`, `rails` ("banking rails").
+- "N years of X" takes the next word as a skill: `professional` (15 posts), `building`, `industry`, `hands-on`, `working`.
+- Missing from the dictionary although posts ask for them: AI agents and agentic (38% and 19%), observability (35%), distributed systems (25%), on-call, incident response, networking, system design, LLMs, MCP, evals, data modeling, ETL, lakehouse, Iceberg, accessibility.
+- 205 of the 397 distinct dictionary skills appear in no post (for example most Azure services, jQuery, PHP, Laravel, Jest, Flutter, Entity Framework, .NET), 66 in only one.
+- Seniority: titles say "Staff" 36 times, but the parser only knows the phrase "staff engineer"; "II", "internship" and "early career" are not keywords; the parser's level agrees with the title in 46% of posts (it takes the first level word in the text, often "lead the ...").
+
+Verify: the refresh command run twice in a row: the second run reported "Added 0, updated 0, removed 0, unchanged 194" and every file under `corpus/` plus `sample-jobs.json` had the same hash before and after. `check` reports no post older than the window as of today. `CorpusTests` (unit): the corpus follows every rule as of its last refresh, no post is older than the window, every post, sample and corpus fixture has `postedAt` and an https source url, samples are what the picker chooses, the parser reads all 194 posts without junk, and the report runs on the committed corpus. `CollectorTests` (unit, fake HTTP, no network): idempotent refresh, expiry, closed posts, failing board, edits, takedown by url and by board, `robots.txt`, User-Agent, request spacing, sample picking. `SampleJobPickerTests` (bUnit) and the E2E `Picking_a_sample_shows_where_and_when_it_was_posted_with_a_link_to_the_original`; the full E2E suite (accessibility and responsive included) passes with the real samples.
+
+### APP-06: Corpus follow-ups
+**Status:** Todo · **Priority:** P2 · **Effort:** S
+
+- [ ] Sample picker skips posts that are not a normal job (accelerators, programs, fellowships) and prefers posts with a clear level in the title; the Full stack sample (an accelerator post) and the Junior sample (Associate DevOps) are the cases that triggered it
+- [ ] Run the corpus refresh workflow once from the Actions tab and review the PR it opens; fix whatever the first real run shows
+- [ ] Decide whether to enable the weekly cron (the user turns it on, see the workflow file)
+
+Verify: `CorpusTests` samples test updated to the new rule; the first run's PR exists and `check` passes on it.
 
 ---
 

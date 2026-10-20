@@ -19,6 +19,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\ErCv.Web\ErCv.Web.csproj" />
+		<ProjectReference Include="..\ErCv.Collector\ErCv.Collector.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

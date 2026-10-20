@@ -15,7 +15,7 @@ namespace ErCv.Tests.Helpers
         {
             var data = new TheoryData<string, string, bool>();
             foreach (var profile in FixtureLoader.ProfileIds)
-            foreach (var jd in FixtureLoader.JdNames)
+            foreach (var jd in FixtureLoader.AllJdNames)
             foreach (var twoPages in new[] { false, true })
                 data.Add(profile, jd, twoPages);
             return data;

@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>ErCv.Web</RootNamespace>
 		<!-- One version per milestone, see "Versioning" in features.md. Shown in the app footer. -->
-		<Version>2.0.3</Version>
+		<Version>2.0.4</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -14,6 +14,12 @@
 		<PackageReference Include="PuppeteerSharp" Version="19.0.0" />
 		<PackageReference Include="Stubble.Core" Version="1.10.8" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- APP-03 samples, written by the corpus collector (APP-05). Embedded so the app does not depend on the corpus folder. -->
+		<None Remove="Data\sample-jobs.json" />
+		<EmbeddedResource Include="Data\sample-jobs.json" LogicalName="ErCv.Web.Data.sample-jobs.json" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using ErCv.Web.Data;
 using Microsoft.Playwright;
 
 namespace ErCv.E2E
@@ -25,6 +26,24 @@ namespace ErCv.E2E
 
             await Page.GetByRole(AriaRole.Tab, new() { Name = "Gaps" }).ClickAsync();
             await Assertions.Expect(Page.Locator(".missing-skills-card")).ToBeVisibleAsync();
+        }
+
+        // APP-05: the samples are real posts, so the picker says whose they are, when they were posted and links back
+        [Fact]
+        public async Task Picking_a_sample_shows_where_and_when_it_was_posted_with_a_link_to_the_original()
+        {
+            var sample = SampleJobDescriptions.All.Single(s => s.Label == "Backend");
+
+            await OpenHomeAsync();
+            await PickSampleAsync("Backend");
+
+            var source = Page.Locator(".sample-picker-source");
+            await Assertions.Expect(source).ToContainTextAsync(sample.Company);
+            await Assertions.Expect(source).ToContainTextAsync(sample.PostedAt.ToString("d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture));
+            var link = source.GetByRole(AriaRole.Link, new() { Name = "View the original post" });
+            await Assertions.Expect(link).ToHaveAttributeAsync("href", sample.Url);
+            await Assertions.Expect(link).ToHaveAttributeAsync("target", "_blank");
+            await Assertions.Expect(JobDescription).ToHaveValueAsync(new Regex(Regex.Escape(sample.Title)));
         }
 
         [Fact]
@@ -151,7 +170,8 @@ namespace ErCv.E2E
 
             await Button("Back to composer").ClickAsync();
             await Page.GetByRole(AriaRole.Button, new() { Name = "Job description" }).ClickAsync();
-            await Assertions.Expect(JobDescription).ToHaveValueAsync(new Regex("DevOps Engineer"));
+            var devops = SampleJobDescriptions.All.Single(s => s.Label == "DevOps");
+            await Assertions.Expect(JobDescription).ToHaveValueAsync(new Regex(Regex.Escape(devops.Title)));
 
             await Page.GetByRole(AriaRole.Button, new() { Name = "Options" }).ClickAsync();
             await Button("Generate CV").ClickAsync();

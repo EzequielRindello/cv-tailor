@@ -1,79 +1,38 @@
+using System.Text.Json;
+
 namespace ErCv.Web.Data
 {
-    public record SampleJobDescription(string Id, string Label, string Text);
+    /// <summary>A real, recent job post from the corpus, with where and when it was published.</summary>
+    public sealed record SampleJobDescription
+    {
+        public string Id { get; init; } = "";
+        public string Label { get; init; } = "";
+        public string PostingId { get; init; } = "";
+        public string Source { get; init; } = "";
+        public string Url { get; init; } = "";
+        public string Company { get; init; } = "";
+        public string Title { get; init; } = "";
+        public string Location { get; init; } = "";
+        public DateTimeOffset PostedAt { get; init; }
+        public string Text { get; init; } = "";
+    }
 
-    /// <summary>Curated job descriptions a visitor can load with one click (APP-03).</summary>
+    /// <summary>
+    /// Job descriptions a visitor can load with one click (APP-03). One per role family, picked from the
+    /// job-post corpus (APP-05) by the collector's refresh command, which writes Data/sample-jobs.json.
+    /// </summary>
     public static class SampleJobDescriptions
     {
-        public static readonly IReadOnlyList<SampleJobDescription> All = new[]
+        public const string ResourceName = "ErCv.Web.Data.sample-jobs.json";
+
+        public static readonly IReadOnlyList<SampleJobDescription> All = Load();
+
+        private static IReadOnlyList<SampleJobDescription> Load()
         {
-            new SampleJobDescription("backend", "Backend", """
-                Senior Backend Engineer (Go)
-
-                We are looking for a Senior Backend Engineer with 6+ years of experience building high-throughput services in Go. You will design event-driven systems on Kafka, own services running on Kubernetes, and work with PostgreSQL and Redis.
-
-                Requirements:
-                - Strong Go experience and distributed systems fundamentals
-                - Hands-on Kafka, gRPC and REST API design
-                - PostgreSQL, Redis, AWS
-                - CI/CD, observability, on-call ownership
-                """),
-            new SampleJobDescription("frontend", "Frontend", """
-                Frontend Engineer (React)
-
-                Join our product team to build a fast, accessible web app. You will work with React, TypeScript, Redux and GraphQL, write component and end-to-end tests, and collaborate closely with designers.
-
-                Requirements:
-                - 3+ years with React and TypeScript
-                - HTML, CSS, responsive design, accessibility
-                - Jest, Cypress, Git
-                - Nice to have: Next.js, Node.js
-                """),
-            new SampleJobDescription("fullstack", "Full stack", """
-                Full Stack Engineer
-
-                Help us build a SaaS product end to end. You will ship features across a Next.js and TypeScript frontend and a Node.js API backed by PostgreSQL, deploy with Docker on AWS, and review code with the rest of a small team.
-
-                Requirements:
-                - 4+ years of full stack experience
-                - TypeScript, React, Next.js, Node.js
-                - PostgreSQL, REST API and GraphQL design
-                - Docker, Git, CI/CD
-                - Nice to have: Redis, Terraform
-                """),
-            new SampleJobDescription("data", "Data", """
-                Data Engineer
-
-                Build and maintain batch and streaming pipelines. You will use Python, SQL, Spark and Airflow on AWS, model data in Snowflake and keep pipelines reliable and tested.
-
-                Requirements:
-                - 4+ years of data engineering experience
-                - Python, SQL, Spark, Airflow
-                - AWS (S3, Glue, Redshift), Snowflake
-                - Kafka is a plus
-                """),
-            new SampleJobDescription("devops", "DevOps", """
-                DevOps Engineer
-
-                Own our cloud platform. You will manage infrastructure as code with Terraform, run workloads on Kubernetes and Docker, build CI/CD pipelines with GitHub Actions and improve monitoring with Prometheus and Grafana.
-
-                Requirements:
-                - 5+ years in DevOps or SRE
-                - AWS, Terraform, Kubernetes, Docker
-                - Linux, Bash, Python scripting
-                - Incident response and observability
-                """),
-            new SampleJobDescription("junior", "Junior", """
-                Junior Software Developer
-
-                Great first or second role. No senior experience needed. You will work with JavaScript, React and Node.js alongside mentors, fix bugs and ship small features.
-
-                Requirements:
-                - 0-2 years of experience or relevant internships
-                - JavaScript, HTML, CSS
-                - Basic Git and SQL
-                - Eagerness to learn
-                """)
-        };
+            using var stream = typeof(SampleJobDescriptions).Assembly.GetManifestResourceStream(ResourceName)
+                ?? throw new InvalidOperationException($"Embedded resource {ResourceName} is missing");
+            return JsonSerializer.Deserialize<List<SampleJobDescription>>(stream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                ?? new List<SampleJobDescription>();
+        }
     }
 }

@@ -2029,6 +2029,19 @@ h1, h2, h3, .form-title {
   opacity: 0.6;
 }
 
+/* Where and when the active sample was posted (APP-05) */
+.sample-picker-source {
+  color: var(--color-text-tertiary);
+  flex-basis: 100%;
+  font-size: var(--font-size-sm);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.sample-picker-source a {
+  color: var(--color-text-link);
+}
+
 /* ===== AppHeader / Hero / AppFooter (UX-02) ===== */
 .app-topbar {
   position: sticky;

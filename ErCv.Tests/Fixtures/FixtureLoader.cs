@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ErCv.Collector;
 using ErCvApi.Models;
 
 namespace ErCv.Tests.Fixtures
@@ -26,6 +27,23 @@ namespace ErCv.Tests.Fixtures
             "spanish"
         };
 
+        public const string CorpusPrefix = "corpus/";
+
+        /// <summary>The committed job-post corpus (APP-05), read from the repository so a refresh is picked up without a rebuild.</summary>
+        public static readonly CorpusStore Corpus = new(Path.Combine(RepoRoot(), "corpus"));
+
+        public static readonly IReadOnlyList<Posting> CorpusPostings = Corpus.LoadPostings();
+
+        /// <summary>One real post per role family (the newest), so the profile x JD matrices stay a reasonable size.</summary>
+        public static readonly string[] CorpusJdNames = CorpusPostings
+            .GroupBy(p => p.RoleFamily)
+            .OrderBy(g => g.Key, StringComparer.Ordinal)
+            .Select(g => CorpusPrefix + g.OrderByDescending(p => p.PostedAt).ThenBy(p => p.Id, StringComparer.Ordinal).First().Id)
+            .ToArray();
+
+        /// <summary>The hand-written edge cases plus the real posts.</summary>
+        public static readonly string[] AllJdNames = JdNames.Concat(CorpusJdNames).ToArray();
+
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
             PropertyNameCaseInsensitive = true
@@ -39,7 +57,9 @@ namespace ErCv.Tests.Fixtures
         }
 
         public static string LoadJd(string name) =>
-            File.ReadAllText(FixturePath("jds", $"{name}.txt"));
+            name.StartsWith(CorpusPrefix, StringComparison.Ordinal)
+                ? CorpusPostings.Single(p => p.Id == name[CorpusPrefix.Length..]).JobDescription
+                : File.ReadAllText(FixturePath("jds", $"{name}.txt"));
 
         public static TheoryData<string> Profiles()
         {
@@ -51,8 +71,22 @@ namespace ErCv.Tests.Fixtures
         public static TheoryData<string> Jds()
         {
             var data = new TheoryData<string>();
-            foreach (var name in JdNames) data.Add(name);
+            foreach (var name in AllJdNames) data.Add(name);
             return data;
+        }
+
+        public static TheoryData<string> CorpusPostingIds()
+        {
+            var data = new TheoryData<string>();
+            foreach (var p in CorpusPostings) data.Add(p.Id);
+            return data;
+        }
+
+        public static string RepoRoot()
+        {
+            for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
+                if (File.Exists(Path.Combine(dir.FullName, "er-cv-generator.sln"))) return dir.FullName;
+            throw new DirectoryNotFoundException("Repository root (er-cv-generator.sln) not found above the test output");
         }
 
         private static string FixturePath(string folder, string file) =>

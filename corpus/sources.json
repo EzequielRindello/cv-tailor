@@ -1,0 +1,194 @@
+{
+  "windowDays": 90,
+  "maxPerBoard": 6,
+  "maxTextLength": 15000,
+  "minTextLength": 400,
+  "delayMs": 1500,
+  "boards": [
+    {
+      "source": "greenhouse",
+      "board": "gitlab",
+      "company": "GitLab"
+    },
+    {
+      "source": "greenhouse",
+      "board": "stripe",
+      "company": "Stripe"
+    },
+    {
+      "source": "greenhouse",
+      "board": "cloudflare",
+      "company": "Cloudflare"
+    },
+    {
+      "source": "greenhouse",
+      "board": "datadog",
+      "company": "Datadog"
+    },
+    {
+      "source": "greenhouse",
+      "board": "figma",
+      "company": "Figma"
+    },
+    {
+      "source": "greenhouse",
+      "board": "discord",
+      "company": "Discord"
+    },
+    {
+      "source": "greenhouse",
+      "board": "airbnb",
+      "company": "Airbnb"
+    },
+    {
+      "source": "greenhouse",
+      "board": "dropbox",
+      "company": "Dropbox"
+    },
+    {
+      "source": "greenhouse",
+      "board": "twilio",
+      "company": "Twilio"
+    },
+    {
+      "source": "greenhouse",
+      "board": "mongodb",
+      "company": "MongoDB"
+    },
+    {
+      "source": "greenhouse",
+      "board": "elastic",
+      "company": "Elastic"
+    },
+    {
+      "source": "greenhouse",
+      "board": "reddit",
+      "company": "Reddit"
+    },
+    {
+      "source": "greenhouse",
+      "board": "robinhood",
+      "company": "Robinhood"
+    },
+    {
+      "source": "greenhouse",
+      "board": "coinbase",
+      "company": "Coinbase"
+    },
+    {
+      "source": "greenhouse",
+      "board": "databricks",
+      "company": "Databricks"
+    },
+    {
+      "source": "greenhouse",
+      "board": "asana",
+      "company": "Asana"
+    },
+    {
+      "source": "greenhouse",
+      "board": "pinterest",
+      "company": "Pinterest"
+    },
+    {
+      "source": "greenhouse",
+      "board": "duolingo",
+      "company": "Duolingo"
+    },
+    {
+      "source": "greenhouse",
+      "board": "grafanalabs",
+      "company": "Grafana Labs"
+    },
+    {
+      "source": "greenhouse",
+      "board": "vercel",
+      "company": "Vercel"
+    },
+    {
+      "source": "lever",
+      "board": "spotify",
+      "company": "Spotify"
+    },
+    {
+      "source": "lever",
+      "board": "palantir",
+      "company": "Palantir"
+    },
+    {
+      "source": "lever",
+      "board": "zoox",
+      "company": "Zoox"
+    },
+    {
+      "source": "lever",
+      "board": "veeva",
+      "company": "Veeva Systems"
+    },
+    {
+      "source": "lever",
+      "board": "binance",
+      "company": "Binance"
+    },
+    {
+      "source": "ashby",
+      "board": "openai",
+      "company": "OpenAI"
+    },
+    {
+      "source": "ashby",
+      "board": "notion",
+      "company": "Notion"
+    },
+    {
+      "source": "ashby",
+      "board": "linear",
+      "company": "Linear"
+    },
+    {
+      "source": "ashby",
+      "board": "ramp",
+      "company": "Ramp"
+    },
+    {
+      "source": "ashby",
+      "board": "supabase",
+      "company": "Supabase"
+    },
+    {
+      "source": "ashby",
+      "board": "posthog",
+      "company": "PostHog"
+    },
+    {
+      "source": "ashby",
+      "board": "replit",
+      "company": "Replit"
+    },
+    {
+      "source": "ashby",
+      "board": "elevenlabs",
+      "company": "ElevenLabs"
+    },
+    {
+      "source": "ashby",
+      "board": "cursor",
+      "company": "Cursor"
+    },
+    {
+      "source": "workable",
+      "board": "huggingface",
+      "company": "Hugging Face"
+    },
+    {
+      "source": "workable",
+      "board": "blueground",
+      "company": "Blueground"
+    },
+    {
+      "source": "workable",
+      "board": "skroutz",
+      "company": "Skroutz"
+    }
+  ]
+}
