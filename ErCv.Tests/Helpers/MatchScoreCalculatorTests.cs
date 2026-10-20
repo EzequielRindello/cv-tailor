@@ -125,5 +125,37 @@ namespace ErCv.Tests.Helpers
 
             Assert.True(m.SeniorityMatch);
         }
+
+        [Fact]
+        public void Keywords_match_whole_words_in_bullets_only()
+        {
+            var cv = Master(new[] { Exp(bullets: new[] { "Improved goodwill with partners" }) });
+
+            var m = _calc.Calculate(cv, Req(keywords: new[] { "good", "partner" }));
+
+            Assert.Equal(0, m.KeywordsMatched);
+        }
+
+        [Fact]
+        public void Keyword_matches_when_the_whole_word_is_present()
+        {
+            var cv = Master(new[] { Exp(bullets: new[] { "Worked with partners on good outcomes" }) });
+
+            var m = _calc.Calculate(cv, Req(keywords: new[] { "good", "partners" }));
+
+            Assert.Equal(2, m.KeywordsMatched);
+        }
+
+        [Fact]
+        public void Seniority_words_in_a_role_match_whole_words_only()
+        {
+            // "Internal" must not be read as "intern": that would be level 1 against a mid-level target (a mismatch).
+            var cv = Master(new[] { Exp(role: "Internal Tools Engineer") });
+
+            var m = _calc.Calculate(cv, Req(seniority: "mid-level"));
+
+            Assert.True(m.SeniorityMatch);
+            Assert.Equal(20, m.Overall);
+        }
     }
 }

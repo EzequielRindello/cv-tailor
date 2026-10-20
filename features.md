@@ -85,7 +85,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | ENG-04 | Options pattern for scoring weights | E8 Engineering | P3 | S | Todo |
 | ENG-05 | Chromium readiness in health check + warm-up | E8 Engineering | P2 | S | Todo |
 | ENG-06 | Modern OpenAPI (built-in + Scalar) | E8 Engineering | P3 | S | Todo |
-| OPS-01 | GitHub Actions CI | E9 DevOps | P0 | M | In progress |
+| OPS-01 | GitHub Actions CI | E9 DevOps | P0 | M | Done |
 | OPS-02 | Dependabot | E9 DevOps | P2 | S | Todo |
 | OPS-03 | README rewrite for portfolio | E9 DevOps | P1 | M | Todo |
 | OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Todo |
@@ -122,18 +122,31 @@ Found during the roadmap review. Each one is covered by a feature below.
 | F10 | Docs drift: legacy FIX-002 says low match is below 30%, code uses below 40%. Node runner expectations depend on a fixture in `testing/`. | `Helpers/MatchScoreCalculator.cs:43`, `testing/` | OPS-04, TEST-09 |
 | F11 | Bullet reordering is drag-only, not keyboard accessible. | `Components/Shared/BulletEditor.razor` | UX-08 |
 
-### New findings (from TEST-02)
+### New findings (from TEST-02 to TEST-05)
 
-Not covered by any feature yet. Each has a skipped test in `ErCv.Tests/Helpers/`.
+Found while writing the tests. All fixed at the end of M1, each with a regression test.
 
-| # | Finding | Where |
+| # | Finding | Status |
 |---|---|---|
-| F12 | `YearsWithTechPattern` captures the word after "N years of" as a skill: `b2b` in a sales JD, `or` in "experience or relevant". A non-tech JD is then treated as technical. | `Helpers/JobDescriptionParser.cs:60`, `JobDescriptionConstants.YearsWithTechPattern` |
-| F13 | `MatchScoreCalculator` keyword matching uses substring `Contains` (same class as F1/F2). | `Helpers/MatchScoreCalculator.cs:30` |
-| F14 | `FuzzyMatch` also misfiles skills as nice-to-have (`rust` matches `zero trust`). Covered by the MATCH-01 fix. | `Helpers/MissingSkillsAnalyzer.cs:30` |
-| F15 | DOCX is schema-invalid: `SectionProperties` is appended as the first child of `w:body`, the schema requires it last. | `Helpers/DocumentRenderer.cs:134` |
-| F16 | Modern template PDF loses characters at text-extraction level (`backoff reducing` becomes `backoreducing`), which hurts ATS parsing. Root cause not confirmed. | `Templates/modern-template.html` |
-| F17 | `POST /api/cv/regenerate` without `generatedCV` answers 200 with an empty document: `RegenerateRequest.GeneratedCV` defaults to `new()`, so the null check in `ValidateRegenerateRequest` never fires. | `Services/CVGeneratorService.cs:286`, `Models/FeatureModels.cs:58` |
+| F12 | `YearsWithTechPattern` captured the word after "N years of/in" as a skill (`b2b`, `or`, `in`), and the single-letter skill `c` matched inside accented words ("código"). Parser now matches whole tokens and ignores connector words. | Fixed |
+| F13 | Keyword, bullet, project and seniority matching used substring `Contains` (same class as F1/F2), e.g. `intern` in `Internal`. Now whole-token. | Fixed |
+| F14 | `FuzzyMatch` misfiled skills as nice-to-have (`rust` matched `zero trust`). | Fixed with MATCH-01 |
+| F15 | DOCX was schema-invalid: `SectionProperties` was the first child of `w:body`, the schema requires it last. | Fixed |
+| F16 | Modern template PDF lost the last characters of long lines: the grid was `38% 62%` plus a 10pt gap, wider than the printable area, so Chromium clipped it. Now `38% 1fr`. | Fixed |
+| F17 | `POST /api/cv/regenerate` without `generatedCV` answered 200 with an empty document (the property defaulted to `new()`). Now 400. | Fixed |
+
+### Open items after M1
+
+Nothing in M1 is blocked. These were deliberately left to the milestone that owns them:
+
+| Item | Why it is not in M1 | Owner |
+|---|---|---|
+| F6: a Minimalist CV in 1-page mode can spill onto a second page (18 of 36 combinations). Test `Minimalist_one_page_mode_stays_on_one_page` is written and skipped. | Fixing it properly means measuring the rendered page instead of estimating from character counts. | MATCH-08 (M4) |
+| OPS-01 E2E job | Needs Playwright tests. | TEST-07 (M2) |
+| Coverage report and 80% target | Needs coverlet. | TEST-10 (M5) |
+| MATCH-01 "snapshot diff reviewed" | Reviewed by hand over the 36 corpus combinations (only junk skills such as `in` and `or` stopped matching); the automatic snapshots do not exist yet. | TEST-08 (M5) |
+| TEST-06 (bUnit) and TEST-07 (Playwright) | Not started on purpose: the components and selectors are redesigned in M2. Both need package downloads that have to be approved first. | M5 / M2 |
+| Parser: `objective-c` also yields the skill `c` (a hyphen is not treated as part of a token). | Minor and ambiguous (`go-to-market` would be the opposite case). | Backlog |
 
 ---
 
@@ -165,7 +178,7 @@ Verify: `dotnet test` passes.
 - [x] `MatchScoreCalculator`, `MissingSkillsAnalyzer`, `KeywordAnalyzer`, `ATSChecker`: scores, thresholds, color classes, issue ordering
 - [x] `SummaryGenerator`: role type detection, years of experience, 300-char cap
 
-Notes: the tests for F1, F2 and F3 were written first and skipped with the ticket id; they are active now that `MATCH-01`, `MATCH-02` and `MATCH-03` landed. Two parser findings found while writing these (`b2b` and `or` captured as skills from "N years of ...") are also skipped, see "New findings" below.
+Notes: the tests for F1, F2 and F3 were written first and skipped with the ticket id; they are active now that `MATCH-01`, `MATCH-02` and `MATCH-03` landed. The parser findings found while writing them (F12) are fixed too, see "New findings".
 
 Files: `ErCv.Tests/Helpers/*`
 Verify: `dotnet test --filter Category=Unit`.
@@ -183,7 +196,7 @@ Why: these prove the core promise of the product. Run for every JD in the corpus
 - [x] Match and ATS scores stay within 0 to 100
 - [x] Master profile object is not mutated by generation (F5)
 
-Note: the "no mutation" invariant passes today for generation itself. The stricter aliasing check (editing the generated CV must not touch the master) is written and skipped until ENG-02, because Header and Education are shared references (F5).
+Note: the "no mutation" invariant passes today for generation itself. The stricter aliasing check (editing the generated CV must not touch the master) was skipped until ENG-02 and is active now.
 
 Files: `ErCv.Tests/Invariants/*`
 Verify: theory tests over the corpus pass.
@@ -196,7 +209,7 @@ Verify: theory tests over the corpus pass.
 - [x] PDF text extraction (ATS simulation): extracted text contains the name, every section title and every selected bullet, in reading order
 - [x] HTML preview contains no unrendered Mustache tags (`{{`)
 
-Notes: DOCX and HTML tests run over profiles x corpus JDs (x templates for HTML); PDF tests over profiles x JDs x 3 templates x 1/2 pages. PDF tests take about 1.5 minutes, use `--filter Category=Documents` to run or exclude them. Two groups are written and skipped: Minimalist 1-page spill (F6, MATCH-08) and Modern PDF text extraction (F16). The DOCX schema validation test is skipped (F15). Chromium is downloaded on first use if `PUPPETEER_EXECUTABLE_PATH` is not set.
+Notes: DOCX and HTML tests run over profiles x corpus JDs (x templates for HTML); PDF tests over profiles x JDs x 3 templates x 1/2 pages. PDF tests take about 1.5 minutes, use `--filter Category=Documents` to run or exclude them. The only skipped group is the Minimalist 1-page spill (F6, MATCH-08, M4). The Modern text extraction (F16) and the DOCX schema validation (F15) are active: both caught real bugs that are fixed. Chromium is downloaded on first use if `PUPPETEER_EXECUTABLE_PATH` is not set.
 
 Files: `ErCv.Tests/Documents/*`
 Verify: tests pass locally and in CI (Chromium available).
@@ -213,7 +226,7 @@ Verify: tests pass locally and in CI (Chromium available).
 - [x] 429 after the rate limit (60 per minute)
 - [x] `GET /api/cv/health` and `GET /api/cv/profiles`
 
-Notes: each test boots its own app (the rate limiter and session store are per app). API tests share the `Documents` collection with the PDF tests because the app closes the shared Chromium on shutdown. `Program.cs` gets `public partial class Program { }` so `WebApplicationFactory<Program>` can find the entry point. Skipped: unknown or traversal `profileId` answers 500 with `ex.Message` instead of a 4xx (F8, ENG-03), and `regenerate` without a `generatedCV` answers 200 (F17).
+Notes: each test boots its own app (the rate limiter and session store are per app). API tests share the `Documents` collection with the PDF tests because the app closes the shared Chromium on shutdown. `Program.cs` gets `public partial class Program { }` so `WebApplicationFactory<Program>` can find the entry point. Nothing is skipped: the unknown or traversal `profileId` case (F8, ENG-03) and the missing `generatedCV` case (F17) were skipped until fixed.
 
 Files: `ErCv.Tests/Api/*`
 Verify: tests pass with `WebApplicationFactory<Program>`.
@@ -701,14 +714,14 @@ Verify: TEST-05 health response; manual cold-start timing.
 ## E9. DevOps and portfolio presentation
 
 ### OPS-01: GitHub Actions CI
-**Status:** In progress · **Priority:** P0 · **Effort:** M
+**Status:** Done · **Priority:** P0 · **Effort:** M
 
 - [x] On push and PR: restore, build, unit + integration tests (coverage arrives with TEST-10)
 - [x] Docker image build
 - [ ] E2E job (Playwright), arrives with TEST-07
 - [x] Status badge in README
 
-Notes: `.github/workflows/ci.yml` runs the same commands that pass locally (restore, build and test in Release). PDF tests use the Chrome preinstalled on the runner through `PUPPETEER_EXECUTABLE_PATH`. Not verified on GitHub yet: the first push or PR has to go green before this is Done.
+Notes: `.github/workflows/ci.yml` runs the same commands that pass locally (restore, build and test in Release). PDF tests use the Chrome preinstalled on the runner through `PUPPETEER_EXECUTABLE_PATH`. Verified on PR #7: build and test (3389 passed, 6 skipped, about 2 minutes) and the Docker image build both green.
 
 Verify: green run on a PR.
 

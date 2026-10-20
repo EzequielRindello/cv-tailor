@@ -108,14 +108,14 @@ namespace ErCv.Tests.Helpers
             Assert.Contains(b, r.TechnicalSkills);
         }
 
-        // Found while writing TEST-02: YearsWithTechPattern captures the word after "N years of" as a skill.
-        [Fact(Skip = "NEW FINDING: 'years of B2B' is captured as a tech skill, so a sales JD looks technical")]
+        // F12: YearsWithTechPattern used to capture the word after "N years of" as a skill ("B2B").
+        [Fact]
         public void Sales_jd_has_no_technical_skills()
         {
             Assert.Empty(_parser.Parse(FixtureLoader.LoadJd("sales-non-tech")).TechnicalSkills);
         }
 
-        [Fact(Skip = "NEW FINDING: 'experience or relevant' yields the skill 'or'")]
+        [Fact]
         public void Junior_jd_does_not_extract_filler_words_as_skills()
         {
             var r = _parser.Parse(FixtureLoader.LoadJd("junior"));
@@ -143,6 +143,35 @@ namespace ErCv.Tests.Helpers
             Assert.Contains("postgresql", r.TechnicalSkills);
             Assert.Contains("aws", r.TechnicalSkills);
             Assert.Equal("senior", r.SeniorityLevel);
+        }
+
+        [Theory]
+        [InlineData("5 years in DevOps or SRE", "in")]
+        [InlineData("3+ years of B2B sales", "b2b")]
+        [InlineData("2 years or more", "or")]
+        public void Connector_words_after_years_are_not_skills(string jd, string notASkill)
+        {
+            Assert.DoesNotContain(notASkill, _parser.Parse(jd).TechnicalSkills);
+        }
+
+        [Fact]
+        public void Years_with_a_technology_still_captures_unlisted_technologies()
+        {
+            Assert.Contains("haskell", _parser.Parse("5+ years of experience with Haskell").TechnicalSkills);
+        }
+
+        [Theory]
+        [InlineData("Revisiones de c\u00f3digo y despliegues continuos")]
+        [InlineData("Trabajamos con C# y C++ todos los d\u00edas")]
+        public void The_single_letter_language_c_is_not_found_inside_other_words_or_c_sharp(string jd)
+        {
+            Assert.DoesNotContain("c", _parser.Parse(jd).TechnicalSkills);
+        }
+
+        [Fact]
+        public void The_single_letter_language_c_is_found_when_it_is_named()
+        {
+            Assert.Contains("c", _parser.Parse("Experience with C, Linux and Bash").TechnicalSkills);
         }
     }
 }

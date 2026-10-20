@@ -55,7 +55,7 @@ namespace ErCvApi.Models
 
     public class RegenerateRequest
     {
-        public GeneratedCV GeneratedCV { get; set; } = new();
+        public GeneratedCV? GeneratedCV { get; set; }
         public Dictionary<string, List<int>> BulletSelections { get; set; } = new();
         public List<string> Formats { get; set; } = new();
         public CVTemplate Template { get; set; } = CVTemplate.Harvard;

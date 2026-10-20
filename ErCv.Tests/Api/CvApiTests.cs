@@ -61,7 +61,9 @@ namespace ErCv.Tests.Api
             Assert.Equal(HttpStatusCode.OK, download.StatusCode);
             Assert.Equal("application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 download.Content.Headers.ContentType?.MediaType);
-            Assert.Equal(filename, download.Content.Headers.ContentDisposition?.FileName);
+            // The timestamp in the name has one second resolution and is computed on each call, so only the shape is stable.
+            Assert.Matches(@"^CV_\d{8}_\d{6}\.docx$", filename);
+            Assert.Matches(@"^CV_\d{8}_\d{6}\.docx$", download.Content.Headers.ContentDisposition?.FileName);
             Assert.Equal(size, bytes.Length);
             Assert.Equal("PK", System.Text.Encoding.ASCII.GetString(bytes, 0, 2));
         }
@@ -342,9 +344,9 @@ namespace ErCv.Tests.Api
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        // NEW FINDING F17: RegenerateRequest.GeneratedCV defaults to new(), so the null check never fires and an
-        // empty CV is rendered and stored instead of answering 400.
-        [Fact(Skip = "NEW FINDING F17: regenerate without a generatedCV answers 200 with an empty document")]
+        // F17: RegenerateRequest.GeneratedCV used to default to new(), so the null check never fired and an
+        // empty CV was rendered and stored instead of answering 400.
+        [Fact]
         public async Task Regenerate_rejects_a_missing_cv_with_400()
         {
             using var app = new ApiApp();

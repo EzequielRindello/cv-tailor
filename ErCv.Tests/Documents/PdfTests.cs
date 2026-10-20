@@ -18,11 +18,9 @@ namespace ErCv.Tests.Documents
         public static TheoryData<string, string, CVTemplate, bool> MinimalistOnePageCases =>
             Filter((t, two) => t == CVTemplate.Minimalist && !two);
 
-        public static TheoryData<string, string, CVTemplate, bool> ExtractionCases =>
+        // The Modern template is two columns, so its linear reading order is not meaningful for an ATS check.
+        public static TheoryData<string, string, CVTemplate, bool> ReadingOrderCases =>
             Filter((t, _) => t != CVTemplate.Modern);
-
-        public static TheoryData<string, string, CVTemplate, bool> ModernCases =>
-            Filter((t, _) => t == CVTemplate.Modern);
 
         private static TheoryData<string, string, CVTemplate, bool> Filter(Func<CVTemplate, bool, bool> keep)
         {
@@ -96,22 +94,16 @@ namespace ErCv.Tests.Documents
         public Task Minimalist_one_page_mode_stays_on_one_page(string profile, string jd, CVTemplate template, bool twoPages) =>
             AssertPageCount(profile, jd, template, twoPages);
 
+        // F16: the Modern grid was wider than the printable area (38% + 62% + gap), so Chromium clipped the end of
+        // long lines and the text layer lost characters. Covered for every template.
         [Theory]
-        [MemberData(nameof(ExtractionCases))]
+        [MemberData(nameof(Cases))]
         public Task Extracted_text_contains_name_titles_and_every_bullet(
             string profile, string jd, CVTemplate template, bool twoPages) =>
             AssertContainsNameTitlesAndBullets(profile, jd, template, twoPages);
 
-        // F16: the Modern PDF loses characters at text-extraction level, e.g. "backoff reducing" becomes
-        // "backoreducing". Root cause not confirmed (template layout or font ligatures).
-        [Theory(Skip = "NEW FINDING F16: Modern PDF text extraction drops characters")]
-        [MemberData(nameof(ModernCases))]
-        public Task Modern_extracted_text_contains_name_titles_and_every_bullet(
-            string profile, string jd, CVTemplate template, bool twoPages) =>
-            AssertContainsNameTitlesAndBullets(profile, jd, template, twoPages);
-
         [Theory]
-        [MemberData(nameof(ExtractionCases))]
+        [MemberData(nameof(ReadingOrderCases))]
         public async Task Extracted_text_follows_reading_order(string profile, string jd, CVTemplate template, bool twoPages)
         {
             var (pdf, cv) = await RenderAsync(profile, jd, template, twoPages);

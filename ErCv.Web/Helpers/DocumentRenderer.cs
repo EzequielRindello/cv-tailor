@@ -131,9 +131,6 @@ namespace ErCvApi.Helpers
                 mainPart.Document = new Document();
                 var body = mainPart.Document.AppendChild(new Body());
 
-                body.AppendChild(new SectionProperties(
-                    new PageMargin { Top = 720, Bottom = 720, Left = 1080, Right = 1080 }));
-
                 AddHeader(body, cv.Header);
 
                 if (!string.IsNullOrEmpty(cv.Summary))
@@ -162,6 +159,10 @@ namespace ErCvApi.Helpers
                     foreach (var project in cv.Projects)
                         AddProject(body, project);
                 }
+
+                // The schema requires the section properties to be the last child of the body
+                body.AppendChild(new SectionProperties(
+                    new PageMargin { Top = 720, Bottom = 720, Left = 1080, Right = 1080 }));
 
                 mainPart.Document.Save();
             }

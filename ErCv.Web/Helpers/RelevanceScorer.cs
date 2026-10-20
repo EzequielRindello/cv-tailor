@@ -109,8 +109,8 @@ namespace ErCvApi.Helpers
 
             foreach (var kvp in MatchScoreConstants.SeniorityMap)
             {
-                if (role.ToLower().Contains(kvp.Key)) roleLevel = kvp.Value;
-                if (targetSeniority.ToLower().Contains(kvp.Key)) targetLevel = kvp.Value;
+                if (SkillNormalizer.ContainsTerm(role, kvp.Key)) roleLevel = kvp.Value;
+                if (SkillNormalizer.ContainsTerm(targetSeniority, kvp.Key)) targetLevel = kvp.Value;
             }
 
             return Math.Abs(roleLevel - targetLevel) switch

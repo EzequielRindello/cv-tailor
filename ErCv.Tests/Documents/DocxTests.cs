@@ -90,8 +90,8 @@ namespace ErCv.Tests.Documents
                 bullets);
         }
 
-        // NEW FINDING F15: SectionProperties is appended as the first child of Body; the schema requires it last.
-        [Theory(Skip = "NEW FINDING F15: sectPr is the first child of w:body, schema requires it last")]
+        // F15: SectionProperties used to be the first child of Body; the schema requires it last.
+        [Theory]
         [MemberData(nameof(Cases))]
         public void Document_passes_openxml_schema_validation(string profile, string jd, bool twoPages)
         {
@@ -102,6 +102,20 @@ namespace ErCv.Tests.Documents
             var errors = new OpenXmlValidator().Validate(doc).Select(e => e.Description).Distinct().ToList();
 
             Assert.True(errors.Count == 0, string.Join(" || ", errors));
+        }
+
+        [Theory]
+        [MemberData(nameof(Cases))]
+        public void Section_properties_are_the_last_child_of_the_body(string profile, string jd, bool twoPages)
+        {
+            var bytes = Render(profile, jd, twoPages, out _);
+
+            using var stream = new MemoryStream(bytes);
+            using var doc = WordprocessingDocument.Open(stream, false);
+            var body = doc.MainDocumentPart!.Document!.Body!;
+
+            Assert.IsType<SectionProperties>(body.LastChild);
+            Assert.Single(body.Elements<SectionProperties>());
         }
     }
 }

@@ -157,13 +157,13 @@ namespace ErCvApi.Helpers
                 var bullet = bullets[i];
                 double score = 0;
                 foreach (var skill in matchedSkills)
-                    if (bullet.Contains(skill, StringComparison.OrdinalIgnoreCase))
+                    if (SkillNormalizer.ContainsSkill(bullet, skill))
                         score += 10.0;
                 foreach (var techSkill in requirements.TechnicalSkills)
                     if (SkillNormalizer.MatchesAny(techSkill, new[] { bullet }))
                         score += 8.0;
                 foreach (var keyword in requirements.Keywords.Take(10))
-                    if (bullet.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                    if (SkillNormalizer.ContainsTerm(bullet, keyword))
                         score += 3.0;
                 if (Regex.IsMatch(bullet, @"\d+[%x]|\d+[MK]\+?|[\d,]{3,}\+?"))
                     score += 6.0;
@@ -194,7 +194,7 @@ namespace ErCvApi.Helpers
                         string.Join(" ", p.Highlights ?? new List<string>())).ToLower();
 
                     foreach (var kw in requirements.Keywords.Take(10))
-                        if (text.Contains(kw)) score += 2.0;
+                        if (SkillNormalizer.ContainsTerm(text, kw)) score += 2.0;
 
                     return (Project: p, Score: score);
                 })

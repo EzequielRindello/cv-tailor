@@ -26,7 +26,7 @@ namespace ErCvApi.Helpers
             var totalKeywords = Math.Max(evaluatedKeywords.Count, 1);
 
             var matchedKeywords = evaluatedKeywords
-                .Count(k => allBullets.Any(b => b.Contains(k.ToLower())));
+                .Count(k => allBullets.Any(b => SkillNormalizer.ContainsTerm(b, k)));
 
             var keywordPercentage = Math.Min(
                 (double)matchedKeywords / totalKeywords * 100 *
@@ -74,8 +74,8 @@ namespace ErCvApi.Helpers
 
             foreach (var kvp in seniorityMap)
             {
-                if (mostRecentRole.Contains(kvp.Key)) cvLevel = kvp.Value;
-                if (requirements.SeniorityLevel.Contains(kvp.Key, StringComparison.OrdinalIgnoreCase))
+                if (SkillNormalizer.ContainsTerm(mostRecentRole, kvp.Key)) cvLevel = kvp.Value;
+                if (SkillNormalizer.ContainsTerm(requirements.SeniorityLevel, kvp.Key))
                     targetLevel = kvp.Value;
             }
 

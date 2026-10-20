@@ -92,7 +92,10 @@ er-cv-generator/
 │   │   ├── RelevanceScorer.cs               # scores each experience: skills 40%, keywords 30%, recency 20%, seniority 10%
 │   │   ├── CVSelector.cs                    # picks top experiences/bullets; deprioritizes non-tech roles for tech JDs
 │   │   ├── SummaryGenerator.cs              # builds 2-3 line summary: role + tech YoE + skills + achievement + soft skills
-│   │   ├── PageConstraintHelper.cs          # trims bullets → projects → experiences to enforce page limit
+│   │   ├── PageConstraintHelper.cs          # trims bullets → projects → experiences to enforce page limit (returns a copy)
+│   │   ├── DateParser.cs                    # "Jun 2024", "2024-06", "Present"... to month indexes; recency and merged years of experience
+│   │   ├── SkillNormalizer.cs               # skill aliases, whole-token matching (ContainsTerm / ContainsSkill)
+│   │   ├── CvCloner.cs                      # deep copies, so a generated CV never shares state with the master
 │   │   ├── DocumentRenderer.cs              # Mustache HTML → PDF via PuppeteerSharp, DOCX via OpenXML
 │   │   ├── MatchScoreCalculator.cs          # overall % = skills(50%) + keywords(30%) + seniority(20%)
 │   │   ├── MissingSkillsAnalyzer.cs         # required vs nice-to-have gaps with suggestions
@@ -120,6 +123,8 @@ er-cv-generator/
 │   ├── UI/                                  # BrowserStore (localStorage) + UI models
 │   ├── wwwroot/                             # css/site.css, js/app.js, lib/ (Bootstrap 5.3.2 + Icons 1.13.1, vendored)
 │   └── Program.cs                           # Blazor + API + rate limiter + forwarded headers, binds to PORT
+├── ErCv.Tests/                              # xUnit: Helpers (unit), Invariants, Documents (DOCX/PDF/HTML), Api, Fixtures (profiles + JD corpus)
+├── .github/workflows/ci.yml                 # restore, build, test, Docker image build
 ├── Dockerfile                               # build + runtime image with Chromium
 └── render.yaml                              # Render web service (Docker)
 ```
@@ -184,7 +189,21 @@ er-cv-generator/
 ### version 2.0.1
 ---
 
-## Testing Scripts
+## Tests
+
+```
+dotnet test                                      # everything, about 2 minutes (PDF tests render with headless Chrome)
+dotnet test --filter Category=Unit               # helpers only, under a second
+dotnet test --filter Category=Invariant          # the product promise: output only contains what the master profile says
+dotnet test --filter Category=Api                # WebApplicationFactory integration tests
+dotnet test --filter Category=Documents          # DOCX, PDF and HTML preview
+```
+
+PDF tests use the Chromium that PuppeteerSharp downloads on first use; set `PUPPETEER_EXECUTABLE_PATH` to use an installed Chrome instead (CI does). One test is skipped on purpose: Minimalist 1-page mode can spill onto a second page (`MATCH-08` in `features.md`).
+
+---
+
+## Testing Scripts (legacy, replaced by `dotnet test`)
 
 - `node testing/test-runner-2.0.1.js`
 - `node testing/test-runner-2.0.1.js --tc TC-01`

@@ -138,5 +138,37 @@ namespace ErCv.Tests.Helpers
             Assert.NotSame(cv.Experience[0].Bullets, result.Experience[0].Bullets);
             Assert.All(result.Projects, p => Assert.DoesNotContain(cv.Projects, m => ReferenceEquals(m, p)));
         }
+
+        [Fact]
+        public void Bullet_scoring_does_not_count_a_skill_inside_another_word()
+        {
+            // The three "related" bullets only contain "go" inside "good"; the real one names the Go skill.
+            var related = "Improved the good team spirit and delivery rhythm by 40% across the whole department staff";
+            var real = "Wrote the Go service that handles the payment retries for all merchants";
+            var cv = Master(new[]
+            {
+                Exp(role: "Backend Engineer", skills: new[] { "go" },
+                    bullets: new[] { related, related + " 2", related + " 3", real })
+            }, languages: new[] { "go" });
+
+            var selected = _selector.SelectAndAdaptCV(cv, Req(skills: new[] { "go" })).Experience.Single().Bullets;
+
+            Assert.Contains(real, selected);
+        }
+
+        [Fact]
+        public void Project_ranking_uses_whole_word_keywords()
+        {
+            var cv = Master(new[] { Exp(role: "Engineer", bullets: new[] { LongBullet }) });
+            cv.Projects = new List<Project>
+            {
+                new() { Name = "Substring", Description = "A goodwill campaign", Technologies = new() { "swift" } },
+                new() { Name = "Whole", Description = "A good campaign", Technologies = new() { "swift" } }
+            };
+
+            var result = _selector.SelectAndAdaptCV(cv, Req(keywords: new[] { "good" }));
+
+            Assert.Equal("Whole", result.Projects.Single().Name);
+        }
     }
 }

@@ -208,7 +208,7 @@ namespace ErCvApi.Services
 
         private async Task<(Dictionary<string, byte[]> Documents, string PreviewHtml)> RegenerateCVInternalAsync(RegenerateRequest request)
         {
-            var cv = CvCloner.Clone(request.GeneratedCV);
+            var cv = CvCloner.Clone(request.GeneratedCV!);
 
             for (int i = 0; i < cv.Experience.Count; i++)
             {
