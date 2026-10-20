@@ -35,7 +35,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | TEST-02 | Unit tests per helper | E1 Tests | P0 | L | Done |
 | TEST-03 | Invariant tests (no fabrication, ordering, bounds) | E1 Tests | P0 | M | Done |
 | TEST-04 | Document tests (DOCX structure, PDF pages + text extraction) | E1 Tests | P0 | M | Done |
-| TEST-05 | API integration tests (WebApplicationFactory) | E1 Tests | P0 | M | Todo |
+| TEST-05 | API integration tests (WebApplicationFactory) | E1 Tests | P0 | M | Done |
 | TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | Todo |
 | TEST-07 | End-to-end tests (Playwright) | E1 Tests | P1 | L | Todo |
 | TEST-08 | Golden snapshot tests for generation output | E1 Tests | P2 | S | Todo |
@@ -133,6 +133,7 @@ Not covered by any feature yet. Each has a skipped test in `ErCv.Tests/Helpers/`
 | F14 | `FuzzyMatch` also misfiles skills as nice-to-have (`rust` matches `zero trust`). Covered by the MATCH-01 fix. | `Helpers/MissingSkillsAnalyzer.cs:30` |
 | F15 | DOCX is schema-invalid: `SectionProperties` is appended as the first child of `w:body`, the schema requires it last. | `Helpers/DocumentRenderer.cs:134` |
 | F16 | Modern template PDF loses characters at text-extraction level (`backoff reducing` becomes `backoreducing`), which hurts ATS parsing. Root cause not confirmed. | `Templates/modern-template.html` |
+| F17 | `POST /api/cv/regenerate` without `generatedCV` answers 200 with an empty document: `RegenerateRequest.GeneratedCV` defaults to `new()`, so the null check in `ValidateRegenerateRequest` never fires. | `Services/CVGeneratorService.cs:286`, `Models/FeatureModels.cs:58` |
 
 ---
 
@@ -201,16 +202,18 @@ Files: `ErCv.Tests/Documents/*`
 Verify: tests pass locally and in CI (Chromium available).
 
 ### TEST-05: API integration tests
-**Status:** Todo · **Priority:** P0 · **Effort:** M
+**Status:** Done · **Priority:** P0 · **Effort:** M
 
-- [ ] `POST /api/cv/generate` returns 200 with files, scores and preview
-- [ ] `POST /api/cv/regenerate` respects bullet selections and order
-- [ ] `GET /api/cv/download/{format}` session round-trip; 404 when the session is empty
-- [ ] 400 for empty JD, missing formats, unsupported formats
-- [ ] Path-traversal `profileId` (`../../appsettings`) is rejected
-- [ ] 413 when session size limits are exceeded
-- [ ] 429 after the rate limit (60 per minute)
-- [ ] `GET /api/cv/health` and `GET /api/cv/profiles`
+- [x] `POST /api/cv/generate` returns 200 with files, scores and preview
+- [x] `POST /api/cv/regenerate` respects bullet selections and order
+- [x] `GET /api/cv/download/{format}` session round-trip; 404 when the session is empty
+- [x] 400 for empty JD, missing formats, unsupported formats
+- [x] Path-traversal `profileId` (`../../appsettings`) is rejected
+- [x] 413 when session size limits are exceeded
+- [x] 429 after the rate limit (60 per minute)
+- [x] `GET /api/cv/health` and `GET /api/cv/profiles`
+
+Notes: each test boots its own app (the rate limiter and session store are per app). API tests share the `Documents` collection with the PDF tests because the app closes the shared Chromium on shutdown. `Program.cs` gets `public partial class Program { }` so `WebApplicationFactory<Program>` can find the entry point. Skipped: unknown or traversal `profileId` answers 500 with `ex.Message` instead of a 4xx (F8, ENG-03), and `regenerate` without a `generatedCV` answers 200 (F17).
 
 Files: `ErCv.Tests/Api/*`
 Verify: tests pass with `WebApplicationFactory<Program>`.

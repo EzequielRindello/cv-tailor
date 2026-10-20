@@ -82,3 +82,6 @@ app.MapRazorComponents<App>()
 app.Lifetime.ApplicationStopping.Register(() => ErCvApi.Helpers.DocumentRenderer.ShutdownAsync().GetAwaiter().GetResult());
 
 app.Run();
+
+// Lets WebApplicationFactory<Program> reach the top-level entry point from the test project
+public partial class Program { }
