@@ -109,9 +109,12 @@ namespace ErCvApi.Helpers
         /// True when <paramref name="term"/> appears in <paramref name="text"/> as a whole token, so "go" does not
         /// match "google" or "good", "java" does not match "javascript" and "c" does not match "c#" or "c++".
         /// </summary>
-        public static bool ContainsTerm(string? text, string? term)
+        public static bool ContainsTerm(string? text, string? term) => FindTerm(text, term).Any();
+
+        /// <summary>Every place <paramref name="term"/> appears in <paramref name="text"/> as a whole token (see <see cref="ContainsTerm"/>).</summary>
+        public static IEnumerable<(int Start, int Length)> FindTerm(string? text, string? term)
         {
-            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(term)) return false;
+            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(term)) yield break;
 
             term = term.Trim();
             var at = 0;
@@ -120,10 +123,28 @@ namespace ErCvApi.Helpers
                 var end = at + term.Length;
                 var startsToken = at == 0 || !char.IsLetterOrDigit(text[at - 1]);
                 var endsToken = end >= text.Length || !(char.IsLetterOrDigit(text[end]) || text[end] == '#' || text[end] == '+');
-                if (startsToken && endsToken) return true;
-                at++;
+                if (startsToken && endsToken)
+                {
+                    yield return (at, term.Length);
+                    at = end;
+                }
+                else
+                {
+                    at++;
+                }
             }
-            return false;
+        }
+
+        /// <summary>Like <see cref="FindTerm"/>, but also finds every alias of the skill ("golang" for "go").</summary>
+        public static IEnumerable<(int Start, int Length)> FindSkill(string? text, string? skill)
+        {
+            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(skill)) return Enumerable.Empty<(int, int)>();
+
+            var canonical = Normalize(skill);
+            var terms = new List<string> { canonical };
+            if (AliasesByCanonical.Value.TryGetValue(canonical, out var aliases)) terms.AddRange(aliases);
+
+            return terms.SelectMany(t => FindTerm(text, t));
         }
 
         /// <summary>Like <see cref="ContainsTerm"/>, but also accepts any alias of the skill ("golang" for "go").</summary>

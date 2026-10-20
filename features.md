@@ -36,7 +36,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | TEST-03 | Invariant tests (no fabrication, ordering, bounds) | E1 Tests | P0 | M | Done |
 | TEST-04 | Document tests (DOCX structure, PDF pages + text extraction) | E1 Tests | P0 | M | Done |
 | TEST-05 | API integration tests (WebApplicationFactory) | E1 Tests | P0 | M | Done |
-| TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | Todo |
+| TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | In progress |
 | TEST-07 | End-to-end tests (Playwright) | E1 Tests | P1 | L | Done |
 | TEST-08 | Golden snapshot tests for generation output | E1 Tests | P2 | S | Todo |
 | TEST-09 | Retire the Node scripts in `testing/` | E1 Tests | P2 | S | Todo |
@@ -60,7 +60,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | MATCH-02 | Word-boundary ATS keyword density | E4 Matching | P0 | S | Done |
 | MATCH-03 | Shared date parser + correct "most recent role" | E4 Matching | P0 | M | Done |
 | MATCH-04 | Explainability: "why this was chosen" | E4 Matching | P1 | M | Done |
-| MATCH-05 | JD highlighter | E4 Matching | P1 | M | Todo |
+| MATCH-05 | JD highlighter | E4 Matching | P1 | M | Done |
 | MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Todo |
 | MATCH-07 | Skill/alias dictionary as data file | E4 Matching | P2 | S | Todo |
 | MATCH-08 | Page fit measured on the rendered PDF | E4 Matching | P1 | M | Todo |
@@ -244,7 +244,7 @@ Files: `ErCv.Tests/Api/*`
 Verify: tests pass with `WebApplicationFactory<Program>`.
 
 ### TEST-06: Blazor component tests (bUnit)
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** In progress (`bunit` 2.12.5 added in M3 with the JD highlighter tests; the checklist below is still to do, M5) · **Priority:** P1 · **Effort:** M
 
 - [ ] BulletEditor: at least 1 bullet always selected, reorder updates selections, emitted selections map is correct
 - [ ] Template, format and page selectors emit the right values and respect `Disabled`
@@ -516,12 +516,15 @@ Files: `Helpers/CVSelector.cs`, `Helpers/RelevanceScorer.cs`, `Models/Explanatio
 Verify: `SelectionExplanationTests` (parts sum to the score over profiles x corpus x 1/2 pages); E2E `Why_tab_explains_each_role_and_bullet_with_its_score_parts` and the axe scan of the Why tab.
 
 ### MATCH-05: JD highlighter
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** Done · **Priority:** P1 · **Effort:** M
 
-- [ ] JD rendered with matched skills in green and missing ones in red
-- [ ] Click a highlighted skill to see where it appears in the CV
+- [x] JD rendered with matched skills in green and missing ones in red
+- [x] Click a highlighted skill to see where it appears in the CV
 
-Verify: bUnit test for highlighting; HTML-encoded output (no XSS).
+Notes: new "Job" tab (`JdHighlightCard`). `JdHighlighter` cuts the job description into segments (joining them gives the JD back exactly) and finds each skill the parser extracted, whole tokens only, longest match first (`React Native` is one highlight), with aliases (`Golang` for `go`). Aliases that are also everyday words (`next`, `RN`, `ml`...) are not highlighted. "Matched" means the profile lists the skill or a bullet mentions it (same rule as the Gaps tab, now shared through `MissingSkillsAnalyzer.IsInProfile`), so it does not depend on what this CV happened to include. Clicking a skill lists where it appears in the generated CV (skills list, role bullets and tags, projects, summary); a skill that is in the profile but not in this CV says so. Status is not color only: matched is underlined, missing is dashed. The tab strip now scrolls sideways if six tabs do not fit. `SkillNormalizer` gained `FindTerm` / `FindSkill` (positions); `ContainsTerm` is built on `FindTerm`.
+
+Files: `Helpers/JdHighlighter.cs`, `Models/JdHighlightModels.cs`, `Components/Shared/JdHighlightCard.razor`, `Helpers/SkillNormalizer.cs`
+Verify: `JdHighlighterTests` (lossless split over profiles x corpus, whole tokens, locations, markup stays text); `JdHighlightCardTests` (bUnit: HTML-encoded output, selection, labels); E2E `Job_tab_highlights_skills_and_shows_where_one_appears_in_the_cv` and the axe scan of the Job tab.
 
 ### MATCH-06: Required vs nice-to-have from JD sections
 **Status:** Todo · **Priority:** P2 · **Effort:** M

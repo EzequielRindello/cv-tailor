@@ -43,6 +43,40 @@ namespace ErCv.E2E
         }
 
         [Fact]
+        public async Task Why_tab_card_uses_the_same_surface_as_the_other_tabs_in_dark_mode()
+        {
+            await GenerateAsync("Backend");
+            await Page.EvaluateAsync("() => document.documentElement.setAttribute('data-theme', 'dark')");
+            // Colors are read from the computed style, so no transition may be halfway through the theme change
+            await Page.AddStyleTagAsync(new() { Content = "*, *::before, *::after { transition: none !important; }" });
+
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Keywords" }).ClickAsync();
+            var reference = await Page.Locator(".keyword-card").EvaluateAsync<string>("e => getComputedStyle(e).backgroundColor");
+
+            foreach (var (tab, card) in new[] { ("Why", ".why-card"), ("Job", ".jd-card") })
+            {
+                await Page.GetByRole(AriaRole.Tab, new() { Name = tab }).ClickAsync();
+                var background = await Page.Locator(card).EvaluateAsync<string>("e => getComputedStyle(e).backgroundColor");
+                Assert.True(reference == background, $"{tab}: card is {background}, keyword card is {reference}");
+            }
+        }
+
+        [Fact]
+        public async Task Job_tab_highlights_skills_and_shows_where_one_appears_in_the_cv()
+        {
+            await GenerateAsync("Backend");
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Job" }).ClickAsync();
+
+            await Assertions.Expect(Page.Locator(".jd-term.matched").First).ToBeVisibleAsync();
+
+            var skill = Page.Locator(".jd-term.matched").First;
+            await skill.ClickAsync();
+            await Assertions.Expect(skill).ToHaveAttributeAsync("aria-pressed", "true");
+            await Assertions.Expect(Page.Locator(".jd-detail-title")).ToBeVisibleAsync();
+            await Assertions.Expect(Page.Locator(".jd-locations li, .jd-note").First).ToBeVisibleAsync();
+        }
+
+        [Fact]
         public async Task Generate_announces_the_result_and_moves_focus_to_the_results()
         {
             await GenerateAsync();

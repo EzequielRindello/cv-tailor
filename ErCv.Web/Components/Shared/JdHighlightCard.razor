@@ -1,0 +1,87 @@
+@* MATCH-05: the job description with its skills marked. Segment text is rendered with Razor's normal encoding, never as markup. *@
+
+<div class="card jd-card">
+    <div class="card-body">
+        <h5 class="jd-title">Job description</h5>
+
+        <ul class="jd-legend" aria-label="Legend">
+            <li><span class="jd-key jd-key-matched">In your profile</span></li>
+            <li><span class="jd-key jd-key-missing">Not in your profile</span></li>
+        </ul>
+
+        @if (Data.Segments.Count == 0)
+        {
+            <p class="jd-empty">There is no job description to show.</p>
+        }
+        else
+        {
+            <p class="jd-hint">Select a highlighted skill to see where it appears in your CV.</p>
+
+            <div class="jd-text" role="group" aria-label="Job description with skills highlighted">
+                @foreach (var segment in Data.Segments)
+                {
+                    @if (segment.Skill == null)
+                    {
+                        @segment.Text
+                    }
+                    else
+                    {
+                        var info = Find(segment.Skill);
+                        var matched = info?.InProfile == true;
+                        var selected = string.Equals(_selected, segment.Skill, StringComparison.OrdinalIgnoreCase);
+                        <button type="button"
+                                class="jd-term @(matched ? "matched" : "missing") @(selected ? "selected" : "")"
+                                aria-pressed="@(selected ? "true" : "false")"
+                                aria-label="@segment.Text, @(matched ? "in your profile" : "not in your profile")"
+                                @onclick="() => Select(segment.Skill)">@segment.Text</button>
+                    }
+                }
+            </div>
+
+            <div class="jd-detail" aria-live="polite">
+                @if (_selected != null && Find(_selected) is { } detail)
+                {
+                    <h6 class="jd-detail-title">@detail.Skill</h6>
+
+                    @if (detail.Locations.Count > 0)
+                    {
+                        <ul class="jd-locations" aria-label="Where @detail.Skill appears in your CV">
+                            @foreach (var location in detail.Locations)
+                            {
+                                <li>
+                                    <span class="jd-location-section">@location.Section</span>
+                                    <span class="jd-location-label">@location.Label</span>
+                                    @if (!string.IsNullOrWhiteSpace(location.Excerpt))
+                                    {
+                                        <span class="jd-location-excerpt">@location.Excerpt</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else if (detail.InProfile)
+                    {
+                        <p class="jd-note">It is in your profile, but this CV did not include it. It was left out to keep the CV focused and within the page limit.</p>
+                    }
+                    else
+                    {
+                        <p class="jd-note">It is not in your profile. The app never adds skills you do not have.</p>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public JdHighlight Data { get; set; } = new();
+
+    private string? _selected;
+
+    private JdSkillInfo? Find(string skill) =>
+        Data.Skills.FirstOrDefault(s => string.Equals(s.Skill, skill, StringComparison.OrdinalIgnoreCase));
+
+    // Selecting the same skill again closes its details
+    private void Select(string skill) =>
+        _selected = string.Equals(_selected, skill, StringComparison.OrdinalIgnoreCase) ? null : skill;
+}

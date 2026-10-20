@@ -18,6 +18,7 @@ namespace ErCvApi.Services
         private readonly KeywordAnalyzer _keywordAnalyzer;
         private readonly ATSChecker _atsChecker;
         private readonly ProfileValidator _profileValidator = new();
+        private readonly JdHighlighter _jdHighlighter = new();
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<CVGeneratorService> _logger;
         private readonly string _harvardTemplatePath;
@@ -222,7 +223,8 @@ namespace ErCvApi.Services
                 ATSScore        = atsScore,
                 GeneratedCV     = generatedCV,
                 PreviewHtml     = previewHtml,
-                Explanation     = explanation
+                Explanation     = explanation,
+                JdHighlight     = _jdHighlighter.Build(request.JobDescription, requirements, cvMaster, generatedCV)
             };
 
             return (documents, analysis);

@@ -93,6 +93,11 @@ namespace ErCv.E2E
             await Page.Locator(".why-item > summary").First.ClickAsync();
             await AssertNoSeriousViolationsAsync("results, Why tab expanded");
 
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Job" }).ClickAsync();
+            await Page.Locator(".jd-term").First.ClickAsync();
+            await Assertions.Expect(Page.Locator(".jd-detail-title")).ToBeVisibleAsync();
+            await AssertNoSeriousViolationsAsync("results, Job tab with a skill selected");
+
             await Button("Edit", exact: true).ClickAsync();
             await Assertions.Expect(Page.Locator(".bullet-editor-card")).ToBeVisibleAsync();
             await AssertNoSeriousViolationsAsync("bullet editor");
