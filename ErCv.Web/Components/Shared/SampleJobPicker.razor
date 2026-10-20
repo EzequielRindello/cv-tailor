@@ -1,7 +1,9 @@
 @using ErCv.Web.Data
 
+@if (Visible)
+{
 <div class="sample-picker" id="samples" role="group" aria-label="Sample job descriptions">
-    <span class="sample-picker-label">No job description at hand? Try a sample:</span>
+    <span class="sample-picker-label">Or start from a sample:</span>
     <div class="sample-picker-chips">
         @foreach (var sample in SampleJobDescriptions.All)
         {
@@ -16,9 +18,14 @@
         }
     </div>
 </div>
+}
 
 @code {
     [Parameter] public string Current { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> OnSelect { get; set; }
     [Parameter] public bool Disabled { get; set; }
+
+    // Shown while the editor is empty or holds one of the samples (so another can be picked); hidden once the user has their own text
+    private bool Visible =>
+        string.IsNullOrWhiteSpace(Current) || SampleJobDescriptions.All.Any(s => string.Equals(s.Text, Current, StringComparison.Ordinal));
 }

@@ -131,6 +131,10 @@ namespace ErCv.E2E
 
         private static string WebProjectDirectory()
         {
+            // Needed when the tests are built to a folder outside the repository (dotnet test -o ...)
+            var configured = Environment.GetEnvironmentVariable("E2E_WEB_DIR");
+            if (!string.IsNullOrWhiteSpace(configured)) return configured;
+
             for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
             {
                 var candidate = Path.Combine(dir.FullName, "ErCv.Web");

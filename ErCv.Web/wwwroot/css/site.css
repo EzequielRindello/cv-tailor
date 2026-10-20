@@ -823,10 +823,10 @@ h1, h2, h3, .form-title {
 .generate-btn {
   background-color: var(--color-primary-500);
   border: none;
-  border-radius: var(--radius-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-md);
+  border-radius: var(--radius-md);
+  padding: 14px var(--spacing-lg);
+  font-weight: var(--font-weight-semibold);
+  font-size: 15px;
   color: var(--color-text-inverse);
   transition: background-color var(--transition-default),
               box-shadow var(--transition-default);
@@ -1418,7 +1418,42 @@ h1, h2, h3, .form-title {
   color: var(--color-text-primary);
 }
 
-/* Bootstrap primary button mapped to the accent */
+/* ===== Buttons: Bootstrap's .btn re-skinned with the design tokens ===== */
+.btn {
+  --bs-btn-padding-x: 16px;
+  --bs-btn-padding-y: 8px;
+  --bs-btn-font-family: var(--font-family-default);
+  --bs-btn-font-size: var(--font-size-md);
+  --bs-btn-font-weight: var(--font-weight-semibold);
+  --bs-btn-line-height: 1.25;
+  --bs-btn-border-width: 1px;
+  --bs-btn-border-radius: var(--radius-md);
+  --bs-btn-disabled-opacity: 0.5;
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  letter-spacing: -0.005em;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast),
+              color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-sm {
+  --bs-btn-padding-x: 12px;
+  --bs-btn-padding-y: 5px;
+  --bs-btn-font-size: var(--font-size-sm);
+}
+
+.btn-lg {
+  --bs-btn-padding-x: 24px;
+  --bs-btn-padding-y: 12px;
+  --bs-btn-font-size: 15px;
+}
+
+/* primary: solid accent */
 .btn-primary {
   --bs-btn-bg: var(--color-primary-500);
   --bs-btn-border-color: var(--color-primary-500);
@@ -1429,36 +1464,67 @@ h1, h2, h3, .form-title {
   --bs-btn-active-bg: var(--color-accent-active);
   --bs-btn-active-border-color: var(--color-accent-active);
   --bs-btn-active-color: var(--color-text-inverse);
-  --bs-btn-disabled-bg: var(--color-neutral-300);
-  --bs-btn-disabled-border-color: var(--color-neutral-300);
-  --bs-btn-disabled-color: var(--color-neutral-600);
+  --bs-btn-disabled-bg: var(--color-primary-500);
+  --bs-btn-disabled-border-color: var(--color-primary-500);
+  --bs-btn-disabled-color: var(--color-text-inverse);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Bootstrap outline buttons mapped to the design tokens (readable in light and dark) */
+.btn-primary:hover:not(:disabled) {
+  box-shadow: var(--shadow-md);
+}
+
+/* secondary: quiet surface with a hairline border */
 .btn-outline-secondary {
-  --bs-btn-color: var(--color-text-secondary);
-  --bs-btn-border-color: var(--color-border-hover);
-  --bs-btn-hover-color: var(--color-text-primary);
+  --bs-btn-bg: var(--color-bg-card);
+  --bs-btn-border-color: var(--color-border-default);
+  --bs-btn-color: var(--color-text-primary);
   --bs-btn-hover-bg: var(--color-bg-hover);
   --bs-btn-hover-border-color: var(--color-border-hover);
-  --bs-btn-active-color: var(--color-text-primary);
+  --bs-btn-hover-color: var(--color-text-primary);
   --bs-btn-active-bg: var(--color-bg-hover);
   --bs-btn-active-border-color: var(--color-border-hover);
-  --bs-btn-disabled-color: var(--color-text-tertiary);
+  --bs-btn-active-color: var(--color-text-primary);
+  --bs-btn-disabled-bg: var(--color-bg-card);
   --bs-btn-disabled-border-color: var(--color-border-default);
+  --bs-btn-disabled-color: var(--color-text-tertiary);
 }
 
+.btn-outline-secondary[aria-pressed="true"] {
+  --bs-btn-bg: var(--color-bg-selected);
+  --bs-btn-border-color: var(--color-primary-300);
+  --bs-btn-color: var(--color-text-link);
+}
+
+/* "outline" primary and danger are tonal: a soft tint of the color, no border */
 .btn-outline-primary {
-  --bs-btn-color: var(--color-primary-500);
-  --bs-btn-border-color: var(--color-primary-500);
-  --bs-btn-hover-color: var(--color-text-inverse);
-  --bs-btn-hover-bg: var(--color-primary-500);
-  --bs-btn-hover-border-color: var(--color-primary-500);
-  --bs-btn-active-color: var(--color-text-inverse);
-  --bs-btn-active-bg: var(--color-accent-hover);
-  --bs-btn-active-border-color: var(--color-accent-hover);
+  --bs-btn-bg: var(--color-bg-selected);
+  --bs-btn-border-color: transparent;
+  --bs-btn-color: var(--color-text-link);
+  --bs-btn-hover-bg: var(--color-primary-100);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-hover-color: var(--color-text-link);
+  --bs-btn-active-bg: var(--color-primary-100);
+  --bs-btn-active-border-color: transparent;
+  --bs-btn-active-color: var(--color-text-link);
+  --bs-btn-disabled-bg: var(--color-bg-selected);
+  --bs-btn-disabled-border-color: transparent;
   --bs-btn-disabled-color: var(--color-text-tertiary);
-  --bs-btn-disabled-border-color: var(--color-border-default);
+}
+
+.btn-outline-danger {
+  --bs-btn-bg: var(--color-error-soft);
+  --bs-btn-border-color: transparent;
+  --bs-btn-color: var(--color-error);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--color-error) 16%, var(--color-bg-card));
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-hover-color: var(--color-error);
+  --bs-btn-active-bg: color-mix(in srgb, var(--color-error) 22%, var(--color-bg-card));
+  --bs-btn-active-border-color: transparent;
+  --bs-btn-active-color: var(--color-error);
+  --bs-btn-disabled-bg: var(--color-error-soft);
+  --bs-btn-disabled-border-color: transparent;
+  --bs-btn-disabled-color: var(--color-text-tertiary);
 }
 
 /* ===== Composer steps and JD meta (UX-03) ===== */
@@ -1589,12 +1655,13 @@ h1, h2, h3, .form-title {
 }
 
 /* ===== SampleJobPicker (APP-03) ===== */
+/* Secondary on purpose: it sits under the editor and stays out of the way of someone who already has a job description */
 .sample-picker {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-xs) var(--spacing-sm);
+  margin-top: calc(-1 * var(--spacing-sm));
 }
 
 .sample-picker-label {
@@ -1605,30 +1672,32 @@ h1, h2, h3, .form-title {
 .sample-picker-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
 }
 
 .sample-chip {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-pill);
-  color: var(--color-text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-link);
   cursor: pointer;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  padding: 4px var(--spacing-md);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  padding: 2px var(--spacing-sm);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: background-color var(--transition-fast), text-decoration-color var(--transition-fast);
 }
 
 .sample-chip:hover:not(:disabled) {
-  border-color: var(--color-primary-500);
-  color: var(--color-primary-500);
+  background: var(--color-bg-selected);
+  text-decoration-color: currentColor;
 }
 
 .sample-chip.active {
   background: var(--color-bg-selected);
-  border-color: var(--color-primary-500);
-  color: var(--color-primary-500);
+  text-decoration-color: currentColor;
 }
 
 .sample-chip:disabled {
@@ -2290,15 +2359,41 @@ body:not(:has(#samples)) .app-try-demo {
   transition: transform var(--transition-fast);
 }
 
-.tip-text {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+.gain-callout {
+  align-items: center;
+  background: var(--color-bg-selected);
+  border-radius: var(--radius-lg);
+  display: flex;
+  gap: var(--spacing-md);
   margin-top: var(--spacing-sm);
-  margin-bottom: 0;
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-bg-hover);
-  border-radius: var(--radius-md);
-  border-left: 3px solid var(--color-warning);
+  padding: var(--spacing-md);
+}
+
+.gain-icon {
+  align-items: center;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-pill);
+  color: var(--color-primary-500);
+  display: inline-flex;
+  flex: none;
+  font-size: var(--font-size-lg);
+  height: 36px;
+  justify-content: center;
+  width: 36px;
+}
+
+.gain-text {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-default);
+  margin: 0;
+}
+
+.gain-figure {
+  color: var(--color-primary-500);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
 }
 
 .skill-pill {
@@ -2411,13 +2506,6 @@ body:not(:has(#samples)) .app-try-demo {
 .toggle-icon i {
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
-}
-
-.missing-tip-icon {
-  font-size: 16px;
-  margin-right: var(--spacing-xs);
-  color: var(--color-warning);
-  vertical-align: middle;
 }
 
 /* ===== PageOptions.css ===== */

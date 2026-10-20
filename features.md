@@ -72,8 +72,9 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | EDIT-06 | Plain-text / Markdown export | E5 Editing | P3 | S | Todo |
 | APP-01 | Application tracker | E6 Workflow | P2 | M | Todo |
 | APP-02 | Re-open a past generation | E6 Workflow | P2 | S | Todo |
-| APP-03 | Sample JD gallery | E6 Workflow | P0 | S | Todo |
+| APP-03 | Sample JD gallery | E6 Workflow | P0 | S | Done |
 | APP-04 | Import JD from URL (Greenhouse/Lever) | E6 Workflow | P3 | M | Todo |
+| APP-05 | Real job-post corpus, dated and kept fresh | E6 Workflow | P1 | L | Todo |
 | AI-01 | LLM options + feature flag | E7 AI | P3 | S | Parked |
 | AI-02 | Semantic matching (indices only) | E7 AI | P3 | M | Parked |
 | AI-03 | Bullet rewrite suggestions (user accepts) | E7 AI | P3 | M | Parked |
@@ -97,7 +98,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 
 1. **M1 Foundation**: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, MATCH-01, MATCH-02, MATCH-03, ENG-02, ENG-03, OPS-01. Fixes ship with their tests from day one.
 2. **M2 Redesign**: UX-01 to UX-09, APP-03, TEST-07 (E2E written against the new UI).
-3. **M3 Your data**: PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02.
+3. **M3 Your data**: PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
 4. **M4 Output**: EDIT-01 to EDIT-06, MATCH-08, UX-10.
 5. **M5 Polish & presentation**: OPS-02 to OPS-05, ENG-01, ENG-04, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10.
 6. **M6 Optional AI**: AI-01 to AI-05.
@@ -619,6 +620,23 @@ Verify: E2E: pick sample, generate.
 - [ ] Greenhouse and Lever public job APIs only, allowlisted hosts (SSRF-safe), timeout and size limit
 
 Verify: integration tests with mocked HTTP; disallowed hosts rejected.
+
+### APP-05: Real job-post corpus, dated and kept fresh
+**Status:** Todo · **Priority:** P1 · **Effort:** L
+
+Why: the sample JDs (APP-03), the test corpus (`ErCv.Tests/Fixtures/jds`) and the skill dictionary behind the parser were all written by hand. They are plausible, but they are not what employers are posting now, so the demo, the tests and the scoring are tuned to guesses. Real, recent posts make the demo convincing, the tests honest, and show where the app drifts from the market (new tools, renamed skills, different seniority wording).
+
+- [ ] Collector (a console tool, not part of the web app) that gathers current postings from sources that allow it: the public job-board APIs of Greenhouse, Lever, Ashby and Workable, plus feeds that publish their data on purpose. No scraping of sites whose terms forbid it; respect `robots.txt`, rate limits and a clear User-Agent
+- [ ] One JSON file per posting with metadata: source, url, company, title, `postedAt`, `retrievedAt`, role family, seniority, location, and the clean text. Keep only what is needed and link back to the original post
+- [ ] Freshness window (for example 90 days) and a refresh command that drops expired posts and adds new ones; a scheduled GitHub Action runs it and opens a PR, so a person reviews every change
+- [ ] A relevance report with dates: skill frequency over time, skills the parser misses (`MATCH-07` dictionary), skills in the dictionary nobody asks for any more, and seniority wording, so the app can be adjusted to what recent posts actually say
+- [ ] APP-03 samples are picked from the corpus (one per role family) and show where and when they were posted
+- [ ] Test fixtures read the same corpus: the parser and scoring tests run over real posts, and `TEST-08` golden snapshots use them
+- [ ] Removal path: honor takedown requests and keep a short note of the licensing and terms of each source
+
+Notes: the legal and terms-of-use review of each source is part of the work, not an afterthought. `APP-04` (import one JD from a URL) is related but separate: that one is the user's own action on one post, this one is a maintained dataset.
+Recommended model for the implementation: Opus. It is a multi-part design task (source adapters, data model, scheduled automation, a report that has to be judged, and terms-of-use trade-offs), and a wrong call silently ships stale or unlicensed data.
+Verify: the refresh command is idempotent; no posting older than the window survives; every sample and fixture has `postedAt` and a source url; the relevance report runs on the committed corpus.
 
 ---
 

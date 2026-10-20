@@ -29,10 +29,13 @@
 
             @if (Data.PotentialScoreIncrease > 0)
             {
-                <p class="tip-text">
-                    <i class="bi bi-lightbulb-fill missing-tip-icon"></i>
-                    Adding missing skills could increase your match score by up to <strong>+@Data.PotentialScoreIncrease%</strong>
-                </p>
+                <div class="gain-callout">
+                    <span class="gain-icon" aria-hidden="true"><i class="bi bi-graph-up-arrow"></i></span>
+                    <p class="gain-text">
+                        Adding the missing skills could raise your match score by up to
+                        <strong class="gain-figure">+@Data.PotentialScoreIncrease%</strong>
+                    </p>
+                </div>
             }
 
             @if (_open)
