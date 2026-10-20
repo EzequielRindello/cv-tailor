@@ -1409,6 +1409,16 @@ h1, h2, h3, .form-title {
   padding: var(--spacing-sm) var(--spacing-md);
 }
 
+@media (max-width: 480px) {
+  .insights-tabs {
+    gap: 0;
+  }
+
+  .insights-tab {
+    padding: var(--spacing-sm) 10px;
+  }
+}
+
 .insights-tab:hover {
   color: var(--color-text-primary);
 }
@@ -1416,6 +1426,179 @@ h1, h2, h3, .form-title {
 .insights-tab.active {
   border-bottom-color: var(--color-primary-500);
   color: var(--color-text-primary);
+}
+
+/* ===== Why this was chosen (MATCH-04) ===== */
+.why-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.why-card .card-body {
+  padding: var(--spacing-lg);
+}
+
+.why-title {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.why-intro,
+.why-empty {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-md);
+}
+
+.why-item {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-sm);
+}
+
+.why-summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.why-summary-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.why-role {
+  font-weight: var(--font-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.why-company {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.why-score {
+  background: var(--color-bg-selected);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  padding: 2px var(--spacing-sm);
+  white-space: nowrap;
+}
+
+.why-parts,
+.why-bullets,
+.why-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.why-parts {
+  border-top: 1px solid var(--color-border-default);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.why-parts li {
+  align-items: baseline;
+  display: flex;
+  font-size: var(--font-size-md);
+  gap: var(--spacing-sm);
+  padding: 2px 0;
+}
+
+.why-part-label {
+  font-weight: var(--font-weight-medium);
+}
+
+.why-part-detail {
+  color: var(--color-text-tertiary);
+  flex: 1;
+  font-size: var(--font-size-sm);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.why-part-points {
+  font-family: var(--font-family-mono);
+  margin-left: auto;
+}
+
+.why-bullets {
+  display: grid;
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-md) var(--spacing-md);
+}
+
+.why-bullet {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.why-bullet.left-out {
+  background: var(--color-bg-hover);
+}
+
+.why-bullet-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.why-badge {
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px var(--spacing-sm);
+  text-transform: uppercase;
+}
+
+.why-badge.included {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.why-badge.left-out {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-tertiary);
+}
+
+.why-bullet-text {
+  font-size: var(--font-size-md);
+  margin: var(--spacing-sm) 0;
+  overflow-wrap: anywhere;
+}
+
+.why-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.why-chip {
+  background: var(--color-bg-selected);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-sm);
+}
+
+.why-chip.negative {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
 }
 
 /* ===== Buttons: Bootstrap's .btn re-skinned with the design tokens ===== */

@@ -35,6 +35,13 @@ namespace ErCvApi.Helpers
         public GeneratedCV SelectAndAdaptCV(
             CVMaster cvMaster,
             JobRequirements requirements,
+            bool allowTwoPages = false) =>
+            SelectWithExplanation(cvMaster, requirements, allowTwoPages).Cv;
+
+        /// <summary>Same selection as <see cref="SelectAndAdaptCV"/>, plus why each experience and bullet scored as it did.</summary>
+        public (GeneratedCV Cv, SelectionExplanation Explanation) SelectWithExplanation(
+            CVMaster cvMaster,
+            JobRequirements requirements,
             bool allowTwoPages = false)
         {
             var maxExperiences = allowTwoPages ? 4 : 3;
@@ -47,8 +54,9 @@ namespace ErCvApi.Helpers
             if (isTechJD)
                 scoredExperiences = PrioritizeTechExperiences(scoredExperiences, maxExperiences);
 
-            var selectedExperiences = SelectExperiences(
+            var selected = SelectExperiences(
                 scoredExperiences, requirements, maxExperiences, maxBulletsPerExp);
+            var selectedExperiences = selected.Select(x => x.Experience).ToList();
 
             var topSkills = _scorer.GetTopSkills(
                 selectedExperiences, requirements, cvMaster.Skills, maxSkills: 15);
@@ -79,7 +87,27 @@ namespace ErCvApi.Helpers
             }
 
             generatedCV = _pageConstraint.EnforcePageConstraint(generatedCV, allowTwoPages);
-            return generatedCV;
+            return (generatedCV, BuildExplanation(generatedCV, selected.Select(x => x.Explanation)));
+        }
+
+        // The page constraint can trim after selection, so the explanation follows the final CV.
+        private static SelectionExplanation BuildExplanation(
+            GeneratedCV finalCv, IEnumerable<ExperienceExplanation> explanations)
+        {
+            var byKey = new Dictionary<string, ExperienceExplanation>();
+            foreach (var e in explanations) byKey.TryAdd(e.Key, e);
+
+            var result = new SelectionExplanation();
+            foreach (var exp in finalCv.Experience)
+            {
+                if (!byKey.TryGetValue(ExperienceExplanation.KeyOf(exp), out var explanation)) continue;
+
+                foreach (var bullet in explanation.Bullets)
+                    bullet.Selected = bullet.Selected && exp.Bullets.Contains(bullet.Text);
+
+                result.Experiences.Add(explanation);
+            }
+            return result;
         }
         private List<RelevanceScore> PrioritizeTechExperiences(
             List<RelevanceScore> scored, int maxNeeded)
@@ -95,7 +123,13 @@ namespace ErCvApi.Helpers
                 {
                     Experience = s.Experience,
                     Score = s.Score * 0.4,
-                    MatchedSkills = s.MatchedSkills
+                    MatchedSkills = s.MatchedSkills,
+                    Parts = s.Parts.Append(new ScorePart
+                    {
+                        Label = "Non-tech role penalty",
+                        Points = s.Score * 0.4 - s.Score,
+                        Detail = "Tech job description, role is not a tech role"
+                    }).ToList()
                 })
                 .Take(needed)
                 .ToList();
@@ -106,7 +140,7 @@ namespace ErCvApi.Helpers
         private bool IsTechExperience(Experience e) =>
             !string.IsNullOrEmpty(e.Role) &&
             TechRoleIndicators.Any(k => e.Role.Contains(k, StringComparison.OrdinalIgnoreCase));
-        private List<Experience> SelectExperiences(
+        private List<(Experience Experience, ExperienceExplanation Explanation)> SelectExperiences(
             List<RelevanceScore> scored,
             JobRequirements requirements,
             int maxExperiences,
@@ -114,27 +148,46 @@ namespace ErCvApi.Helpers
         {
             return scored
                 .Take(maxExperiences)
-                .Select(s => AdaptExperience(s.Experience, s.MatchedSkills, requirements, maxBulletsPerExp))
+                .Select(s => AdaptExperience(s, requirements, maxBulletsPerExp))
                 .ToList();
         }
 
-        private Experience AdaptExperience(
-            Experience original,
-            List<string> matchedSkills,
+        private (Experience Experience, ExperienceExplanation Explanation) AdaptExperience(
+            RelevanceScore relevance,
             JobRequirements requirements,
             int maxBullets = 3)
         {
+            var original = relevance.Experience;
             var bulletScores = ScoreBullets(
-                original.Bullets ?? new List<string>(), matchedSkills, requirements);
+                original.Bullets ?? new List<string>(), relevance.MatchedSkills, requirements);
 
-            var selected = bulletScores
+            var chosen = bulletScores
                 .OrderByDescending(bs => bs.Score)
                 .Take(maxBullets)
+                .ToList();
+            var selected = chosen
                 .OrderBy(bs => bs.OriginalIndex)  // preserve original order
                 .Select(bs => bs.Bullet)
                 .ToList();
 
-            return new Experience
+            var explanation = new ExperienceExplanation
+            {
+                Role = original.Role,
+                Company = original.Company,
+                StartDate = original.StartDate,
+                EndDate = original.EndDate,
+                Score = relevance.Score,
+                Parts = relevance.Parts,
+                Bullets = bulletScores.Select(bs => new BulletExplanation
+                {
+                    Text = bs.Bullet,
+                    Score = bs.Score,
+                    Parts = bs.Parts,
+                    Selected = chosen.Contains(bs)
+                }).ToList()
+            };
+
+            var experience = new Experience
             {
                 Role = original.Role,
                 Company = original.Company,
@@ -144,6 +197,8 @@ namespace ErCvApi.Helpers
                 Skills = (original.Skills ?? new List<string>()).ToList(),
                 Bullets = selected
             };
+
+            return (experience, explanation);
         }
         private List<BulletScore> ScoreBullets(
             List<string> bullets,
@@ -155,29 +210,49 @@ namespace ErCvApi.Helpers
             for (int i = 0; i < bullets.Count; i++)
             {
                 var bullet = bullets[i];
-                double score = 0;
-                foreach (var skill in matchedSkills)
-                    if (SkillNormalizer.ContainsSkill(bullet, skill))
-                        score += 10.0;
-                foreach (var techSkill in requirements.TechnicalSkills)
-                    if (SkillNormalizer.MatchesAny(techSkill, new[] { bullet }))
-                        score += 8.0;
-                foreach (var keyword in requirements.Keywords.Take(10))
-                    if (SkillNormalizer.ContainsTerm(bullet, keyword))
-                        score += 3.0;
+                var parts = new List<ScorePart>();
+
+                var skillHits = matchedSkills.Where(skill => SkillNormalizer.ContainsSkill(bullet, skill)).ToList();
+                AddPart(parts, "Matched skills", skillHits.Count * 10.0, skillHits);
+
+                var jdSkillHits = requirements.TechnicalSkills
+                    .Where(techSkill => SkillNormalizer.MatchesAny(techSkill, new[] { bullet })).ToList();
+                AddPart(parts, "JD skills", jdSkillHits.Count * 8.0, jdSkillHits);
+
+                var keywordHits = requirements.Keywords.Take(10)
+                    .Where(keyword => SkillNormalizer.ContainsTerm(bullet, keyword)).ToList();
+                AddPart(parts, "Keywords", keywordHits.Count * 3.0, keywordHits);
+
                 if (Regex.IsMatch(bullet, @"\d+[%x]|\d+[MK]\+?|[\d,]{3,}\+?"))
-                    score += 6.0;
+                    parts.Add(new ScorePart { Label = "Metric", Points = 6.0, Detail = "Contains a number or percentage" });
+
                 var firstWord = bullet.Split(' ').FirstOrDefault()?.ToLower() ?? "";
                 if (StrongActionVerbs.Any(v => firstWord.StartsWith(v, StringComparison.OrdinalIgnoreCase)))
-                    score += 4.0;
-                if (bullet.Length < 40) score -= 5.0;
-                if (bullet.Length > 80) score += 2.0;
-                if (bullet.Length > 120) score += 1.0;
+                    parts.Add(new ScorePart { Label = "Action verb", Points = 4.0, Detail = firstWord });
 
-                scores.Add(new BulletScore { Bullet = bullet, Score = score, OriginalIndex = i });
+                var length = 0.0;
+                if (bullet.Length < 40) length -= 5.0;
+                if (bullet.Length > 80) length += 2.0;
+                if (bullet.Length > 120) length += 1.0;
+                if (length != 0)
+                    parts.Add(new ScorePart { Label = "Length", Points = length, Detail = $"{bullet.Length} characters" });
+
+                scores.Add(new BulletScore
+                {
+                    Bullet = bullet,
+                    Score = parts.Sum(p => p.Points),
+                    OriginalIndex = i,
+                    Parts = parts
+                });
             }
 
             return scores;
+        }
+
+        private static void AddPart(List<ScorePart> parts, string label, double points, List<string> hits)
+        {
+            if (hits.Count > 0)
+                parts.Add(new ScorePart { Label = label, Points = points, Detail = string.Join(", ", hits) });
         }
         private List<Project> RankProjects(List<Project> projects, JobRequirements requirements)
         {
@@ -208,6 +283,7 @@ namespace ErCvApi.Helpers
             public string Bullet { get; set; } = "";
             public double Score { get; set; }
             public int OriginalIndex { get; set; }
+            public List<ScorePart> Parts { get; set; } = new();
         }
     }
 }

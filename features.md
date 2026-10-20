@@ -59,7 +59,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | MATCH-01 | Fix fuzzy-match false positives | E4 Matching | P0 | S | Done |
 | MATCH-02 | Word-boundary ATS keyword density | E4 Matching | P0 | S | Done |
 | MATCH-03 | Shared date parser + correct "most recent role" | E4 Matching | P0 | M | Done |
-| MATCH-04 | Explainability: "why this was chosen" | E4 Matching | P1 | M | Todo |
+| MATCH-04 | Explainability: "why this was chosen" | E4 Matching | P1 | M | Done |
 | MATCH-05 | JD highlighter | E4 Matching | P1 | M | Todo |
 | MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Todo |
 | MATCH-07 | Skill/alias dictionary as data file | E4 Matching | P2 | S | Todo |
@@ -505,12 +505,15 @@ Files: new `Helpers/DateParser.cs`, `MatchScoreCalculator.cs`, `SummaryGenerator
 Verify: unit tests per format; regression test for `May 2020` vs `Dec 2023`.
 
 ### MATCH-04: Explainability
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** Done · **Priority:** P1 · **Effort:** M
 
-- [ ] Each selected experience and bullet exposes a score breakdown (matched skills, keywords, recency, metric bonus, verb bonus)
-- [ ] Workspace shows "Why this was chosen" on hover/expand
+- [x] Each selected experience and bullet exposes a score breakdown (matched skills, keywords, recency, metric bonus, verb bonus)
+- [x] Workspace shows "Why this was chosen" on hover/expand
 
-Verify: unit test that breakdown parts sum to the score.
+Notes: `CVSelector.SelectWithExplanation` returns the CV plus a `SelectionExplanation`; `SelectAndAdaptCV` now delegates to it, so the selection is unchanged (a test compares both). Scores are built as the sum of named `ScorePart`s, so the breakdown cannot drift from the score. The explanation follows the final CV after the page constraint, and lists the bullets that were left out with their scores. It is also in the `/api/cv/generate` response as `explanation`. UI: a "Why" tab with one expandable block per role (`SelectionExplanationCard`); after editing bullets the card reads the current CV, so included / left out stays correct.
+
+Files: `Helpers/CVSelector.cs`, `Helpers/RelevanceScorer.cs`, `Models/ExplanationModels.cs`, `Components/Shared/SelectionExplanationCard.razor`
+Verify: `SelectionExplanationTests` (parts sum to the score over profiles x corpus x 1/2 pages); E2E `Why_tab_explains_each_role_and_bullet_with_its_score_parts` and the axe scan of the Why tab.
 
 ### MATCH-05: JD highlighter
 **Status:** Todo · **Priority:** P1 · **Effort:** M

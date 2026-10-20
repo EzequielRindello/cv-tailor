@@ -1,0 +1,97 @@
+@* MATCH-04: why each experience and bullet was chosen. Native <details> keeps it keyboard and screen reader friendly. *@
+
+<div class="card why-card">
+    <div class="card-body">
+        <h5 class="why-title">Why this was chosen</h5>
+        <p class="why-intro">
+            Each role and bullet is scored against the job description. Points add up to the score shown.
+            Only content from your profile is ever used.
+        </p>
+
+        @if (Items.Count == 0)
+        {
+            <p class="why-empty">No experience was selected for this CV.</p>
+        }
+
+        @foreach (var item in Items)
+        {
+            <details class="why-item" @key="item.Experience.Key">
+                <summary class="why-summary">
+                    <span class="why-summary-text">
+                        <span class="why-role">@item.Experience.Role</span>
+                        <span class="why-company">@item.Experience.Company</span>
+                    </span>
+                    <span class="why-score" aria-label="Score @Points(item.Experience.Score)">@Points(item.Experience.Score)</span>
+                </summary>
+
+                <ul class="why-parts" aria-label="Role score breakdown">
+                    @foreach (var part in item.Experience.Parts.Where(p => p.Points != 0))
+                    {
+                        <li>
+                            <span class="why-part-label">@part.Label</span>
+                            @if (!string.IsNullOrWhiteSpace(part.Detail))
+                            {
+                                <span class="why-part-detail">@part.Detail</span>
+                            }
+                            <span class="why-part-points">@Signed(part.Points)</span>
+                        </li>
+                    }
+                </ul>
+
+                <ol class="why-bullets" aria-label="Bullets considered">
+                    @foreach (var bullet in item.Experience.Bullets)
+                    {
+                        var included = item.Included.Contains(bullet.Text);
+                        <li class="why-bullet @(included ? "included" : "left-out")">
+                            <div class="why-bullet-head">
+                                <span class="why-badge @(included ? "included" : "left-out")">@(included ? "Included" : "Left out")</span>
+                                <span class="why-score" aria-label="Score @Points(bullet.Score)">@Points(bullet.Score)</span>
+                            </div>
+                            <p class="why-bullet-text">@bullet.Text</p>
+                            <ul class="why-chips" aria-label="Bullet score breakdown">
+                                @foreach (var part in bullet.Parts)
+                                {
+                                    <li class="why-chip @(part.Points < 0 ? "negative" : "")"
+                                        title="@part.Detail">@part.Label @Signed(part.Points)</li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                </ol>
+            </details>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public SelectionExplanation Explanation { get; set; } = new();
+
+    /// <summary>The CV as it is now. After an edit it can differ from what the first selection chose.</summary>
+    [Parameter] public GeneratedCV? Cv { get; set; }
+
+    private sealed record Item(ExperienceExplanation Experience, HashSet<string> Included);
+
+    private List<Item> Items
+    {
+        get
+        {
+            var items = new List<Item>();
+            foreach (var exp in Explanation.Experiences)
+            {
+                var current = Cv?.Experience.FirstOrDefault(e => ExperienceExplanation.KeyOf(e) == exp.Key);
+                if (Cv != null && current == null) continue;
+
+                var included = current != null
+                    ? current.Bullets.ToHashSet()
+                    : exp.Bullets.Where(b => b.Selected).Select(b => b.Text).ToHashSet();
+                items.Add(new Item(exp, included));
+            }
+            return items;
+        }
+    }
+
+    private static string Points(double value) => value.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string Signed(double value) =>
+        (value > 0 ? "+" : string.Empty) + Points(value);
+}

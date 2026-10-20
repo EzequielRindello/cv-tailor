@@ -28,6 +28,21 @@ namespace ErCv.E2E
         }
 
         [Fact]
+        public async Task Why_tab_explains_each_role_and_bullet_with_its_score_parts()
+        {
+            await GenerateAsync("Backend");
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Why" }).ClickAsync();
+
+            var firstRole = Page.Locator(".why-item").First;
+            await Assertions.Expect(firstRole).ToBeVisibleAsync();
+
+            await firstRole.Locator("summary").ClickAsync();
+            await Assertions.Expect(firstRole.Locator(".why-parts li").First).ToBeVisibleAsync();
+            await Assertions.Expect(firstRole.Locator(".why-bullet.included").First).ToBeVisibleAsync();
+            await Assertions.Expect(firstRole.Locator(".why-chip").First).ToBeVisibleAsync();
+        }
+
+        [Fact]
         public async Task Generate_announces_the_result_and_moves_focus_to_the_results()
         {
             await GenerateAsync();

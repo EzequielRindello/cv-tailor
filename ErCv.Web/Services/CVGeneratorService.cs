@@ -202,7 +202,7 @@ namespace ErCvApi.Services
             var missingSkills   = _missingSkillsAnalyzer.Analyze(cvMaster, requirements);
 
             await ReportAsync(progress, GenerationStage.Selecting);
-            var generatedCV     = _selector.SelectAndAdaptCV(cvMaster, requirements, request.AllowTwoPages);
+            var (generatedCV, explanation) = _selector.SelectWithExplanation(cvMaster, requirements, request.AllowTwoPages);
             var keywordAnalysis = _keywordAnalyzer.Analyze(request.JobDescription, generatedCV);
 
             await ReportAsync(progress, GenerationStage.Rendering);
@@ -221,7 +221,8 @@ namespace ErCvApi.Services
                 KeywordAnalysis = keywordAnalysis,
                 ATSScore        = atsScore,
                 GeneratedCV     = generatedCV,
-                PreviewHtml     = previewHtml
+                PreviewHtml     = previewHtml,
+                Explanation     = explanation
             };
 
             return (documents, analysis);
@@ -424,7 +425,8 @@ namespace ErCvApi.Services
                 keywordAnalysis = analysis.KeywordAnalysis,
                 atsScore        = analysis.ATSScore,
                 generatedCV     = analysis.GeneratedCV,
-                previewHtml     = analysis.PreviewHtml   // FEATURE-102
+                previewHtml     = analysis.PreviewHtml,   // FEATURE-102
+                explanation     = analysis.Explanation
             };
 
         private List<object> BuildFileMetadata(Dictionary<string, byte[]> documents) =>

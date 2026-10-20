@@ -138,6 +138,9 @@ else
                             case "keywords":
                                 <KeywordAnalysisCard Data="Analysis.KeywordAnalysis" />
                                 break;
+                            case "why":
+                                <SelectionExplanationCard Explanation="Analysis.Explanation" Cv="Analysis.GeneratedCV" />
+                                break;
                             default:
                                 <MissingSkillsCard Data="Analysis.MissingSkills" />
                                 break;
@@ -152,7 +155,7 @@ else
 @code {
     private static readonly (string Key, string Label)[] Tabs =
     {
-        ("match", "Match"), ("ats", "ATS"), ("keywords", "Keywords"), ("gaps", "Gaps")
+        ("match", "Match"), ("ats", "ATS"), ("keywords", "Keywords"), ("gaps", "Gaps"), ("why", "Why")
     };
 
     private string _tab = "match";

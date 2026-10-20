@@ -89,6 +89,10 @@ namespace ErCv.E2E
                 await AssertNoSeriousViolationsAsync($"results, {tab} tab");
             }
 
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Why" }).ClickAsync();
+            await Page.Locator(".why-item > summary").First.ClickAsync();
+            await AssertNoSeriousViolationsAsync("results, Why tab expanded");
+
             await Button("Edit", exact: true).ClickAsync();
             await Assertions.Expect(Page.Locator(".bullet-editor-card")).ToBeVisibleAsync();
             await AssertNoSeriousViolationsAsync("bullet editor");
