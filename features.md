@@ -55,6 +55,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | Done |
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
 | PROF-04 | Profile health check | E3 Your profile | P2 | M | Done |
+| PROF-06 | The owner's real profile as the demo | E3 Your profile | P1 | S | Todo |
 | PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Todo |
 | MATCH-01 | Fix fuzzy-match false positives | E4 Matching | P0 | S | Done |
 | MATCH-02 | Word-boundary ATS keyword density | E4 Matching | P0 | S | Done |
@@ -101,7 +102,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 1. **M1 Foundation** (v2.0.2, released): TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, MATCH-01, MATCH-02, MATCH-03, ENG-02, ENG-03, OPS-01. Fixes ship with their tests from day one.
 2. **M2 Redesign** (v2.0.3, released): UX-01 to UX-09, APP-03, TEST-07 (E2E written against the new UI).
 3. **M3 Your data** (v2.0.4, released): PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
-3.2. **M3.2 Real-post fixes** (v2.0.4.1, before M4): MATCH-07, MATCH-09, APP-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
+3.2. **M3.2 Real-post fixes** (v2.0.4.1, before M4): MATCH-07, MATCH-09, APP-06, PROF-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
 4. **M4 Output** (v2.0.5): EDIT-01 to EDIT-06, MATCH-08, UX-10.
 5. **M5 Polish & presentation** (v2.0.6): OPS-02 to OPS-05, ENG-01, ENG-04, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05.
@@ -470,7 +471,7 @@ Verify: `ProfileFieldsTests` (bUnit); `MyProfileTests` E2E (field errors and not
 - [x] Validation with field-level errors (required fields, date formats, empty bullets)
 - [x] Downloadable blank template
 
-Notes: `ProfileTools.razor` sits under the profile selector in step 2. An imported profile lives in memory only (PROF-01 adds localStorage) and replaces the stored-profile selector until "Use a stored profile" is clicked. Files over 512 KB are refused. `ProfileJson` parses (case-insensitive keys, comments and trailing commas allowed), serializes and builds the template.
+Notes: `ProfileTools.razor` (import, export, blank template) first sat in step 2 and was moved to the `/profile` editor so the three steps stay simple. Importing there fills the form; saving makes it "My profile". Files over 512 KB are refused. `ProfileJson` parses (case-insensitive keys, comments and trailing commas allowed), serializes and builds the template.
 
 Verify: `ProfileValidatorTests` and `ProfileJsonTests` (incl. export/import round trip); `ProfileImportTests` E2E (export, edit, import, generate; invalid file; template).
 
@@ -488,11 +489,24 @@ Verify: `CustomProfileTests` runs the no-fabrication, header, score-range and no
 **Status:** Done · **Priority:** P2 · **Effort:** M
 
 - [x] Flags bullets without metrics, weak opening verbs, experiences without skill tags, overlapping or invalid dates
-- [x] Shown as a checklist before generating
+- [x] Shown as a checklist in the profile editor (`/profile`), not in the composer steps
 
-Notes: `ProfileHealthChecker.Check` returns `HealthFinding(rule, path, message)`. Metrics reuse `ATSConstants.MetricsRegex`, so a flagged bullet is one the ATS check would also not count. Weak verbs are judged on the first word only. Roles that overlap by one month or less are treated as a hand-over. `ProfileHealthCard` is shown at the top of step 3 for the profile about to be used (demo, My profile or imported) and on `/profile` through "Check profile health". It is advice only and never blocks generating.
+Notes: `ProfileHealthChecker.Check` returns `HealthFinding(rule, path, message)`. Metrics reuse `ATSConstants.MetricsRegex`, so a flagged bullet is one the ATS check would also not count. Weak verbs are judged on the first word only. Roles that overlap by one month or less are treated as a hand-over. `ProfileHealthCard` is a collapsible panel shown only on `/profile`, through "Check profile health" (it opens expanded there). It was removed from step 3 of the composer so the three steps stay simple. It is advice only and never blocks generating.
 
-Verify: `ProfileHealthCheckerTests` (one group per rule); `ProfileHealthTests` E2E (checklist shows warnings, CV still generates; editor button).
+Verify: `ProfileHealthCheckerTests` (one group per rule); `ProfileHealthTests` E2E (checklist on `/profile` shows warnings and the CV still generates; step 3 has no checklist).
+
+### PROF-06: The owner's real profile as the demo
+**Status:** Todo · **Priority:** P1 · **Effort:** S
+
+Why: the demo profile is a made-up person (Alex Rivera). The portfolio is stronger if the demo is the owner's own, real CV.
+
+- [ ] The owner provides the profile (JSON, or typed in the `/profile` editor) and it replaces `Data/cv-master.json` as the demo profile
+- [ ] Tests and fixtures that assert on "Rivera" or on its bullets are updated to the new demo, or keep a small fixture copy of the old one so edge cases stay covered
+- [ ] The step 2 choice stays "Demo profile / My profile / Create my profile"; "Create my profile" opens the `/profile` editor (import, export and the blank template live there, not in the composer)
+
+Notes: waiting for the owner to upload their profile. Do not invent it. Check the personal data in it (phone, email) before committing it to a public repo.
+
+Verify: the E2E suite and the document matrices pass on the new demo profile.
 
 ### PROF-05: Import from an existing resume
 **Status:** Todo · **Priority:** P3 · **Effort:** L

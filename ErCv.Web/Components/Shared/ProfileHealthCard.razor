@@ -1,8 +1,11 @@
 @using ErCvApi.Helpers
 
-<section class="profile-health" aria-labelledby="profile-health-title" id="profile-health">
-    <h3 class="profile-health-title" id="profile-health-title">Profile health check</h3>
-    <p class="profile-health-intro">Advice only. None of this stops you from generating.</p>
+<details class="profile-health" id="profile-health" open="@Open">
+    <summary class="profile-health-summary">
+        <span class="profile-health-title">Profile health check</span>
+        <span class="profile-health-badge">@Badge</span>
+    </summary>
+    <p class="profile-health-intro mt-2">Advice only. None of this stops you from generating.</p>
     <ul class="profile-health-list">
         @foreach (var (rule, label) in Rules)
         {
@@ -27,7 +30,7 @@
             </li>
         }
     </ul>
-</section>
+</details>
 
 @code {
     private static readonly (HealthRule Rule, string Label)[] Rules =
@@ -39,4 +42,16 @@
     };
 
     [Parameter, EditorRequired] public List<HealthFinding> Findings { get; set; } = new();
+
+    /// <summary>Collapsed by default so it does not compete with the form; the editor opens it because the visitor asked for the check.</summary>
+    [Parameter] public bool Open { get; set; }
+
+    private string Badge
+    {
+        get
+        {
+            var rules = Findings.Select(f => f.Rule).Distinct().Count();
+            return rules == 0 ? "All clear" : $"{rules} to improve";
+        }
+    }
 }

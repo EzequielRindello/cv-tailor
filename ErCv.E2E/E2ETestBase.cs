@@ -43,6 +43,31 @@ namespace ErCv.E2E
             await Page.GetByRole(AriaRole.Navigation, new() { Name = "Composer steps" }).WaitForAsync();
         }
 
+        /// <summary>Creates "My profile" the way a visitor does: import a JSON file on the profile page, then save it.</summary>
+        protected async Task SaveMyProfileFromJsonAsync(string json)
+        {
+            await Page.GotoAsync("/profile");
+            await Assertions.Expect(Page.Locator("#profile-save")).ToBeVisibleAsync();
+            await Page.Locator("#profile-import").SetInputFilesAsync(new FilePayload
+            {
+                Name = "profile.json",
+                MimeType = "application/json",
+                Buffer = System.Text.Encoding.UTF8.GetBytes(json)
+            });
+            await Assertions.Expect(Page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Imported" })).ToBeVisibleAsync();
+            await Page.Locator("#profile-save").ClickAsync();
+            await Assertions.Expect(Page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Saved in this browser" })).ToBeVisibleAsync();
+        }
+
+        /// <summary>From the home page to step 2 with "My profile" chosen.</summary>
+        protected async Task ChooseMyProfileAsync(string sample = "Backend")
+        {
+            await OpenHomeAsync();
+            await PickSampleAsync(sample);
+            await NextAsync();
+            await Page.Locator("label[for='source-mine']").ClickAsync();
+        }
+
         protected ILocator Button(string name, bool exact = false) =>
             Page.GetByRole(AriaRole.Button, new() { Name = name, Exact = exact });
 

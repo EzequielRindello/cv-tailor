@@ -9,11 +9,9 @@ namespace ErCv.E2E
         {
         }
 
-        private async Task OpenProfileStepAsync()
+        private async Task OpenProfilePageAsync()
         {
-            await OpenHomeAsync();
-            await PickSampleAsync("Backend");
-            await NextAsync();
+            await Page.GotoAsync("/profile");
             await Assertions.Expect(Page.Locator("#profile-export")).ToBeVisibleAsync();
         }
 
@@ -21,18 +19,33 @@ namespace ErCv.E2E
             new() { Name = "profile.json", MimeType = "application/json", Buffer = Encoding.UTF8.GetBytes(text) };
 
         [Fact]
-        public async Task Exported_profile_can_be_edited_imported_and_is_used_for_the_cv()
+        public async Task Step_two_has_no_import_export_or_template_buttons()
         {
-            await OpenProfileStepAsync();
+            await OpenHomeAsync();
+            await PickSampleAsync("Backend");
+            await NextAsync();
+
+            await Assertions.Expect(Page.Locator("#source-demo")).ToBeVisibleAsync();
+            await Assertions.Expect(Page.Locator("#profile-edit-link")).ToBeVisibleAsync();
+            await Assertions.Expect(Page.Locator("#profile-import, #profile-export, #profile-template")).ToHaveCountAsync(0);
+        }
+
+        [Fact]
+        public async Task Exported_profile_can_be_edited_imported_saved_and_is_used_for_the_cv()
+        {
+            await OpenProfilePageAsync();
+            await Page.Locator("#profile-use-demo").ClickAsync();
+            await Assertions.Expect(Page.Locator("#p-fullName")).ToHaveValueAsync("Alex Rivera");
 
             var download = await Page.RunAndWaitForDownloadAsync(() => Page.Locator("#profile-export").ClickAsync());
             await using var stream = await download.CreateReadStreamAsync();
             var exported = await new StreamReader(stream!).ReadToEndAsync();
             Assert.Contains("Rivera", exported);
 
-            await Page.Locator("#profile-import").SetInputFilesAsync(Json(exported.Replace("Alex Rivera", "Zed Tester")));
-            await Assertions.Expect(Page.Locator("#profile-active")).ToContainTextAsync("Zed Tester");
+            await SaveMyProfileFromJsonAsync(exported.Replace("Alex Rivera", "Zed Tester"));
+            await Assertions.Expect(Page.Locator("#p-fullName")).ToHaveValueAsync("Zed Tester");
 
+            await ChooseMyProfileAsync();
             await NextAsync();
             await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "Word" }), true);
             await Button("Generate CV").ClickAsync();
@@ -43,20 +56,20 @@ namespace ErCv.E2E
         [Fact]
         public async Task Invalid_file_is_rejected_with_field_level_errors()
         {
-            await OpenProfileStepAsync();
+            await OpenProfilePageAsync();
 
             await Page.Locator("#profile-import").SetInputFilesAsync(Json("""{ "header": { "fullName": "", "email": "nope" } }"""));
 
             var errors = Page.Locator("#profile-import-errors");
             await Assertions.Expect(errors).ToContainTextAsync("header.fullName");
             await Assertions.Expect(errors).ToContainTextAsync("header.email");
-            await Assertions.Expect(Page.Locator("#profile-active")).ToHaveCountAsync(0);
+            await Assertions.Expect(Page.Locator("#p-fullName")).ToHaveValueAsync("");
         }
 
         [Fact]
         public async Task Blank_template_downloads()
         {
-            await OpenProfileStepAsync();
+            await OpenProfilePageAsync();
 
             var download = await Page.RunAndWaitForDownloadAsync(() => Page.Locator("#profile-template").ClickAsync());
             Assert.EndsWith(".json", download.SuggestedFilename);

@@ -85,29 +85,23 @@ namespace ErCv.E2E
         }
 
         [Fact]
-        public async Task Reopening_an_entry_that_used_an_imported_profile_falls_back_to_the_demo_profile()
+        public async Task Reopening_an_entry_whose_saved_profile_is_gone_falls_back_to_the_demo_profile()
         {
-            await OpenHomeAsync();
-            await PickSampleAsync("Backend");
-            await NextAsync();
-            var profile = """{ "header": { "fullName": "Zed Tester", "email": "zed@example.com" }, "experience": [ { "role": "Eng", "company": "Acme", "startDate": "Jan 2020", "bullets": ["Built a thing"], "skills": ["C#"] } ] }""";
-            await Page.Locator("#profile-import").SetInputFilesAsync(new FilePayload
-            {
-                Name = "p.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes(profile)
-            });
-            await Assertions.Expect(Page.Locator("#profile-active")).ToBeVisibleAsync();
+            await SaveMyProfileFromJsonAsync("""{ "header": { "fullName": "Zed Tester", "email": "zed@example.com" }, "experience": [ { "role": "Eng", "company": "Acme", "startDate": "Jan 2020", "bullets": ["Built a thing"], "skills": ["C#"] } ] }""");
+            await ChooseMyProfileAsync();
             await NextAsync();
             await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "Word" }), true);
             await Button("Generate CV").ClickAsync();
             await Assertions.Expect(PreviewBody).ToContainTextAsync("Tester");
 
+            await Page.EvaluateAsync("() => localStorage.removeItem('cv-generator-my-profile')");
             await OpenHomeAsync();
             await Button("History", exact: true).ClickAsync();
             await Page.Locator(".history-item").GetByRole(AriaRole.Button, new() { Name = "Re-open" }).ClickAsync();
 
             await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
             await Assertions.Expect(PreviewBody).ToContainTextAsync("Rivera");
-            await Assertions.Expect(Page.GetByText("imported profile was not kept")).ToBeVisibleAsync();
+            await Assertions.Expect(Page.GetByText("saved profile was not found")).ToBeVisibleAsync();
         }
 
         [Fact]

@@ -4,21 +4,11 @@
         <div class="card-body p-3">
             <div class="cv-preview-header">
                 <h5 class="mb-0">CV Preview</h5>
-                <div class="cv-zoom" role="group" aria-label="Preview zoom">
-                    <button type="button"
-                            class="cv-zoom-btn @(!_actualSize ? "active" : "")"
-                            aria-pressed="@(!_actualSize ? "true" : "false")"
-                            @onclick="() => _actualSize = false">Fit width</button>
-                    <button type="button"
-                            class="cv-zoom-btn @(_actualSize ? "active" : "")"
-                            aria-pressed="@(_actualSize ? "true" : "false")"
-                            @onclick="() => _actualSize = true">100%</button>
-                </div>
             </div>
             <div class="cv-preview-frame-wrapper">
                 <iframe srcdoc="@_normalizedHtml"
                         title="CV Preview"
-                        class="cv-preview-frame @(_actualSize ? "actual-size" : "")"
+                        class="cv-preview-frame"
                         sandbox="allow-same-origin"></iframe>
             </div>
         </div>
@@ -28,7 +18,6 @@
 @code {
     [Parameter] public string? Html { get; set; }
 
-    private bool _actualSize;
     private string? _sourceHtml;
     private string _normalizedHtml = string.Empty;
 
@@ -37,6 +26,7 @@
     // Modern template uses a 2-column grid that can overflow in the iframe preview.
     private const string PreviewFixStyle = """
         <style id="cv-preview-fix">
+          html { scrollbar-width: thin; scrollbar-color: rgba(128, 128, 128, 0.5) transparent; }
           html, body { max-width: 100% !important; overflow-x: hidden !important; }
           body { margin: 0 auto !important; padding: 12px !important; }
           a, p, span, div, li { overflow-wrap: anywhere; }

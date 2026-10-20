@@ -723,12 +723,6 @@ h1, h2, h3, .form-title {
   padding: var(--spacing-lg);
 }
 
-.cv-preview-frame.actual-size {
-  max-width: none;
-  /* US Letter at 96dpi: the paper at real size, the wrapper scrolls sideways */
-  width: 816px;
-}
-
 .cv-preview-frame-wrapper {
   overflow-x: auto;
 }
@@ -1363,31 +1357,6 @@ h1, h2, h3, .form-title {
   gap: var(--spacing-md);
   justify-content: space-between;
   margin-bottom: var(--spacing-md);
-}
-
-.cv-zoom {
-  background: var(--color-bg-hover);
-  border-radius: var(--radius-md);
-  display: inline-flex;
-  padding: 2px;
-}
-
-.cv-zoom-btn {
-  white-space: nowrap;
-  background: transparent;
-  border: 0;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  padding: 4px var(--spacing-md);
-}
-
-.cv-zoom-btn.active {
-  background: var(--color-bg-card);
-  box-shadow: var(--shadow-sm);
-  color: var(--color-text-primary);
 }
 
 /* Same look as the composer steps: every tab has its own underline, the current one in the accent color */
@@ -3154,4 +3123,38 @@ body:not(:has(#samples)) .app-try-demo {
 .history-status {
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
+}
+
+/* Thin scrollbars so they take little room and draw little attention */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-default) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border-default);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.profile-health-summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.profile-health-badge {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }

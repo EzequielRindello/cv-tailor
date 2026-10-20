@@ -62,16 +62,10 @@
                                     <ProfileSourceSwitcher Value="@_settings.ProfileSource"
                                                            ValueChanged="SetProfileSource"
                                                            HasMine="_myProfile != null"
-                                                           Disabled="@(_loading || _importedProfile != null)" />
+                                                           Disabled="_loading" />
                                     <ProfileSelector Profiles="_profiles"
                                                      @bind-Value="_profileId"
                                                      Disabled="@(_loading || ActiveProfile != null)" />
-                                    <ProfileTools Imported="_importedProfile"
-                                                  Disabled="_loading"
-                                                  OnImport="ImportProfile"
-                                                  OnRemove="() => _importedProfile = null"
-                                                  OnExport="ExportProfileAsync"
-                                                  OnTemplate="DownloadTemplateAsync" />
                                     <TemplateSelector Value="@_settings.Template"
                                                       ValueChanged="SetTemplate"
                                                       Disabled="_loading" />
@@ -80,10 +74,6 @@
                             else
                             {
                                 <div class="form-section form-section-primary">
-                                    @if (_health != null)
-                                    {
-                                        <ProfileHealthCard Findings="_health" />
-                                    }
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <FormatSelector Selected="_settings.SelectedFormats"
@@ -151,9 +141,7 @@ else
     private int _step = 1;
     private string _jobDescription = string.Empty;
     private string _profileId = "cv-master";
-    private CVMaster? _importedProfile;
     private CVMaster? _myProfile;
-    private List<HealthFinding>? _health;
     private List<ProfileInfo> _profiles = new() { new("cv-master", "Default") };
     private AppSettings _settings = new();
     private List<HistoryEntry> _history = new();
@@ -241,36 +229,21 @@ else
         StateHasChanged();
     });
 
-    private async Task GoToStepAsync(int step)
+    private Task GoToStepAsync(int step)
     {
         if (step > 1 && string.IsNullOrWhiteSpace(_jobDescription))
         {
             RequireJobDescription();
-            return;
+            return Task.CompletedTask;
         }
 
         _jdError = null;
         _step = Math.Clamp(step, 1, LastStep);
-        if (_step == LastStep) await CheckProfileHealthAsync();
+        return Task.CompletedTask;
     }
 
-    /// <summary>PROF-04: advice on the profile that is about to be used. A profile that cannot be loaded just skips it.</summary>
-    private async Task CheckProfileHealthAsync()
-    {
-        try
-        {
-            _health = ProfileHealthChecker.Check(ActiveProfile ?? await CvService.GetProfileAsync(_profileId));
-        }
-        catch (Exception ex) when (ex is IOException or InvalidOperationException)
-        {
-            Logger.LogWarning(ex, "Could not run the profile health check.");
-            _health = null;
-        }
-    }
-
-    /// <summary>The profile sent with the request: an imported one wins, then the saved "My profile" if selected. Null means a stored demo profile.</summary>
-    private CVMaster? ActiveProfile =>
-        _importedProfile ?? (_settings.ProfileSource == "mine" ? _myProfile : null);
+    /// <summary>The profile sent with the request: the saved "My profile" if selected. Null means a stored demo profile.</summary>
+    private CVMaster? ActiveProfile => _settings.ProfileSource == "mine" ? _myProfile : null;
 
     private async Task SetProfileSource(string source)
     {
@@ -303,46 +276,6 @@ else
         Enum.TryParse<CVTemplate>(_settings.Template, ignoreCase: true, out var t) ? t : CVTemplate.Harvard;
 
     private string TemplateLabel() => TemplateEnum().ToString();
-
-    private void ImportProfile(CVMaster profile)
-    {
-        _importedProfile = profile;
-        Toasts.Success("Profile imported");
-    }
-
-    private async Task ExportProfileAsync()
-    {
-        try
-        {
-            var profile = ActiveProfile ?? await CvService.GetProfileAsync(_profileId);
-            await DownloadTextAsync("cv-profile.json", ProfileJson.Serialize(profile));
-        }
-        catch (Exception ex) when (ex is JSException or InvalidOperationException or IOException)
-        {
-            Logger.LogError(ex, "Error exporting profile");
-            Toasts.Error("Could not export the profile");
-        }
-    }
-
-    private async Task DownloadTemplateAsync()
-    {
-        try
-        {
-            await DownloadTextAsync("cv-profile-template.json", ProfileJson.Template());
-        }
-        catch (Exception ex) when (ex is JSException or InvalidOperationException)
-        {
-            Logger.LogError(ex, "Error downloading the profile template");
-            Toasts.Error("Could not download the template");
-        }
-    }
-
-    private async Task DownloadTextAsync(string fileName, string text)
-    {
-        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(text));
-        using var reference = new DotNetStreamReference(stream);
-        await JS.InvokeVoidAsync("cvApp.downloadFile", fileName, reference);
-    }
 
     private async Task DownloadAsync(string format)
     {
@@ -409,7 +342,7 @@ else
                 TemplateKey = _settings.Template,
                 Formats = SelectedFormats(),
                 AllowTwoPages = _settings.AllowTwoPages,
-                ProfileSource = _importedProfile != null ? "imported" : _settings.ProfileSource,
+                ProfileSource = _settings.ProfileSource,
                 ProfileId = _profileId
             });
         }
@@ -492,7 +425,6 @@ else
     {
         if (entry.ProfileSource == null) return null;
 
-        _importedProfile = null;
         if (entry.ProfileId != null && _profiles.Any(p => p.Id == entry.ProfileId))
             _profileId = entry.ProfileId;
 

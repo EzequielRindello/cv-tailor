@@ -3,12 +3,6 @@
 
 <div class="mb-4 profile-tools">
     <label class="form-label form-label-custom" for="profile-import">Your profile</label>
-    @if (Imported != null)
-    {
-        <p class="profile-tools-active" id="profile-active">
-            Using your imported profile: <strong>@Imported.Header.FullName</strong>
-        </p>
-    }
     <div class="d-flex flex-wrap gap-2">
         <label class="btn btn-outline-secondary btn-sm mb-0 @(Disabled ? "disabled" : "")">
             Import JSON
@@ -19,11 +13,6 @@
                 disabled="@Disabled" @onclick="OnExport">Export JSON</button>
         <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-template"
                 disabled="@Disabled" @onclick="OnTemplate">Blank template</button>
-        @if (Imported != null)
-        {
-            <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-remove"
-                    disabled="@Disabled" @onclick="OnRemove">Use a stored profile</button>
-        }
     </div>
 
     @if (_issues.Count > 0)
@@ -49,10 +38,8 @@
 
     private List<ProfileIssue> _issues = new();
 
-    [Parameter] public CVMaster? Imported { get; set; }
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public EventCallback<CVMaster> OnImport { get; set; }
-    [Parameter] public EventCallback OnRemove { get; set; }
     [Parameter] public EventCallback OnExport { get; set; }
     [Parameter] public EventCallback OnTemplate { get; set; }
 
