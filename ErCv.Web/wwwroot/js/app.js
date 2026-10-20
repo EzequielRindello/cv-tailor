@@ -23,6 +23,13 @@ window.cvApp = {
         try { localStorage.removeItem(key); } catch { }
     },
 
+    getTheme: () => document.documentElement.getAttribute('data-theme') || 'light',
+
+    setTheme: (theme) => {
+        document.documentElement.setAttribute('data-theme', theme);
+        try { localStorage.setItem('theme', theme); } catch { }
+    },
+
     scrollToTop: () => {
         document.getElementById('app-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     },

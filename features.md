@@ -303,12 +303,12 @@ Direction: a premium document tool. Warm paper background, serif display heading
 Fonts are self-hosted under `wwwroot/lib/fonts` (no runtime CDN, same rule as Bootstrap).
 
 ### UX-01: Design system
-**Status:** Todo · **Priority:** P0 · **Effort:** M
+**Status:** In progress (visual check and CSS isolation pending) · **Priority:** P0 · **Effort:** M
 
-- [ ] Replace the token block in `wwwroot/css/site.css` with the spec above (colors, type scale, 4px spacing grid, radii, soft shadows, focus ring)
-- [ ] Bootstrap variables mapped to the new tokens (`--bs-primary`, `--bs-body-font-family`, ...)
-- [ ] Fonts self-hosted (woff2) with `font-display: swap`
-- [ ] Dark mode token set (`prefers-color-scheme` + manual toggle)
+- [x] Replace the token block in `wwwroot/css/site.css` with the spec above (colors, type scale, 4px spacing grid, radii, soft shadows, focus ring)
+- [x] Bootstrap variables mapped to the new tokens (`--bs-primary`, `--bs-body-font-family`, ...)
+- [x] Fonts self-hosted (woff2) with `font-display: swap`
+- [x] Dark mode token set (`prefers-color-scheme` + manual toggle)
 - [ ] Per-component CSS moved to `*.razor.css` (CSS isolation) where it helps
 
 Files: `wwwroot/css/site.css`, `wwwroot/lib/fonts/*`, `Components/**/*.razor.css`
