@@ -33,8 +33,13 @@ else if (Analysis == null)
 {
     <div class="details-fullscreen">
         <div class="card main-card">
-            <div class="card-body text-center">
-                <p class="analysis-empty">Generate a CV to view details.</p>
+            <div class="card-body">
+                <div class="empty-state">
+                    <i class="bi bi-file-earmark-text empty-state-icon" aria-hidden="true"></i>
+                    <p class="empty-state-title">Nothing to show yet</p>
+                    <p class="empty-state-text">Generate a CV and its preview and scores will appear here.</p>
+                    <button type="button" class="btn btn-primary" @onclick="OnBack">Back to composer</button>
+                </div>
             </div>
         </div>
     </div>

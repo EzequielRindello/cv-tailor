@@ -367,11 +367,11 @@ Verify: bUnit render tests for each color state (TEST-06).
 Verify: manual check plus E2E that the indicator appears and disappears.
 
 ### UX-07: Empty, error and toast states
-**Status:** Todo · **Priority:** P1 · **Effort:** S
+**Status:** Done (E2E arrives with TEST-07) · **Priority:** P1 · **Effort:** S
 
-- [ ] Inline validation on the JD field instead of an alert box
-- [ ] Toasts for success (download started, regenerated) and errors with a retry action
-- [ ] Friendly empty states with a call to action
+- [x] Inline validation on the JD field (and on the formats) instead of an alert box
+- [x] Toasts for success (download started, regenerated) and errors with a retry action (`ToastService` + `ToastHost`)
+- [x] Friendly empty states with a call to action (history, results)
 
 Verify: E2E for empty JD and no format selected.
 

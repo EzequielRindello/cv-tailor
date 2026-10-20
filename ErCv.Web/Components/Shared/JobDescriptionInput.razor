@@ -4,15 +4,23 @@
 <div class="mb-4">
     <label class="form-label form-label-custom" for="job-description">Job Description</label>
     <textarea id="job-description"
-              class="form-control job-description-input"
+              class="form-control job-description-input @(ShowError ? "is-invalid" : "")"
               rows="14"
               placeholder="Paste the job description here..."
               disabled="@Disabled"
               title="@HelperText"
-              aria-describedby="job-description-meta"
+              aria-describedby="@(ShowError ? "job-description-error job-description-meta" : "job-description-meta")"
+              aria-invalid="@(ShowError ? "true" : null)"
               value="@Value"
               @oninput="OnInput"
               @onchange="OnChanged"></textarea>
+    @if (ShowError)
+    {
+        <div class="field-error" id="job-description-error" role="alert">
+            <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+            @Error
+        </div>
+    }
     <div class="jd-meta" id="job-description-meta">
         <span class="jd-counter">@_text.Length.ToString("N0") characters</span>
         <span class="jd-counter">
@@ -60,6 +68,11 @@
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public string? HelperText { get; set; }
+
+    /// <summary>Shown under the field until the user types something.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    private bool ShowError => !string.IsNullOrEmpty(Error) && string.IsNullOrWhiteSpace(_text);
 
     protected override void OnParametersSet()
     {

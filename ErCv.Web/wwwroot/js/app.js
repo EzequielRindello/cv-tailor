@@ -30,6 +30,10 @@ window.cvApp = {
         try { localStorage.setItem('theme', theme); } catch { }
     },
 
+    focusElement: (id) => {
+        document.getElementById(id)?.focus();
+    },
+
     scrollToTop: () => {
         document.getElementById('app-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     },

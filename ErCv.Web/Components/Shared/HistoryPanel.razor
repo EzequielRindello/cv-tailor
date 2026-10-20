@@ -11,7 +11,12 @@
 
         @if (Entries.Count == 0)
         {
-            <p class="history-empty mb-0">No generations yet.</p>
+            <div class="empty-state">
+                <i class="bi bi-clock-history empty-state-icon" aria-hidden="true"></i>
+                <p class="empty-state-title">No generations yet</p>
+                <p class="empty-state-text">Your last 10 CVs show up here. They are saved only in this browser.</p>
+                <button type="button" class="btn btn-primary btn-sm" @onclick="OnClose">Create your first CV</button>
+            </div>
         }
         else
         {

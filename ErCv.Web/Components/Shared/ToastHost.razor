@@ -1,0 +1,41 @@
+@implements IDisposable
+@inject ToastService Toasts
+
+<div class="toast-host" aria-live="polite">
+    @foreach (var toast in Toasts.Toasts)
+    {
+        var t = toast;
+        <div class="app-toast @t.Kind.ToString().ToLowerInvariant()" role="@(t.Kind == ToastKind.Error ? "alert" : "status")" @key="t.Id">
+            <i class="bi @Icon(t.Kind) app-toast-icon" aria-hidden="true"></i>
+            <span class="app-toast-text">@t.Text</span>
+            @if (t.Action != null)
+            {
+                <button type="button" class="app-toast-action" @onclick="() => RunAsync(t)">@t.ActionLabel</button>
+            }
+            <button type="button" class="app-toast-close" aria-label="Dismiss" @onclick="() => Toasts.Dismiss(t.Id)">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized() => Toasts.Changed += OnChanged;
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private async Task RunAsync(ToastMessage toast)
+    {
+        Toasts.Dismiss(toast.Id);
+        if (toast.Action != null) await toast.Action();
+    }
+
+    private static string Icon(ToastKind kind) => kind switch
+    {
+        ToastKind.Success => "bi-check-circle-fill",
+        ToastKind.Error => "bi-exclamation-triangle-fill",
+        _ => "bi-info-circle-fill"
+    };
+
+    public void Dispose() => Toasts.Changed -= OnChanged;
+}

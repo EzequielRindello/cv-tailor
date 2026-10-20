@@ -7,6 +7,7 @@
 @inject BrowserStore Store
 @inject IJSRuntime JS
 @inject ILogger<Home> Logger
+@inject ToastService Toasts
 
 <PageTitle>CV Generator - Tailored Professional Resumes</PageTitle>
 
@@ -18,13 +19,6 @@
             <div class="col-lg-8 col-xl-7">
                 <div class="card main-card">
                     <div class="card-body form-card-body">
-                        @if (!string.IsNullOrEmpty(_error))
-                        {
-                            <div class="alert alert-danger alert-dismissible" role="alert">
-                                @_error
-                                <button type="button" class="btn-close" aria-label="Close" @onclick="() => _error = string.Empty"></button>
-                            </div>
-                        }
                         @if (_showHistory)
                         {
                             <HistoryPanel Entries="_history"
@@ -52,6 +46,7 @@
                                                      OnSelect="s => _jobDescription = s"
                                                      Disabled="_loading" />
                                     <JobDescriptionInput @bind-Value="_jobDescription"
+                                                         Error="@_jdError"
                                                          Disabled="_loading"
                                                          HelperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate" />
                                 </div>
@@ -73,6 +68,7 @@
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <FormatSelector Selected="_settings.SelectedFormats"
+                                                            Error="@_formatError"
                                                             OnToggle="ToggleFormat"
                                                             Disabled="_loading" />
                                         </div>
@@ -145,7 +141,9 @@ else
     private GenerationStage _stage;
     private bool _showHistory;
     private bool _showBulletEditor;
-    private string _error = string.Empty;
+    private string? _jdError;
+    private string? _formatError;
+    private bool _focusJd;
     private DotNetObjectReference<Home>? _selfRef;
 
     protected override async Task OnInitializedAsync()
@@ -172,6 +170,22 @@ else
         await JS.InvokeVoidAsync("cvApp.registerShortcuts", _selfRef);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // The editor only exists once step 1 is on screen, so focus waits for the render that creates it
+        if (!_focusJd || _view != "generate" || _step != 1) return;
+
+        _focusJd = false;
+        await JS.InvokeVoidAsync("cvApp.focusElement", "job-description");
+    }
+
+    private void RequireJobDescription()
+    {
+        _step = 1;
+        _jdError = "Paste a job description to continue";
+        _focusJd = true;
+    }
+
     [JSInvokable]
     public Task OnPasteShortcut(string text) => InvokeAsync(() =>
     {
@@ -185,21 +199,24 @@ else
     {
         // The editor only exists on step 1; on later steps the text already lives in _jobDescription
         var text = string.IsNullOrWhiteSpace(textareaValue) ? _jobDescription : textareaValue;
-        if (_view != "generate" || _loading || string.IsNullOrWhiteSpace(text)) return;
+        if (_view != "generate" || _loading) return;
+
         _jobDescription = text;
         await GenerateAsync();
+
+        // A JS-invoked method does not re-render on its own; validation errors need it
+        StateHasChanged();
     });
 
     private Task GoToStepAsync(int step)
     {
         if (step > 1 && string.IsNullOrWhiteSpace(_jobDescription))
         {
-            _step = 1;
-            _error = "Please paste a job description";
+            RequireJobDescription();
             return Task.CompletedTask;
         }
 
-        _error = string.Empty;
+        _jdError = null;
         _step = Math.Clamp(step, 1, LastStep);
         return Task.CompletedTask;
     }
@@ -234,17 +251,27 @@ else
     {
         if (!_documents.TryGetValue(format, out var bytes)) return;
 
-        using var stream = new MemoryStream(bytes);
-        using var reference = new DotNetStreamReference(stream);
-        await JS.InvokeVoidAsync("cvApp.downloadFile", CvService.BuildFileName(format), reference);
+        try
+        {
+            using var stream = new MemoryStream(bytes);
+            using var reference = new DotNetStreamReference(stream);
+            await JS.InvokeVoidAsync("cvApp.downloadFile", CvService.BuildFileName(format), reference);
+            Toasts.Success($"Download started: {format.ToUpperInvariant()}");
+        }
+        catch (Exception ex) when (ex is JSException or InvalidOperationException)
+        {
+            Logger.LogError(ex, "Error downloading {Format}", format);
+            Toasts.Error($"Could not download the {format.ToUpperInvariant()} file", "Retry", () => DownloadAsync(format));
+        }
     }
 
     private async Task GenerateAsync()
     {
-        if (string.IsNullOrWhiteSpace(_jobDescription)) { _error = "Please paste a job description"; return; }
-        if (SelectedFormats().Count == 0) { _error = "Please select at least one format"; return; }
+        if (string.IsNullOrWhiteSpace(_jobDescription)) { RequireJobDescription(); return; }
+        if (SelectedFormats().Count == 0) { _formatError = "Select at least one format"; return; }
 
-        _error = string.Empty;
+        _jdError = null;
+        _formatError = null;
         _loading = true;
         _analysis = null;
         _documents = new();
@@ -279,13 +306,13 @@ else
         catch (ArgumentException ex)
         {
             _view = "generate";
-            _error = ex.Message;
+            Toasts.Error(ex.Message);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error generating CV");
             _view = "generate";
-            _error = "An error occurred while generating the CV";
+            Toasts.Error("Something went wrong while generating the CV", "Retry", GenerateAsync);
         }
         finally
         {
@@ -298,7 +325,6 @@ else
         if (_analysis == null) return;
 
         _loading = true;
-        _error = string.Empty;
         StateHasChanged();
 
         try
@@ -316,15 +342,16 @@ else
             _analysis.GeneratedCV = edit.Cv;
             _analysis.PreviewHtml = previewHtml;
             _showBulletEditor = false;
+            Toasts.Success("CV regenerated");
         }
         catch (ArgumentException ex)
         {
-            _error = ex.Message;
+            Toasts.Error(ex.Message);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error regenerating CV");
-            _error = "Error regenerating CV";
+            Toasts.Error("Something went wrong while regenerating the CV", "Retry", () => RegenerateAsync(edit));
         }
         finally
         {
@@ -337,7 +364,7 @@ else
         _jobDescription = entry.JobDescription;
         _step = 1;
         _showHistory = false;
-        _error = string.Empty;
+        _jdError = null;
         await JS.InvokeVoidAsync("cvApp.scrollToTop");
     }
 
@@ -354,7 +381,6 @@ else
         _view = "generate";
         _showHistory = false;
         _showBulletEditor = false;
-        _error = string.Empty;
         await JS.InvokeVoidAsync("cvApp.scrollToTop");
     }
 
@@ -373,7 +399,8 @@ else
         _showHistory = false;
         _step = 1;
         _view = "generate";
-        _error = string.Empty;
+        _jdError = null;
+        _formatError = null;
         await JS.InvokeVoidAsync("cvApp.scrollToTop");
     }
 
