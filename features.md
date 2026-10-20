@@ -71,7 +71,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | EDIT-05 | More templates | E5 Editing | P3 | M | Todo |
 | EDIT-06 | Plain-text / Markdown export | E5 Editing | P3 | S | Todo |
 | APP-01 | Application tracker | E6 Workflow | P2 | M | Todo |
-| APP-02 | Re-open a past generation | E6 Workflow | P2 | S | Todo |
+| APP-02 | Re-open a past generation | E6 Workflow | P2 | S | Done |
 | APP-03 | Sample JD gallery | E6 Workflow | P0 | S | Done |
 | APP-04 | Import JD from URL (Greenhouse/Lever) | E6 Workflow | P3 | M | Todo |
 | APP-05 | Real job-post corpus, dated and kept fresh | E6 Workflow | P1 | L | Todo |
@@ -623,11 +623,13 @@ Verify: unit test of the text renderer.
 Verify: bUnit + E2E.
 
 ### APP-02: Re-open a past generation
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done · **Priority:** P2 · **Effort:** S
 
-- [ ] History stores template, formats, page mode and profile; "Re-open" restores and regenerates
+- [x] History stores template, formats, page mode and profile; "Re-open" restores and regenerates
 
-Verify: E2E.
+Notes: `HistoryEntry` gained `TemplateKey`, `Formats`, `AllowTwoPages`, `ProfileSource` and `ProfileId`; entries saved before this keep working and re-open with the current options. The button was "Regenerate" and only reloaded the job description; it is now "Re-open" and generates straight away. An imported profile is memory only, and "My profile" may have been cleared, so in both cases the demo profile is used and a toast says so.
+
+Verify: `PersistenceAndShortcutTests` E2E (options restored and the same formats come back; imported profile falls back to the demo).
 
 ### APP-03: Sample JD gallery
 **Status:** Done · **Priority:** P0 · **Effort:** S

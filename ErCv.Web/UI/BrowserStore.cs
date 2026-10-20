@@ -47,7 +47,8 @@ namespace ErCv.Web.UI
         public async Task<List<HistoryEntry>> GetHistoryAsync() =>
             await ReadAsync<List<HistoryEntry>>(HistoryKey) ?? new();
 
-        public async Task<List<HistoryEntry>> AddToHistoryAsync(string jobDescription, int? matchScore, string template)
+        public async Task<List<HistoryEntry>> AddToHistoryAsync(
+            string jobDescription, int? matchScore, string template, HistoryEntry? options = null)
         {
             var entry = new HistoryEntry
             {
@@ -56,7 +57,12 @@ namespace ErCv.Web.UI
                 GeneratedAt = DateTime.UtcNow.ToString("o"),
                 MatchScore = matchScore,
                 Template = template,
-                JobDescription = jobDescription
+                JobDescription = jobDescription,
+                TemplateKey = options?.TemplateKey,
+                Formats = options?.Formats,
+                AllowTwoPages = options?.AllowTwoPages,
+                ProfileSource = options?.ProfileSource,
+                ProfileId = options?.ProfileId
             };
 
             var updated = (await GetHistoryAsync()).Prepend(entry).Take(MaxHistoryEntries).ToList();

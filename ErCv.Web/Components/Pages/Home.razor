@@ -26,7 +26,7 @@
                         @if (_showHistory)
                         {
                             <HistoryPanel Entries="_history"
-                                          OnLoad="LoadHistoryEntry"
+                                          OnLoad="ReopenHistoryEntry"
                                           OnDelete="DeleteHistoryEntry"
                                           OnClear="ClearHistory"
                                           OnClose="() => _showHistory = false"
@@ -403,7 +403,14 @@ else
             _analysis = analysis;
             _focusResults = true;
             _announcement = $"CV ready. Match score {analysis.MatchScore.Overall} percent. ATS score {analysis.ATSScore.Overall} out of 100.";
-            _history = await Store.AddToHistoryAsync(_jobDescription, analysis.MatchScore.Overall, TemplateLabel());
+            _history = await Store.AddToHistoryAsync(_jobDescription, analysis.MatchScore.Overall, TemplateLabel(), new HistoryEntry
+            {
+                TemplateKey = _settings.Template,
+                Formats = SelectedFormats(),
+                AllowTwoPages = _settings.AllowTwoPages,
+                ProfileSource = _importedProfile != null ? "imported" : _settings.ProfileSource,
+                ProfileId = _profileId
+            });
         }
         catch (ArgumentException ex)
         {
@@ -461,13 +468,46 @@ else
         }
     }
 
-    private async Task LoadHistoryEntry(HistoryEntry entry)
+    /// <summary>APP-02: puts the saved job description and options back and generates again.</summary>
+    private async Task ReopenHistoryEntry(HistoryEntry entry)
     {
         _jobDescription = entry.JobDescription;
-        _step = 1;
-        _showHistory = false;
         _jdError = null;
-        await JS.InvokeVoidAsync("cvApp.scrollToTop");
+
+        if (entry.TemplateKey != null) _settings.Template = entry.TemplateKey;
+        if (entry.AllowTwoPages is { } twoPages) _settings.AllowTwoPages = twoPages;
+        if (entry.Formats is { Count: > 0 } formats)
+            _settings.SelectedFormats = _settings.SelectedFormats.Keys.ToDictionary(k => k, k => formats.Contains(k));
+
+        var note = RestoreProfile(entry);
+        await Store.SaveSettingsAsync(_settings);
+
+        if (note != null) Toasts.Info(note);
+        await GenerateAsync();
+    }
+
+    /// <summary>Returns a message when the profile the entry used is gone and the demo profile is used instead.</summary>
+    private string? RestoreProfile(HistoryEntry entry)
+    {
+        if (entry.ProfileSource == null) return null;
+
+        _importedProfile = null;
+        if (entry.ProfileId != null && _profiles.Any(p => p.Id == entry.ProfileId))
+            _profileId = entry.ProfileId;
+
+        if (entry.ProfileSource == "mine" && _myProfile != null)
+        {
+            _settings.ProfileSource = "mine";
+            return null;
+        }
+
+        _settings.ProfileSource = "demo";
+        return entry.ProfileSource switch
+        {
+            "imported" => "The imported profile was not kept, so the demo profile was used.",
+            "mine" => "Your saved profile was not found, so the demo profile was used.",
+            _ => null
+        };
     }
 
     private async Task DeleteHistoryEntry(long id) => _history = await Store.RemoveFromHistoryAsync(id);
