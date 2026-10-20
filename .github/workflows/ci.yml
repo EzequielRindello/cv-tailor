@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # The runner image ships Google Chrome. Pointing PuppeteerSharp at it skips its own Chromium download.
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore er-cv-generator.sln
+
+      - name: Build
+        run: dotnet build er-cv-generator.sln --no-restore --configuration Release
+
+      # Unit, invariant, document (DOCX, PDF, HTML) and API integration tests.
+      - name: Test
+        run: >
+          dotnet test er-cv-generator.sln --no-build --configuration Release
+          --logger "trx;LogFileName=test-results.trx"
+          --results-directory test-results
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+          if-no-files-found: ignore
+
+  docker:
+    name: Docker image build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build --tag er-cv-generator:ci .
+
+  # Coverage (TEST-10) and the Playwright E2E job (TEST-07) are added to this workflow when those tickets land.

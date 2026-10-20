@@ -147,5 +147,31 @@ namespace ErCv.Tests.Helpers
 
             Assert.True(lines > 0);
         }
+
+        [Fact]
+        public void Enforcing_returns_a_new_cv_and_leaves_the_input_untouched()
+        {
+            var input = Oversized(experiences: 6, bulletsEach: 2, bulletChars: 400);
+            input.Projects = new List<Project> { new() { Description = Bullet(100) } };
+            var before = System.Text.Json.JsonSerializer.Serialize(input);
+
+            var result = _helper.EnforcePageConstraint(input);
+
+            Assert.NotSame(input, result);
+            Assert.Equal(before, System.Text.Json.JsonSerializer.Serialize(input));
+            Assert.True(result.Experience.Count < input.Experience.Count);
+        }
+
+        [Fact]
+        public void A_cv_that_already_fits_is_still_returned_as_a_copy()
+        {
+            var input = Generated(new[] { Exp(bullets: new[] { "a", "b", "c" }) });
+
+            var result = _helper.EnforcePageConstraint(input);
+
+            Assert.NotSame(input, result);
+            Assert.NotSame(input.Experience[0], result.Experience[0]);
+            Assert.Equal(input.Experience[0].Bullets, result.Experience[0].Bullets);
+        }
     }
 }

@@ -56,9 +56,9 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Todo |
 | PROF-04 | Profile health check | E3 Your profile | P2 | M | Todo |
 | PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Todo |
-| MATCH-01 | Fix fuzzy-match false positives | E4 Matching | P0 | S | Todo |
-| MATCH-02 | Word-boundary ATS keyword density | E4 Matching | P0 | S | Todo |
-| MATCH-03 | Shared date parser + correct "most recent role" | E4 Matching | P0 | M | Todo |
+| MATCH-01 | Fix fuzzy-match false positives | E4 Matching | P0 | S | Done |
+| MATCH-02 | Word-boundary ATS keyword density | E4 Matching | P0 | S | Done |
+| MATCH-03 | Shared date parser + correct "most recent role" | E4 Matching | P0 | M | Done |
 | MATCH-04 | Explainability: "why this was chosen" | E4 Matching | P1 | M | Todo |
 | MATCH-05 | JD highlighter | E4 Matching | P1 | M | Todo |
 | MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Todo |
@@ -80,12 +80,12 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | AI-04 | Cover letter polish | E7 AI | P3 | S | Parked |
 | AI-05 | Cost guardrails and caching | E7 AI | P3 | S | Parked |
 | ENG-01 | DI for helpers + single namespace root | E8 Engineering | P2 | M | Todo |
-| ENG-02 | Consolidate duplicated logic, immutable selection | E8 Engineering | P0 | M | Todo |
-| ENG-03 | ILogger + ProblemDetails (no leaked exceptions) | E8 Engineering | P0 | S | Todo |
+| ENG-02 | Consolidate duplicated logic, immutable selection | E8 Engineering | P0 | M | Done |
+| ENG-03 | ILogger + ProblemDetails (no leaked exceptions) | E8 Engineering | P0 | S | Done |
 | ENG-04 | Options pattern for scoring weights | E8 Engineering | P3 | S | Todo |
 | ENG-05 | Chromium readiness in health check + warm-up | E8 Engineering | P2 | S | Todo |
 | ENG-06 | Modern OpenAPI (built-in + Scalar) | E8 Engineering | P3 | S | Todo |
-| OPS-01 | GitHub Actions CI | E9 DevOps | P0 | M | Todo |
+| OPS-01 | GitHub Actions CI | E9 DevOps | P0 | M | In progress |
 | OPS-02 | Dependabot | E9 DevOps | P2 | S | Todo |
 | OPS-03 | README rewrite for portfolio | E9 DevOps | P1 | M | Todo |
 | OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Todo |
@@ -110,14 +110,14 @@ Found during the roadmap review. Each one is covered by a feature below.
 
 | # | Finding | Where | Covered by |
 |---|---|---|---|
-| F1 | `FuzzyMatch` uses substring `Contains`: `go` matches `google`/`mongo`, `java` matches `javascript`. Inflates match score and skill selection. | `Helpers/SkillNormalizer.cs:95` | MATCH-01 |
-| F2 | ATS keyword density uses raw `Contains` (`go` matches "good"). | `Helpers/ATSChecker.cs:75` | MATCH-02 |
-| F3 | "Most recent role" sorts `EndDate` strings lexically, so `"May 2020"` ranks above `"Dec 2023"`. | `Helpers/MatchScoreCalculator.cs:67`, `Helpers/SummaryGenerator.cs:59` | MATCH-03 |
-| F4 | `ContainsTerm` copied 3 times, seniority map duplicated, year parsing duplicated. | `RelevanceScorer`, `MissingSkillsAnalyzer`, `KeywordAnalyzer`, `MatchScoreConstants`, `SummaryGenerator` | ENG-02 |
-| F5 | Generated CV shares `Header`/`Education` references with the master; page constraint mutates in place (caller clones as a workaround). | `Helpers/CVSelector.cs:59`, `Helpers/PageConstraintHelper.cs`, `Components/Pages/Home.razor:300` | ENG-02 |
+| F1 | `FuzzyMatch` uses substring `Contains`: `go` matches `google`/`mongo`, `java` matches `javascript`. Inflates match score and skill selection. | `Helpers/SkillNormalizer.cs:95` | MATCH-01 (fixed) |
+| F2 | ATS keyword density uses raw `Contains` (`go` matches "good"). | `Helpers/ATSChecker.cs:75` | MATCH-02 (fixed) |
+| F3 | "Most recent role" sorts `EndDate` strings lexically, so `"May 2020"` ranks above `"Dec 2023"`. | `Helpers/MatchScoreCalculator.cs:67`, `Helpers/SummaryGenerator.cs:59` | MATCH-03 (fixed) |
+| F4 | `ContainsTerm` copied 3 times, seniority map duplicated, year parsing duplicated. | `RelevanceScorer`, `MissingSkillsAnalyzer`, `KeywordAnalyzer`, `MatchScoreConstants`, `SummaryGenerator` | ENG-02 (fixed) |
+| F5 | Generated CV shares `Header`/`Education` references with the master; page constraint mutates in place (caller clones as a workaround). | `Helpers/CVSelector.cs:59`, `Helpers/PageConstraintHelper.cs`, `Components/Pages/Home.razor:300` | ENG-02 (fixed) |
 | F6 | Page fit is estimated by character count, not measured; a "1-page" CV can spill over. | `Helpers/PageConstraintHelper.cs` | MATCH-08, TEST-04 |
 | F7 | Generate auto-downloads files before the user sees the preview. | `Components/Pages/Home.razor:268` | UX-04 |
-| F8 | 500 responses include `ex.Message`; logging uses `Console.WriteLine`. | `Services/CVGeneratorService.cs:63`, helpers | ENG-03 |
+| F8 | 500 responses include `ex.Message`; logging uses `Console.WriteLine`. | `Services/CVGeneratorService.cs:63`, helpers | ENG-03 (fixed) |
 | F9 | Mixed namespaces (`ErCvApi.*` and `ErCv.Web.*`); helpers built with `new` instead of DI. | Whole project | ENG-01 |
 | F10 | Docs drift: legacy FIX-002 says low match is below 30%, code uses below 40%. Node runner expectations depend on a fixture in `testing/`. | `Helpers/MatchScoreCalculator.cs:43`, `testing/` | OPS-04, TEST-09 |
 | F11 | Bullet reordering is drag-only, not keyboard accessible. | `Components/Shared/BulletEditor.razor` | UX-08 |
@@ -165,7 +165,7 @@ Verify: `dotnet test` passes.
 - [x] `MatchScoreCalculator`, `MissingSkillsAnalyzer`, `KeywordAnalyzer`, `ATSChecker`: scores, thresholds, color classes, issue ordering
 - [x] `SummaryGenerator`: role type detection, years of experience, 300-char cap
 
-Notes: tests for bugs F1 (substring matching), F2 and F3 are written and skipped with the ticket id (`MATCH-01`, `MATCH-02`, `MATCH-03`); remove the `Skip` when each fix lands. Two parser findings found while writing these (`b2b` and `or` captured as skills from "N years of ...") are also skipped, see "New findings" below.
+Notes: the tests for F1, F2 and F3 were written first and skipped with the ticket id; they are active now that `MATCH-01`, `MATCH-02` and `MATCH-03` landed. Two parser findings found while writing these (`b2b` and `or` captured as skills from "N years of ...") are also skipped, see "New findings" below.
 
 Files: `ErCv.Tests/Helpers/*`
 Verify: `dotnet test --filter Category=Unit`.
@@ -446,27 +446,31 @@ Verify: tests with sample resumes.
 ## E4. Matching quality and transparency
 
 ### MATCH-01: Fix fuzzy-match false positives
-**Status:** Todo · **Priority:** P0 · **Effort:** S
+**Status:** Done · **Priority:** P0 · **Effort:** S
 
-- [ ] Replace substring `Contains` in `SkillNormalizer.FuzzyMatch` with alias equality + token-boundary matching (F1)
-- [ ] Regression tests: `go` vs `google`/`mongodb`, `java` vs `javascript`, `react` vs `react native`, `c` vs `c#`
+- [x] Replace substring `Contains` in `SkillNormalizer.FuzzyMatch` with alias equality + token-boundary matching (F1)
+- [x] Regression tests: `go` vs `google`/`mongodb`, `java` vs `javascript`, `react` vs `react native`, `c` vs `c#`
+
+Notes: `FuzzyMatch` now matches whole tokens (`rest` matches `REST API Design`, `go` does not match `google`), with `react native` kept distinct from `react`. New shared `SkillNormalizer.ContainsTerm` (token matcher, treats `#` and `+` as part of the token) and `ContainsSkill` (same, also accepting aliases such as `golang` for `go`). The old `Skip` tests for F1 are now active. Corpus impact reviewed by hand: the only matches that disappear are junk skills from F12 (`in`, `or`) that matched by substring.
 
 Files: `Helpers/SkillNormalizer.cs`
 Verify: TEST-02 SkillNormalizer tests; TEST-08 snapshot diff reviewed.
 
 ### MATCH-02: Word-boundary ATS density
-**Status:** Todo · **Priority:** P0 · **Effort:** S
+**Status:** Done · **Priority:** P0 · **Effort:** S
 
-- [ ] `ATSChecker.EvaluateKeywordDensity` uses the shared word-boundary matcher (F2)
+- [x] `ATSChecker.EvaluateKeywordDensity` uses the shared word-boundary matcher (F2)
 
 Verify: regression test with "good" not counting as `go`.
 
 ### MATCH-03: Shared date parser
-**Status:** Todo · **Priority:** P0 · **Effort:** M
+**Status:** Done · **Priority:** P0 · **Effort:** M
 
-- [ ] `DateParser` handles `Jun 2024`, `June 2024`, `2024-06`, `06/2024`, `2024`, `Present`/`Current`/`Now`
-- [ ] "Most recent role" uses parsed dates (F3)
-- [ ] Years of experience computed from merged date ranges (gaps not counted)
+- [x] `DateParser` handles `Jun 2024`, `June 2024`, `2024-06`, `06/2024`, `2024`, `Present`/`Current`/`Now`
+- [x] "Most recent role" uses parsed dates (F3)
+- [x] Years of experience computed from merged date ranges (gaps not counted)
+
+Notes: months without a month name count as January for a start date and December for an end date; a missing or unreadable end date means ongoing; a role with no readable start is ignored for years. Years are floored whole years from merged ranges, so the demo profile summary now says `9+ years` instead of `10+` (there is a gap between the 2016 internship and 2017).
 
 Files: new `Helpers/DateParser.cs`, `MatchScoreCalculator.cs`, `SummaryGenerator.cs`, `RelevanceScorer.cs`
 Verify: unit tests per format; regression test for `May 2020` vs `Dec 2023`.
@@ -654,19 +658,23 @@ Verify: tests with a fake client; TEST-03 invariants still hold.
 Verify: build + all tests pass.
 
 ### ENG-02: Consolidate duplicated logic
-**Status:** Todo · **Priority:** P0 · **Effort:** M
+**Status:** Done · **Priority:** P0 · **Effort:** M
 
-- [ ] One shared term matcher (replaces 3 `ContainsTerm` copies)
-- [ ] One seniority map; one year/date parser (with MATCH-03) (F4)
-- [ ] Selection builds new objects; master profile is never mutated; page constraint returns a new CV (F5)
+- [x] One shared term matcher (replaces 3 `ContainsTerm` copies)
+- [x] One seniority map; one year/date parser (with MATCH-03) (F4)
+- [x] Selection builds new objects; master profile is never mutated; page constraint returns a new CV (F5)
+
+Notes: new `Helpers/CvCloner.cs` (deep copies). `CVSelector`, `PageConstraintHelper.EnforcePageConstraint` and `CVGeneratorService.RegenerateCVInternalAsync` now work on copies, so the clone workaround in `Home.razor` is gone. Shared matcher is `SkillNormalizer.ContainsTerm`; shared seniority map is `MatchScoreConstants.SeniorityMap` (now also has `associate`); dates and years go through `DateParser` (MATCH-03). The TEST-03 aliasing test is active.
 
 Verify: TEST-03 "master not mutated" invariant.
 
 ### ENG-03: Logging and errors
-**Status:** Todo · **Priority:** P0 · **Effort:** S
+**Status:** Done · **Priority:** P0 · **Effort:** S
 
-- [ ] `ILogger<T>` replaces `Console.WriteLine`
-- [ ] ProblemDetails responses; no exception text in 500 bodies (F8)
+- [x] `ILogger<T>` replaces `Console.WriteLine`
+- [x] ProblemDetails responses; no exception text in 500 bodies (F8)
+
+Notes: `CVGeneratorService` takes `ILoggerFactory` and hands loggers to `CVSelector`, `RelevanceScorer` and `SummaryGenerator` (optional parameters, so `new` still works until ENG-01 moves them to DI). Every error is an RFC 7807 `application/problem+json` body; the `error` extension keeps the field existing consumers read. An unknown or traversal `profileId` is now a 400 "Profile not found" instead of a 500.
 
 Verify: TEST-05 asserts 500 bodies contain no exception details.
 
@@ -693,11 +701,14 @@ Verify: TEST-05 health response; manual cold-start timing.
 ## E9. DevOps and portfolio presentation
 
 ### OPS-01: GitHub Actions CI
-**Status:** Todo · **Priority:** P0 · **Effort:** M
+**Status:** In progress · **Priority:** P0 · **Effort:** M
 
-- [ ] On push and PR: restore, build, unit + integration tests, coverage
-- [ ] E2E job (Playwright) and Docker image build
-- [ ] Status badge in README
+- [x] On push and PR: restore, build, unit + integration tests (coverage arrives with TEST-10)
+- [x] Docker image build
+- [ ] E2E job (Playwright), arrives with TEST-07
+- [x] Status badge in README
+
+Notes: `.github/workflows/ci.yml` runs the same commands that pass locally (restore, build and test in Release). PDF tests use the Chrome preinstalled on the runner through `PUPPETEER_EXECUTABLE_PATH`. Not verified on GitHub yet: the first push or PR has to go green before this is Done.
 
 Verify: green run on a PR.
 

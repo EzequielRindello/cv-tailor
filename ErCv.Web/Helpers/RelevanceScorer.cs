@@ -1,5 +1,6 @@
 using ErCvApi.Models;
-using System.Text.RegularExpressions;
+using ErCvApi.Constants;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ErCvApi.Helpers
 {
@@ -10,6 +11,13 @@ namespace ErCvApi.Helpers
         private const double BulletSkillHalfCredit = 2.0;
         private const double KeywordPointsPerMatch = 2.0;
         private const int MaxKeywordsEvaluated = 15;
+
+        private readonly ILogger<RelevanceScorer> _logger;
+
+        public RelevanceScorer(ILogger<RelevanceScorer>? logger = null)
+        {
+            _logger = logger ?? NullLogger<RelevanceScorer>.Instance;
+        }
 
         public List<RelevanceScore> ScoreExperiences(
             List<Experience> experiences,
@@ -45,7 +53,7 @@ namespace ErCvApi.Helpers
                 foreach (var reqSkill in requirements.TechnicalSkills)
                 {
                     if (!SkillNormalizer.MatchesAny(reqSkill, matchedSkills) &&
-                        ContainsTerm(bulletText, reqSkill))
+                        SkillNormalizer.ContainsTerm(bulletText, reqSkill))
                     {
                         score += BulletSkillHalfCredit;
                         matchedSkills.Add(reqSkill);
@@ -57,7 +65,7 @@ namespace ErCvApi.Helpers
             var fullBulletText = string.Join(" ", experience.Bullets ?? new List<string>()).ToLower();
             foreach (var keyword in requirements.Keywords.Take(MaxKeywordsEvaluated))
             {
-                if (ContainsTerm(fullBulletText, keyword))
+                if (SkillNormalizer.ContainsTerm(fullBulletText, keyword))
                     score += KeywordPointsPerMatch;
             }
             score += CalculateRecencyScore(experience.EndDate);
@@ -74,9 +82,9 @@ namespace ErCvApi.Helpers
         private double CalculateRecencyScore(string? endDate)
         {
             if (string.IsNullOrWhiteSpace(endDate)) return 5.0;
-            if (IsPresent(endDate)) return 18.0;
+            if (DateParser.IsPresent(endDate)) return 18.0;
 
-            if (TryExtractYear(endDate, out var year))
+            if (DateParser.TryParse(endDate, out var year, out _))
             {
                 var diff = DateTime.Now.Year - year;
                 if (diff <= 1) return 16.0;
@@ -86,35 +94,9 @@ namespace ErCvApi.Helpers
                 return 4.0;
             }
 
-            Console.WriteLine($"[WARN] RelevanceScorer: could not parse endDate '{endDate}', using fallback score.");
+            _logger.LogWarning("Could not parse endDate '{EndDate}', using fallback score", endDate);
 
             return 5.0;
-        }
-
-        private static bool IsPresent(string value) =>
-            value.Trim().Equals("present", StringComparison.OrdinalIgnoreCase) ||
-            value.Trim().Equals("current", StringComparison.OrdinalIgnoreCase) ||
-            value.Trim().Equals("now", StringComparison.OrdinalIgnoreCase);
-
-        private static bool TryExtractYear(string? value, out int year)
-        {
-            year = 0;
-            if (string.IsNullOrWhiteSpace(value)) return false;
-
-            var match = Regex.Match(value, @"\b(19|20)\d{2}\b");
-            if (!match.Success) return false;
-
-            if (!int.TryParse(match.Value, out year)) return false;
-
-            var currentYear = DateTime.Now.Year;
-            return year >= 1950 && year <= currentYear + 1;
-        }
-
-        private static bool ContainsTerm(string text, string term)
-        {
-            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(term)) return false;
-            var pattern = $@"(?<![A-Za-z0-9]){Regex.Escape(term.Trim())}(?![A-Za-z0-9])";
-            return Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase);
         }
 
         private double CalculateSeniorityScore(string? role, string? targetSeniority)
@@ -122,18 +104,10 @@ namespace ErCvApi.Helpers
             if (string.IsNullOrEmpty(role) || string.IsNullOrEmpty(targetSeniority))
                 return 5.0;
 
-            var seniorityMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "intern", 1 }, { "junior", 2 }, { "entry", 2 }, { "associate", 2 },
-                { "mid", 3 }, { "mid-level", 3 },
-                { "senior", 4 }, { "lead", 5 }, { "principal", 6 },
-                { "staff", 6 }, { "architect", 6 }
-            };
+            var roleLevel = MatchScoreConstants.DefaultLevel;
+            var targetLevel = MatchScoreConstants.DefaultLevel;
 
-            var roleLevel = 3;
-            var targetLevel = 3;
-
-            foreach (var kvp in seniorityMap)
+            foreach (var kvp in MatchScoreConstants.SeniorityMap)
             {
                 if (role.ToLower().Contains(kvp.Key)) roleLevel = kvp.Value;
                 if (targetSeniority.ToLower().Contains(kvp.Key)) targetLevel = kvp.Value;

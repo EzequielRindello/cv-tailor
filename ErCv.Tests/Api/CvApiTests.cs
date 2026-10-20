@@ -193,18 +193,66 @@ namespace ErCv.Tests.Api
             Assert.DoesNotContain("[fonts]", body);
         }
 
-        // F8: 500 responses include ex.Message, so a bad profile id answers 500 with an internal message
-        // instead of a 4xx. Fixed by ENG-03.
-        [Fact(Skip = "ENG-03: unknown or traversal profile id answers 500 with ex.Message (F8)")]
-        public async Task Unknown_profile_id_answers_a_client_error_without_internal_details()
+        // F8 / ENG-03: an unknown profile used to answer 500 with the exception message.
+        [Theory]
+        [InlineData("does-not-exist")]
+        [InlineData("../../appsettings")]
+        public async Task Unknown_profile_id_answers_a_client_error_without_internal_details(string profileId)
         {
             using var app = new ApiApp();
 
-            var response = await app.PostAsync("/api/cv/generate", ApiApp.GenerateBody(profileId: "../../appsettings"));
+            var response = await app.PostAsync("/api/cv/generate", ApiApp.GenerateBody(profileId: profileId));
             var body = await response.Content.ReadAsStringAsync();
 
-            Assert.InRange((int)response.StatusCode, 400, 499);
-            Assert.DoesNotContain("details", body);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains("not found", body);
+            Assert.DoesNotContain("Exception", body);
+            Assert.DoesNotContain("ErCv", body);
+            Assert.DoesNotContain(":\\", body);
+        }
+
+        [Fact]
+        public async Task Unexpected_errors_answer_500_without_exception_details()
+        {
+            using var app = new ApiApp();
+            var generate = await ApiApp.JsonAsync(await app.PostAsync("/api/cv/generate", ApiApp.GenerateBody()));
+            var cv = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(generate.GetProperty("generatedCV").GetRawText())!;
+
+            // A null experience entry makes the renderer throw a NullReferenceException.
+            var response = await app.Client.PostAsync("/api/cv/regenerate", ApiApp.Raw(JsonSerializer.Serialize(new Dictionary<string, object?>
+            {
+                ["generatedCV"] = new Dictionary<string, object?>
+                {
+                    ["header"] = cv["header"], ["summary"] = "", ["education"] = cv["education"],
+                    ["experience"] = new object?[] { null }, ["skills"] = cv["skills"], ["projects"] = cv["projects"]
+                },
+                ["formats"] = new[] { "docx" }
+            })));
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+            Assert.Contains("Error regenerating CV", body);
+            Assert.DoesNotContain("NullReference", body);
+            Assert.DoesNotContain("Object reference", body);
+            Assert.DoesNotContain("at ErCv", body);
+            Assert.DoesNotContain("\"details\"", body);
+            Assert.DoesNotContain("StackTrace", body);
+        }
+
+        [Fact]
+        public async Task Client_errors_are_problem_details_and_keep_the_error_field()
+        {
+            using var app = new ApiApp();
+
+            var response = await app.PostAsync("/api/cv/generate", ApiApp.GenerateBody(jd: ""));
+            var json = await ApiApp.JsonAsync(response);
+
+            Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+            Assert.Equal(400, json.GetProperty("status").GetInt32());
+            Assert.Equal("Bad request", json.GetProperty("title").GetString());
+            Assert.Equal("Job description is required", json.GetProperty("detail").GetString());
+            Assert.Equal("Job description is required", json.GetProperty("error").GetString());
         }
 
         [Fact]

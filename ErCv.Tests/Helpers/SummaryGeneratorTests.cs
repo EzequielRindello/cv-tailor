@@ -38,6 +38,43 @@ namespace ErCv.Tests.Helpers
         }
 
         [Fact]
+        public void Years_of_experience_do_not_count_gaps_between_roles()
+        {
+            var cv = Master(new[]
+            {
+                Exp(role: "Developer", start: "Jan 2010", end: "Jan 2013"),   // 3 years
+                Exp(role: "Developer", start: "Jan 2020", end: "Jan 2022")    // 2 years, long gap before
+            });
+
+            Assert.Contains("with 5+ years of experience", Summary(cv, Req()));
+        }
+
+        [Fact]
+        public void Years_of_experience_merge_overlapping_roles()
+        {
+            var cv = Master(new[]
+            {
+                Exp(role: "Developer", start: "Jan 2015", end: "Jan 2019"),
+                Exp(role: "Engineer", start: "Jan 2017", end: "Jan 2020")
+            });
+
+            Assert.Contains("with 5+ years of experience", Summary(cv, Req()));
+        }
+
+        [Fact]
+        public void Candidate_seniority_comes_from_the_most_recent_role_by_date()
+        {
+            // As strings "May 2020" sorts after "Dec 2023" and would pick the junior role (F3).
+            var cv = Master(new[]
+            {
+                Exp(role: "Junior Developer", start: "Jan 2019", end: "May 2020"),
+                Exp(role: "Senior Developer", start: "Jun 2020", end: "Dec 2023")
+            });
+
+            Assert.StartsWith("Senior ", Summary(cv, Req()));
+        }
+
+        [Fact]
         public void Falls_back_to_all_roles_when_none_is_tech()
         {
             var cv = Master(new[] { Exp(role: "Barista", start: $"Jan {Year(4)}") });

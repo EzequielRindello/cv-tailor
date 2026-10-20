@@ -65,8 +65,7 @@ namespace ErCvApi.Helpers
             var seniorityMap = MatchScoreConstants.SeniorityMap;
 
             var mostRecentRole = cv.Experience
-                .OrderByDescending(e =>
-                    e.EndDate?.ToLower() == MatchScoreConstants.PresentKeyword ? "zzz" : e.EndDate ?? "")
+                .OrderByDescending(e => DateParser.RecencyKey(e.StartDate, e.EndDate))
                 .FirstOrDefault()
                 ?.Role?.ToLower() ?? "";
 

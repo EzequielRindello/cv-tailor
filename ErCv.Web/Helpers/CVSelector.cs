@@ -25,11 +25,11 @@ namespace ErCvApi.Helpers
             "engineered", "shipped", "transformed", "drove", "accelerated"
         };
 
-        public CVSelector()
+        public CVSelector(ILoggerFactory? loggerFactory = null)
         {
-            _scorer = new RelevanceScorer();
+            _scorer = new RelevanceScorer(loggerFactory?.CreateLogger<RelevanceScorer>());
             _pageConstraint = new PageConstraintHelper();
-            _summaryGenerator = new SummaryGenerator();
+            _summaryGenerator = new SummaryGenerator(loggerFactory?.CreateLogger<SummaryGenerator>());
         }
 
         public GeneratedCV SelectAndAdaptCV(
@@ -58,9 +58,9 @@ namespace ErCvApi.Helpers
 
             var generatedCV = new GeneratedCV
             {
-                Header = cvMaster.Header,
+                Header = CvCloner.Clone(cvMaster.Header),
                 Summary = summary,
-                Education = cvMaster.Education,
+                Education = cvMaster.Education.Select(CvCloner.Clone).ToList(),
                 Experience = selectedExperiences,
                 Skills = topSkills,
                 Projects = new List<Project>()
@@ -74,7 +74,7 @@ namespace ErCvApi.Helpers
                 foreach (var project in rankedProjects.Take(maxProjects))
                 {
                     if (_pageConstraint.CanFitProject(generatedCV, allowTwoPages))
-                        generatedCV.Projects.Add(project);
+                        generatedCV.Projects.Add(CvCloner.Clone(project));
                 }
             }
 
@@ -141,7 +141,7 @@ namespace ErCvApi.Helpers
                 Location = original.Location,
                 StartDate = original.StartDate,
                 EndDate = original.EndDate,
-                Skills = original.Skills,
+                Skills = (original.Skills ?? new List<string>()).ToList(),
                 Bullets = selected
             };
         }

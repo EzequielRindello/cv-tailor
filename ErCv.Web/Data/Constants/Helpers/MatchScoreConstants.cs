@@ -12,7 +12,6 @@ namespace ErCvApi.Constants
         public const double KeywordBoostMultiplier = 1.5;
         public const int DefaultSeniorityScore = 70;
         public const int DefaultLevel = 3;
-        public const string PresentKeyword = "present";
         public const int PerfectMatchScore = 100;
         public const int CloseMatchScore = 70;
         public const int PartialMatchScore = 40;
@@ -30,6 +29,7 @@ namespace ErCvApi.Constants
                 { "junior", 2 },
                 { "entry", 2 },
                 { "entry-level", 2 },
+                { "associate", 2 },
                 { "mid", 3 },
                 { "mid-level", 3 },
                 { "senior", 4 },

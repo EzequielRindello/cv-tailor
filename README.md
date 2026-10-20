@@ -1,5 +1,7 @@
 # ER CV Generator
 
+[![CI](https://github.com/EzequielRindello/er-cv-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/EzequielRindello/er-cv-generator/actions/workflows/ci.yml)
+
 ASP.NET Core monolith (.NET 10) that generates ATS-optimized, tailored resumes from a job description. The UI is Blazor Server and the REST API lives in the same project, so the whole app ships as a single deploy. It never fabricates content: it selects, reorders, and summarizes what's already in `cv-master.json`.
 
 ---

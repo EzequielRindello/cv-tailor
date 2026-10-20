@@ -71,21 +71,58 @@ namespace ErCv.Tests.Helpers
             Assert.False(SkillNormalizer.FuzzyMatch(a, b));
         }
 
-        // F1: substring Contains makes these match. Fixed by MATCH-01.
-        [Theory(Skip = "MATCH-01: FuzzyMatch uses substring Contains (F1)")]
+        // F1 / MATCH-01: a skill must match as a whole token, never as a substring of another word.
+        [Theory]
         [InlineData("go", "google")]
         [InlineData("go", "mongo")]
+        [InlineData("go", "mongodb")]
         [InlineData("java", "javascript")]
+        [InlineData("react", "react native")]
+        [InlineData("c", "c#")]
+        [InlineData("c", "c++")]
+        [InlineData("sql", "nosql")]
+        [InlineData("rust", "zero trust")]
         public void FuzzyMatch_rejects_substring_false_positives(string a, string b)
         {
             Assert.False(SkillNormalizer.FuzzyMatch(a, b));
+            Assert.False(SkillNormalizer.FuzzyMatch(b, a));
         }
 
-        [Fact]
-        public void F1_current_behavior_substring_matches()
+        [Theory]
+        [InlineData("rest", "REST API Design")]
+        [InlineData("aws", "AWS Lambda")]
+        [InlineData("kafka", "Apache Kafka")]
+        [InlineData("python", "Python 3")]
+        public void FuzzyMatch_still_matches_a_skill_inside_a_longer_phrase(string a, string b)
         {
-            // Documents the bug until MATCH-01. Delete this test when the Skip above is removed.
-            Assert.True(SkillNormalizer.FuzzyMatch("java", "javascript"));
+            Assert.True(SkillNormalizer.FuzzyMatch(a, b));
+            Assert.True(SkillNormalizer.FuzzyMatch(b, a));
+        }
+
+        [Theory]
+        [InlineData("We write Go services", "go", true)]
+        [InlineData("Go, Rust and C#", "go", true)]
+        [InlineData("Good results at google", "go", false)]
+        [InlineData("Wrote C# and C++ code", "c", false)]
+        [InlineData("Wrote C, C# and C++ code", "c", true)]
+        [InlineData("Wrote C# code", "c#", true)]
+        [InlineData("Built on .NET Core", ".net", true)]
+        [InlineData("JavaScript only", "java", false)]
+        [InlineData("", "go", false)]
+        [InlineData("text", "", false)]
+        public void ContainsTerm_matches_whole_tokens_only(string text, string term, bool expected)
+        {
+            Assert.Equal(expected, SkillNormalizer.ContainsTerm(text, term));
+        }
+
+        [Theory]
+        [InlineData("Backend in Golang", "go", true)]
+        [InlineData("Backend in Go", "golang", true)]
+        [InlineData("Used k8s daily", "kubernetes", true)]
+        [InlineData("Good and ongoing work", "go", false)]
+        public void ContainsSkill_accepts_aliases_but_not_substrings(string text, string skill, bool expected)
+        {
+            Assert.Equal(expected, SkillNormalizer.ContainsSkill(text, skill));
         }
 
         [Fact]

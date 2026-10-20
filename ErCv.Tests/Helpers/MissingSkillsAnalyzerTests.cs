@@ -40,8 +40,8 @@ namespace ErCv.Tests.Helpers
             Assert.Equal(new[] { "kubernetes", "terraform" }, r.NiceToHaveMissing);
         }
 
-        // "rust" is a substring of the nice-to-have entry "zero trust", so FuzzyMatch (F1) misfiles it.
-        [Fact(Skip = "MATCH-01: substring FuzzyMatch classifies 'rust' as nice-to-have via 'zero trust' (F1)")]
+        // "rust" used to match the nice-to-have entry "zero trust" through substring matching (F1).
+        [Fact]
         public void Rust_is_required_not_nice_to_have()
         {
             var r = _analyzer.Analyze(Master(languages: new[] { "python" }), Req(skills: new[] { "rust" }));

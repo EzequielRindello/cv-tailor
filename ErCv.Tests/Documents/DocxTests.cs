@@ -16,7 +16,7 @@ namespace ErCv.Tests.Documents
         {
             using var stream = new MemoryStream(docx);
             using var doc = WordprocessingDocument.Open(stream, false);
-            return doc.MainDocumentPart!.Document.Body!.Elements<Paragraph>()
+            return doc.MainDocumentPart!.Document!.Body!.Elements<Paragraph>()
                 .Select(p => (Paragraph)p.CloneNode(true)).ToList();
         }
 
@@ -35,7 +35,7 @@ namespace ErCv.Tests.Documents
             using var stream = new MemoryStream(bytes);
             using var doc = WordprocessingDocument.Open(stream, false);
 
-            Assert.NotNull(doc.MainDocumentPart?.Document.Body);
+            Assert.NotNull(doc.MainDocumentPart?.Document?.Body);
             Assert.Equal((byte)'P', bytes[0]);   // zip container ("PK")
             Assert.Equal((byte)'K', bytes[1]);
         }

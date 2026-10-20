@@ -3,6 +3,9 @@ using ErCv.Tests.Fixtures;
 using ErCvApi.Helpers;
 using ErCvApi.Models;
 
+// Every test shares the same profile x JD x template x pages matrix, so some do not use every parameter.
+#pragma warning disable xUnit1026
+
 namespace ErCv.Tests.Invariants
 {
     /// <summary>
@@ -149,8 +152,8 @@ namespace ErCv.Tests.Invariants
             Assert.Equal(before, Json(master));
         }
 
-        // F5: Header and Education are shared references with the master. Fixed by ENG-02.
-        [Theory(Skip = "ENG-02: generated CV shares Header/Education references with the master (F5)")]
+        // F5 / ENG-02: Header and Education used to be shared references with the master.
+        [Theory]
         [MemberData(nameof(Matrix))]
         public void Editing_the_generated_cv_never_touches_the_master(
             string profile, string jd, CVTemplate template, bool twoPages)

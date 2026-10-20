@@ -48,9 +48,8 @@ namespace ErCv.Tests.Helpers
             Assert.Equal(1, m.TotalKeywords);
         }
 
-        [Theory]
-        [InlineData(0.5, "yellow")]
-        public void Color_class_follows_thresholds(double skillRatio, string expected)
+        [Fact]
+        public void Color_class_follows_thresholds()
         {
             // 1 of 2 skills (50% * 0.5 = 25) + seniority exact (100 * 0.2 = 20) + 0 keywords = 45 -> red.
             // Add keywords to land in yellow: all keywords matched -> 100 capped * 0.3 = 30 -> 75.
@@ -60,7 +59,7 @@ namespace ErCv.Tests.Helpers
             var m = _calc.Calculate(cv, req);
 
             Assert.Equal(75, m.Overall);
-            Assert.Equal(expected, m.ColorClass);
+            Assert.Equal("yellow", m.ColorClass);
         }
 
         [Fact]
@@ -103,8 +102,8 @@ namespace ErCv.Tests.Helpers
             Assert.InRange(_calc.Calculate(cv, req).Overall, 0, 100);
         }
 
-        // F3: sorts EndDate strings lexically, so "May 2020" outranks "Dec 2023". Fixed by MATCH-03.
-        [Fact(Skip = "MATCH-03: most recent role chosen by lexical EndDate sort (F3)")]
+        // F3 / MATCH-03: "May 2020" used to outrank "Dec 2023" because end dates were compared as strings.
+        [Fact]
         public void Most_recent_role_is_chosen_by_date_not_by_string_order()
         {
             var older = Exp(role: "Intern", end: "May 2020");

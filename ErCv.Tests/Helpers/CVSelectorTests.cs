@@ -120,5 +120,23 @@ namespace ErCv.Tests.Helpers
             Assert.Empty(result.Projects);
             Assert.NotEmpty(result.Experience);
         }
+
+        [Fact]
+        public void Generated_cv_shares_no_references_with_the_master()
+        {
+            var cv = Master(new[] { Role("Backend Engineer", "Present", LongBullet) }, languages: new[] { "go" });
+            cv.Education = new List<Education> { new() { Degree = "B.S. CS", RelevantCourses = new() { "Algorithms" } } };
+            cv.Projects = new List<Project> { new() { Name = "P", Description = "d", Technologies = new() { "go" } } };
+
+            var result = _selector.SelectAndAdaptCV(cv, Req(skills: new[] { "go" }));
+
+            Assert.NotSame(cv.Header, result.Header);
+            Assert.NotSame(cv.Education, result.Education);
+            Assert.NotSame(cv.Education[0], result.Education[0]);
+            Assert.NotSame(cv.Education[0].RelevantCourses, result.Education[0].RelevantCourses);
+            Assert.NotSame(cv.Experience[0].Skills, result.Experience[0].Skills);
+            Assert.NotSame(cv.Experience[0].Bullets, result.Experience[0].Bullets);
+            Assert.All(result.Projects, p => Assert.DoesNotContain(cv.Projects, m => ReferenceEquals(m, p)));
+        }
     }
 }

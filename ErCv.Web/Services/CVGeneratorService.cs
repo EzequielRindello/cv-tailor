@@ -18,15 +18,17 @@ namespace ErCvApi.Services
         private readonly KeywordAnalyzer _keywordAnalyzer;
         private readonly ATSChecker _atsChecker;
         private readonly IWebHostEnvironment _env;
+        private readonly ILogger<CVGeneratorService> _logger;
         private readonly string _harvardTemplatePath;
         private readonly string _modernTemplatePath;
         private readonly string _minimalistTemplatePath;
 
-        public CVGeneratorService(IWebHostEnvironment env)
+        public CVGeneratorService(IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             _env = env;
+            _logger = loggerFactory.CreateLogger<CVGeneratorService>();
             _parser = new JobDescriptionParser();
-            _selector = new CVSelector();
+            _selector = new CVSelector(loggerFactory);
             _matchScoreCalc = new MatchScoreCalculator();
             _missingSkillsAnalyzer = new MissingSkillsAnalyzer();
             _keywordAnalyzer = new KeywordAnalyzer();
@@ -52,16 +54,20 @@ namespace ErCvApi.Services
             }
             catch (InvalidOperationException ex)
             {
-                return new ObjectResult(new { error = ex.Message }) { StatusCode = 413 };
+                return Problem(StatusCodes.Status413PayloadTooLarge, "Payload too large", ex.Message);
             }
             catch (ArgumentException ex)
             {
-                return new BadRequestObjectResult(new { error = ex.Message });
+                return Problem(StatusCodes.Status400BadRequest, "Bad request", ex.Message);
+            }
+            catch (FileNotFoundException ex)
+            {
+                return Problem(StatusCodes.Status400BadRequest, "Profile not found", ex.Message);
             }
             catch (Exception ex)
             {
-                return new ObjectResult(new { error = ApiConstants.ErrorGeneratingCv, details = ex.Message })
-                { StatusCode = 500 };
+                _logger.LogError(ex, "Error generating CV");
+                return Problem(StatusCodes.Status500InternalServerError, ApiConstants.ErrorGeneratingCv);
             }
         }
 
@@ -83,16 +89,16 @@ namespace ErCvApi.Services
             }
             catch (InvalidOperationException ex)
             {
-                return new ObjectResult(new { error = ex.Message }) { StatusCode = 413 };
+                return Problem(StatusCodes.Status413PayloadTooLarge, "Payload too large", ex.Message);
             }
             catch (ArgumentException ex)
             {
-                return new BadRequestObjectResult(new { error = ex.Message });
+                return Problem(StatusCodes.Status400BadRequest, "Bad request", ex.Message);
             }
             catch (Exception ex)
             {
-                return new ObjectResult(new { error = ApiConstants.ErrorRegeneratingCv, details = ex.Message })
-                { StatusCode = 500 };
+                _logger.LogError(ex, "Error regenerating CV");
+                return Problem(StatusCodes.Status500InternalServerError, ApiConstants.ErrorRegeneratingCv);
             }
         }
 
@@ -104,7 +110,7 @@ namespace ErCvApi.Services
                 var fileBytes = context.Session.Get(ApiConstants.SessionCvPrefix + normalizedFormat);
 
                 if (fileBytes == null || fileBytes.Length == 0)
-                    return new NotFoundObjectResult(new { error = ApiConstants.ErrorFileNotFound });
+                    return Problem(StatusCodes.Status404NotFound, "Not found", ApiConstants.ErrorFileNotFound);
 
                 return new FileContentResult(fileBytes, GetContentType(normalizedFormat))
                 {
@@ -113,11 +119,12 @@ namespace ErCvApi.Services
             }
             catch (ArgumentException ex)
             {
-                return new BadRequestObjectResult(new { error = ex.Message });
+                return Problem(StatusCodes.Status400BadRequest, "Bad request", ex.Message);
             }
-            catch
+            catch (Exception ex)
             {
-                return new ObjectResult(new { error = ApiConstants.ErrorDownloadingFile }) { StatusCode = 500 };
+                _logger.LogError(ex, "Error downloading file");
+                return Problem(StatusCodes.Status500InternalServerError, ApiConstants.ErrorDownloadingFile);
             }
         }
         public record ProfileInfo(string Id, string Name);
@@ -160,8 +167,8 @@ namespace ErCvApi.Services
             }
             catch (Exception ex)
             {
-                return new ObjectResult(new { error = "Error loading profiles", details = ex.Message })
-                { StatusCode = 500 };
+                _logger.LogError(ex, "Error loading profiles");
+                return Problem(StatusCodes.Status500InternalServerError, "Error loading profiles");
             }
         }
 
@@ -201,7 +208,7 @@ namespace ErCvApi.Services
 
         private async Task<(Dictionary<string, byte[]> Documents, string PreviewHtml)> RegenerateCVInternalAsync(RegenerateRequest request)
         {
-            var cv = request.GeneratedCV;
+            var cv = CvCloner.Clone(request.GeneratedCV);
 
             for (int i = 0; i < cv.Experience.Count; i++)
             {
@@ -334,7 +341,8 @@ namespace ErCvApi.Services
                 currentBytes = projected;
             }
 
-            Console.WriteLine($"[INFO] Saved {documents.Count} generated document(s) in session. Total session bytes: {currentBytes}");
+            _logger.LogInformation("Saved {Count} generated document(s) in session. Total session bytes: {Bytes}",
+                documents.Count, currentBytes);
         }
 
         private static int GetCurrentSessionDocumentBytes(HttpContext context)
@@ -353,6 +361,17 @@ namespace ErCvApi.Services
         private void SaveGeneratedCvToSession(GeneratedCV cv, HttpContext context)
         {
             context.Session.SetString(ApiConstants.SessionGeneratedCv, JsonSerializer.Serialize(cv));
+        }
+
+        /// <summary>
+        /// RFC 7807 error body. <paramref name="detail"/> is only ever a message written for the client, never an
+        /// exception message. The "error" extension keeps the field existing API consumers read.
+        /// </summary>
+        private static ObjectResult Problem(int status, string title, string? detail = null)
+        {
+            var problem = new ProblemDetails { Status = status, Title = title, Detail = detail };
+            problem.Extensions["error"] = detail ?? title;
+            return new ObjectResult(problem) { StatusCode = status };
         }
 
         private object BuildGenerateResponse(Dictionary<string, byte[]> documents, AnalysisResult analysis) =>

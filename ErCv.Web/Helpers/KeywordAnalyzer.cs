@@ -31,7 +31,7 @@ namespace ErCvApi.Helpers
                 var freq = kvp.Value;
                 var presentInCV =
                     SkillNormalizer.MatchesAny(word, cvSkills) ||
-                    ContainsTerm(cvText, word);
+                    SkillNormalizer.ContainsTerm(cvText, word);
 
                 var item = new KeywordItem { Word = word, Frequency = freq, PresentInCV = presentInCV };
 
@@ -45,12 +45,12 @@ namespace ErCvApi.Helpers
 
             var presentList = wordFrequencies.Keys
                 .Where(w => SkillNormalizer.MatchesAny(w, cvSkills) ||
-                            ContainsTerm(cvText, w))
+                            SkillNormalizer.ContainsTerm(cvText, w))
                 .Take(KeywordAnalyzerConstants.MaxPresentKeywords).ToList();
 
             var missingList = wordFrequencies.Keys
                 .Where(w => !SkillNormalizer.MatchesAny(w, cvSkills) &&
-                            !ContainsTerm(cvText, w) &&
+                            !SkillNormalizer.ContainsTerm(cvText, w) &&
                             (TechWords.Contains(w) || SoftSkillWords.Contains(w)))
                 .Take(KeywordAnalyzerConstants.MaxMissingKeywords).ToList();
 
@@ -112,13 +112,6 @@ namespace ErCvApi.Helpers
             foreach (var item in softSkills.Where(x => !x.PresentInCV).Take(KeywordAnalyzerConstants.MaxMissingSoftSuggestions))
                 suggestions.Add(string.Format(KeywordAnalyzerConstants.AddSoftSuggestionTemplate, item.Word));
             return suggestions;
-        }
-
-        private static bool ContainsTerm(string text, string term)
-        {
-            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(term)) return false;
-            var pattern = $@"(?<![A-Za-z0-9]){Regex.Escape(term.Trim())}(?![A-Za-z0-9])";
-            return Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase);
         }
     }
 }

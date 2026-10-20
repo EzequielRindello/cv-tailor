@@ -152,8 +152,8 @@ namespace ErCv.Tests.Helpers
             Assert.EndsWith("improvement point(s) detected:", r.Recommendations[0]);
         }
 
-        // F2: raw Contains makes "go" match "good". Fixed by MATCH-02.
-        [Fact(Skip = "MATCH-02: ATS keyword density uses raw Contains (F2)")]
+        // F2 / MATCH-02: "go" must not be counted because the CV says "good".
+        [Fact]
         public void Keyword_density_does_not_count_substrings()
         {
             var cv = Generated(new[] { Exp(bullets: new[] { "Good results delivered to the happy customers 50%" }) },
@@ -162,6 +162,17 @@ namespace ErCv.Tests.Helpers
             var r = _checker.Check(cv, Req(skills: new[] { "go" }), CVTemplate.Harvard);
 
             Assert.Contains(r.Issues, i => i.Issue.Contains("keyword density"));
+        }
+
+        [Fact]
+        public void Keyword_density_counts_an_alias_of_the_skill()
+        {
+            var cv = Generated(new[] { Exp(bullets: new[] { "Built services in Golang serving 2M users every single day" }) },
+                skills: new[] { "golang" });
+
+            var r = _checker.Check(cv, Req(skills: new[] { "go" }), CVTemplate.Harvard);
+
+            Assert.DoesNotContain(r.Issues, i => i.Issue.Contains("keyword density"));
         }
     }
 }
