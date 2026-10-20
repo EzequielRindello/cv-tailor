@@ -1,0 +1,36 @@
+<nav class="composer-steps" aria-label="Composer steps">
+    <ol>
+        @for (var i = 0; i < Titles.Length; i++)
+        {
+            var step = i + 1;
+            var state = step == Current ? "current" : step < Current ? "done" : "todo";
+            <li class="composer-step @state">
+                <button type="button"
+                        class="composer-step-btn"
+                        aria-current="@(step == Current ? "step" : null)"
+                        disabled="@Disabled"
+                        @onclick="() => OnGoTo.InvokeAsync(step)">
+                    <span class="composer-step-num" aria-hidden="true">
+                        @if (step < Current)
+                        {
+                            <i class="bi bi-check-lg"></i>
+                        }
+                        else
+                        {
+                            @step
+                        }
+                    </span>
+                    <span class="composer-step-title">@Titles[i]</span>
+                </button>
+            </li>
+        }
+    </ol>
+</nav>
+
+@code {
+    private static readonly string[] Titles = { "Job description", "Profile & template", "Options" };
+
+    [Parameter] public int Current { get; set; } = 1;
+    [Parameter] public EventCallback<int> OnGoTo { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+}

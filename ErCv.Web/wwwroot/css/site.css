@@ -910,6 +910,160 @@ h1, h2, h3, .form-title {
   cursor: not-allowed;
   box-shadow: none;
 }
+/* Bootstrap outline buttons mapped to the design tokens (readable in light and dark) */
+.btn-outline-secondary {
+  --bs-btn-color: var(--color-text-secondary);
+  --bs-btn-border-color: var(--color-border-hover);
+  --bs-btn-hover-color: var(--color-text-primary);
+  --bs-btn-hover-bg: var(--color-bg-hover);
+  --bs-btn-hover-border-color: var(--color-border-hover);
+  --bs-btn-active-color: var(--color-text-primary);
+  --bs-btn-active-bg: var(--color-bg-hover);
+  --bs-btn-active-border-color: var(--color-border-hover);
+  --bs-btn-disabled-color: var(--color-text-tertiary);
+  --bs-btn-disabled-border-color: var(--color-border-default);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--color-primary-500);
+  --bs-btn-border-color: var(--color-primary-500);
+  --bs-btn-hover-color: var(--color-text-inverse);
+  --bs-btn-hover-bg: var(--color-primary-500);
+  --bs-btn-hover-border-color: var(--color-primary-500);
+  --bs-btn-active-color: var(--color-text-inverse);
+  --bs-btn-active-bg: var(--color-accent-hover);
+  --bs-btn-active-border-color: var(--color-accent-hover);
+  --bs-btn-disabled-color: var(--color-text-tertiary);
+  --bs-btn-disabled-border-color: var(--color-border-default);
+}
+
+/* ===== Composer steps and JD meta (UX-03) ===== */
+.composer-steps ol {
+  display: grid;
+  gap: var(--spacing-sm);
+  grid-template-columns: repeat(3, 1fr);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.composer-step-btn {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--color-border-default);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  text-align: left;
+  width: 100%;
+}
+
+.composer-step-btn:disabled {
+  cursor: not-allowed;
+}
+
+.composer-step.current .composer-step-btn {
+  border-bottom-color: var(--color-primary-500);
+  color: var(--color-text-primary);
+}
+
+.composer-step.done .composer-step-btn {
+  border-bottom-color: var(--color-primary-300);
+  color: var(--color-text-secondary);
+}
+
+.composer-step-num {
+  align-items: center;
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  flex: none;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+.composer-step.current .composer-step-num {
+  background: var(--color-primary-500);
+  color: var(--color-text-inverse);
+}
+
+.composer-step.done .composer-step-num {
+  background: var(--color-bg-selected);
+  color: var(--color-primary-500);
+}
+
+.composer-nav {
+  align-items: stretch;
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.composer-nav .generate-btn {
+  flex: 1;
+}
+
+.composer-back-btn {
+  font-size: var(--font-size-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.jd-meta {
+  color: var(--color-text-tertiary);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  gap: var(--spacing-md);
+  justify-content: space-between;
+  margin-top: var(--spacing-sm);
+}
+
+.jd-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  list-style: none;
+  margin: var(--spacing-sm) 0 0;
+  padding: 0;
+}
+
+.jd-skill {
+  background: var(--color-bg-selected);
+  border-radius: var(--radius-pill);
+  color: var(--color-primary-500);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: 2px var(--spacing-sm);
+}
+
+.jd-skill-more {
+  background: var(--color-bg-hover);
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 575.98px) {
+  .composer-step-title {
+    display: none;
+  }
+
+  .composer-step.current .composer-step-title {
+    display: inline;
+  }
+
+  .composer-steps ol {
+    grid-template-columns: auto auto auto;
+  }
+}
+
 /* ===== SampleJobPicker (APP-03) ===== */
 .sample-picker {
   align-items: center;

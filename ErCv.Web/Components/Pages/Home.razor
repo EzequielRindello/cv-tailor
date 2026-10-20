@@ -44,38 +44,70 @@
                                     @(_showHistory ? "Hide History" : "History")
                                 </button>
                             </div>
-                            <div class="form-section form-section-primary">
-                                <ProfileSelector Profiles="_profiles"
-                                                 @bind-Value="_profileId"
-                                                 Disabled="_loading" />
-                                <SampleJobPicker Current="_jobDescription"
-                                                 OnSelect="s => _jobDescription = s"
-                                                 Disabled="_loading" />
-                                <JobDescriptionInput @bind-Value="_jobDescription"
-                                                     Disabled="_loading"
-                                                     HelperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate" />
-                            </div>
-                            <div class="form-section">
-                                <TemplateSelector Value="_settings.Template"
-                                                  ValueChanged="SetTemplate"
-                                                  Disabled="_loading" />
-                            </div>
-                            <div class="form-section form-section-inline">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <FormatSelector Selected="_settings.SelectedFormats"
-                                                        OnToggle="ToggleFormat"
-                                                        Disabled="_loading" />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <PageOptions AllowTwoPages="_settings.AllowTwoPages"
-                                                     AllowTwoPagesChanged="SetAllowTwoPages"
+                            <ComposerSteps Current="_step" OnGoTo="GoToStepAsync" Disabled="_loading" />
+                            @if (_step == 1)
+                            {
+                                <div class="form-section form-section-primary">
+                                    <SampleJobPicker Current="@_jobDescription"
+                                                     OnSelect="s => _jobDescription = s"
                                                      Disabled="_loading" />
+                                    <JobDescriptionInput @bind-Value="_jobDescription"
+                                                         Disabled="_loading"
+                                                         HelperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate" />
+                                </div>
+                            }
+                            else if (_step == 2)
+                            {
+                                <div class="form-section form-section-primary">
+                                    <ProfileSelector Profiles="_profiles"
+                                                     @bind-Value="_profileId"
+                                                     Disabled="_loading" />
+                                    <TemplateSelector Value="@_settings.Template"
+                                                      ValueChanged="SetTemplate"
+                                                      Disabled="_loading" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-section form-section-primary">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <FormatSelector Selected="_settings.SelectedFormats"
+                                                            OnToggle="ToggleFormat"
+                                                            Disabled="_loading" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <PageOptions AllowTwoPages="_settings.AllowTwoPages"
+                                                         AllowTwoPagesChanged="SetAllowTwoPages"
+                                                         Disabled="_loading" />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="form-section form-actions">
-                                <GenerateButton Loading="_loading" Disabled="_loading" OnClick="GenerateAsync" />
+                            }
+                            <div class="form-section form-actions composer-nav">
+                                @if (_step > 1)
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-lg composer-back-btn"
+                                            disabled="@_loading"
+                                            @onclick="() => GoToStepAsync(_step - 1)">
+                                        <i class="bi bi-arrow-left me-1"></i>
+                                        Back
+                                    </button>
+                                }
+                                @if (_step < LastStep)
+                                {
+                                    <button type="button"
+                                            class="btn btn-primary btn-lg generate-btn"
+                                            @onclick="() => GoToStepAsync(_step + 1)">
+                                        Next
+                                        <i class="bi bi-arrow-right ms-1"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <GenerateButton Loading="_loading" Disabled="_loading" OnClick="GenerateAsync" />
+                                }
                             </div>
                         </form>
                     </div>
@@ -157,7 +189,10 @@ else
 }
 
 @code {
+    private const int LastStep = 3;
+
     private string _view = "generate";
+    private int _step = 1;
     private string _jobDescription = string.Empty;
     private string _profileId = "cv-master";
     private List<ProfileInfo> _profiles = new() { new("cv-master", "Default") };
@@ -205,10 +240,26 @@ else
     [JSInvokable]
     public Task OnGenerateShortcut(string textareaValue) => InvokeAsync(async () =>
     {
-        if (_view != "generate" || _loading || string.IsNullOrWhiteSpace(textareaValue)) return;
-        _jobDescription = textareaValue;
+        // The editor only exists on step 1; on later steps the text already lives in _jobDescription
+        var text = string.IsNullOrWhiteSpace(textareaValue) ? _jobDescription : textareaValue;
+        if (_view != "generate" || _loading || string.IsNullOrWhiteSpace(text)) return;
+        _jobDescription = text;
         await GenerateAsync();
     });
+
+    private Task GoToStepAsync(int step)
+    {
+        if (step > 1 && string.IsNullOrWhiteSpace(_jobDescription))
+        {
+            _step = 1;
+            _error = "Please paste a job description";
+            return Task.CompletedTask;
+        }
+
+        _error = string.Empty;
+        _step = Math.Clamp(step, 1, LastStep);
+        return Task.CompletedTask;
+    }
 
     private async Task SetTemplate(string template)
     {
@@ -331,6 +382,7 @@ else
     private async Task LoadHistoryEntry(HistoryEntry entry)
     {
         _jobDescription = entry.JobDescription;
+        _step = 1;
         _showHistory = false;
         _error = string.Empty;
         await JS.InvokeVoidAsync("cvApp.scrollToTop");
@@ -365,6 +417,7 @@ else
         _analysis = null;
         _showBulletEditor = false;
         _showHistory = false;
+        _step = 1;
         _view = "generate";
         _error = string.Empty;
         await JS.InvokeVoidAsync("cvApp.scrollToTop");

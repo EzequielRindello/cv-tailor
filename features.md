@@ -325,12 +325,12 @@ Files: `Components/Layout/MainLayout.razor`, `Components/Shared/AppHeader.razor`
 Verify: E2E screenshot; first view looks finished on desktop and mobile.
 
 ### UX-03: Guided 3-step composer
-**Status:** Todo · **Priority:** P0 · **Effort:** M
+**Status:** In progress (thumbnails from real renders pending, E2E pending) · **Priority:** P0 · **Effort:** M
 
-- [ ] Step 1 Job description: large editor, sample JD picker (APP-03), live counter of characters and detected skills
-- [ ] Step 2 Profile & template: big template cards with real thumbnails
-- [ ] Step 3 Options: formats, 1 or 2 pages
-- [ ] One primary CTA; shortcuts still work
+- [x] Step 1 Job description: large editor, sample JD picker (APP-03), live counter of characters and detected skills
+- [ ] Step 2 Profile & template: template cards (the existing SVG sketches; real thumbnails arrive with UX-10)
+- [x] Step 3 Options: formats, 1 or 2 pages
+- [x] One primary CTA (Next, then Generate on step 3); shortcuts still work from any step
 
 Files: `Components/Pages/Home.razor`, `Components/Shared/*Selector.razor`, `JobDescriptionInput.razor`
 Verify: E2E generate flow (TEST-07).
