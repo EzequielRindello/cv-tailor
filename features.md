@@ -34,7 +34,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | TEST-01 | xUnit test project + fixtures + JD corpus | E1 Tests | P0 | M | Done |
 | TEST-02 | Unit tests per helper | E1 Tests | P0 | L | Done |
 | TEST-03 | Invariant tests (no fabrication, ordering, bounds) | E1 Tests | P0 | M | Done |
-| TEST-04 | Document tests (DOCX structure, PDF pages + text extraction) | E1 Tests | P0 | M | Todo |
+| TEST-04 | Document tests (DOCX structure, PDF pages + text extraction) | E1 Tests | P0 | M | Done |
 | TEST-05 | API integration tests (WebApplicationFactory) | E1 Tests | P0 | M | Todo |
 | TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | Todo |
 | TEST-07 | End-to-end tests (Playwright) | E1 Tests | P1 | L | Todo |
@@ -131,6 +131,8 @@ Not covered by any feature yet. Each has a skipped test in `ErCv.Tests/Helpers/`
 | F12 | `YearsWithTechPattern` captures the word after "N years of" as a skill: `b2b` in a sales JD, `or` in "experience or relevant". A non-tech JD is then treated as technical. | `Helpers/JobDescriptionParser.cs:60`, `JobDescriptionConstants.YearsWithTechPattern` |
 | F13 | `MatchScoreCalculator` keyword matching uses substring `Contains` (same class as F1/F2). | `Helpers/MatchScoreCalculator.cs:30` |
 | F14 | `FuzzyMatch` also misfiles skills as nice-to-have (`rust` matches `zero trust`). Covered by the MATCH-01 fix. | `Helpers/MissingSkillsAnalyzer.cs:30` |
+| F15 | DOCX is schema-invalid: `SectionProperties` is appended as the first child of `w:body`, the schema requires it last. | `Helpers/DocumentRenderer.cs:134` |
+| F16 | Modern template PDF loses characters at text-extraction level (`backoff reducing` becomes `backoreducing`), which hurts ATS parsing. Root cause not confirmed. | `Templates/modern-template.html` |
 
 ---
 
@@ -186,12 +188,14 @@ Files: `ErCv.Tests/Invariants/*`
 Verify: theory tests over the corpus pass.
 
 ### TEST-04: Document tests
-**Status:** Todo · **Priority:** P0 · **Effort:** M
+**Status:** Done · **Priority:** P0 · **Effort:** M
 
-- [ ] DOCX: opens with OpenXML, sections appear in the expected order, contact line present, bullet count equals the generated CV
-- [ ] PDF: valid `%PDF` header, page count is 1 in 1-page mode and at most 2 in 2-page mode, for every corpus JD (catches F6)
-- [ ] PDF text extraction (ATS simulation): extracted text contains the name, every section title and every selected bullet, in reading order
-- [ ] HTML preview contains no unrendered Mustache tags (`{{`)
+- [x] DOCX: opens with OpenXML, sections appear in the expected order, contact line present, bullet count equals the generated CV
+- [x] PDF: valid `%PDF` header, page count is 1 in 1-page mode and at most 2 in 2-page mode, for every corpus JD (catches F6)
+- [x] PDF text extraction (ATS simulation): extracted text contains the name, every section title and every selected bullet, in reading order
+- [x] HTML preview contains no unrendered Mustache tags (`{{`)
+
+Notes: DOCX and HTML tests run over profiles x corpus JDs (x templates for HTML); PDF tests over profiles x JDs x 3 templates x 1/2 pages. PDF tests take about 1.5 minutes, use `--filter Category=Documents` to run or exclude them. Two groups are written and skipped: Minimalist 1-page spill (F6, MATCH-08) and Modern PDF text extraction (F16). The DOCX schema validation test is skipped (F15). Chromium is downloaded on first use if `PUPPETEER_EXECUTABLE_PATH` is not set.
 
 Files: `ErCv.Tests/Documents/*`
 Verify: tests pass locally and in CI (Chromium available).
