@@ -336,13 +336,13 @@ Files: `Components/Pages/Home.razor`, `Components/Shared/*Selector.razor`, `JobD
 Verify: E2E generate flow (TEST-07).
 
 ### UX-04: Results workspace
-**Status:** Todo · **Priority:** P0 · **Effort:** L
+**Status:** In progress (PDF download and E2E pending) · **Priority:** P0 · **Effort:** L
 
-- [ ] Left: preview at paper scale with zoom (fit width / 100%)
-- [ ] Right: tabbed insights (Match, ATS, Keywords, Gaps)
-- [ ] Sticky action bar: Download PDF, Download DOCX, Edit, Start over
-- [ ] Generate no longer auto-downloads (F7); downloads happen on click
-- [ ] Back to composer keeps the JD and settings
+- [x] Left: preview at paper scale with zoom (fit width / 100%)
+- [x] Right: tabbed insights (Match, ATS, Keywords, Gaps)
+- [x] Sticky action bar: Download PDF, Download DOCX, Edit, Start over (one Download button per generated format; PDF not exercised in the browser)
+- [x] Generate no longer auto-downloads (F7); downloads happen on click (also after Regenerate)
+- [x] Back to composer keeps the JD and settings
 
 Files: `Components/Pages/Home.razor`, new `Components/Shared/ResultsWorkspace.razor`
 Verify: E2E: generate without download prompt, then click to download.

@@ -1,0 +1,123 @@
+@if (Analysis == null)
+{
+    <div class="details-fullscreen">
+        <div class="card main-card">
+            <div class="card-body text-center">
+                <p class="analysis-empty">Generate a CV to view details.</p>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="details-fullscreen">
+        <div class="results-actionbar" role="toolbar" aria-label="CV actions">
+            <button type="button" class="btn btn-outline-secondary" disabled="@Loading" @onclick="OnBack">
+                <i class="bi bi-arrow-left me-1"></i>
+                Back to composer
+            </button>
+            <div class="results-actionbar-main">
+                @foreach (var format in Documents.Keys)
+                {
+                    var f = format;
+                    <button type="button"
+                            class="btn @(f == Documents.Keys.First() ? "btn-primary" : "btn-outline-primary")"
+                            disabled="@Loading"
+                            @onclick="() => OnDownload.InvokeAsync(f)">
+                        <i class="bi bi-download me-1"></i>
+                        Download @FormatLabel(f)
+                    </button>
+                }
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        disabled="@Loading"
+                        aria-pressed="@(Editing ? "true" : "false")"
+                        @onclick="() => EditingChanged.InvokeAsync(!Editing)">
+                    <i class="bi bi-pencil-square me-1"></i>
+                    @(Editing ? "Close editor" : "Edit")
+                </button>
+                <button type="button" class="btn btn-outline-secondary" disabled="@Loading" @onclick="OnStartOver">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>
+                    Start over
+                </button>
+            </div>
+        </div>
+
+        <div class="details-layout">
+            <div class="details-preview-panel">
+                <CVPreview Html="@Analysis.PreviewHtml" />
+            </div>
+
+            <div class="details-analysis-panel">
+                @if (Editing)
+                {
+                    <BulletEditor GeneratedCv="Analysis.GeneratedCV"
+                                  OnRegenerate="OnRegenerate"
+                                  OnCancel="() => EditingChanged.InvokeAsync(false)"
+                                  Loading="Loading" />
+                }
+                else
+                {
+                    <div class="insights-tabs" role="tablist" aria-label="CV insights">
+                        @foreach (var tab in Tabs)
+                        {
+                            var key = tab.Key;
+                            <button type="button"
+                                    role="tab"
+                                    id="insights-tab-@key"
+                                    class="insights-tab @(_tab == key ? "active" : "")"
+                                    aria-selected="@(_tab == key ? "true" : "false")"
+                                    aria-controls="insights-panel"
+                                    @onclick="() => _tab = key">
+                                @tab.Label
+                            </button>
+                        }
+                    </div>
+                    <div class="insights-panel" id="insights-panel" role="tabpanel" aria-labelledby="insights-tab-@_tab">
+                        @switch (_tab)
+                        {
+                            case "match":
+                                <MatchScoreCard Data="Analysis.MatchScore" />
+                                break;
+                            case "ats":
+                                <ATSScoreCard Data="Analysis.ATSScore" />
+                                break;
+                            case "keywords":
+                                <KeywordAnalysisCard Data="Analysis.KeywordAnalysis" />
+                                break;
+                            default:
+                                <MissingSkillsCard Data="Analysis.MissingSkills" />
+                                break;
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private static readonly (string Key, string Label)[] Tabs =
+    {
+        ("match", "Match"), ("ats", "ATS"), ("keywords", "Keywords"), ("gaps", "Gaps")
+    };
+
+    private string _tab = "match";
+
+    [Parameter] public AnalysisResult? Analysis { get; set; }
+    [Parameter] public Dictionary<string, byte[]> Documents { get; set; } = new();
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public bool Editing { get; set; }
+    [Parameter] public EventCallback<bool> EditingChanged { get; set; }
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback OnStartOver { get; set; }
+    [Parameter] public EventCallback<string> OnDownload { get; set; }
+    [Parameter] public EventCallback<(Dictionary<string, List<int>> Selections, GeneratedCV Cv)> OnRegenerate { get; set; }
+
+    private static string FormatLabel(string format) => format switch
+    {
+        "pdf" => "PDF",
+        "docx" => "DOCX",
+        _ => format.ToUpperInvariant()
+    };
+}
