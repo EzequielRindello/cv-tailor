@@ -37,7 +37,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | TEST-04 | Document tests (DOCX structure, PDF pages + text extraction) | E1 Tests | P0 | M | Done |
 | TEST-05 | API integration tests (WebApplicationFactory) | E1 Tests | P0 | M | Done |
 | TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | Todo |
-| TEST-07 | End-to-end tests (Playwright) | E1 Tests | P1 | L | Todo |
+| TEST-07 | End-to-end tests (Playwright) | E1 Tests | P1 | L | Done |
 | TEST-08 | Golden snapshot tests for generation output | E1 Tests | P2 | S | Todo |
 | TEST-09 | Retire the Node scripts in `testing/` | E1 Tests | P2 | S | Todo |
 | TEST-10 | Coverage report and target | E1 Tests | P2 | S | Todo |
@@ -142,10 +142,9 @@ Nothing in M1 is blocked. These were deliberately left to the milestone that own
 | Item | Why it is not in M1 | Owner |
 |---|---|---|
 | F6: a Minimalist CV in 1-page mode can spill onto a second page (18 of 36 combinations). Test `Minimalist_one_page_mode_stays_on_one_page` is written and skipped. | Fixing it properly means measuring the rendered page instead of estimating from character counts. | MATCH-08 (M4) |
-| OPS-01 E2E job | Needs Playwright tests. | TEST-07 (M2) |
 | Coverage report and 80% target | Needs coverlet. | TEST-10 (M5) |
 | MATCH-01 "snapshot diff reviewed" | Reviewed by hand over the 36 corpus combinations (only junk skills such as `in` and `or` stopped matching); the automatic snapshots do not exist yet. | TEST-08 (M5) |
-| TEST-06 (bUnit) and TEST-07 (Playwright) | Not started on purpose: the components and selectors are redesigned in M2. Both need package downloads that have to be approved first. | M5 / M2 |
+| TEST-06 (bUnit) | Not started on purpose: the components were redesigned in M2 first. Needs the `bunit` package, which has to be approved before it is downloaded. | M5 |
 | Parser: `objective-c` also yields the skill `c` (a hyphen is not treated as part of a token). | Minor and ambiguous (`go-to-market` would be the opposite case). | Backlog |
 
 ---
@@ -243,18 +242,20 @@ Files: `ErCv.Tests/Components/*`
 Verify: tests pass.
 
 ### TEST-07: End-to-end tests (Playwright)
-**Status:** Todo · **Priority:** P1 · **Effort:** L
+**Status:** Done (26 tests passing locally; the CI job has not run on GitHub yet) · **Priority:** P1 · **Effort:** L
 
-- [ ] Paste a sample JD, generate, preview visible, scores visible
-- [ ] Download PDF and DOCX; files are non-empty and valid
-- [ ] Edit bullets, regenerate, preview updates
-- [ ] Reload: settings and history persist
-- [ ] Keyboard shortcuts (`Ctrl+Enter`, `Ctrl+Shift+V`)
-- [ ] Mobile viewport (390px): no horizontal scroll
-- [ ] axe accessibility scan has no serious violations
+- [x] Paste a sample JD, generate, preview visible, scores visible
+- [x] Download PDF and DOCX; files are non-empty and valid (PDF header, DOCX is a zip with `word/document.xml`)
+- [x] Edit bullets, regenerate, preview updates
+- [x] Reload: settings and history persist
+- [x] Keyboard shortcuts (`Ctrl+Enter`, `Ctrl+Shift+V`)
+- [x] Mobile viewport (390px, also 360 and 768): no horizontal scroll, one pane at a time
+- [x] axe accessibility scan has no serious violations (wcag2a, wcag2aa, wcag21a, wcag21aa; light and dark; CV preview iframe excluded)
 
-Files: `ErCv.E2E/*`
-Verify: `dotnet test ErCv.E2E` against a running app; runs in CI.
+Also covered: nothing downloads until a button is clicked (F7), the progress stages appear in order, inline validation for an empty JD and for no format, the empty history state, focus and announcement after generating.
+
+Files: `ErCv.E2E/*` (`AppFixture` starts the app on a free port and launches an installed Chrome or Edge, so no browser is downloaded)
+Verify: `dotnet test ErCv.E2E`; runs in CI as its own job.
 
 ### TEST-08: Golden snapshot tests
 **Status:** Todo · **Priority:** P2 · **Effort:** S
@@ -303,21 +304,21 @@ Direction: a premium document tool. Warm paper background, serif display heading
 Fonts are self-hosted under `wwwroot/lib/fonts` (no runtime CDN, same rule as Bootstrap).
 
 ### UX-01: Design system
-**Status:** In progress (visual check and CSS isolation pending) · **Priority:** P0 · **Effort:** M
+**Status:** Done (CSS isolation deliberately not done) · **Priority:** P0 · **Effort:** M
 
 - [x] Replace the token block in `wwwroot/css/site.css` with the spec above (colors, type scale, 4px spacing grid, radii, soft shadows, focus ring)
 - [x] Bootstrap variables mapped to the new tokens (`--bs-primary`, `--bs-body-font-family`, ...)
 - [x] Fonts self-hosted (woff2) with `font-display: swap`
 - [x] Dark mode token set (`prefers-color-scheme` + manual toggle)
-- [ ] Per-component CSS moved to `*.razor.css` (CSS isolation) where it helps
+- [x] Per-component CSS: kept in `site.css`, organised by component sections, because the tokens are shared everywhere; `*.razor.css` did not help
 
 Files: `wwwroot/css/site.css`, `wwwroot/lib/fonts/*`, `Components/**/*.razor.css`
-Verify: visual check in light and dark; contrast check with axe (UX-08).
+Verify: visual check in light and dark; contrast check with axe (UX-08, `AccessibilityTests`).
 
 ### UX-02: App shell and editorial hero
-**Status:** In progress ("Try demo" arrives with APP-03) · **Priority:** P0 · **Effort:** M
+**Status:** Done · **Priority:** P0 · **Effort:** M
 
-- [x] Top bar: wordmark, GitHub link, theme toggle (the "Try demo" button is added with APP-03)
+- [x] Top bar: wordmark, "Try demo" (scrolls to the sample picker, only on the composer), GitHub link, theme toggle
 - [x] Hero: serif headline, one-line value prop ("Tailored to every job. Nothing invented."), short 3-point "how it works"
 - [x] Footer with privacy note and version
 
@@ -325,10 +326,10 @@ Files: `Components/Layout/MainLayout.razor`, `Components/Shared/AppHeader.razor`
 Verify: E2E screenshot; first view looks finished on desktop and mobile.
 
 ### UX-03: Guided 3-step composer
-**Status:** In progress (thumbnails from real renders pending, E2E pending) · **Priority:** P0 · **Effort:** M
+**Status:** Done (real thumbnails move to UX-10) · **Priority:** P0 · **Effort:** M
 
 - [x] Step 1 Job description: large editor, sample JD picker (APP-03), live counter of characters and detected skills
-- [ ] Step 2 Profile & template: template cards (the existing SVG sketches; real thumbnails arrive with UX-10)
+- [x] Step 2 Profile & template: template cards (the existing SVG sketches; real thumbnails arrive with UX-10)
 - [x] Step 3 Options: formats, 1 or 2 pages
 - [x] One primary CTA (Next, then Generate on step 3); shortcuts still work from any step
 
@@ -336,11 +337,11 @@ Files: `Components/Pages/Home.razor`, `Components/Shared/*Selector.razor`, `JobD
 Verify: E2E generate flow (TEST-07).
 
 ### UX-04: Results workspace
-**Status:** In progress (PDF download and E2E pending) · **Priority:** P0 · **Effort:** L
+**Status:** Done · **Priority:** P0 · **Effort:** L
 
 - [x] Left: preview at paper scale with zoom (fit width / 100%)
 - [x] Right: tabbed insights (Match, ATS, Keywords, Gaps)
-- [x] Sticky action bar: Download PDF, Download DOCX, Edit, Start over (one Download button per generated format; PDF not exercised in the browser)
+- [x] Sticky action bar: Download PDF, Download DOCX, Edit, Start over (one Download button per generated format; both formats are downloaded and validated in `DownloadTests`)
 - [x] Generate no longer auto-downloads (F7); downloads happen on click (also after Regenerate)
 - [x] Back to composer keeps the JD and settings
 
@@ -376,13 +377,13 @@ Verify: manual check plus E2E that the indicator appears and disappears.
 Verify: E2E for empty JD and no format selected.
 
 ### UX-08: Accessibility
-**Status:** In progress (axe scan waits for TEST-07) · **Priority:** P1 · **Effort:** M
+**Status:** Done (keyboard-only manual pass still welcome) · **Priority:** P1 · **Effort:** M
 
 - [x] WCAG AA contrast for all tokens in light and dark (token pairs audited, plus a DOM scan of the composer and results views; control borders raised to 3:1)
 - [x] BulletEditor: move up/down buttons and `Alt+Arrow` keyboard reorder (F11); focus follows the moved bullet and the move is announced
 - [x] `aria-live` region announces generation results; focus moves to the results region
 - [x] Visible focus on every interactive element; selectable cards are real radios / checkboxes; insights tabs follow the ARIA tabs pattern
-- [ ] axe scan in E2E has no serious violations
+- [x] axe scan in E2E has no serious violations (`AccessibilityTests`)
 
 Verify: TEST-07 axe check + keyboard-only manual pass.
 
@@ -603,7 +604,7 @@ Verify: bUnit + E2E.
 Verify: E2E.
 
 ### APP-03: Sample JD gallery
-**Status:** In progress (E2E and the "Try demo" top bar link pending) · **Priority:** P0 · **Effort:** S
+**Status:** Done · **Priority:** P0 · **Effort:** S
 
 Why: portfolio visitors rarely have a JD at hand.
 
@@ -718,7 +719,7 @@ Verify: TEST-05 health response; manual cold-start timing.
 
 - [x] On push and PR: restore, build, unit + integration tests (coverage arrives with TEST-10)
 - [x] Docker image build
-- [ ] E2E job (Playwright), arrives with TEST-07
+- [x] E2E job (Playwright) in `ci.yml`, separate from the unit job (first run on GitHub pending)
 - [x] Status badge in README
 
 Notes: `.github/workflows/ci.yml` runs the same commands that pass locally (restore, build and test in Release). PDF tests use the Chrome preinstalled on the runner through `PUPPETEER_EXECUTABLE_PATH`. Verified on PR #7: build and test (3389 passed, 6 skipped, about 2 minutes) and the Docker image build both green.

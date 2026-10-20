@@ -37,10 +37,11 @@ jobs:
       - name: Build
         run: dotnet build er-cv-generator.sln --no-restore --configuration Release
 
-      # Unit, invariant, document (DOCX, PDF, HTML) and API integration tests.
+      # Unit, invariant, document (DOCX, PDF, HTML) and API integration tests. The browser tests run in their own job.
       - name: Test
         run: >
           dotnet test er-cv-generator.sln --no-build --configuration Release
+          --filter "Category!=E2E"
           --logger "trx;LogFileName=test-results.trx"
           --results-directory test-results
 
@@ -50,6 +51,42 @@ jobs:
         with:
           name: test-results
           path: test-results/
+          if-no-files-found: ignore
+
+  e2e:
+    name: Browser tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # The runner image ships Google Chrome: Playwright drives it (no browser download) and so does PuppeteerSharp for the PDF test.
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
+      E2E_BROWSER_CHANNEL: chrome
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore ErCv.E2E/ErCv.E2E.csproj
+
+      - name: Build
+        run: dotnet build ErCv.E2E/ErCv.E2E.csproj --no-restore --configuration Release
+
+      # The tests start the web app themselves, then drive it: composer, generate, downloads, shortcuts, mobile, axe.
+      - name: Browser tests
+        run: >
+          dotnet test ErCv.E2E/ErCv.E2E.csproj --no-build --configuration Release
+          --logger "trx;LogFileName=e2e-results.trx"
+          --results-directory e2e-results
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: e2e-results/
           if-no-files-found: ignore
 
   docker:
@@ -62,4 +99,4 @@ jobs:
       - name: Build image
         run: docker build --tag er-cv-generator:ci .
 
-  # Coverage (TEST-10) and the Playwright E2E job (TEST-07) are added to this workflow when those tickets land.
+  # Coverage (TEST-10) is added to this workflow when that ticket lands.
