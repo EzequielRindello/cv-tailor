@@ -2983,3 +2983,13 @@ body:not(:has(#samples)) .app-try-demo {
   justify-content: center;
 }
 
+
+.profile-tools-active {
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.profile-tools-errors {
+  font-size: var(--font-size-sm);
+  color: var(--color-danger, #b3261e);
+}

@@ -292,6 +292,9 @@ namespace ErCvApi.Services
 
         private string TemplatePath(string filename) =>
             Path.Combine(_env.ContentRootPath, TemplatePaths.TemplatesFolder, filename);
+        /// <summary>Loads a stored profile so the visitor can export it (PROF-02).</summary>
+        public Task<CVMaster> GetProfileAsync(string profileId) => LoadCVMasterAsync(profileId);
+
         private async Task<CVMaster> LoadCVMasterAsync(string profileId = "cv-master")
         {
             var safeId = Path.GetFileName(profileId);

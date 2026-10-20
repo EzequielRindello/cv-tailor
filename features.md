@@ -52,7 +52,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | UX-09 | Responsive pass | E2 Redesign | P1 | M | Todo |
 | UX-10 | CV template visual polish | E2 Redesign | P2 | M | Todo |
 | PROF-01 | In-browser profile editor | E3 Your profile | P1 | L | Todo |
-| PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | In progress |
+| PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | Done |
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
 | PROF-04 | Profile health check | E3 Your profile | P2 | M | Todo |
 | PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Todo |
@@ -436,13 +436,15 @@ Files: new `Components/Pages/Profile.razor`, `UI/BrowserStore.cs`
 Verify: bUnit tests for the editor; E2E create profile, generate, output uses it.
 
 ### PROF-02: Import/export + validation
-**Status:** In progress (validator done, import/export UI pending) · **Priority:** P1 · **Effort:** M
+**Status:** Done · **Priority:** P1 · **Effort:** M
 
-- [ ] Import JSON file; export current profile as JSON
+- [x] Import JSON file; export current profile as JSON
 - [x] Validation with field-level errors (required fields, date formats, empty bullets)
-- [ ] Downloadable blank template
+- [x] Downloadable blank template
 
-Verify: unit tests for the validator; E2E import round-trip.
+Notes: `ProfileTools.razor` sits under the profile selector in step 2. An imported profile lives in memory only (PROF-01 adds localStorage) and replaces the stored-profile selector until "Use a stored profile" is clicked. Files over 512 KB are refused. `ProfileJson` parses (case-insensitive keys, comments and trailing commas allowed), serializes and builds the template.
+
+Verify: `ProfileValidatorTests` and `ProfileJsonTests` (incl. export/import round trip); `ProfileImportTests` E2E (export, edit, import, generate; invalid file; template).
 
 ### PROF-03: Generate from a custom profile
 **Status:** Done · **Priority:** P1 · **Effort:** S
