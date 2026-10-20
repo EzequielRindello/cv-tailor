@@ -67,7 +67,7 @@
 
   --color-border-default: #e7e2d9;
   --color-border-focus: #0f766e;
-  --color-border-hover: #cfc9be;
+  --color-border-hover: #8c877e;
 
   --color-success: #15803d;
   --color-error: #b42318;
@@ -199,7 +199,7 @@
 
   --color-border-default: #34312b;
   --color-border-focus: #4cc9bb;
-  --color-border-hover: #4a463f;
+  --color-border-hover: #7a756b;
 
   --color-success: #4ade80;
   --color-error: #f87171;
@@ -641,8 +641,13 @@ h1, h2, h3, .form-title {
   background: var(--color-bg-selected);
 }
 
+.bullet-row.deselected .bullet-text {
+  color: var(--color-text-tertiary);
+  text-decoration: line-through;
+}
+
 .bullet-row.deselected {
-  opacity: 0.4;
+  opacity: 1;
   background: var(--color-neutral-100);
 }
 
@@ -654,7 +659,7 @@ h1, h2, h3, .form-title {
 
 .drag-handle {
   font-size: var(--font-size-lg);
-  color: var(--color-neutral-400);
+  color: var(--color-text-tertiary);
   cursor: grab;
   user-select: none;
   flex-shrink: 0;
@@ -765,7 +770,7 @@ h1, h2, h3, .form-title {
 .format-card {
   position: relative;
   background: var(--color-bg-card);
-  border: 2px solid var(--color-border-default);
+  border: 2px solid var(--color-border-hover);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   text-align: center;
@@ -774,7 +779,7 @@ h1, h2, h3, .form-title {
 }
 
 .format-card:hover:not(.selected) {
-  border-color: var(--color-border-hover);
+  border-color: var(--color-primary-300);
   background-color: var(--color-bg-hover);
 }
 
@@ -844,6 +849,53 @@ h1, h2, h3, .form-title {
   cursor: not-allowed;
   box-shadow: none;
 }
+/* ===== Accessibility (UX-08) ===== */
+/* Selectable cards wrap a visually hidden radio/checkbox, so the ring goes on the card */
+.template-card:has(input:focus-visible),
+.page-option-card:has(input:focus-visible),
+.format-card:has(input:focus-visible) {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.template-card input,
+.page-option-card input {
+  pointer-events: none;
+}
+
+.bullet-move {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.bullet-move-btn {
+  background: transparent;
+  border: 1px solid var(--color-border-hover);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 6px;
+}
+
+.bullet-move-btn:hover:not(:disabled) {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.bullet-move-btn:disabled {
+  border-color: var(--color-border-default);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+#results-region:focus {
+  outline: none;
+}
+
 /* ===== Toasts, inline errors and empty states (UX-07) ===== */
 .toast-host {
   display: flex;
@@ -1805,7 +1857,7 @@ body:not(:has(#samples)) .app-try-demo {
 }
 
 .job-description-input {
-  border: 2px solid var(--color-border-default);
+  border: 2px solid var(--color-border-hover);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   font-size: var(--font-size-md);
@@ -1832,7 +1884,7 @@ body:not(:has(#samples)) .app-try-demo {
 }
 
 .job-description-input::placeholder {
-  color: var(--color-neutral-500);
+  color: var(--color-text-tertiary);
 }
 
 .input-helper-text {
@@ -2288,7 +2340,7 @@ body:not(:has(#samples)) .app-try-demo {
 
 .page-option-card {
   flex: 1;
-  border: 2px solid var(--color-border-default);
+  border: 2px solid var(--color-border-hover);
   border-radius: var(--radius-lg);
   padding: var(--spacing-md);
   cursor: pointer;
@@ -2361,7 +2413,7 @@ body:not(:has(#samples)) .app-try-demo {
 
 .template-card {
   flex: 1;
-  border: 2px solid var(--color-border-default);
+  border: 2px solid var(--color-border-hover);
   border-radius: var(--radius-lg);
   padding: var(--spacing-sm);
   cursor: pointer;

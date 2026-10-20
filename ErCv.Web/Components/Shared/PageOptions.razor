@@ -1,18 +1,28 @@
 <div class="mb-4">
-    <label class="form-label form-label-custom mb-3">Page Options</label>
-    <div class="page-options-group">
-        <div class="page-option-card @(!AllowTwoPages ? "selected" : "") @(Disabled ? "disabled" : "")"
-             @onclick="() => Select(false)">
-            <div class="page-option-icon"><i class="bi bi-file-earmark-text"></i></div>
+    <span class="form-label form-label-custom mb-3 d-block" id="page-options-label">Page Options</span>
+    <div class="page-options-group" role="radiogroup" aria-labelledby="page-options-label">
+        <label class="page-option-card @(!AllowTwoPages ? "selected" : "") @(Disabled ? "disabled" : "")">
+            <input type="radio"
+                   class="visually-hidden"
+                   name="page-mode"
+                   checked="@(!AllowTwoPages)"
+                   disabled="@Disabled"
+                   @onchange="() => Select(false)" />
+            <div class="page-option-icon" aria-hidden="true"><i class="bi bi-file-earmark-text"></i></div>
             <div class="page-option-label">1 Page</div>
             <div class="page-option-desc">Recommended</div>
-        </div>
-        <div class="page-option-card @(AllowTwoPages ? "selected" : "") @(Disabled ? "disabled" : "")"
-             @onclick="() => Select(true)">
-            <div class="page-option-icon"><i class="bi bi-files"></i></div>
+        </label>
+        <label class="page-option-card @(AllowTwoPages ? "selected" : "") @(Disabled ? "disabled" : "")">
+            <input type="radio"
+                   class="visually-hidden"
+                   name="page-mode"
+                   checked="@AllowTwoPages"
+                   disabled="@Disabled"
+                   @onchange="() => Select(true)" />
+            <div class="page-option-icon" aria-hidden="true"><i class="bi bi-files"></i></div>
             <div class="page-option-label">Up to 2 Pages</div>
             <div class="page-option-desc">8+ years exp.</div>
-        </div>
+        </label>
     </div>
 </div>
 

@@ -1,20 +1,27 @@
 <div class="mb-4">
-    <label class="form-label form-label-custom mb-3">Resume Template</label>
-    <div class="template-options">
+    <span class="form-label form-label-custom mb-3 d-block" id="template-label">Resume Template</span>
+    <div class="template-options" role="radiogroup" aria-labelledby="template-label">
         @foreach (var t in Templates)
         {
-            <div class="template-card @(Value == t.Key ? "selected" : "") @(Disabled ? "disabled" : "")"
-                 @onclick="() => Select(t.Key)">
-                <div class="template-preview">@Preview(t.Key)</div>
+            var selected = Value == t.Key;
+            <label class="template-card @(selected ? "selected" : "") @(Disabled ? "disabled" : "")">
+                <input type="radio"
+                       class="visually-hidden"
+                       name="resume-template"
+                       value="@t.Key"
+                       checked="@selected"
+                       disabled="@Disabled"
+                       @onchange="() => Select(t.Key)" />
+                <div class="template-preview" aria-hidden="true">@Preview(t.Key)</div>
                 <div class="template-info">
                     <div class="template-name">@t.Name</div>
                     <div class="template-desc">@t.Description</div>
                 </div>
-                @if (Value == t.Key)
+                @if (selected)
                 {
-                    <div class="template-check">✓</div>
+                    <div class="template-check" aria-hidden="true">✓</div>
                 }
-            </div>
+            </label>
         }
     </div>
 </div>

@@ -376,12 +376,12 @@ Verify: manual check plus E2E that the indicator appears and disappears.
 Verify: E2E for empty JD and no format selected.
 
 ### UX-08: Accessibility
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** In progress (axe scan waits for TEST-07) · **Priority:** P1 · **Effort:** M
 
-- [ ] WCAG AA contrast for all tokens in light and dark
-- [ ] BulletEditor: move up/down buttons and `Alt+Arrow` keyboard reorder (F11)
-- [ ] `aria-live` region announces generation results
-- [ ] Visible focus on every interactive element; selectable cards are real buttons/radios
+- [x] WCAG AA contrast for all tokens in light and dark (token pairs audited, plus a DOM scan of the composer and results views; control borders raised to 3:1)
+- [x] BulletEditor: move up/down buttons and `Alt+Arrow` keyboard reorder (F11); focus follows the moved bullet and the move is announced
+- [x] `aria-live` region announces generation results; focus moves to the results region
+- [x] Visible focus on every interactive element; selectable cards are real radios / checkboxes; insights tabs follow the ARIA tabs pattern
 - [ ] axe scan in E2E has no serious violations
 
 Verify: TEST-07 axe check + keyboard-only manual pass.

@@ -1,3 +1,5 @@
+@inject IJSRuntime JS
+
 @if (Analysis == null && Loading)
 {
     <div class="details-fullscreen" aria-busy="true">
@@ -46,7 +48,7 @@ else if (Analysis == null)
 }
 else
 {
-    <div class="details-fullscreen">
+    <div class="details-fullscreen" id="results-region" tabindex="-1" role="region" aria-label="CV results">
         <div class="results-actionbar" role="toolbar" aria-label="CV actions">
             <button type="button" class="btn btn-outline-secondary" disabled="@Loading" @onclick="OnBack">
                 <i class="bi bi-arrow-left me-1"></i>
@@ -104,6 +106,8 @@ else
                                     class="insights-tab @(_tab == key ? "active" : "")"
                                     aria-selected="@(_tab == key ? "true" : "false")"
                                     aria-controls="insights-panel"
+                                    tabindex="@(_tab == key ? 0 : -1)"
+                                    @onkeydown="OnTabKeyDown"
                                     @onclick="() => _tab = key">
                                 @tab.Label
                             </button>
@@ -139,6 +143,33 @@ else
     };
 
     private string _tab = "match";
+    private bool _focusTab;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusTab) return;
+
+        _focusTab = false;
+        await JS.InvokeVoidAsync("cvApp.focusElement", $"insights-tab-{_tab}");
+    }
+
+    // Arrow keys, Home and End move between tabs (roving tabindex, per the ARIA tabs pattern)
+    private void OnTabKeyDown(KeyboardEventArgs e)
+    {
+        var index = Array.FindIndex(Tabs, t => t.Key == _tab);
+        var next = e.Key switch
+        {
+            "ArrowRight" => (index + 1) % Tabs.Length,
+            "ArrowLeft" => (index - 1 + Tabs.Length) % Tabs.Length,
+            "Home" => 0,
+            "End" => Tabs.Length - 1,
+            _ => -1
+        };
+        if (next < 0) return;
+
+        _tab = Tabs[next].Key;
+        _focusTab = true;
+    }
 
     [Parameter] public AnalysisResult? Analysis { get; set; }
     [Parameter] public Dictionary<string, byte[]> Documents { get; set; } = new();

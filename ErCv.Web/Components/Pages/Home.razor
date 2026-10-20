@@ -11,6 +11,8 @@
 
 <PageTitle>CV Generator - Tailored Professional Resumes</PageTitle>
 
+<div class="visually-hidden" role="status" aria-live="polite">@_announcement</div>
+
 @if (_view == "generate")
 {
     <div class="container app-shell py-4 py-lg-5">
@@ -144,6 +146,8 @@ else
     private string? _jdError;
     private string? _formatError;
     private bool _focusJd;
+    private bool _focusResults;
+    private string _announcement = string.Empty;
     private DotNetObjectReference<Home>? _selfRef;
 
     protected override async Task OnInitializedAsync()
@@ -172,7 +176,14 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // The editor only exists once step 1 is on screen, so focus waits for the render that creates it
+        // Focus waits for the render that creates the target element
+        if (_focusResults && _view == "details" && _analysis != null)
+        {
+            _focusResults = false;
+            await JS.InvokeVoidAsync("cvApp.focusElement", "results-region");
+            return;
+        }
+
         if (!_focusJd || _view != "generate" || _step != 1) return;
 
         _focusJd = false;
@@ -301,6 +312,8 @@ else
 
             _documents = documents;
             _analysis = analysis;
+            _focusResults = true;
+            _announcement = $"CV ready. Match score {analysis.MatchScore.Overall} percent. ATS score {analysis.ATSScore.Overall} out of 100.";
             _history = await Store.AddToHistoryAsync(_jobDescription, analysis.MatchScore.Overall, TemplateLabel());
         }
         catch (ArgumentException ex)

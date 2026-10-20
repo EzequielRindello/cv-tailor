@@ -1,3 +1,9 @@
+// Alt+Up/Down reorders a bullet (handled in BulletEditor); stop the browser from also scrolling
+document.addEventListener('keydown', (event) => {
+    if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown') && event.target.closest?.('.bullet-row'))
+        event.preventDefault();
+});
+
 window.cvApp = {
     downloadFile: async (fileName, streamRef) => {
         const buffer = await streamRef.arrayBuffer();
@@ -30,8 +36,16 @@ window.cvApp = {
         try { localStorage.setItem('theme', theme); } catch { }
     },
 
-    focusElement: (id) => {
-        document.getElementById(id)?.focus();
+    // The target can still be mid-render when Blazor calls this, so retry for a few frames before giving up
+    focusElement: (id, attempts = 15) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.focus();
+            return;
+        }
+
+        if (attempts > 0)
+            requestAnimationFrame(() => window.cvApp.focusElement(id, attempts - 1));
     },
 
     scrollToTop: () => {
