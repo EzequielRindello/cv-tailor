@@ -95,5 +95,7 @@ namespace ErCvApi.Models
         public ATSScore ATSScore { get; set; } = new();
         public GeneratedCV GeneratedCV { get; set; } = new();
         public string? PreviewHtml { get; set; }
+        public SelectionExplanation Explanation { get; set; } = new();
+        public JdHighlight JdHighlight { get; set; } = new();
     }
 }

@@ -1,3 +1,4 @@
+@using System.Globalization
 @using ErCv.Web.Data
 
 @if (Visible)
@@ -17,6 +18,19 @@
             </button>
         }
     </div>
+    @* The samples are real posts (APP-05): say whose, where and when, and link back to the original *@
+    @if (ActiveSample is { } s)
+    {
+        <p class="sample-picker-source">
+            @s.Title at @s.Company@(string.IsNullOrWhiteSpace(s.Location) ? "" : $" ({s.Location})"),
+            posted @s.PostedAt.ToString("d MMM yyyy", CultureInfo.InvariantCulture) on @s.Source.
+            <a href="@s.Url" target="_blank" rel="noopener noreferrer">View the original post</a>
+        </p>
+    }
+    else
+    {
+        <p class="sample-picker-source">Each sample is a real, recent post from a public job board.</p>
+    }
 </div>
 }
 
@@ -25,7 +39,9 @@
     [Parameter] public EventCallback<string> OnSelect { get; set; }
     [Parameter] public bool Disabled { get; set; }
 
+    private SampleJobDescription? ActiveSample =>
+        SampleJobDescriptions.All.FirstOrDefault(s => string.Equals(s.Text, Current, StringComparison.Ordinal));
+
     // Shown while the editor is empty or holds one of the samples (so another can be picked); hidden once the user has their own text
-    private bool Visible =>
-        string.IsNullOrWhiteSpace(Current) || SampleJobDescriptions.All.Any(s => string.Equals(s.Text, Current, StringComparison.Ordinal));
+    private bool Visible => string.IsNullOrWhiteSpace(Current) || ActiveSample != null;
 }

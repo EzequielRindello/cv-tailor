@@ -1,0 +1,57 @@
+@using ErCvApi.Helpers
+
+<details class="profile-health" id="profile-health" open="@Open">
+    <summary class="profile-health-summary">
+        <span class="profile-health-title">Profile health check</span>
+        <span class="profile-health-badge">@Badge</span>
+    </summary>
+    <p class="profile-health-intro mt-2">Advice only. None of this stops you from generating.</p>
+    <ul class="profile-health-list">
+        @foreach (var (rule, label) in Rules)
+        {
+            var found = Findings.Where(f => f.Rule == rule).ToList();
+            <li class="profile-health-item @(found.Count == 0 ? "ok" : "warn")" data-rule="@rule">
+                @if (found.Count == 0)
+                {
+                    <span><span class="profile-health-mark" aria-hidden="true">&#10003;</span> <span class="visually-hidden">Passed: </span>@label</span>
+                }
+                else
+                {
+                    <details>
+                        <summary><span class="profile-health-mark" aria-hidden="true">!</span> <span class="visually-hidden">Needs attention: </span>@label (@found.Count)</summary>
+                        <ul>
+                            @foreach (var f in found)
+                            {
+                                <li>@f.Message</li>
+                            }
+                        </ul>
+                    </details>
+                }
+            </li>
+        }
+    </ul>
+</details>
+
+@code {
+    private static readonly (HealthRule Rule, string Label)[] Rules =
+    {
+        (HealthRule.NoMetrics, "Bullets have numbers or percentages"),
+        (HealthRule.WeakVerb, "Bullets open with an action verb"),
+        (HealthRule.NoSkillTags, "Every experience has skill tags"),
+        (HealthRule.Dates, "Dates are readable and do not overlap")
+    };
+
+    [Parameter, EditorRequired] public List<HealthFinding> Findings { get; set; } = new();
+
+    /// <summary>Collapsed by default so it does not compete with the form; the editor opens it because the visitor asked for the check.</summary>
+    [Parameter] public bool Open { get; set; }
+
+    private string Badge
+    {
+        get
+        {
+            var rules = Findings.Select(f => f.Rule).Distinct().Count();
+            return rules == 0 ? "All clear" : $"{rules} to improve";
+        }
+    }
+}

@@ -23,5 +23,6 @@ namespace ErCvApi.Models
         public Experience Experience { get; set; } = new();
         public double Score { get; set; }
         public List<string> MatchedSkills { get; set; } = new();
+        public List<ScorePart> Parts { get; set; } = new();
     }
 }

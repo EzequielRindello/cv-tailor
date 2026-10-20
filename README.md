@@ -123,7 +123,9 @@ er-cv-generator/
 │   ├── UI/                                  # BrowserStore (localStorage) + UI models
 │   ├── wwwroot/                             # css/site.css, js/app.js, lib/ (Bootstrap 5.3.2 + Icons 1.13.1, vendored)
 │   └── Program.cs                           # Blazor + API + rate limiter + forwarded headers, binds to PORT
-├── ErCv.Tests/                              # xUnit: Helpers (unit), Invariants, Documents (DOCX/PDF/HTML), Api, Fixtures (profiles + JD corpus)
+├── ErCv.Tests/                              # xUnit: Helpers (unit), Invariants, Documents (DOCX/PDF/HTML), Api, Collector, Fixtures (profiles + JD corpus)
+├── ErCv.Collector/                          # console tool that keeps corpus/ fresh (not part of the web app)
+├── corpus/                                  # real job posts, one JSON per post, plus report.md (see corpus/README.md)
 ├── .github/workflows/ci.yml                 # restore, build, test, Docker image build
 ├── Dockerfile                               # build + runtime image with Chromium
 └── render.yaml                              # Render web service (Docker)
@@ -189,7 +191,20 @@ er-cv-generator/
 
 ## Version
 
-Current version: **2.0.3** (M2 Redesign). Each milestone of the roadmap ships as one version, see [Versioning in `features.md`](features.md#versioning).
+Current version: **2.0.4** (M3 Your data). Each milestone of the roadmap ships as one version, see [Versioning in `features.md`](features.md#versioning).
+
+---
+
+## Job-post corpus
+
+`corpus/` holds real, recent software job posts from the public Greenhouse, Lever, Ashby and Workable job-board APIs, dated and linked back to the original. The sample job descriptions in the UI and the parser and scoring tests use them. Refresh it by hand and review the diff in a PR:
+
+```
+dotnet run --project ErCv.Collector -- refresh     # drops posts older than 90 days or closed, adds new ones; idempotent
+dotnet run --project ErCv.Collector -- report      # corpus/report.md: skill trends, parser gaps, seniority wording
+```
+
+Sources, terms, limits and how to remove a post: [`corpus/README.md`](corpus/README.md).
 
 ---
 

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using ErCv.Web.Data;
 using Microsoft.Playwright;
 
 namespace ErCv.E2E
@@ -25,6 +26,73 @@ namespace ErCv.E2E
 
             await Page.GetByRole(AriaRole.Tab, new() { Name = "Gaps" }).ClickAsync();
             await Assertions.Expect(Page.Locator(".missing-skills-card")).ToBeVisibleAsync();
+        }
+
+        // APP-05: the samples are real posts, so the picker says whose they are, when they were posted and links back
+        [Fact]
+        public async Task Picking_a_sample_shows_where_and_when_it_was_posted_with_a_link_to_the_original()
+        {
+            var sample = SampleJobDescriptions.All.Single(s => s.Label == "Backend");
+
+            await OpenHomeAsync();
+            await PickSampleAsync("Backend");
+
+            var source = Page.Locator(".sample-picker-source");
+            await Assertions.Expect(source).ToContainTextAsync(sample.Company);
+            await Assertions.Expect(source).ToContainTextAsync(sample.PostedAt.ToString("d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture));
+            var link = source.GetByRole(AriaRole.Link, new() { Name = "View the original post" });
+            await Assertions.Expect(link).ToHaveAttributeAsync("href", sample.Url);
+            await Assertions.Expect(link).ToHaveAttributeAsync("target", "_blank");
+            await Assertions.Expect(JobDescription).ToHaveValueAsync(new Regex(Regex.Escape(sample.Title)));
+        }
+
+        [Fact]
+        public async Task Why_tab_explains_each_role_and_bullet_with_its_score_parts()
+        {
+            await GenerateAsync("Backend");
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Why" }).ClickAsync();
+
+            var firstRole = Page.Locator(".why-item").First;
+            await Assertions.Expect(firstRole).ToBeVisibleAsync();
+
+            await firstRole.Locator("summary").ClickAsync();
+            await Assertions.Expect(firstRole.Locator(".why-parts li").First).ToBeVisibleAsync();
+            await Assertions.Expect(firstRole.Locator(".why-bullet.included").First).ToBeVisibleAsync();
+            await Assertions.Expect(firstRole.Locator(".why-chip").First).ToBeVisibleAsync();
+        }
+
+        [Fact]
+        public async Task Why_tab_card_uses_the_same_surface_as_the_other_tabs_in_dark_mode()
+        {
+            await GenerateAsync("Backend");
+            await Page.EvaluateAsync("() => document.documentElement.setAttribute('data-theme', 'dark')");
+            // Colors are read from the computed style, so no transition may be halfway through the theme change
+            await Page.AddStyleTagAsync(new() { Content = "*, *::before, *::after { transition: none !important; }" });
+
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Keywords" }).ClickAsync();
+            var reference = await Page.Locator(".keyword-card").EvaluateAsync<string>("e => getComputedStyle(e).backgroundColor");
+
+            foreach (var (tab, card) in new[] { ("Why", ".why-card"), ("Job", ".jd-card") })
+            {
+                await Page.GetByRole(AriaRole.Tab, new() { Name = tab }).ClickAsync();
+                var background = await Page.Locator(card).EvaluateAsync<string>("e => getComputedStyle(e).backgroundColor");
+                Assert.True(reference == background, $"{tab}: card is {background}, keyword card is {reference}");
+            }
+        }
+
+        [Fact]
+        public async Task Job_tab_highlights_skills_and_shows_where_one_appears_in_the_cv()
+        {
+            await GenerateAsync("Backend");
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Job" }).ClickAsync();
+
+            await Assertions.Expect(Page.Locator(".jd-term.matched").First).ToBeVisibleAsync();
+
+            var skill = Page.Locator(".jd-term.matched").First;
+            await skill.ClickAsync();
+            await Assertions.Expect(skill).ToHaveAttributeAsync("aria-pressed", "true");
+            await Assertions.Expect(Page.Locator(".jd-detail-title")).ToBeVisibleAsync();
+            await Assertions.Expect(Page.Locator(".jd-locations li, .jd-note").First).ToBeVisibleAsync();
         }
 
         [Fact]
@@ -102,7 +170,8 @@ namespace ErCv.E2E
 
             await Button("Back to composer").ClickAsync();
             await Page.GetByRole(AriaRole.Button, new() { Name = "Job description" }).ClickAsync();
-            await Assertions.Expect(JobDescription).ToHaveValueAsync(new Regex("DevOps Engineer"));
+            var devops = SampleJobDescriptions.All.Single(s => s.Label == "DevOps");
+            await Assertions.Expect(JobDescription).ToHaveValueAsync(new Regex(Regex.Escape(devops.Title)));
 
             await Page.GetByRole(AriaRole.Button, new() { Name = "Options" }).ClickAsync();
             await Button("Generate CV").ClickAsync();

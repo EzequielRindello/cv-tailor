@@ -42,8 +42,66 @@ namespace ErCv.E2E
             await Assertions.Expect(entry).ToHaveCountAsync(1);
             await Assertions.Expect(entry).ToContainTextAsync("Template: Modern");
 
-            await entry.GetByRole(AriaRole.Button, new() { Name = "Regenerate" }).ClickAsync();
-            await Assertions.Expect(JobDescription).ToHaveValueAsync(new Regex("Senior Backend Engineer"));
+            await entry.GetByRole(AriaRole.Button, new() { Name = "Re-open" }).ClickAsync();
+            await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
+        }
+
+        [Fact]
+        public async Task Reopening_a_past_generation_restores_its_options_and_generates_again()
+        {
+            await OpenHomeAsync();
+            await PickSampleAsync("Backend");
+            await NextAsync();
+            await ChooseCardAsync("Modern");
+            await NextAsync();
+            await ChooseCardAsync("Up to 2 Pages");
+            await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "PDF" }), false);
+            await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "Word" }), true);
+            await Button("Generate CV").ClickAsync();
+            await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
+
+            // Come back, change everything, then re-open the old generation
+            await OpenHomeAsync();
+            await PickSampleAsync("Junior");
+            await NextAsync();
+            await ChooseCardAsync("Harvard");
+            await NextAsync();
+            await ChooseCardAsync("1 Page");
+            await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "Word" }), false);
+            await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "PDF" }), true);
+
+            await Button("History", exact: true).ClickAsync();
+            await Page.Locator(".history-item").GetByRole(AriaRole.Button, new() { Name = "Re-open" }).ClickAsync();
+            await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
+            await Assertions.Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Download DOCX" })).ToBeVisibleAsync();
+            await Assertions.Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Download PDF" })).ToHaveCountAsync(0);
+
+            await OpenHomeAsync();
+            await PickSampleAsync("Backend");
+            await NextAsync();
+            await Assertions.Expect(Radio("Modern")).ToBeCheckedAsync();
+            await NextAsync();
+            await Assertions.Expect(Radio("Up to 2 Pages")).ToBeCheckedAsync();
+        }
+
+        [Fact]
+        public async Task Reopening_an_entry_whose_saved_profile_is_gone_falls_back_to_the_demo_profile()
+        {
+            await SaveMyProfileFromJsonAsync("""{ "header": { "fullName": "Zed Tester", "email": "zed@example.com" }, "experience": [ { "role": "Eng", "company": "Acme", "startDate": "Jan 2020", "bullets": ["Built a thing"], "skills": ["C#"] } ] }""");
+            await ChooseMyProfileAsync();
+            await NextAsync();
+            await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "Word" }), true);
+            await Button("Generate CV").ClickAsync();
+            await Assertions.Expect(PreviewBody).ToContainTextAsync("Tester");
+
+            await Page.EvaluateAsync("() => localStorage.removeItem('cv-generator-my-profile')");
+            await OpenHomeAsync();
+            await Button("History", exact: true).ClickAsync();
+            await Page.Locator(".history-item").GetByRole(AriaRole.Button, new() { Name = "Re-open" }).ClickAsync();
+
+            await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
+            await Assertions.Expect(PreviewBody).ToContainTextAsync("Rivera");
+            await Assertions.Expect(Page.GetByText("saved profile was not found")).ToBeVisibleAsync();
         }
 
         [Fact]

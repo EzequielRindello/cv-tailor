@@ -723,12 +723,6 @@ h1, h2, h3, .form-title {
   padding: var(--spacing-lg);
 }
 
-.cv-preview-frame.actual-size {
-  max-width: none;
-  /* US Letter at 96dpi: the paper at real size, the wrapper scrolls sideways */
-  width: 816px;
-}
-
 .cv-preview-frame-wrapper {
   overflow-x: auto;
 }
@@ -1365,48 +1359,31 @@ h1, h2, h3, .form-title {
   margin-bottom: var(--spacing-md);
 }
 
-.cv-zoom {
-  background: var(--color-bg-hover);
-  border-radius: var(--radius-md);
-  display: inline-flex;
-  padding: 2px;
-}
-
-.cv-zoom-btn {
-  white-space: nowrap;
-  background: transparent;
-  border: 0;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  padding: 4px var(--spacing-md);
-}
-
-.cv-zoom-btn.active {
-  background: var(--color-bg-card);
-  box-shadow: var(--shadow-sm);
-  color: var(--color-text-primary);
-}
-
+/* Same look as the composer steps: every tab has its own underline, the current one in the accent color */
 .insights-tabs {
-  border-bottom: 1px solid var(--color-border-default);
-  display: flex;
-  gap: var(--spacing-xs);
+  display: grid;
+  gap: var(--spacing-sm);
+  grid-auto-columns: minmax(max-content, 1fr);
+  grid-auto-flow: column;
   margin-bottom: var(--spacing-md);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.insights-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .insights-tab {
   background: transparent;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-bottom: 2px solid var(--color-border-default);
   color: var(--color-text-tertiary);
   cursor: pointer;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
-  margin-bottom: -1px;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-sm) 0;
+  text-align: left;
 }
 
 .insights-tab:hover {
@@ -1416,6 +1393,322 @@ h1, h2, h3, .form-title {
 .insights-tab.active {
   border-bottom-color: var(--color-primary-500);
   color: var(--color-text-primary);
+}
+
+/* ===== Job description highlights (MATCH-05) ===== */
+.jd-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.jd-card .card-body {
+  padding: var(--spacing-lg);
+}
+
+.jd-title {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.jd-legend {
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--font-size-sm);
+  gap: var(--spacing-md);
+  list-style: none;
+  margin: 0 0 var(--spacing-sm);
+  padding: 0;
+}
+
+.jd-key {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.jd-key-matched {
+  text-decoration-color: var(--color-success);
+  text-decoration-style: solid;
+}
+
+.jd-key-missing {
+  text-decoration-color: var(--color-error);
+  text-decoration-style: dashed;
+}
+
+.jd-hint,
+.jd-empty,
+.jd-note {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.jd-text {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-loose);
+  max-height: 420px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  padding: var(--spacing-md);
+  white-space: pre-wrap;
+}
+
+/* Skills read as ordinary text with an underline: solid green when the profile has it, dashed red when not */
+.jd-term {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.jd-term.matched {
+  text-decoration-color: var(--color-success);
+  text-decoration-style: solid;
+}
+
+.jd-term.missing {
+  text-decoration-color: var(--color-error);
+  text-decoration-style: dashed;
+}
+
+.jd-term:hover,
+.jd-term.selected {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* No box around a skill: keyboard focus is shown by a thicker underline instead of the global focus ring */
+.jd-term:focus-visible {
+  box-shadow: none;
+  outline: none;
+  text-decoration-thickness: 4px;
+  text-underline-offset: 4px;
+}
+
+.jd-detail {
+  margin-top: var(--spacing-md);
+}
+
+.jd-detail-title {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-xs);
+}
+
+.jd-locations {
+  display: grid;
+  gap: var(--spacing-xs);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jd-locations li {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.jd-location-section {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+}
+
+.jd-location-label {
+  font-weight: var(--font-weight-medium);
+}
+
+.jd-location-excerpt {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+/* ===== Why this was chosen (MATCH-04) ===== */
+.why-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.why-card .card-body {
+  padding: var(--spacing-lg);
+}
+
+.why-title {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.why-intro,
+.why-empty {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-md);
+}
+
+.why-item {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-sm);
+}
+
+.why-summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.why-summary-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.why-role {
+  font-weight: var(--font-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.why-company {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.why-score {
+  background: var(--color-bg-selected);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  padding: 2px var(--spacing-sm);
+  white-space: nowrap;
+}
+
+.why-parts,
+.why-bullets,
+.why-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.why-parts {
+  border-top: 1px solid var(--color-border-default);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.why-parts li {
+  align-items: baseline;
+  display: flex;
+  font-size: var(--font-size-md);
+  gap: var(--spacing-sm);
+  padding: 2px 0;
+}
+
+.why-part-label {
+  font-weight: var(--font-weight-medium);
+}
+
+.why-part-detail {
+  color: var(--color-text-tertiary);
+  flex: 1;
+  font-size: var(--font-size-sm);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.why-part-points {
+  font-family: var(--font-family-mono);
+  margin-left: auto;
+}
+
+.why-bullets {
+  display: grid;
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-md) var(--spacing-md);
+}
+
+.why-bullet {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.why-bullet.left-out {
+  background: var(--color-bg-hover);
+}
+
+.why-bullet-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.why-badge {
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px var(--spacing-sm);
+  text-transform: uppercase;
+}
+
+.why-badge.included {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.why-badge.left-out {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-tertiary);
+}
+
+.why-bullet-text {
+  font-size: var(--font-size-md);
+  margin: var(--spacing-sm) 0;
+  overflow-wrap: anywhere;
+}
+
+.why-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.why-chip {
+  background: var(--color-bg-selected);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-sm);
+}
+
+.why-chip.negative {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
 }
 
 /* ===== Buttons: Bootstrap's .btn re-skinned with the design tokens ===== */
@@ -1703,6 +1996,19 @@ h1, h2, h3, .form-title {
 .sample-chip:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+/* Where and when the active sample was posted (APP-05) */
+.sample-picker-source {
+  color: var(--color-text-tertiary);
+  flex-basis: 100%;
+  font-size: var(--font-size-sm);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.sample-picker-source a {
+  color: var(--color-text-link);
 }
 
 /* ===== AppHeader / Hero / AppFooter (UX-02) ===== */
@@ -2659,3 +2965,196 @@ body:not(:has(#samples)) .app-try-demo {
   justify-content: center;
 }
 
+
+.profile-tools-active {
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.profile-tools-errors {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+}
+
+.profile-page-title {
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+.profile-page-intro {
+  color: var(--color-text-secondary);
+}
+
+.profile-section {
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.profile-section h2 {
+  font-size: 1.15rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.profile-entry {
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.profile-entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-entry-head h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.profile-list {
+  margin-top: var(--spacing-sm);
+}
+
+.profile-list-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xs);
+}
+
+.profile-list-row .profile-list-item {
+  flex: 1;
+}
+
+.profile-list-row .profile-list-item .form-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.profile-field-error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  margin-top: 2px;
+}
+
+.profile-save-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.profile-source a {
+  color: var(--color-text-link);
+}
+
+.profile-health {
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.profile-health-title {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.profile-health-intro {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 2px 0 var(--spacing-sm);
+}
+
+.profile-health-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.profile-health-item {
+  margin-bottom: var(--spacing-xs);
+}
+
+.profile-health-item.warn summary {
+  cursor: pointer;
+}
+
+.profile-health-item ul {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.profile-health-mark {
+  display: inline-block;
+  width: 1.2em;
+  font-weight: 700;
+}
+
+.history-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.history-no-match {
+  color: var(--color-text-secondary);
+}
+
+.history-entry {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-details {
+  border: 1px solid var(--color-border-default);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.history-status {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+/* Thin scrollbars so they take little room and draw little attention */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-default) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border-default);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.profile-health-summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.profile-health-badge {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}

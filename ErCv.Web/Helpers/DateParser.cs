@@ -29,8 +29,11 @@ namespace ErCvApi.Helpers
                 v.Equals("now", StringComparison.OrdinalIgnoreCase));
         }
 
-        /// <summary>Parses a date to its year, plus its month when the text gives one.</summary>
-        public static bool TryParse(string? value, out int year, out int? month)
+        /// <summary>
+        /// Parses only the documented formats (no "any year in the text" fallback). Used to validate what a
+        /// visitor types, where "13/2024" must be an error and not silently read as 2024.
+        /// </summary>
+        public static bool TryParseStrict(string? value, out int year, out int? month)
         {
             year = 0;
             month = null;
@@ -43,6 +46,17 @@ namespace ErCvApi.Helpers
                 return IsPlausible(year);
 
             if (YearOnly.IsMatch(text)) { year = int.Parse(text); month = null; return IsPlausible(year); }
+
+            year = 0;
+            return false;
+        }
+
+        /// <summary>Parses a date to its year, plus its month when the text gives one.</summary>
+        public static bool TryParse(string? value, out int year, out int? month)
+        {
+            if (TryParseStrict(value, out year, out month)) return true;
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            var text = value.Trim();
 
             // Tolerant fallback for text such as "Spring 2019": any plausible year in the string.
             var any = AnyYear.Match(text);

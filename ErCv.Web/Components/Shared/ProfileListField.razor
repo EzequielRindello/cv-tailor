@@ -1,0 +1,25 @@
+@* One text box per item (bullets, highlights) with add and remove *@
+<fieldset class="profile-list">
+    <legend class="form-label form-label-custom">@Label</legend>
+    @for (var i = 0; i < Items.Count; i++)
+    {
+        var index = i;
+        <div class="profile-list-row">
+            <ProfileField Id="@($"{Id}-{index}")" Label="@($"{Label} {index + 1}")" Multiline="true"
+                          Value="@Items[index]" Error="@ErrorFor?.Invoke(index)"
+                          ValueChanged="v => Items[index] = v" CssClass="profile-list-item" />
+            <button type="button" class="btn btn-outline-secondary btn-sm"
+                    aria-label="@($"Remove {Label} {index + 1}")"
+                    @onclick="() => Items.RemoveAt(index)">Remove</button>
+        </div>
+    }
+    <button type="button" class="btn btn-outline-secondary btn-sm" id="@(Id + "-add")"
+            @onclick="() => Items.Add(string.Empty)">Add @Label.ToLowerInvariant()</button>
+</fieldset>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public List<string> Items { get; set; } = new();
+    [Parameter] public Func<int, string?>? ErrorFor { get; set; }
+}

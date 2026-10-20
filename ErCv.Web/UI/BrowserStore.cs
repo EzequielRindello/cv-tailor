@@ -1,5 +1,6 @@
 using System.Text.Json;
 using ErCv.Web.UI;
+using ErCvApi.Models;
 using Microsoft.JSInterop;
 
 namespace ErCv.Web.UI
@@ -8,8 +9,9 @@ namespace ErCv.Web.UI
     public class BrowserStore
     {
         private const string SettingsKey = "cv-generator-settings";
+        private const string ProfileKey = "cv-generator-my-profile";
         private const string HistoryKey = "cv-generator-history";
-        private const int MaxHistoryEntries = 10;
+        private const int MaxHistoryEntries = 50;
 
         private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -34,10 +36,19 @@ namespace ErCv.Web.UI
 
         public Task SaveSettingsAsync(AppSettings settings) => WriteAsync(SettingsKey, settings);
 
+        /// <summary>The visitor's own profile (PROF-01). It stays in this browser and is never sent to the server to be stored.</summary>
+        public Task<CVMaster?> LoadMyProfileAsync() => ReadAsync<CVMaster>(ProfileKey);
+
+        public Task SaveMyProfileAsync(CVMaster profile) => WriteAsync(ProfileKey, profile);
+
+        public async Task ClearMyProfileAsync() =>
+            await _js.InvokeVoidAsync("cvApp.removeItem", ProfileKey);
+
         public async Task<List<HistoryEntry>> GetHistoryAsync() =>
             await ReadAsync<List<HistoryEntry>>(HistoryKey) ?? new();
 
-        public async Task<List<HistoryEntry>> AddToHistoryAsync(string jobDescription, int? matchScore, string template)
+        public async Task<List<HistoryEntry>> AddToHistoryAsync(
+            string jobDescription, int? matchScore, string template, HistoryEntry? options = null)
         {
             var entry = new HistoryEntry
             {
@@ -46,12 +57,30 @@ namespace ErCv.Web.UI
                 GeneratedAt = DateTime.UtcNow.ToString("o"),
                 MatchScore = matchScore,
                 Template = template,
-                JobDescription = jobDescription
+                JobDescription = jobDescription,
+                TemplateKey = options?.TemplateKey,
+                Formats = options?.Formats,
+                AllowTwoPages = options?.AllowTwoPages,
+                ProfileSource = options?.ProfileSource,
+                ProfileId = options?.ProfileId
             };
 
             var updated = (await GetHistoryAsync()).Prepend(entry).Take(MaxHistoryEntries).ToList();
             await WriteAsync(HistoryKey, updated);
             return updated;
+        }
+
+        /// <summary>Saves edits to an entry's application details (APP-01). Keyed by id, so a stale copy cannot add an entry back.</summary>
+        public async Task<List<HistoryEntry>> UpdateHistoryEntryAsync(HistoryEntry entry)
+        {
+            entry.Status = ApplicationTracker.Normalize(entry.Status);
+            var history = await GetHistoryAsync();
+            var index = history.FindIndex(e => e.Id == entry.Id);
+            if (index < 0) return history;
+
+            history[index] = entry;
+            await WriteAsync(HistoryKey, history);
+            return history;
         }
 
         public async Task<List<HistoryEntry>> RemoveFromHistoryAsync(long id)

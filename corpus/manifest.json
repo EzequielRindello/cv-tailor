@@ -1,0 +1,25 @@
+{
+  "refreshedAt": "2026-10-20T20:34:52+00:00",
+  "windowDays": 90,
+  "count": 194,
+  "oldestPostedAt": "2026-07-22T22:12:20+00:00",
+  "newestPostedAt": "2026-10-20T19:23:16+00:00",
+  "bySource": {
+    "ashby": 48,
+    "greenhouse": 114,
+    "lever": 28,
+    "workable": 4
+  },
+  "byRoleFamily": {
+    "backend": 13,
+    "data": 25,
+    "devops": 29,
+    "frontend": 10,
+    "fullstack": 9,
+    "ml": 32,
+    "mobile": 11,
+    "qa": 4,
+    "security": 20,
+    "software": 41
+  }
+}

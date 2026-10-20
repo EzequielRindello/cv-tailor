@@ -1,5 +1,7 @@
 @page "/"
 @using System.Text.Json
+@using ErCvApi.Helpers
+@using ErCvApi.Models
 @using ErCvApi.Services
 @using static ErCvApi.Services.CVGeneratorService
 @implements IAsyncDisposable
@@ -24,8 +26,9 @@
                         @if (_showHistory)
                         {
                             <HistoryPanel Entries="_history"
-                                          OnLoad="LoadHistoryEntry"
+                                          OnLoad="ReopenHistoryEntry"
                                           OnDelete="DeleteHistoryEntry"
+                                          OnUpdate="SaveHistoryEntry"
                                           OnClear="ClearHistory"
                                           OnClose="() => _showHistory = false"
                                           Disabled="_loading" />
@@ -56,9 +59,13 @@
                             else if (_step == 2)
                             {
                                 <div class="form-section form-section-primary">
+                                    <ProfileSourceSwitcher Value="@_settings.ProfileSource"
+                                                           ValueChanged="SetProfileSource"
+                                                           HasMine="_myProfile != null"
+                                                           Disabled="_loading" />
                                     <ProfileSelector Profiles="_profiles"
                                                      @bind-Value="_profileId"
-                                                     Disabled="_loading" />
+                                                     Disabled="@(_loading || ActiveProfile != null)" />
                                     <TemplateSelector Value="@_settings.Template"
                                                       ValueChanged="SetTemplate"
                                                       Disabled="_loading" />
@@ -134,6 +141,7 @@ else
     private int _step = 1;
     private string _jobDescription = string.Empty;
     private string _profileId = "cv-master";
+    private CVMaster? _myProfile;
     private List<ProfileInfo> _profiles = new() { new("cv-master", "Default") };
     private AppSettings _settings = new();
     private List<HistoryEntry> _history = new();
@@ -167,11 +175,14 @@ else
             Logger.LogWarning(ex, "Could not list CV profiles; falling back to default.");
         }
 
-        _settings = await Store.LoadSettingsAsync();
-        _history = await Store.GetHistoryAsync();
-
+        // Registered before the storage reads: each read is a round trip, and a shortcut pressed meanwhile was lost
         _selfRef = DotNetObjectReference.Create(this);
         await JS.InvokeVoidAsync("cvApp.registerShortcuts", _selfRef);
+
+        _settings = await Store.LoadSettingsAsync();
+        _history = await Store.GetHistoryAsync();
+        _myProfile = await Store.LoadMyProfileAsync();
+        if (_myProfile == null) _settings.ProfileSource = "demo";
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -230,6 +241,15 @@ else
         _jdError = null;
         _step = Math.Clamp(step, 1, LastStep);
         return Task.CompletedTask;
+    }
+
+    /// <summary>The profile sent with the request: the saved "My profile" if selected. Null means a stored demo profile.</summary>
+    private CVMaster? ActiveProfile => _settings.ProfileSource == "mine" ? _myProfile : null;
+
+    private async Task SetProfileSource(string source)
+    {
+        _settings.ProfileSource = source;
+        await Store.SaveSettingsAsync(_settings);
     }
 
     private async Task SetTemplate(string template)
@@ -301,20 +321,31 @@ else
 
         try
         {
-            var (documents, analysis) = await CvService.BuildCvAsync(new GenerateRequest
+            var request = new GenerateRequest
             {
                 JobDescription = _jobDescription,
                 Formats = SelectedFormats(),
                 Template = TemplateEnum(),
                 AllowTwoPages = _settings.AllowTwoPages,
                 ProfileId = _profileId
-            }, progress);
+            };
+
+            var (documents, analysis) = ActiveProfile is { } profile
+                ? await CvService.BuildCvAsync(request, profile, progress)
+                : await CvService.BuildCvAsync(request, progress);
 
             _documents = documents;
             _analysis = analysis;
             _focusResults = true;
             _announcement = $"CV ready. Match score {analysis.MatchScore.Overall} percent. ATS score {analysis.ATSScore.Overall} out of 100.";
-            _history = await Store.AddToHistoryAsync(_jobDescription, analysis.MatchScore.Overall, TemplateLabel());
+            _history = await Store.AddToHistoryAsync(_jobDescription, analysis.MatchScore.Overall, TemplateLabel(), new HistoryEntry
+            {
+                TemplateKey = _settings.Template,
+                Formats = SelectedFormats(),
+                AllowTwoPages = _settings.AllowTwoPages,
+                ProfileSource = _settings.ProfileSource,
+                ProfileId = _profileId
+            });
         }
         catch (ArgumentException ex)
         {
@@ -372,14 +403,48 @@ else
         }
     }
 
-    private async Task LoadHistoryEntry(HistoryEntry entry)
+    /// <summary>APP-02: puts the saved job description and options back and generates again.</summary>
+    private async Task ReopenHistoryEntry(HistoryEntry entry)
     {
         _jobDescription = entry.JobDescription;
-        _step = 1;
-        _showHistory = false;
         _jdError = null;
-        await JS.InvokeVoidAsync("cvApp.scrollToTop");
+
+        if (entry.TemplateKey != null) _settings.Template = entry.TemplateKey;
+        if (entry.AllowTwoPages is { } twoPages) _settings.AllowTwoPages = twoPages;
+        if (entry.Formats is { Count: > 0 } formats)
+            _settings.SelectedFormats = _settings.SelectedFormats.Keys.ToDictionary(k => k, k => formats.Contains(k));
+
+        var note = RestoreProfile(entry);
+        await Store.SaveSettingsAsync(_settings);
+
+        if (note != null) Toasts.Info(note);
+        await GenerateAsync();
     }
+
+    /// <summary>Returns a message when the profile the entry used is gone and the demo profile is used instead.</summary>
+    private string? RestoreProfile(HistoryEntry entry)
+    {
+        if (entry.ProfileSource == null) return null;
+
+        if (entry.ProfileId != null && _profiles.Any(p => p.Id == entry.ProfileId))
+            _profileId = entry.ProfileId;
+
+        if (entry.ProfileSource == "mine" && _myProfile != null)
+        {
+            _settings.ProfileSource = "mine";
+            return null;
+        }
+
+        _settings.ProfileSource = "demo";
+        return entry.ProfileSource switch
+        {
+            "imported" => "The imported profile was not kept, so the demo profile was used.",
+            "mine" => "Your saved profile was not found, so the demo profile was used.",
+            _ => null
+        };
+    }
+
+    private Task SaveHistoryEntry(HistoryEntry entry) => Store.UpdateHistoryEntryAsync(entry);
 
     private async Task DeleteHistoryEntry(long id) => _history = await Store.RemoveFromHistoryAsync(id);
 

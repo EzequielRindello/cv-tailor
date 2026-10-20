@@ -1,0 +1,78 @@
+@using ErCvApi.Helpers
+@using ErCvApi.Models
+
+<div class="mb-4 profile-tools">
+    <label class="form-label form-label-custom" for="profile-import">Your profile</label>
+    <div class="d-flex flex-wrap gap-2">
+        <label class="btn btn-outline-secondary btn-sm mb-0 @(Disabled ? "disabled" : "")">
+            Import JSON
+            <InputFile id="profile-import" class="visually-hidden" accept=".json,application/json"
+                       disabled="@Disabled" OnChange="ImportAsync" />
+        </label>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-export"
+                disabled="@Disabled" @onclick="OnExport">Export JSON</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-template"
+                disabled="@Disabled" @onclick="OnTemplate">Blank template</button>
+    </div>
+
+    @if (_issues.Count > 0)
+    {
+        <div class="profile-tools-errors mt-2" role="alert" id="profile-import-errors">
+            <p class="mb-1">That file was not imported. Fix these and try again:</p>
+            <ul class="mb-0">
+                @foreach (var issue in _issues.Take(MaxShown))
+                {
+                    <li><code>@issue.Path</code>: @issue.Message</li>
+                }
+            </ul>
+            @if (_issues.Count > MaxShown)
+            {
+                <p class="mb-0 mt-1">and @(_issues.Count - MaxShown) more.</p>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private const int MaxShown = 10;
+
+    private List<ProfileIssue> _issues = new();
+
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<CVMaster> OnImport { get; set; }
+    [Parameter] public EventCallback OnExport { get; set; }
+    [Parameter] public EventCallback OnTemplate { get; set; }
+
+    private async Task ImportAsync(InputFileChangeEventArgs e)
+    {
+        _issues = new();
+        var file = e.File;
+
+        if (file.Size > ProfileJson.MaxImportBytes)
+        {
+            _issues.Add(new ProfileIssue("file", $"The file is larger than {ProfileJson.MaxImportBytes / 1024} KB."));
+            return;
+        }
+
+        string json;
+        try
+        {
+            using var reader = new StreamReader(file.OpenReadStream(ProfileJson.MaxImportBytes));
+            json = await reader.ReadToEndAsync();
+        }
+        catch (IOException)
+        {
+            _issues.Add(new ProfileIssue("file", "The file could not be read."));
+            return;
+        }
+
+        var (profile, issues) = ProfileJson.Parse(json);
+        if (profile == null || issues.Count > 0)
+        {
+            _issues = issues;
+            return;
+        }
+
+        await OnImport.InvokeAsync(profile);
+    }
+}

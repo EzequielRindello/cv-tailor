@@ -1,0 +1,35 @@
+<div class="profile-field @CssClass">
+    <label class="form-label form-label-custom" for="@Id">@Label</label>
+    @if (Multiline)
+    {
+        <textarea id="@Id" class="form-control @(Error != null ? "is-invalid" : "")" rows="2"
+                  aria-invalid="@(Error != null ? "true" : null)"
+                  aria-describedby="@(Error != null ? Id + "-err" : null)"
+                  value="@Value" @onchange="OnChange"></textarea>
+    }
+    else
+    {
+        <input id="@Id" class="form-control @(Error != null ? "is-invalid" : "")" type="text"
+               placeholder="@Placeholder"
+               aria-invalid="@(Error != null ? "true" : null)"
+               aria-describedby="@(Error != null ? Id + "-err" : null)"
+               value="@Value" @onchange="OnChange" />
+    }
+    @if (Error != null)
+    {
+        <div class="profile-field-error" id="@(Id + "-err")">@Error</div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public bool Multiline { get; set; }
+    [Parameter] public string? CssClass { get; set; }
+
+    private Task OnChange(ChangeEventArgs e) => ValueChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+}

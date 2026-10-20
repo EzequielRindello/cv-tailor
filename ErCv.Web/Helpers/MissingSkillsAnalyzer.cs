@@ -12,18 +12,14 @@ namespace ErCvApi.Helpers
         {
             var allCVSkills = RelevanceScorer.FlattenSkills(cv.Skills);
 
-            var allBulletsText = string.Join(" ",
-                cv.Experience.SelectMany(e => e.Bullets ?? new List<string>())).ToLower();
+            var allBulletsText = BulletsText(cv);
 
             var requiredMissing = new List<string>();
             var niceToHaveMissing = new List<string>();
 
             foreach (var skill in requirements.TechnicalSkills)
             {
-                var foundInSkills = SkillNormalizer.MatchesAny(skill, allCVSkills);
-                var foundInBullets = SkillNormalizer.ContainsTerm(allBulletsText, skill);
-
-                if (!foundInSkills && !foundInBullets)
+                if (!IsInProfile(skill, allCVSkills, allBulletsText))
                 {
                     if (NiceToHaveKeywords.Contains(skill) ||
                         SkillNormalizer.MatchesAny(skill, NiceToHaveKeywords))
@@ -51,6 +47,16 @@ namespace ErCvApi.Helpers
                 PotentialScoreIncrease = Math.Min(potentialIncrease, MissingSkillsConstants.MaxPotentialIncrease)
             };
         }
+
+        /// <summary>True when the profile lists the skill or mentions it in a bullet.</summary>
+        public static bool IsInProfile(CVMaster cv, string skill) =>
+            IsInProfile(skill, RelevanceScorer.FlattenSkills(cv.Skills), BulletsText(cv));
+
+        private static bool IsInProfile(string skill, List<string> profileSkills, string bulletsTextLower) =>
+            SkillNormalizer.MatchesAny(skill, profileSkills) || SkillNormalizer.ContainsTerm(bulletsTextLower, skill);
+
+        private static string BulletsText(CVMaster cv) =>
+            string.Join(" ", cv.Experience.SelectMany(e => e.Bullets ?? new List<string>())).ToLower();
 
         private List<string> BuildSuggestions(List<string> required, List<string> niceToHave)
         {

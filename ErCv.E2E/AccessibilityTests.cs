@@ -65,6 +65,16 @@ namespace ErCv.E2E
         }
 
         [Fact]
+        public async Task Profile_editor_with_validation_errors_has_no_serious_violations()
+        {
+            await Page.GotoAsync("/profile");
+            await Page.Locator("#profile-save").ClickAsync();
+            await Assertions.Expect(Page.Locator("#p-fullName-err")).ToBeVisibleAsync();
+
+            await AssertNoSeriousViolationsAsync("profile editor");
+        }
+
+        [Fact]
         public async Task Validation_errors_and_the_history_panel_have_no_serious_violations()
         {
             await OpenHomeAsync();
@@ -78,6 +88,18 @@ namespace ErCv.E2E
         }
 
         [Fact]
+        public async Task History_panel_with_application_details_open_has_no_serious_violations()
+        {
+            await GenerateAsync();
+            await OpenHomeAsync();
+            await Button("History", exact: true).ClickAsync();
+            await Page.Locator(".history-item").GetByRole(AriaRole.Button, new() { Name = "Details" }).ClickAsync();
+            await Assertions.Expect(Page.Locator(".history-details")).ToBeVisibleAsync();
+
+            await AssertNoSeriousViolationsAsync("history with details");
+        }
+
+        [Fact]
         public async Task Results_workspace_has_no_serious_violations()
         {
             await GenerateAsync();
@@ -88,6 +110,15 @@ namespace ErCv.E2E
                 await Page.GetByRole(AriaRole.Tab, new() { Name = tab }).ClickAsync();
                 await AssertNoSeriousViolationsAsync($"results, {tab} tab");
             }
+
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Why" }).ClickAsync();
+            await Page.Locator(".why-item > summary").First.ClickAsync();
+            await AssertNoSeriousViolationsAsync("results, Why tab expanded");
+
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Job" }).ClickAsync();
+            await Page.Locator(".jd-term").First.ClickAsync();
+            await Assertions.Expect(Page.Locator(".jd-detail-title")).ToBeVisibleAsync();
+            await AssertNoSeriousViolationsAsync("results, Job tab with a skill selected");
 
             await Button("Edit", exact: true).ClickAsync();
             await Assertions.Expect(Page.Locator(".bullet-editor-card")).ToBeVisibleAsync();

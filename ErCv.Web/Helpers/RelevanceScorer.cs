@@ -33,7 +33,7 @@ namespace ErCvApi.Helpers
             Experience experience,
             JobRequirements requirements)
         {
-            double score = 0;
+            double skillPoints = 0;
             var matchedSkills = new List<string>();
             if (experience.Skills != null && requirements.TechnicalSkills.Any())
             {
@@ -44,7 +44,7 @@ namespace ErCvApi.Helpers
 
                     if (match != null)
                     {
-                        score += SkillPointsPerMatch;
+                        skillPoints += SkillPointsPerMatch;
                         if (!SkillNormalizer.MatchesAny(match, matchedSkills))
                             matchedSkills.Add(match);
                     }
@@ -55,29 +55,44 @@ namespace ErCvApi.Helpers
                     if (!SkillNormalizer.MatchesAny(reqSkill, matchedSkills) &&
                         SkillNormalizer.ContainsTerm(bulletText, reqSkill))
                     {
-                        score += BulletSkillHalfCredit;
+                        skillPoints += BulletSkillHalfCredit;
                         matchedSkills.Add(reqSkill);
                     }
                 }
 
-                score = Math.Min(score, MaxSkillPoints);
+                skillPoints = Math.Min(skillPoints, MaxSkillPoints);
             }
+
+            double keywordPoints = 0;
+            var matchedKeywords = new List<string>();
             var fullBulletText = string.Join(" ", experience.Bullets ?? new List<string>()).ToLower();
             foreach (var keyword in requirements.Keywords.Take(MaxKeywordsEvaluated))
             {
                 if (SkillNormalizer.ContainsTerm(fullBulletText, keyword))
-                    score += KeywordPointsPerMatch;
+                {
+                    keywordPoints += KeywordPointsPerMatch;
+                    matchedKeywords.Add(keyword);
+                }
             }
-            score += CalculateRecencyScore(experience.EndDate);
-            score += CalculateSeniorityScore(experience.Role, requirements.SeniorityLevel);
+
+            var parts = new List<ScorePart>
+            {
+                new() { Label = "Matched skills", Points = skillPoints, Detail = Join(matchedSkills) },
+                new() { Label = "Keywords", Points = keywordPoints, Detail = Join(matchedKeywords) },
+                new() { Label = "Recency", Points = CalculateRecencyScore(experience.EndDate), Detail = experience.EndDate },
+                new() { Label = "Seniority fit", Points = CalculateSeniorityScore(experience.Role, requirements.SeniorityLevel), Detail = experience.Role }
+            };
 
             return new RelevanceScore
             {
                 Experience = experience,
-                Score = score,
-                MatchedSkills = matchedSkills
+                Score = parts.Sum(p => p.Points),
+                MatchedSkills = matchedSkills,
+                Parts = parts
             };
         }
+
+        private static string? Join(List<string> items) => items.Count == 0 ? null : string.Join(", ", items);
 
         private double CalculateRecencyScore(string? endDate)
         {
