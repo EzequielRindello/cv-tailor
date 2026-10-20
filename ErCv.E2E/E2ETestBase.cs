@@ -41,6 +41,8 @@ namespace ErCv.E2E
             await Page.GotoAsync("/");
             // The page is interactive once the stepper (rendered by Blazor, not by the static shell) is there
             await Page.GetByRole(AriaRole.Navigation, new() { Name = "Composer steps" }).WaitForAsync();
+            // The keyboard shortcuts are registered a moment after the first render; on a slow runner a key pressed in between is lost
+            await Page.Locator("html[data-shortcuts='ready']").WaitForAsync(new() { State = WaitForSelectorState.Attached });
         }
 
         /// <summary>Creates "My profile" the way a visitor does: import a JSON file on the profile page, then save it.</summary>

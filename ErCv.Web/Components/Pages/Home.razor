@@ -175,13 +175,14 @@ else
             Logger.LogWarning(ex, "Could not list CV profiles; falling back to default.");
         }
 
+        // Registered before the storage reads: each read is a round trip, and a shortcut pressed meanwhile was lost
+        _selfRef = DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("cvApp.registerShortcuts", _selfRef);
+
         _settings = await Store.LoadSettingsAsync();
         _history = await Store.GetHistoryAsync();
         _myProfile = await Store.LoadMyProfileAsync();
         if (_myProfile == null) _settings.ProfileSource = "demo";
-
-        _selfRef = DotNetObjectReference.Create(this);
-        await JS.InvokeVoidAsync("cvApp.registerShortcuts", _selfRef);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

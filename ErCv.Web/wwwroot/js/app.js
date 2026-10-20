@@ -77,11 +77,14 @@ window.cvApp = {
         };
 
         window.addEventListener('keydown', window.cvApp._shortcutHandler);
+        // Lets tests (and anything else) know the shortcuts will respond
+        document.documentElement.setAttribute('data-shortcuts', 'ready');
     },
 
     unregisterShortcuts: () => {
         if (window.cvApp._shortcutHandler)
             window.removeEventListener('keydown', window.cvApp._shortcutHandler);
         window.cvApp._shortcutHandler = null;
+        document.documentElement.removeAttribute('data-shortcuts');
     }
 };
