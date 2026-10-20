@@ -359,10 +359,10 @@ Files: `MatchScoreCard.razor`, `ATSScoreCard.razor`, `MissingSkillsCard.razor`, 
 Verify: bUnit render tests for each color state (TEST-06).
 
 ### UX-06: Generation progress
-**Status:** Todo · **Priority:** P1 · **Effort:** S
+**Status:** Done (E2E check arrives with TEST-07) · **Priority:** P1 · **Effort:** S
 
-- [ ] Step indicator: Parsing, Scoring, Selecting, Rendering (reported from the service via `IProgress<T>`)
-- [ ] Skeleton placeholders for preview and cards
+- [x] Step indicator: Parsing, Scoring, Selecting, Rendering (reported from the service via `IProgress<GenerationStage>`, covered by `GenerationProgressTests`)
+- [x] Skeleton placeholders for preview and cards (Generate now opens the workspace straight away; an error sends the user back to the composer)
 
 Verify: manual check plus E2E that the indicator appears and disappears.
 

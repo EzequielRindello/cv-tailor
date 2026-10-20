@@ -121,6 +121,7 @@ else
     <ResultsWorkspace Analysis="_analysis"
                       Documents="_documents"
                       Loading="_loading"
+                      Stage="_stage"
                       @bind-Editing="_showBulletEditor"
                       OnBack="BackToGenerate"
                       OnStartOver="ResetAsync"
@@ -141,6 +142,7 @@ else
     private AnalysisResult? _analysis;
     private Dictionary<string, byte[]> _documents = new();
     private bool _loading;
+    private GenerationStage _stage;
     private bool _showHistory;
     private bool _showBulletEditor;
     private string _error = string.Empty;
@@ -245,8 +247,19 @@ else
         _error = string.Empty;
         _loading = true;
         _analysis = null;
+        _documents = new();
         _showBulletEditor = false;
+        _showHistory = false;
+        _stage = GenerationStage.Parsing;
+        _view = "details";
         StateHasChanged();
+
+        // Progress<T> posts to the Blazor sync context, so the callback can touch component state directly
+        var progress = new Progress<GenerationStage>(stage =>
+        {
+            _stage = stage;
+            StateHasChanged();
+        });
 
         try
         {
@@ -257,20 +270,21 @@ else
                 Template = TemplateEnum(),
                 AllowTwoPages = _settings.AllowTwoPages,
                 ProfileId = _profileId
-            });
+            }, progress);
 
             _documents = documents;
             _analysis = analysis;
             _history = await Store.AddToHistoryAsync(_jobDescription, analysis.MatchScore.Overall, TemplateLabel());
-            _view = "details";
         }
         catch (ArgumentException ex)
         {
+            _view = "generate";
             _error = ex.Message;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error generating CV");
+            _view = "generate";
             _error = "An error occurred while generating the CV";
         }
         finally

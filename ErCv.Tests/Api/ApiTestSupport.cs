@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using ErCv.Tests.Fixtures;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ErCv.Tests.Api
 {
@@ -22,6 +23,13 @@ namespace ErCv.Tests.Api
         public ApiApp()
         {
             Client = _factory.CreateClient();
+        }
+
+        /// <summary>Runs <paramref name="action"/> against the app's services inside a DI scope (the services are scoped).</summary>
+        public async Task<T> InScopeAsync<T>(Func<IServiceProvider, Task<T>> action)
+        {
+            using var scope = _factory.Services.CreateScope();
+            return await action(scope.ServiceProvider);
         }
 
         public static object GenerateBody(

@@ -1,0 +1,36 @@
+<div class="gen-progress" role="status" aria-live="polite">
+    <ol class="gen-steps">
+        @foreach (var step in Steps)
+        {
+            var state = step.Stage < Current ? "done" : step.Stage == Current ? "current" : "todo";
+            <li class="gen-step @state">
+                <span class="gen-step-dot" aria-hidden="true">
+                    @if (state == "done")
+                    {
+                        <i class="bi bi-check-lg"></i>
+                    }
+                    else if (state == "current")
+                    {
+                        <span class="spinner-border spinner-border-sm" role="presentation"></span>
+                    }
+                </span>
+                <span class="gen-step-label">@step.Label</span>
+            </li>
+        }
+    </ol>
+    <span class="visually-hidden">@CurrentLabel, step @((int)Current + 1) of @Steps.Length</span>
+</div>
+
+@code {
+    private static readonly (GenerationStage Stage, string Label)[] Steps =
+    {
+        (GenerationStage.Parsing, "Parsing"),
+        (GenerationStage.Scoring, "Scoring"),
+        (GenerationStage.Selecting, "Selecting"),
+        (GenerationStage.Rendering, "Rendering")
+    };
+
+    [Parameter] public GenerationStage Current { get; set; }
+
+    private string CurrentLabel => Steps[(int)Current].Label;
+}

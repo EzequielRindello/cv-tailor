@@ -1,4 +1,35 @@
-@if (Analysis == null)
+@if (Analysis == null && Loading)
+{
+    <div class="details-fullscreen" aria-busy="true">
+        <div class="results-actionbar">
+            <GenerationProgress Current="Stage" />
+        </div>
+
+        <div class="details-layout">
+            <div class="details-preview-panel">
+                <div class="card main-card">
+                    <div class="card-body">
+                        <div class="skeleton skeleton-line skeleton-title"></div>
+                        <div class="skeleton skeleton-paper"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-analysis-panel">
+                <div class="skeleton skeleton-line skeleton-tabs"></div>
+                <div class="card main-card">
+                    <div class="card-body">
+                        <div class="skeleton skeleton-line skeleton-title"></div>
+                        <div class="skeleton skeleton-circle"></div>
+                        <div class="skeleton skeleton-line"></div>
+                        <div class="skeleton skeleton-line skeleton-short"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (Analysis == null)
 {
     <div class="details-fullscreen">
         <div class="card main-card">
@@ -107,6 +138,7 @@ else
     [Parameter] public AnalysisResult? Analysis { get; set; }
     [Parameter] public Dictionary<string, byte[]> Documents { get; set; } = new();
     [Parameter] public bool Loading { get; set; }
+    [Parameter] public GenerationStage Stage { get; set; }
     [Parameter] public bool Editing { get; set; }
     [Parameter] public EventCallback<bool> EditingChanged { get; set; }
     [Parameter] public EventCallback OnBack { get; set; }
