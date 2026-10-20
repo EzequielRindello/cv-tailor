@@ -155,8 +155,6 @@ else
 }
 
 @code {
-    private static readonly JsonSerializerOptions CloneOptions = new();
-
     private string _view = "generate";
     private string _jobDescription = string.Empty;
     private string _profileId = "cv-master";
@@ -297,12 +295,9 @@ else
 
         try
         {
-            // The service trims bullets in place, so hand it a copy and keep the edited CV intact
-            var cvCopy = JsonSerializer.Deserialize<GeneratedCV>(JsonSerializer.Serialize(edit.Cv, CloneOptions), CloneOptions)!;
-
             var (documents, previewHtml) = await CvService.RebuildCvAsync(new RegenerateRequest
             {
-                GeneratedCV = cvCopy,
+                GeneratedCV = edit.Cv,
                 BulletSelections = edit.Selections,
                 Formats = SelectedFormats(),
                 Template = TemplateEnum(),

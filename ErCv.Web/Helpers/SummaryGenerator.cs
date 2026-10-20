@@ -1,4 +1,5 @@
 using ErCvApi.Models;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.RegularExpressions;
 
 namespace ErCvApi.Helpers
@@ -23,6 +24,13 @@ namespace ErCvApi.Helpers
                 { "Mobile Developer",    new[] { "swift","kotlin","flutter","react native","ios","android","xcode" } },
                 { "Full Stack Developer",new[] { "fullstack","full stack","full-stack","end-to-end" } },
             };
+
+        private readonly ILogger<SummaryGenerator> _logger;
+
+        public SummaryGenerator(ILogger<SummaryGenerator>? logger = null)
+        {
+            _logger = logger ?? NullLogger<SummaryGenerator>.Instance;
+        }
 
         public string GenerateSummary(
             CVMaster cvMaster,
@@ -58,7 +66,7 @@ namespace ErCvApi.Helpers
         {
             var mostRecentTech = allExperiences
                 .Where(e => IsTechRole(e.Role))
-                .OrderByDescending(e => e.EndDate?.ToLower() == "present" ? "zzz" : e.EndDate ?? "")
+                .OrderByDescending(e => DateParser.RecencyKey(e.StartDate, e.EndDate))
                 .FirstOrDefault();
 
             var candidateSeniority = ExtractSeniorityFromRole(mostRecentTech?.Role ?? "");
@@ -108,28 +116,13 @@ namespace ErCvApi.Helpers
             var pool = allExperiences.Where(e => IsTechRole(e.Role)).ToList();
             if (!pool.Any()) pool = allExperiences;
 
-            var earliestYear = DateTime.Now.Year;
             foreach (var exp in pool)
             {
-                if (TryExtractYear(exp.StartDate, out int year))
-                    earliestYear = Math.Min(earliestYear, year);
-                else if (!string.IsNullOrWhiteSpace(exp.StartDate))
-                    Console.WriteLine($"[WARN] SummaryGenerator: could not parse startDate '{exp.StartDate}', ignoring entry for years calculation.");
+                if (!string.IsNullOrWhiteSpace(exp.StartDate) && !DateParser.TryParse(exp.StartDate, out _, out _))
+                    _logger.LogWarning("Could not parse startDate '{StartDate}', ignoring entry for years calculation", exp.StartDate);
             }
-            return Math.Max(0, DateTime.Now.Year - earliestYear);
-        }
 
-        private static bool TryExtractYear(string? value, out int year)
-        {
-            year = 0;
-            if (string.IsNullOrWhiteSpace(value)) return false;
-
-            var match = Regex.Match(value, @"\b(19|20)\d{2}\b");
-            if (!match.Success) return false;
-            if (!int.TryParse(match.Value, out year)) return false;
-
-            var currentYear = DateTime.Now.Year;
-            return year >= 1950 && year <= currentYear + 1;
+            return DateParser.YearsOfExperience(pool.Select(e => ((string?)e.StartDate, (string?)e.EndDate)));
         }
 
         private bool IsTechRole(string? role) =>

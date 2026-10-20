@@ -15,8 +15,9 @@ namespace ErCvApi.Helpers
         private const int SkillsSectionLines = 3;
         private const int ProjectLines = 3;
 
-        public GeneratedCV EnforcePageConstraint(GeneratedCV cv, bool allowTwoPages = false)
+        public GeneratedCV EnforcePageConstraint(GeneratedCV source, bool allowTwoPages = false)
         {
+            var cv = CvCloner.Clone(source);
             var maxLines = allowTwoPages ? LinesPerPage * 2 : LinesPerPage;
             var current = CalculateTotalLines(cv);
 

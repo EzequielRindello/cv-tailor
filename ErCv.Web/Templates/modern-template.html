@@ -50,9 +50,10 @@
         /* ─── Two-column layout ──────────────────────────────────── */
         .body-grid {
             display: grid;
-            grid-template-columns: 38% 62%;
+            grid-template-columns: 38% 1fr;
             gap: 10pt;
         }
+        .body-grid > * { min-width: 0; }
 
         /* ─── Left column ────────────────────────────────────────── */
         .left-col { padding-right: 8pt; border-right: 1.5pt solid var(--border); }

@@ -1,6 +1,5 @@
 using ErCvApi.Constants;
 using ErCvApi.Models;
-using System.Text.RegularExpressions;
 
 namespace ErCvApi.Helpers
 {
@@ -22,7 +21,7 @@ namespace ErCvApi.Helpers
             foreach (var skill in requirements.TechnicalSkills)
             {
                 var foundInSkills = SkillNormalizer.MatchesAny(skill, allCVSkills);
-                var foundInBullets = ContainsTerm(allBulletsText, skill);
+                var foundInBullets = SkillNormalizer.ContainsTerm(allBulletsText, skill);
 
                 if (!foundInSkills && !foundInBullets)
                 {
@@ -69,13 +68,6 @@ namespace ErCvApi.Helpers
                     required.Count - MissingSkillsConstants.MaxRequiredSuggestions));
 
             return suggestions;
-        }
-
-        private static bool ContainsTerm(string text, string term)
-        {
-            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(term)) return false;
-            var pattern = $@"(?<![A-Za-z0-9]){Regex.Escape(term.Trim())}(?![A-Za-z0-9])";
-            return Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase);
         }
     }
 }

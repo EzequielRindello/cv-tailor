@@ -85,6 +85,14 @@ namespace ErCvApi.Helpers
             var trimmed = skill.Trim().ToLower();
             return Aliases.TryGetValue(trimmed, out var canonical) ? canonical : trimmed;
         }
+        // Phrases that look like an extension of another skill but are a different technology.
+        private static readonly HashSet<string> DistinctProducts =
+            new(StringComparer.OrdinalIgnoreCase) { "react native" };
+
+        private static readonly Lazy<Dictionary<string, List<string>>> AliasesByCanonical = new(() =>
+            Aliases.GroupBy(kvp => kvp.Value, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.Select(kvp => kvp.Key).ToList(), StringComparer.OrdinalIgnoreCase));
+
         public static bool FuzzyMatch(string a, string b)
         {
             if (string.IsNullOrWhiteSpace(a) || string.IsNullOrWhiteSpace(b)) return false;
@@ -92,9 +100,42 @@ namespace ErCvApi.Helpers
             var na = Normalize(a);
             var nb = Normalize(b);
             if (na == nb) return true;
-            if (na.Contains(nb) || nb.Contains(na)) return true;
+            if (DistinctProducts.Contains(na) != DistinctProducts.Contains(nb)) return false;
 
+            return ContainsTerm(na, nb) || ContainsTerm(nb, na);
+        }
+
+        /// <summary>
+        /// True when <paramref name="term"/> appears in <paramref name="text"/> as a whole token, so "go" does not
+        /// match "google" or "good", "java" does not match "javascript" and "c" does not match "c#" or "c++".
+        /// </summary>
+        public static bool ContainsTerm(string? text, string? term)
+        {
+            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(term)) return false;
+
+            term = term.Trim();
+            var at = 0;
+            while ((at = text.IndexOf(term, at, StringComparison.OrdinalIgnoreCase)) >= 0)
+            {
+                var end = at + term.Length;
+                var startsToken = at == 0 || !char.IsLetterOrDigit(text[at - 1]);
+                var endsToken = end >= text.Length || !(char.IsLetterOrDigit(text[end]) || text[end] == '#' || text[end] == '+');
+                if (startsToken && endsToken) return true;
+                at++;
+            }
             return false;
+        }
+
+        /// <summary>Like <see cref="ContainsTerm"/>, but also accepts any alias of the skill ("golang" for "go").</summary>
+        public static bool ContainsSkill(string? text, string? skill)
+        {
+            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(skill)) return false;
+
+            var canonical = Normalize(skill);
+            if (ContainsTerm(text, canonical)) return true;
+
+            return AliasesByCanonical.Value.TryGetValue(canonical, out var aliases) &&
+                   aliases.Any(alias => ContainsTerm(text, alias));
         }
         public static bool MatchesAny(string skill, IEnumerable<string> collection)
             => collection.Any(c => FuzzyMatch(skill, c));

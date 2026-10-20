@@ -1,0 +1,9 @@
+Frontend Engineer (React)
+
+Join our product team to build a fast, accessible web app. You will work with React, TypeScript, Redux and GraphQL, write component and end-to-end tests, and collaborate closely with designers.
+
+Requirements:
+- 3+ years with React and TypeScript
+- HTML, CSS, responsive design, accessibility
+- Jest, Cypress, Git
+- Nice to have: Next.js, Node.js

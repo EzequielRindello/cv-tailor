@@ -1,0 +1,9 @@
+Junior Software Developer
+
+Great first or second role. No senior experience needed. You will work with JavaScript, React and Node.js alongside mentors, fix bugs and ship small features.
+
+Requirements:
+- 0-2 years of experience or relevant internships
+- JavaScript, HTML, CSS
+- Basic Git and SQL
+- Eagerness to learn

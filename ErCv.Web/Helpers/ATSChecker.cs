@@ -72,7 +72,7 @@ namespace ErCvApi.Helpers
             var totalKeywords = Math.Max(requirements.TechnicalSkills.Count, 1);
 
             var matchedKeywords = requirements.TechnicalSkills
-                .Count(s => cvText.Contains(s, StringComparison.OrdinalIgnoreCase));
+                .Count(s => SkillNormalizer.ContainsSkill(cvText, s));
 
             var density = (double)matchedKeywords / totalKeywords;
 

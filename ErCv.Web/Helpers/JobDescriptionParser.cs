@@ -32,6 +32,8 @@ namespace ErCvApi.Helpers
             "seeking","hire","join","opportunity","what","will",
             "have","with","that","this","from","your",
             "library","libraries","framework","frameworks","methodology",
+            // words that follow "N years of/in" without naming a technology
+            "in","or","of","and","as","on","at","to","for","a","an","the","b2b","b2c",
         };
 
         public JobRequirements Parse(string jobDescription)
@@ -61,8 +63,7 @@ namespace ErCvApi.Helpers
             var foundSkills = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var tech in _commonTechKeywords)
             {
-                var pattern = $@"(?<![a-zA-Z]){Regex.Escape(tech)}(?![a-zA-Z])";
-                if (Regex.IsMatch(normalizedText, pattern, RegexOptions.IgnoreCase))
+                if (SkillNormalizer.ContainsTerm(normalizedText, tech))
                     foundSkills.Add(tech);
             }
             var yearsMatches = Regex.Matches(originalText, JobDescriptionConstants.YearsWithTechPattern, RegexOptions.IgnoreCase);

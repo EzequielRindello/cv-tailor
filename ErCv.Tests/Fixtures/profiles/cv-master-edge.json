@@ -1,0 +1,49 @@
+{
+  "header": {
+    "fullName": "Robin Quill",
+    "email": "robin.quill@email.com",
+    "phone": "",
+    "location": "",
+    "linkedin": "",
+    "github": ""
+  },
+  "education": [],
+  "experience": [
+    {
+      "role": "Freelance Developer",
+      "company": "Self-employed",
+      "location": "",
+      "startDate": "2019",
+      "endDate": "Current",
+      "bullets": ["Delivered websites for small businesses using WordPress and PHP"],
+      "skills": ["PHP", "WordPress"]
+    },
+    {
+      "role": "Support Technician",
+      "company": "HelpDesk Co",
+      "location": "Madrid, Spain",
+      "startDate": "03/2016",
+      "endDate": "Dec 2018",
+      "bullets": [],
+      "skills": []
+    },
+    {
+      "role": "Warehouse Assistant",
+      "company": "LogiMart",
+      "location": "",
+      "startDate": "",
+      "endDate": "",
+      "bullets": ["Managed inventory counts"],
+      "skills": []
+    }
+  ],
+  "skills": {
+    "languages": ["PHP"],
+    "frameworks": [],
+    "databases": [],
+    "tools": [],
+    "cloud": [],
+    "practices": []
+  },
+  "projects": []
+}

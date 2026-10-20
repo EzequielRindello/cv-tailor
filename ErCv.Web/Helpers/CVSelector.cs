@@ -25,11 +25,11 @@ namespace ErCvApi.Helpers
             "engineered", "shipped", "transformed", "drove", "accelerated"
         };
 
-        public CVSelector()
+        public CVSelector(ILoggerFactory? loggerFactory = null)
         {
-            _scorer = new RelevanceScorer();
+            _scorer = new RelevanceScorer(loggerFactory?.CreateLogger<RelevanceScorer>());
             _pageConstraint = new PageConstraintHelper();
-            _summaryGenerator = new SummaryGenerator();
+            _summaryGenerator = new SummaryGenerator(loggerFactory?.CreateLogger<SummaryGenerator>());
         }
 
         public GeneratedCV SelectAndAdaptCV(
@@ -58,9 +58,9 @@ namespace ErCvApi.Helpers
 
             var generatedCV = new GeneratedCV
             {
-                Header = cvMaster.Header,
+                Header = CvCloner.Clone(cvMaster.Header),
                 Summary = summary,
-                Education = cvMaster.Education,
+                Education = cvMaster.Education.Select(CvCloner.Clone).ToList(),
                 Experience = selectedExperiences,
                 Skills = topSkills,
                 Projects = new List<Project>()
@@ -74,7 +74,7 @@ namespace ErCvApi.Helpers
                 foreach (var project in rankedProjects.Take(maxProjects))
                 {
                     if (_pageConstraint.CanFitProject(generatedCV, allowTwoPages))
-                        generatedCV.Projects.Add(project);
+                        generatedCV.Projects.Add(CvCloner.Clone(project));
                 }
             }
 
@@ -141,7 +141,7 @@ namespace ErCvApi.Helpers
                 Location = original.Location,
                 StartDate = original.StartDate,
                 EndDate = original.EndDate,
-                Skills = original.Skills,
+                Skills = (original.Skills ?? new List<string>()).ToList(),
                 Bullets = selected
             };
         }
@@ -157,13 +157,13 @@ namespace ErCvApi.Helpers
                 var bullet = bullets[i];
                 double score = 0;
                 foreach (var skill in matchedSkills)
-                    if (bullet.Contains(skill, StringComparison.OrdinalIgnoreCase))
+                    if (SkillNormalizer.ContainsSkill(bullet, skill))
                         score += 10.0;
                 foreach (var techSkill in requirements.TechnicalSkills)
                     if (SkillNormalizer.MatchesAny(techSkill, new[] { bullet }))
                         score += 8.0;
                 foreach (var keyword in requirements.Keywords.Take(10))
-                    if (bullet.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                    if (SkillNormalizer.ContainsTerm(bullet, keyword))
                         score += 3.0;
                 if (Regex.IsMatch(bullet, @"\d+[%x]|\d+[MK]\+?|[\d,]{3,}\+?"))
                     score += 6.0;
@@ -194,7 +194,7 @@ namespace ErCvApi.Helpers
                         string.Join(" ", p.Highlights ?? new List<string>())).ToLower();
 
                     foreach (var kw in requirements.Keywords.Take(10))
-                        if (text.Contains(kw)) score += 2.0;
+                        if (SkillNormalizer.ContainsTerm(text, kw)) score += 2.0;
 
                     return (Project: p, Score: score);
                 })
