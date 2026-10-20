@@ -1,0 +1,27 @@
+<fieldset class="mb-4 profile-source">
+    <legend class="form-label form-label-custom">Profile to use</legend>
+    <div class="d-flex flex-wrap gap-3 align-items-center">
+        <div class="form-check mb-0">
+            <input class="form-check-input" type="radio" name="profile-source" id="source-demo"
+                   checked="@(Value == "demo")" disabled="@Disabled" @onchange="PickDemo" />
+            <label class="form-check-label" for="source-demo">Demo profile</label>
+        </div>
+        <div class="form-check mb-0">
+            <input class="form-check-input" type="radio" name="profile-source" id="source-mine"
+                   checked="@(Value == "mine")" disabled="@(Disabled || !HasMine)" @onchange="PickMine" />
+            <label class="form-check-label" for="source-mine">My profile</label>
+        </div>
+        <a href="/profile" id="profile-edit-link">@(HasMine ? "Edit my profile" : "Create my profile")</a>
+    </div>
+</fieldset>
+
+@code {
+    [Parameter] public string Value { get; set; } = "demo";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public bool HasMine { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    private Task PickDemo() => ValueChanged.InvokeAsync("demo");
+
+    private Task PickMine() => ValueChanged.InvokeAsync("mine");
+}

@@ -58,9 +58,13 @@
                             else if (_step == 2)
                             {
                                 <div class="form-section form-section-primary">
+                                    <ProfileSourceSwitcher Value="@_settings.ProfileSource"
+                                                           ValueChanged="SetProfileSource"
+                                                           HasMine="_myProfile != null"
+                                                           Disabled="@(_loading || _importedProfile != null)" />
                                     <ProfileSelector Profiles="_profiles"
                                                      @bind-Value="_profileId"
-                                                     Disabled="@(_loading || _importedProfile != null)" />
+                                                     Disabled="@(_loading || ActiveProfile != null)" />
                                     <ProfileTools Imported="_importedProfile"
                                                   Disabled="_loading"
                                                   OnImport="ImportProfile"
@@ -143,6 +147,7 @@ else
     private string _jobDescription = string.Empty;
     private string _profileId = "cv-master";
     private CVMaster? _importedProfile;
+    private CVMaster? _myProfile;
     private List<ProfileInfo> _profiles = new() { new("cv-master", "Default") };
     private AppSettings _settings = new();
     private List<HistoryEntry> _history = new();
@@ -178,6 +183,8 @@ else
 
         _settings = await Store.LoadSettingsAsync();
         _history = await Store.GetHistoryAsync();
+        _myProfile = await Store.LoadMyProfileAsync();
+        if (_myProfile == null) _settings.ProfileSource = "demo";
 
         _selfRef = DotNetObjectReference.Create(this);
         await JS.InvokeVoidAsync("cvApp.registerShortcuts", _selfRef);
@@ -241,6 +248,16 @@ else
         return Task.CompletedTask;
     }
 
+    /// <summary>The profile sent with the request: an imported one wins, then the saved "My profile" if selected. Null means a stored demo profile.</summary>
+    private CVMaster? ActiveProfile =>
+        _importedProfile ?? (_settings.ProfileSource == "mine" ? _myProfile : null);
+
+    private async Task SetProfileSource(string source)
+    {
+        _settings.ProfileSource = source;
+        await Store.SaveSettingsAsync(_settings);
+    }
+
     private async Task SetTemplate(string template)
     {
         _settings.Template = template;
@@ -277,7 +294,7 @@ else
     {
         try
         {
-            var profile = _importedProfile ?? await CvService.GetProfileAsync(_profileId);
+            var profile = ActiveProfile ?? await CvService.GetProfileAsync(_profileId);
             await DownloadTextAsync("cv-profile.json", ProfileJson.Serialize(profile));
         }
         catch (Exception ex) when (ex is JSException or InvalidOperationException or IOException)
@@ -359,8 +376,8 @@ else
                 ProfileId = _profileId
             };
 
-            var (documents, analysis) = _importedProfile != null
-                ? await CvService.BuildCvAsync(request, _importedProfile, progress)
+            var (documents, analysis) = ActiveProfile is { } profile
+                ? await CvService.BuildCvAsync(request, profile, progress)
                 : await CvService.BuildCvAsync(request, progress);
 
             _documents = documents;

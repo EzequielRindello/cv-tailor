@@ -51,7 +51,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | UX-08 | Accessibility (WCAG AA, keyboard reorder) | E2 Redesign | P1 | M | Todo |
 | UX-09 | Responsive pass | E2 Redesign | P1 | M | Todo |
 | UX-10 | CV template visual polish | E2 Redesign | P2 | M | Todo |
-| PROF-01 | In-browser profile editor | E3 Your profile | P1 | L | Todo |
+| PROF-01 | In-browser profile editor | E3 Your profile | P1 | L | Done |
 | PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | Done |
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
 | PROF-04 | Profile health check | E3 Your profile | P2 | M | Todo |
@@ -426,14 +426,15 @@ Verify: TEST-04 still passes for every template.
 Why: today the only usable profile is the demo JSON in the repo. Letting visitors use their own data turns the project from a demo into a real tool.
 
 ### PROF-01: In-browser profile editor
-**Status:** Todo · **Priority:** P1 · **Effort:** L
+**Status:** Done · **Priority:** P1 · **Effort:** L
 
-- [ ] Form-based editor: header, education, experience (bullets + skills tags), skills by category, projects
-- [ ] Saved in localStorage only; never stored on the server
-- [ ] Profile switcher: "Demo profile" and "My profile"
+- [x] Form-based editor: header, education, experience (bullets + skills tags), skills by category, projects
+- [x] Saved in localStorage only; never stored on the server
+- [x] Profile switcher: "Demo profile" and "My profile"
 
-Files: new `Components/Pages/Profile.razor`, `UI/BrowserStore.cs`
-Verify: bUnit tests for the editor; E2E create profile, generate, output uses it.
+Notes: page `/profile` (`Pages/Profile.razor`) with `ProfileField`, `ProfileTagField` and `ProfileListField`. Save validates with `ProfileValidator` and shows errors under each field; nothing is saved while there are errors. `BrowserStore` keeps it under `cv-generator-my-profile`. Step 2 of the generator has `ProfileSourceSwitcher` (choice kept in `AppSettings.ProfileSource`); "My profile" is disabled until one is saved. An imported profile (PROF-02) still wins over both. The page can start from the demo profile, import JSON, export JSON and download the template.
+
+Verify: `ProfileFieldsTests` (bUnit); `MyProfileTests` E2E (field errors and nothing saved; create, save, generate, output uses it; switcher disabled); `AccessibilityTests` covers the editor.
 
 ### PROF-02: Import/export + validation
 **Status:** Done · **Priority:** P1 · **Effort:** M

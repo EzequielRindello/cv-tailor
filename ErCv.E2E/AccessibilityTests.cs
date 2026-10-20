@@ -65,6 +65,16 @@ namespace ErCv.E2E
         }
 
         [Fact]
+        public async Task Profile_editor_with_validation_errors_has_no_serious_violations()
+        {
+            await Page.GotoAsync("/profile");
+            await Page.Locator("#profile-save").ClickAsync();
+            await Assertions.Expect(Page.Locator("#p-fullName-err")).ToBeVisibleAsync();
+
+            await AssertNoSeriousViolationsAsync("profile editor");
+        }
+
+        [Fact]
         public async Task Validation_errors_and_the_history_panel_have_no_serious_violations()
         {
             await OpenHomeAsync();

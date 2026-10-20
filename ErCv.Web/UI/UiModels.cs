@@ -5,6 +5,8 @@ namespace ErCv.Web.UI
         public string Template { get; set; } = "harvard";
         public Dictionary<string, bool> SelectedFormats { get; set; } = new() { ["pdf"] = true, ["docx"] = false };
         public bool AllowTwoPages { get; set; }
+        /// <summary>"demo" or "mine" (PROF-01).</summary>
+        public string ProfileSource { get; set; } = "demo";
     }
 
     public class HistoryEntry

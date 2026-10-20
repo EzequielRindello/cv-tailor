@@ -2991,5 +2991,83 @@ body:not(:has(#samples)) .app-try-demo {
 
 .profile-tools-errors {
   font-size: var(--font-size-sm);
-  color: var(--color-danger, #b3261e);
+  color: var(--color-error);
+}
+
+.profile-page-title {
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+.profile-page-intro {
+  color: var(--color-text-secondary);
+}
+
+.profile-section {
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.profile-section h2 {
+  font-size: 1.15rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.profile-entry {
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.profile-entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-entry-head h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.profile-list {
+  margin-top: var(--spacing-sm);
+}
+
+.profile-list-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xs);
+}
+
+.profile-list-row .profile-list-item {
+  flex: 1;
+}
+
+.profile-list-row .profile-list-item .form-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.profile-field-error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  margin-top: 2px;
+}
+
+.profile-save-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.profile-source a {
+  color: var(--color-text-link);
 }

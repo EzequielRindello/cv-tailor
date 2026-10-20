@@ -1,0 +1,254 @@
+@page "/profile"
+@using ErCvApi.Helpers
+@using ErCvApi.Services
+@inject CVGeneratorService CvService
+@inject BrowserStore Store
+@inject IJSRuntime JS
+@inject ToastService Toasts
+
+<PageTitle>My profile - CV Generator</PageTitle>
+
+<div class="container app-shell py-4 py-lg-5 profile-page">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="profile-page-title">My profile</h1>
+        <a class="btn btn-outline-secondary btn-sm" href="/">Back to the generator</a>
+    </div>
+    <p class="profile-page-intro">
+        Saved in this browser only (localStorage). It is never stored on the server; it is sent only when you generate a CV.
+    </p>
+
+    @if (!_loaded)
+    {
+        <p role="status">Loading...</p>
+    }
+    else
+    {
+        <div class="card main-card">
+            <div class="card-body form-card-body">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-use-demo"
+                            @onclick="UseDemoAsync">Start from the demo profile</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-clear"
+                            @onclick="ClearAsync">Clear my profile</button>
+                </div>
+                <ProfileTools Disabled="false" OnImport="ImportProfile"
+                              OnExport="ExportAsync" OnTemplate="TemplateAsync" />
+
+                @if (_errors.Count > 0)
+                {
+                    <div class="profile-tools-errors mb-3" role="alert" id="profile-errors">
+                        Fix @_errors.Count @(_errors.Count == 1 ? "problem" : "problems") before saving.
+                    </div>
+                }
+
+                <section class="profile-section" aria-labelledby="sec-header">
+                    <h2 id="sec-header">Header</h2>
+                    <div class="row g-2">
+                        <div class="col-md-6"><ProfileField Id="p-fullName" Label="Full name" Value="@_profile.Header.FullName" ValueChanged="v => _profile.Header.FullName = v" Error="@Err("header.fullName")" /></div>
+                        <div class="col-md-6"><ProfileField Id="p-email" Label="Email" Value="@_profile.Header.Email" ValueChanged="v => _profile.Header.Email = v" Error="@Err("header.email")" /></div>
+                        <div class="col-md-6"><ProfileField Id="p-phone" Label="Phone" Value="@_profile.Header.Phone" ValueChanged="v => _profile.Header.Phone = v" /></div>
+                        <div class="col-md-6"><ProfileField Id="p-location" Label="Location" Value="@_profile.Header.Location" ValueChanged="v => _profile.Header.Location = v" /></div>
+                        <div class="col-md-6"><ProfileField Id="p-linkedin" Label="LinkedIn" Value="@_profile.Header.LinkedIn" ValueChanged="v => _profile.Header.LinkedIn = v" /></div>
+                        <div class="col-md-6"><ProfileField Id="p-github" Label="GitHub" Value="@_profile.Header.GitHub" ValueChanged="v => _profile.Header.GitHub = v" /></div>
+                    </div>
+                </section>
+
+                <section class="profile-section" aria-labelledby="sec-experience">
+                    <h2 id="sec-experience">Experience</h2>
+                    @if (Err("experience") is { } noExperience)
+                    {
+                        <div class="profile-field-error" id="experience-err">@noExperience</div>
+                    }
+                    @for (var i = 0; i < _profile.Experience.Count; i++)
+                    {
+                        var ei = i;
+                        var x = _profile.Experience[ei];
+                        <div class="profile-entry" @key="x">
+                            <div class="profile-entry-head">
+                                <h3>Experience @(ei + 1)</h3>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="@($"Remove experience {ei + 1}")"
+                                        @onclick="() => _profile.Experience.RemoveAt(ei)">Remove</button>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6"><ProfileField Id="@($"exp-{ei}-role")" Label="Role" Value="@x.Role" ValueChanged="v => x.Role = v" Error="@Err($"experience[{ei}].role")" /></div>
+                                <div class="col-md-6"><ProfileField Id="@($"exp-{ei}-company")" Label="Company" Value="@x.Company" ValueChanged="v => x.Company = v" Error="@Err($"experience[{ei}].company")" /></div>
+                                <div class="col-md-4"><ProfileField Id="@($"exp-{ei}-location")" Label="Location" Value="@x.Location" ValueChanged="v => x.Location = v" /></div>
+                                <div class="col-md-4"><ProfileField Id="@($"exp-{ei}-start")" Label="Start date" Placeholder="Jan 2021" Value="@x.StartDate" ValueChanged="v => x.StartDate = v" Error="@Err($"experience[{ei}].startDate")" /></div>
+                                <div class="col-md-4"><ProfileField Id="@($"exp-{ei}-end")" Label="End date" Placeholder="Present" Value="@x.EndDate" ValueChanged="v => x.EndDate = v" Error="@Err($"experience[{ei}].endDate")" /></div>
+                            </div>
+                            <ProfileListField Id="@($"exp-{ei}-bullets")" Label="Bullet" Items="x.Bullets"
+                                              ErrorFor="BulletErrors(ei)" />
+                            <ProfileTagField Id="@($"exp-{ei}-skills")" Label="Skills used" Values="x.Skills"
+                                             Error="@FirstErr($"experience[{ei}].skills[")" />
+                        </div>
+                    }
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="exp-add"
+                            @onclick="() => _profile.Experience.Add(new Experience())">Add experience</button>
+                </section>
+
+                <section class="profile-section" aria-labelledby="sec-education">
+                    <h2 id="sec-education">Education</h2>
+                    @for (var i = 0; i < _profile.Education.Count; i++)
+                    {
+                        var ei = i;
+                        var e = _profile.Education[ei];
+                        <div class="profile-entry" @key="e">
+                            <div class="profile-entry-head">
+                                <h3>Education @(ei + 1)</h3>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="@($"Remove education {ei + 1}")"
+                                        @onclick="() => _profile.Education.RemoveAt(ei)">Remove</button>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6"><ProfileField Id="@($"edu-{ei}-degree")" Label="Degree" Value="@e.Degree" ValueChanged="v => e.Degree = v" Error="@Err($"education[{ei}].degree")" /></div>
+                                <div class="col-md-6"><ProfileField Id="@($"edu-{ei}-institution")" Label="Institution" Value="@e.Institution" ValueChanged="v => e.Institution = v" Error="@Err($"education[{ei}].institution")" /></div>
+                                <div class="col-md-4"><ProfileField Id="@($"edu-{ei}-location")" Label="Location" Value="@e.Location" ValueChanged="v => e.Location = v" /></div>
+                                <div class="col-md-4"><ProfileField Id="@($"edu-{ei}-date")" Label="Graduation date" Value="@e.GraduationDate" ValueChanged="v => e.GraduationDate = v" Error="@Err($"education[{ei}].graduationDate")" /></div>
+                                <div class="col-md-4"><ProfileField Id="@($"edu-{ei}-gpa")" Label="GPA" Value="@e.GPA" ValueChanged="v => e.GPA = v" /></div>
+                                <div class="col-md-6"><ProfileField Id="@($"edu-{ei}-honors")" Label="Honors" Value="@e.Honors" ValueChanged="v => e.Honors = v" /></div>
+                                <div class="col-md-6"><ProfileTagField Id="@($"edu-{ei}-courses")" Label="Relevant courses" Values="e.RelevantCourses" /></div>
+                            </div>
+                        </div>
+                    }
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="edu-add"
+                            @onclick="() => _profile.Education.Add(new Education())">Add education</button>
+                </section>
+
+                <section class="profile-section" aria-labelledby="sec-skills">
+                    <h2 id="sec-skills">Skills</h2>
+                    <div class="row g-2">
+                        <div class="col-md-6"><ProfileTagField Id="sk-languages" Label="Languages" Values="_profile.Skills.Languages" /></div>
+                        <div class="col-md-6"><ProfileTagField Id="sk-frameworks" Label="Frameworks" Values="_profile.Skills.Frameworks" /></div>
+                        <div class="col-md-6"><ProfileTagField Id="sk-databases" Label="Databases" Values="_profile.Skills.Databases" /></div>
+                        <div class="col-md-6"><ProfileTagField Id="sk-tools" Label="Tools" Values="_profile.Skills.Tools" /></div>
+                        <div class="col-md-6"><ProfileTagField Id="sk-cloud" Label="Cloud" Values="_profile.Skills.Cloud" /></div>
+                        <div class="col-md-6"><ProfileTagField Id="sk-practices" Label="Practices" Values="_profile.Skills.Practices" /></div>
+                    </div>
+                </section>
+
+                <section class="profile-section" aria-labelledby="sec-projects">
+                    <h2 id="sec-projects">Projects</h2>
+                    @for (var i = 0; i < _profile.Projects.Count; i++)
+                    {
+                        var pi = i;
+                        var p = _profile.Projects[pi];
+                        <div class="profile-entry" @key="p">
+                            <div class="profile-entry-head">
+                                <h3>Project @(pi + 1)</h3>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="@($"Remove project {pi + 1}")"
+                                        @onclick="() => _profile.Projects.RemoveAt(pi)">Remove</button>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6"><ProfileField Id="@($"prj-{pi}-name")" Label="Name" Value="@p.Name" ValueChanged="v => p.Name = v" Error="@Err($"projects[{pi}].name")" /></div>
+                                <div class="col-md-6"><ProfileField Id="@($"prj-{pi}-link")" Label="Link" Value="@p.Link" ValueChanged="v => p.Link = v" /></div>
+                                <div class="col-12"><ProfileField Id="@($"prj-{pi}-description")" Label="Description" Multiline="true" Value="@p.Description" ValueChanged="v => p.Description = v" /></div>
+                                <div class="col-12"><ProfileTagField Id="@($"prj-{pi}-tech")" Label="Technologies" Values="p.Technologies" /></div>
+                            </div>
+                            <ProfileListField Id="@($"prj-{pi}-highlights")" Label="Highlight" Items="p.Highlights"
+                                              ErrorFor="HighlightErrors(pi)" />
+                        </div>
+                    }
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="prj-add"
+                            @onclick="() => _profile.Projects.Add(new Project())">Add project</button>
+                </section>
+
+                <div class="profile-save-bar">
+                    <button type="button" class="btn btn-primary" id="profile-save" @onclick="SaveAsync">Save profile</button>
+                    <span class="profile-saved" role="status">@_status</span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly ProfileValidator Validator = new();
+
+    private CVMaster _profile = Blank();
+    private Dictionary<string, string> _errors = new();
+    private bool _loaded;
+    private string _status = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // localStorage is only reachable once the circuit is up
+        _profile = await Store.LoadMyProfileAsync() ?? Blank();
+        Normalize(_profile);
+        _loaded = true;
+        StateHasChanged();
+    }
+
+    private static CVMaster Blank() => new() { Experience = new List<Experience> { new() } };
+
+    /// <summary>Stored or imported JSON can leave a list null; the form edits them in place.</summary>
+    private static void Normalize(CVMaster p)
+    {
+        p.Header ??= new();
+        p.Skills ??= new();
+        p.Education = (p.Education ?? new()).Where(e => e != null).ToList();
+        p.Experience = (p.Experience ?? new()).Where(x => x != null).ToList();
+        p.Projects = (p.Projects ?? new()).Where(x => x != null).ToList();
+        foreach (var e in p.Education) e.RelevantCourses ??= new();
+        foreach (var x in p.Experience) { x.Bullets ??= new(); x.Skills ??= new(); }
+        foreach (var x in p.Projects) { x.Technologies ??= new(); x.Highlights ??= new(); }
+        p.Skills.Languages ??= new(); p.Skills.Frameworks ??= new(); p.Skills.Databases ??= new();
+        p.Skills.Tools ??= new(); p.Skills.Cloud ??= new(); p.Skills.Practices ??= new();
+    }
+
+    private string? Err(string path) => _errors.TryGetValue(path, out var m) ? m : null;
+
+    private Func<int, string?> BulletErrors(int experience) => b => Err($"experience[{experience}].bullets[{b}]");
+
+    private Func<int, string?> HighlightErrors(int project) => h => Err($"projects[{project}].highlights[{h}]");
+
+    private string? FirstErr(string pathPrefix) =>
+        _errors.FirstOrDefault(kv => kv.Key.StartsWith(pathPrefix, StringComparison.Ordinal)).Value;
+
+    private async Task SaveAsync()
+    {
+        _status = string.Empty;
+        var issues = Validator.Validate(_profile).Issues;
+        _errors = issues.GroupBy(i => i.Path).ToDictionary(g => g.Key, g => g.First().Message);
+        if (_errors.Count > 0) return;
+
+        await Store.SaveMyProfileAsync(_profile);
+        _status = "Saved in this browser.";
+        Toasts.Success("Profile saved");
+    }
+
+    private async Task UseDemoAsync()
+    {
+        _profile = await CvService.GetProfileAsync("cv-master");
+        Normalize(_profile);
+        _errors = new();
+        _status = string.Empty;
+    }
+
+    private async Task ClearAsync()
+    {
+        await Store.ClearMyProfileAsync();
+        _profile = Blank();
+        _errors = new();
+        _status = "Profile cleared.";
+    }
+
+    private void ImportProfile(CVMaster imported)
+    {
+        Normalize(imported);
+        _profile = imported;
+        _errors = new();
+        _status = "Imported. Review it and save.";
+    }
+
+    private Task ExportAsync() => DownloadAsync("cv-profile.json", ProfileJson.Serialize(_profile));
+
+    private Task TemplateAsync() => DownloadAsync("cv-profile-template.json", ProfileJson.Template());
+
+    private async Task DownloadAsync(string fileName, string text)
+    {
+        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(text));
+        using var reference = new DotNetStreamReference(stream);
+        await JS.InvokeVoidAsync("cvApp.downloadFile", fileName, reference);
+    }
+}

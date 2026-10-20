@@ -1,5 +1,6 @@
 using System.Text.Json;
 using ErCv.Web.UI;
+using ErCvApi.Models;
 using Microsoft.JSInterop;
 
 namespace ErCv.Web.UI
@@ -8,6 +9,7 @@ namespace ErCv.Web.UI
     public class BrowserStore
     {
         private const string SettingsKey = "cv-generator-settings";
+        private const string ProfileKey = "cv-generator-my-profile";
         private const string HistoryKey = "cv-generator-history";
         private const int MaxHistoryEntries = 10;
 
@@ -33,6 +35,14 @@ namespace ErCv.Web.UI
         }
 
         public Task SaveSettingsAsync(AppSettings settings) => WriteAsync(SettingsKey, settings);
+
+        /// <summary>The visitor's own profile (PROF-01). It stays in this browser and is never sent to the server to be stored.</summary>
+        public Task<CVMaster?> LoadMyProfileAsync() => ReadAsync<CVMaster>(ProfileKey);
+
+        public Task SaveMyProfileAsync(CVMaster profile) => WriteAsync(ProfileKey, profile);
+
+        public async Task ClearMyProfileAsync() =>
+            await _js.InvokeVoidAsync("cvApp.removeItem", ProfileKey);
 
         public async Task<List<HistoryEntry>> GetHistoryAsync() =>
             await ReadAsync<List<HistoryEntry>>(HistoryKey) ?? new();
