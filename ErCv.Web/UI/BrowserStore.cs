@@ -11,7 +11,7 @@ namespace ErCv.Web.UI
         private const string SettingsKey = "cv-generator-settings";
         private const string ProfileKey = "cv-generator-my-profile";
         private const string HistoryKey = "cv-generator-history";
-        private const int MaxHistoryEntries = 10;
+        private const int MaxHistoryEntries = 50;
 
         private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -68,6 +68,19 @@ namespace ErCv.Web.UI
             var updated = (await GetHistoryAsync()).Prepend(entry).Take(MaxHistoryEntries).ToList();
             await WriteAsync(HistoryKey, updated);
             return updated;
+        }
+
+        /// <summary>Saves edits to an entry's application details (APP-01). Keyed by id, so a stale copy cannot add an entry back.</summary>
+        public async Task<List<HistoryEntry>> UpdateHistoryEntryAsync(HistoryEntry entry)
+        {
+            entry.Status = ApplicationTracker.Normalize(entry.Status);
+            var history = await GetHistoryAsync();
+            var index = history.FindIndex(e => e.Id == entry.Id);
+            if (index < 0) return history;
+
+            history[index] = entry;
+            await WriteAsync(HistoryKey, history);
+            return history;
         }
 
         public async Task<List<HistoryEntry>> RemoveFromHistoryAsync(long id)

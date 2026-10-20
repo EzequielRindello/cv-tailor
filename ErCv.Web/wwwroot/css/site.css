@@ -3114,3 +3114,31 @@ body:not(:has(#samples)) .app-try-demo {
   width: 1.2em;
   font-weight: 700;
 }
+
+.history-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.history-no-match {
+  color: var(--color-text-secondary);
+}
+
+.history-entry {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-details {
+  border: 1px solid var(--color-border-default);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.history-status {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}

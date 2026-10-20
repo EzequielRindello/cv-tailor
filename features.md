@@ -70,7 +70,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | EDIT-04 | CV output language (EN/ES) | E5 Editing | P2 | M | Todo |
 | EDIT-05 | More templates | E5 Editing | P3 | M | Todo |
 | EDIT-06 | Plain-text / Markdown export | E5 Editing | P3 | S | Todo |
-| APP-01 | Application tracker | E6 Workflow | P2 | M | Todo |
+| APP-01 | Application tracker | E6 Workflow | P2 | M | Done |
 | APP-02 | Re-open a past generation | E6 Workflow | P2 | S | Done |
 | APP-03 | Sample JD gallery | E6 Workflow | P0 | S | Done |
 | APP-04 | Import JD from URL (Greenhouse/Lever) | E6 Workflow | P3 | M | Todo |
@@ -615,12 +615,14 @@ Verify: unit test of the text renderer.
 ## E6. Application workflow
 
 ### APP-01: Application tracker
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+**Status:** Done · **Priority:** P2 · **Effort:** M
 
-- [ ] History entries gain company, role, status (Saved, Applied, Interview, Offer, Rejected), notes
-- [ ] Filter and sort by status/date; stays in localStorage
+- [x] History entries gain company, role, status (Saved, Applied, Interview, Offer, Rejected), notes
+- [x] Filter and sort by status/date; stays in localStorage
 
-Verify: bUnit + E2E.
+Notes: the tracker is the History panel. Each entry has a "Details" section (company, role, status, notes) saved to localStorage as you edit. The title reads "Role at Company" once filled in. Filter by status (with counts) and sort by newest, oldest or status (pipeline order). `ApplicationTracker` holds the statuses, filter and sort. Entries saved before this read as "Saved". The history cap went from 10 to 50 so a tracker is usable.
+
+Verify: `ApplicationTrackerTests` (unit), `HistoryPanelTests` (bUnit), `ApplicationTrackerTests` E2E (details kept after reload, filter, sort) and the accessibility scan of the open panel.
 
 ### APP-02: Re-open a past generation
 **Status:** Done · **Priority:** P2 · **Effort:** S

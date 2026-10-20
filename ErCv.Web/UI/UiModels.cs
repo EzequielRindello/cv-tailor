@@ -25,6 +25,12 @@ namespace ErCv.Web.UI
         /// <summary>"demo", "mine" or "imported". An imported profile is not kept, so it cannot be restored.</summary>
         public string? ProfileSource { get; set; }
         public string? ProfileId { get; set; }
+
+        // APP-01: the application this CV was made for. Entries saved before the tracker read as "Saved" with no notes.
+        public string Company { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string Status { get; set; } = ApplicationTracker.DefaultStatus;
+        public string Notes { get; set; } = string.Empty;
     }
 
     public record TemplateOption(string Key, string Name, string Description);

@@ -28,6 +28,7 @@
                             <HistoryPanel Entries="_history"
                                           OnLoad="ReopenHistoryEntry"
                                           OnDelete="DeleteHistoryEntry"
+                                          OnUpdate="SaveHistoryEntry"
                                           OnClear="ClearHistory"
                                           OnClose="() => _showHistory = false"
                                           Disabled="_loading" />
@@ -509,6 +510,8 @@ else
             _ => null
         };
     }
+
+    private Task SaveHistoryEntry(HistoryEntry entry) => Store.UpdateHistoryEntryAsync(entry);
 
     private async Task DeleteHistoryEntry(long id) => _history = await Store.RemoveFromHistoryAsync(id);
 

@@ -14,30 +14,97 @@
             <div class="empty-state">
                 <i class="bi bi-clock-history empty-state-icon" aria-hidden="true"></i>
                 <p class="empty-state-title">No generations yet</p>
-                <p class="empty-state-text">Your last 10 CVs show up here. They are saved only in this browser.</p>
+                <p class="empty-state-text">Your last 50 CVs show up here, and you can track each application. They are saved only in this browser.</p>
                 <button type="button" class="btn btn-primary btn-sm" @onclick="OnClose">Create your first CV</button>
             </div>
         }
         else
         {
+            var counts = ApplicationTracker.CountByStatus(Entries);
+            var visible = ApplicationTracker.Apply(Entries, _statusFilter, _sort);
+
+            <div class="history-controls">
+                <div>
+                    <label class="form-label form-label-custom" for="history-filter">Status</label>
+                    <select id="history-filter" class="form-select form-select-sm" @onchange="OnFilterChange">
+                        <option value="" selected="@(_statusFilter == "")">All (@Entries.Count)</option>
+                        @foreach (var status in ApplicationTracker.Statuses)
+                        {
+                            <option value="@status" selected="@(_statusFilter == status)">@status (@counts[status])</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label form-label-custom" for="history-sort">Sort by</label>
+                    <select id="history-sort" class="form-select form-select-sm" @onchange="OnSortChange">
+                        <option value="Newest" selected="@(_sort == HistorySort.Newest)">Newest first</option>
+                        <option value="Oldest" selected="@(_sort == HistorySort.Oldest)">Oldest first</option>
+                        <option value="Status" selected="@(_sort == HistorySort.Status)">Status</option>
+                    </select>
+                </div>
+            </div>
+
+            @if (visible.Count == 0)
+            {
+                <p class="history-no-match" role="status">No applications with this status.</p>
+            }
+
             <div class="history-list">
-                @foreach (var entry in Entries)
+                @foreach (var entry in visible)
                 {
-                    <div class="history-item" @key="entry.Id">
-                        <div class="history-meta">
-                            <div class="history-title" title="@entry.JobTitle">@entry.JobTitle</div>
-                            <div class="history-subtitle">
-                                <span>@FormatDate(entry.GeneratedAt)</span>
-                                <span>Template: @entry.Template</span>
-                                <span>Match: @(entry.MatchScore?.ToString() ?? "N/A")%</span>
+                    var open = _openId == entry.Id;
+                    var status = ApplicationTracker.Normalize(entry.Status);
+                    <div class="history-entry" @key="entry.Id">
+                        <div class="history-item">
+                            <div class="history-meta">
+                                <div class="history-title" title="@entry.JobTitle">@Heading(entry)</div>
+                                <div class="history-subtitle">
+                                    <span class="history-status" data-status="@status">@status</span>
+                                    <span>@FormatDate(entry.GeneratedAt)</span>
+                                    <span>Template: @entry.Template</span>
+                                    <span>Match: @(entry.MatchScore?.ToString() ?? "N/A")%</span>
+                                </div>
+                            </div>
+                            <div class="history-item-actions">
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        aria-expanded="@(open ? "true" : "false")"
+                                        aria-controls="@($"history-details-{entry.Id}")"
+                                        @onclick="() => _openId = open ? null : entry.Id">Details</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm"
+                                        disabled="@Disabled" @onclick="() => OnLoad.InvokeAsync(entry)">Re-open</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        disabled="@Disabled" @onclick="() => OnDelete.InvokeAsync(entry.Id)">Delete</button>
                             </div>
                         </div>
-                        <div class="history-item-actions">
-                            <button type="button" class="btn btn-outline-primary btn-sm"
-                                    disabled="@Disabled" @onclick="() => OnLoad.InvokeAsync(entry)">Re-open</button>
-                            <button type="button" class="btn btn-outline-danger btn-sm"
-                                    disabled="@Disabled" @onclick="() => OnDelete.InvokeAsync(entry.Id)">Delete</button>
-                        </div>
+                        @if (open)
+                        {
+                            <div class="history-details" id="@($"history-details-{entry.Id}")">
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <ProfileField Id="@($"app-company-{entry.Id}")" Label="Company"
+                                                      Value="@entry.Company" ValueChanged="v => Edit(entry, e => e.Company = v)" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ProfileField Id="@($"app-role-{entry.Id}")" Label="Role"
+                                                      Value="@entry.Role" ValueChanged="v => Edit(entry, e => e.Role = v)" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label form-label-custom" for="@($"app-status-{entry.Id}")">Application status</label>
+                                        <select id="@($"app-status-{entry.Id}")" class="form-select"
+                                                @onchange="e => Edit(entry, x => x.Status = ApplicationTracker.Normalize(e.Value?.ToString()))">
+                                            @foreach (var s in ApplicationTracker.Statuses)
+                                            {
+                                                <option value="@s" selected="@(s == status)">@s</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <ProfileField Id="@($"app-notes-{entry.Id}")" Label="Notes" Multiline="true"
+                                                      Value="@entry.Notes" ValueChanged="v => Edit(entry, e => e.Notes = v)" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
                 }
             </div>
@@ -46,12 +113,40 @@
 </div>
 
 @code {
+    private string _statusFilter = string.Empty;
+    private HistorySort _sort = HistorySort.Newest;
+    private long? _openId;
+
     [Parameter] public List<HistoryEntry> Entries { get; set; } = new();
     [Parameter] public EventCallback<HistoryEntry> OnLoad { get; set; }
     [Parameter] public EventCallback<long> OnDelete { get; set; }
     [Parameter] public EventCallback OnClear { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
+    /// <summary>Raised after the application details of an entry were edited, so the caller can save it.</summary>
+    [Parameter] public EventCallback<HistoryEntry> OnUpdate { get; set; }
     [Parameter] public bool Disabled { get; set; }
+
+    private void OnFilterChange(ChangeEventArgs e) => _statusFilter = e.Value?.ToString() ?? string.Empty;
+
+    private void OnSortChange(ChangeEventArgs e) =>
+        _sort = Enum.TryParse<HistorySort>(e.Value?.ToString(), out var sort) ? sort : HistorySort.Newest;
+
+    private Task Edit(HistoryEntry entry, Action<HistoryEntry> change)
+    {
+        change(entry);
+        return OnUpdate.InvokeAsync(entry);
+    }
+
+    /// <summary>"Role at Company" once the visitor filled those in; otherwise the first line of the job description.</summary>
+    private static string Heading(HistoryEntry entry)
+    {
+        var role = entry.Role?.Trim();
+        var company = entry.Company?.Trim();
+        if (!string.IsNullOrEmpty(role) && !string.IsNullOrEmpty(company)) return $"{role} at {company}";
+        if (!string.IsNullOrEmpty(role)) return role;
+        if (!string.IsNullOrEmpty(company)) return $"{entry.JobTitle} at {company}";
+        return entry.JobTitle;
+    }
 
     private static string FormatDate(string iso) =>
         DateTime.TryParse(iso, null, System.Globalization.DateTimeStyles.RoundtripKind, out var d)

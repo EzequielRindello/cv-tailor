@@ -89,6 +89,18 @@ namespace ErCv.E2E
         }
 
         [Fact]
+        public async Task History_panel_with_application_details_open_has_no_serious_violations()
+        {
+            await GenerateAsync();
+            await OpenHomeAsync();
+            await Button("History", exact: true).ClickAsync();
+            await Page.Locator(".history-item").GetByRole(AriaRole.Button, new() { Name = "Details" }).ClickAsync();
+            await Assertions.Expect(Page.Locator(".history-details")).ToBeVisibleAsync();
+
+            await AssertNoSeriousViolationsAsync("history with details");
+        }
+
+        [Fact]
         public async Task Results_workspace_has_no_serious_violations()
         {
             await GenerateAsync();
