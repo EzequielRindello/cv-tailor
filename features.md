@@ -387,11 +387,11 @@ Verify: E2E for empty JD and no format selected.
 Verify: TEST-07 axe check + keyboard-only manual pass.
 
 ### UX-09: Responsive pass
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** Done (E2E at 390px and 768px arrives with TEST-07) · **Priority:** P1 · **Effort:** M
 
-- [ ] Composer usable at 360px width
-- [ ] Workspace stacks on mobile; preview becomes a tab
-- [ ] No horizontal scroll at any breakpoint
+- [x] Composer usable at 360px width
+- [x] Workspace stacks on mobile; preview becomes a tab (Preview / Insights switch below 992px; the editor opens in the second pane)
+- [x] No horizontal scroll at any breakpoint (measured at 360, 390, 768, 993 and 1024px across composer, history, results, every tab and the editor)
 
 Verify: E2E at 390px and 768px.
 

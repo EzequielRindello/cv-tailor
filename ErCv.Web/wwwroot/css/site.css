@@ -849,6 +849,89 @@ h1, h2, h3, .form-title {
   cursor: not-allowed;
   box-shadow: none;
 }
+/* ===== Responsive (UX-09) ===== */
+.pane-switch {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .pane-switch {
+    background: var(--color-bg-hover);
+    border-radius: var(--radius-md);
+    display: flex;
+    margin-bottom: var(--spacing-md);
+    padding: 3px;
+  }
+
+  .pane-switch-btn {
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    flex: 1;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .pane-switch-btn.active {
+    background: var(--color-bg-card);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-text-primary);
+  }
+
+  .details-layout[data-pane="preview"] .details-analysis-panel,
+  .details-layout[data-pane="insights"] .details-preview-panel {
+    display: none;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .label-wide {
+    display: none;
+  }
+
+  .results-actionbar {
+    flex-wrap: nowrap;
+    gap: var(--spacing-sm);
+  }
+
+  .results-actionbar-main {
+    flex: 1;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+
+  .results-actionbar .btn {
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+  }
+
+  .details-fullscreen {
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+  }
+
+  .cv-preview-frame-wrapper {
+    padding: var(--spacing-sm);
+  }
+
+  .details-preview-panel .card-body {
+    padding: var(--spacing-md);
+  }
+
+  .toast-host {
+    left: var(--spacing-md);
+    max-width: none;
+  }
+
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* ===== Accessibility (UX-08) ===== */
 /* Selectable cards wrap a visually hidden radio/checkbox, so the ring goes on the card */
 .template-card:has(input:focus-visible),
@@ -1270,6 +1353,10 @@ h1, h2, h3, .form-title {
   gap: var(--spacing-sm);
 }
 
+.cv-preview-header h5 {
+  white-space: nowrap;
+}
+
 .cv-preview-header {
   align-items: center;
   display: flex;
@@ -1286,6 +1373,7 @@ h1, h2, h3, .form-title {
 }
 
 .cv-zoom-btn {
+  white-space: nowrap;
   background: transparent;
   border: 0;
   border-radius: var(--radius-sm);

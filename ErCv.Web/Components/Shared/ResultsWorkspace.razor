@@ -50,9 +50,9 @@ else
 {
     <div class="details-fullscreen" id="results-region" tabindex="-1" role="region" aria-label="CV results">
         <div class="results-actionbar" role="toolbar" aria-label="CV actions">
-            <button type="button" class="btn btn-outline-secondary" disabled="@Loading" @onclick="OnBack">
-                <i class="bi bi-arrow-left me-1"></i>
-                Back to composer
+            <button type="button" class="btn btn-outline-secondary" disabled="@Loading" aria-label="Back to composer" @onclick="OnBack">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+                <span class="label-wide">Back to composer</span>
             </button>
             <div class="results-actionbar-main">
                 @foreach (var format in Documents.Keys)
@@ -61,27 +61,40 @@ else
                     <button type="button"
                             class="btn @(f == Documents.Keys.First() ? "btn-primary" : "btn-outline-primary")"
                             disabled="@Loading"
+                            aria-label="Download @FormatLabel(f)"
                             @onclick="() => OnDownload.InvokeAsync(f)">
-                        <i class="bi bi-download me-1"></i>
-                        Download @FormatLabel(f)
+                        <i class="bi bi-download me-1" aria-hidden="true"></i>
+                        <span class="label-wide">Download </span>@FormatLabel(f)
                     </button>
                 }
                 <button type="button"
                         class="btn btn-outline-secondary"
                         disabled="@Loading"
                         aria-pressed="@(Editing ? "true" : "false")"
+                        aria-label="@(Editing ? "Close editor" : "Edit")"
                         @onclick="() => EditingChanged.InvokeAsync(!Editing)">
-                    <i class="bi bi-pencil-square me-1"></i>
-                    @(Editing ? "Close editor" : "Edit")
+                    <i class="bi bi-pencil-square me-1" aria-hidden="true"></i>
+                    <span class="label-wide">@(Editing ? "Close editor" : "Edit")</span>
                 </button>
-                <button type="button" class="btn btn-outline-secondary" disabled="@Loading" @onclick="OnStartOver">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i>
-                    Start over
+                <button type="button" class="btn btn-outline-secondary" disabled="@Loading" aria-label="Start over" @onclick="OnStartOver">
+                    <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>
+                    <span class="label-wide">Start over</span>
                 </button>
             </div>
         </div>
 
-        <div class="details-layout">
+        <div class="pane-switch" role="group" aria-label="Show preview or insights">
+            <button type="button"
+                    class="pane-switch-btn @(_pane == "preview" ? "active" : "")"
+                    aria-pressed="@(_pane == "preview" ? "true" : "false")"
+                    @onclick='() => _pane = "preview"'>Preview</button>
+            <button type="button"
+                    class="pane-switch-btn @(_pane == "insights" ? "active" : "")"
+                    aria-pressed="@(_pane == "insights" ? "true" : "false")"
+                    @onclick='() => _pane = "insights"'>@(Editing ? "Editor" : "Insights")</button>
+        </div>
+
+        <div class="details-layout" data-pane="@_pane">
             <div class="details-preview-panel">
                 <CVPreview Html="@Analysis.PreviewHtml" />
             </div>
@@ -144,6 +157,19 @@ else
 
     private string _tab = "match";
     private bool _focusTab;
+
+    // Below the desktop breakpoint only one of preview / insights is shown at a time
+    private string _pane = "preview";
+    private bool _wasEditing;
+
+    protected override void OnParametersSet()
+    {
+        if (Editing == _wasEditing) return;
+
+        // Opening the editor brings it into view; closing it (after a regenerate) shows the updated preview
+        _pane = Editing ? "insights" : "preview";
+        _wasEditing = Editing;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
