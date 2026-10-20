@@ -1,0 +1,115 @@
+using System.Text.RegularExpressions;
+using Microsoft.Playwright;
+
+namespace ErCv.E2E
+{
+    public class GenerateFlowTests : E2ETestBase
+    {
+        public GenerateFlowTests(AppFixture app) : base(app)
+        {
+        }
+
+        [Fact]
+        public async Task Sample_jd_generates_a_preview_and_scores()
+        {
+            await GenerateAsync("Backend");
+
+            await Assertions.Expect(PreviewBody).ToContainTextAsync("Rivera", new() { IgnoreCase = true });
+
+            var match = Page.GetByRole(AriaRole.Img, new() { Name = "Match score" });
+            await Assertions.Expect(match).ToBeVisibleAsync();
+            Assert.Matches(@"Match score \d{1,3} out of 100", await match.GetAttributeAsync("aria-label") ?? "");
+
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "ATS" }).ClickAsync();
+            await Assertions.Expect(Page.GetByRole(AriaRole.Img, new() { Name = "ATS score" })).ToBeVisibleAsync();
+
+            await Page.GetByRole(AriaRole.Tab, new() { Name = "Gaps" }).ClickAsync();
+            await Assertions.Expect(Page.Locator(".missing-skills-card")).ToBeVisibleAsync();
+        }
+
+        [Fact]
+        public async Task Generate_announces_the_result_and_moves_focus_to_the_results()
+        {
+            await GenerateAsync();
+
+            await Assertions.Expect(Page.Locator("[aria-live=polite]").Filter(new() { HasTextRegex = new Regex("CV ready\\. Match score") }))
+                .ToHaveCountAsync(1);
+            await Assertions.Expect(ResultsRegion).ToBeFocusedAsync();
+        }
+
+        [Fact]
+        public async Task Generating_does_not_download_anything_until_a_button_is_clicked()
+        {
+            var downloads = 0;
+            Page.Download += (_, _) => downloads++;
+
+            await GenerateAsync();
+            await Page.WaitForTimeoutAsync(1000);
+            Assert.Equal(0, downloads);
+
+            var download = await Page.RunAndWaitForDownloadAsync(() => Button("Download DOCX").ClickAsync());
+            Assert.EndsWith(".docx", download.SuggestedFilename);
+            await Assertions.Expect(Page.Locator(".app-toast").Filter(new() { HasText = "Download started" })).ToBeVisibleAsync();
+        }
+
+        [Fact]
+        public async Task Progress_stages_are_shown_in_order_while_generating()
+        {
+            await OpenHomeAsync();
+            await PickSampleAsync("Data");
+            await GoToOptionsAsync();
+
+            await Page.EvaluateAsync(@"() => {
+                window.__stages = [];
+                new MutationObserver(() => {
+                    const label = document.querySelector('.gen-step.current .gen-step-label')?.textContent;
+                    if (label && window.__stages[window.__stages.length - 1] !== label) window.__stages.push(label);
+                }).observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true });
+            }");
+
+            await Button("Generate CV").ClickAsync();
+            await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
+
+            var stages = await Page.EvaluateAsync<string[]>("window.__stages");
+            var canonical = new[] { "Parsing", "Scoring", "Selecting", "Rendering" };
+
+            Assert.True(stages.Length >= 2, $"Expected several stages, saw: {string.Join(", ", stages)}");
+            Assert.All(stages, s => Assert.Contains(s, canonical));
+            Assert.Equal(stages.OrderBy(s => Array.IndexOf(canonical, s)), stages);
+        }
+
+        [Fact]
+        public async Task Editing_bullets_and_regenerating_updates_the_preview()
+        {
+            await GenerateAsync();
+
+            await Button("Edit", exact: true).ClickAsync();
+            var firstBullet = (await Page.Locator("#bullet-text-0-0").InnerTextAsync()).Trim();
+            await Assertions.Expect(PreviewBody).ToContainTextAsync(firstBullet);
+
+            await Page.Locator("#bullet-0-0").UncheckAsync();
+            await Button("Regenerate CV").ClickAsync();
+
+            await Assertions.Expect(Page.Locator(".app-toast").Filter(new() { HasText = "CV regenerated" })).ToBeVisibleAsync();
+            await Assertions.Expect(PreviewBody).Not.ToContainTextAsync(firstBullet);
+            await Assertions.Expect(Page.Locator(".bullet-editor-card")).ToHaveCountAsync(0);
+        }
+
+        [Fact]
+        public async Task Back_to_the_composer_keeps_the_job_description_and_start_over_clears_it()
+        {
+            await GenerateAsync("DevOps");
+
+            await Button("Back to composer").ClickAsync();
+            await Page.GetByRole(AriaRole.Button, new() { Name = "Job description" }).ClickAsync();
+            await Assertions.Expect(JobDescription).ToHaveValueAsync(new Regex("DevOps Engineer"));
+
+            await Page.GetByRole(AriaRole.Button, new() { Name = "Options" }).ClickAsync();
+            await Button("Generate CV").ClickAsync();
+            await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
+
+            await Button("Start over").ClickAsync();
+            await Assertions.Expect(JobDescription).ToHaveValueAsync("");
+        }
+    }
+}

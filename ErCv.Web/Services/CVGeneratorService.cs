@@ -145,10 +145,11 @@ namespace ErCvApi.Services
                 .ToList();
         }
 
-        public async Task<(Dictionary<string, byte[]> Documents, AnalysisResult Analysis)> BuildCvAsync(GenerateRequest request)
+        public async Task<(Dictionary<string, byte[]> Documents, AnalysisResult Analysis)> BuildCvAsync(
+            GenerateRequest request, IProgress<GenerationStage>? progress = null)
         {
             ValidateGenerateRequest(request);
-            return await GenerateCVInternalAsync(request);
+            return await GenerateCVInternalAsync(request, progress);
         }
 
         public async Task<(Dictionary<string, byte[]> Documents, string PreviewHtml)> RebuildCvAsync(RegenerateRequest request)
@@ -176,15 +177,21 @@ namespace ErCvApi.Services
             new OkObjectResult(new { status = ApiConstants.StatusHealthy, timestamp = DateTime.UtcNow });
 
         private async Task<(Dictionary<string, byte[]>, AnalysisResult)>
-            GenerateCVInternalAsync(GenerateRequest request)
+            GenerateCVInternalAsync(GenerateRequest request, IProgress<GenerationStage>? progress = null)
         {
+            await ReportAsync(progress, GenerationStage.Parsing);
             var cvMaster = await LoadCVMasterAsync(request.ProfileId);
             var requirements = _parser.Parse(request.JobDescription);
 
+            await ReportAsync(progress, GenerationStage.Scoring);
             var matchScore      = _matchScoreCalc.Calculate(cvMaster, requirements);
             var missingSkills   = _missingSkillsAnalyzer.Analyze(cvMaster, requirements);
+
+            await ReportAsync(progress, GenerationStage.Selecting);
             var generatedCV     = _selector.SelectAndAdaptCV(cvMaster, requirements, request.AllowTwoPages);
             var keywordAnalysis = _keywordAnalyzer.Analyze(request.JobDescription, generatedCV);
+
+            await ReportAsync(progress, GenerationStage.Rendering);
             var atsScore        = _atsChecker.Check(generatedCV, requirements, request.Template);
 
             var templatePath = ResolveTemplatePath(request.Template);
@@ -204,6 +211,15 @@ namespace ErCvApi.Services
             };
 
             return (documents, analysis);
+        }
+
+        // Yielding after each report lets the UI paint the new stage before the next (synchronous) phase starts
+        private static async Task ReportAsync(IProgress<GenerationStage>? progress, GenerationStage stage)
+        {
+            if (progress == null) return;
+
+            progress.Report(stage);
+            await Task.Yield();
         }
 
         private async Task<(Dictionary<string, byte[]> Documents, string PreviewHtml)> RegenerateCVInternalAsync(RegenerateRequest request)

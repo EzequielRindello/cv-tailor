@@ -1,6 +1,49 @@
-<div class="header-section" id="app-header">
-    <h1 class="app-title">CV Generator</h1>
-    <p class="app-subtitle">
-        Create a tailored, professional CV optimized for any job description
-    </p>
-</div>
+@inject IJSRuntime JS
+
+<header class="app-topbar" id="app-header">
+    <div class="app-topbar-inner">
+        <a class="app-wordmark" href="/" aria-label="CV Generator, home">
+            <span class="app-wordmark-mark" aria-hidden="true">CV</span>
+            <span class="app-wordmark-text">Generator</span>
+        </a>
+        <nav class="app-topbar-actions" aria-label="Site">
+            <a class="app-topbar-link app-try-demo" href="#samples">
+                <i class="bi bi-play-circle" aria-hidden="true"></i>
+                <span>Try demo</span>
+            </a>
+            <a class="app-topbar-link"
+               href="https://github.com/EzequielRindello/er-cv-generator"
+               target="_blank"
+               rel="noopener noreferrer">
+                <i class="bi bi-github" aria-hidden="true"></i>
+                <span>GitHub</span>
+            </a>
+            <button type="button"
+                    class="app-theme-toggle"
+                    aria-label="@(_theme == "dark" ? "Switch to light theme" : "Switch to dark theme")"
+                    title="@(_theme == "dark" ? "Switch to light theme" : "Switch to dark theme")"
+                    @onclick="ToggleThemeAsync">
+                <i class="bi @(_theme == "dark" ? "bi-sun" : "bi-moon")" aria-hidden="true"></i>
+            </button>
+        </nav>
+    </div>
+</header>
+
+@code {
+    private string _theme = "light";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // The theme is resolved before first paint by the script in App.razor
+        _theme = await JS.InvokeAsync<string>("cvApp.getTheme");
+        StateHasChanged();
+    }
+
+    private async Task ToggleThemeAsync()
+    {
+        _theme = _theme == "dark" ? "light" : "dark";
+        await JS.InvokeVoidAsync("cvApp.setTheme", _theme);
+    }
+}

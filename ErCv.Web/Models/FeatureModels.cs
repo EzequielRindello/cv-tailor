@@ -62,6 +62,15 @@ namespace ErCvApi.Models
         public bool AllowTwoPages { get; set; } = false;
     }
 
+    /// <summary>The phases of generating a CV, reported in this order (UX-06).</summary>
+    public enum GenerationStage
+    {
+        Parsing,
+        Scoring,
+        Selecting,
+        Rendering
+    }
+
     public enum CVTemplate
     {
         Harvard,

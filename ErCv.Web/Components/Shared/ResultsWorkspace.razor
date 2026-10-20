@@ -1,0 +1,217 @@
+@inject IJSRuntime JS
+
+@if (Analysis == null && Loading)
+{
+    <div class="details-fullscreen" aria-busy="true">
+        <div class="results-actionbar">
+            <GenerationProgress Current="Stage" />
+        </div>
+
+        <div class="details-layout">
+            <div class="details-preview-panel">
+                <div class="card main-card">
+                    <div class="card-body">
+                        <div class="skeleton skeleton-line skeleton-title"></div>
+                        <div class="skeleton skeleton-paper"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-analysis-panel">
+                <div class="skeleton skeleton-line skeleton-tabs"></div>
+                <div class="card main-card">
+                    <div class="card-body">
+                        <div class="skeleton skeleton-line skeleton-title"></div>
+                        <div class="skeleton skeleton-circle"></div>
+                        <div class="skeleton skeleton-line"></div>
+                        <div class="skeleton skeleton-line skeleton-short"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (Analysis == null)
+{
+    <div class="details-fullscreen">
+        <div class="card main-card">
+            <div class="card-body">
+                <div class="empty-state">
+                    <i class="bi bi-file-earmark-text empty-state-icon" aria-hidden="true"></i>
+                    <p class="empty-state-title">Nothing to show yet</p>
+                    <p class="empty-state-text">Generate a CV and its preview and scores will appear here.</p>
+                    <button type="button" class="btn btn-primary" @onclick="OnBack">Back to composer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="details-fullscreen" id="results-region" tabindex="-1" role="region" aria-label="CV results">
+        <div class="results-actionbar" role="toolbar" aria-label="CV actions">
+            <button type="button" class="btn btn-outline-secondary" disabled="@Loading" aria-label="Back to composer" @onclick="OnBack">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+                <span class="label-wide">Back to composer</span>
+            </button>
+            <div class="results-actionbar-main">
+                @foreach (var format in Documents.Keys)
+                {
+                    var f = format;
+                    <button type="button"
+                            class="btn @(f == Documents.Keys.First() ? "btn-primary" : "btn-outline-primary")"
+                            disabled="@Loading"
+                            aria-label="Download @FormatLabel(f)"
+                            @onclick="() => OnDownload.InvokeAsync(f)">
+                        <i class="bi bi-download me-1" aria-hidden="true"></i>
+                        <span class="label-wide">Download&nbsp;</span>@FormatLabel(f)
+                    </button>
+                }
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        disabled="@Loading"
+                        aria-pressed="@(Editing ? "true" : "false")"
+                        aria-label="@(Editing ? "Close editor" : "Edit")"
+                        @onclick="() => EditingChanged.InvokeAsync(!Editing)">
+                    <i class="bi bi-pencil-square me-1" aria-hidden="true"></i>
+                    <span class="label-wide">@(Editing ? "Close editor" : "Edit")</span>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" disabled="@Loading" aria-label="Start over" @onclick="OnStartOver">
+                    <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>
+                    <span class="label-wide">Start over</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="pane-switch" role="group" aria-label="Show preview or insights">
+            <button type="button"
+                    class="pane-switch-btn @(_pane == "preview" ? "active" : "")"
+                    aria-pressed="@(_pane == "preview" ? "true" : "false")"
+                    @onclick='() => _pane = "preview"'>Preview</button>
+            <button type="button"
+                    class="pane-switch-btn @(_pane == "insights" ? "active" : "")"
+                    aria-pressed="@(_pane == "insights" ? "true" : "false")"
+                    @onclick='() => _pane = "insights"'>@(Editing ? "Editor" : "Insights")</button>
+        </div>
+
+        <div class="details-layout" data-pane="@_pane">
+            <div class="details-preview-panel">
+                <CVPreview Html="@Analysis.PreviewHtml" />
+            </div>
+
+            <div class="details-analysis-panel">
+                @if (Editing)
+                {
+                    <BulletEditor GeneratedCv="Analysis.GeneratedCV"
+                                  OnRegenerate="OnRegenerate"
+                                  OnCancel="() => EditingChanged.InvokeAsync(false)"
+                                  Loading="Loading" />
+                }
+                else
+                {
+                    <div class="insights-tabs" role="tablist" aria-label="CV insights">
+                        @foreach (var tab in Tabs)
+                        {
+                            var key = tab.Key;
+                            <button type="button"
+                                    role="tab"
+                                    id="insights-tab-@key"
+                                    class="insights-tab @(_tab == key ? "active" : "")"
+                                    aria-selected="@(_tab == key ? "true" : "false")"
+                                    aria-controls="insights-panel"
+                                    tabindex="@(_tab == key ? 0 : -1)"
+                                    @onkeydown="OnTabKeyDown"
+                                    @onclick="() => _tab = key">
+                                @tab.Label
+                            </button>
+                        }
+                    </div>
+                    <div class="insights-panel" id="insights-panel" role="tabpanel" aria-labelledby="insights-tab-@_tab">
+                        @switch (_tab)
+                        {
+                            case "match":
+                                <MatchScoreCard Data="Analysis.MatchScore" />
+                                break;
+                            case "ats":
+                                <ATSScoreCard Data="Analysis.ATSScore" />
+                                break;
+                            case "keywords":
+                                <KeywordAnalysisCard Data="Analysis.KeywordAnalysis" />
+                                break;
+                            default:
+                                <MissingSkillsCard Data="Analysis.MissingSkills" />
+                                break;
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private static readonly (string Key, string Label)[] Tabs =
+    {
+        ("match", "Match"), ("ats", "ATS"), ("keywords", "Keywords"), ("gaps", "Gaps")
+    };
+
+    private string _tab = "match";
+    private bool _focusTab;
+
+    // Below the desktop breakpoint only one of preview / insights is shown at a time
+    private string _pane = "preview";
+    private bool _wasEditing;
+
+    protected override void OnParametersSet()
+    {
+        if (Editing == _wasEditing) return;
+
+        // Opening the editor brings it into view; closing it (after a regenerate) shows the updated preview
+        _pane = Editing ? "insights" : "preview";
+        _wasEditing = Editing;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusTab) return;
+
+        _focusTab = false;
+        await JS.InvokeVoidAsync("cvApp.focusElement", $"insights-tab-{_tab}");
+    }
+
+    // Arrow keys, Home and End move between tabs (roving tabindex, per the ARIA tabs pattern)
+    private void OnTabKeyDown(KeyboardEventArgs e)
+    {
+        var index = Array.FindIndex(Tabs, t => t.Key == _tab);
+        var next = e.Key switch
+        {
+            "ArrowRight" => (index + 1) % Tabs.Length,
+            "ArrowLeft" => (index - 1 + Tabs.Length) % Tabs.Length,
+            "Home" => 0,
+            "End" => Tabs.Length - 1,
+            _ => -1
+        };
+        if (next < 0) return;
+
+        _tab = Tabs[next].Key;
+        _focusTab = true;
+    }
+
+    [Parameter] public AnalysisResult? Analysis { get; set; }
+    [Parameter] public Dictionary<string, byte[]> Documents { get; set; } = new();
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public GenerationStage Stage { get; set; }
+    [Parameter] public bool Editing { get; set; }
+    [Parameter] public EventCallback<bool> EditingChanged { get; set; }
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback OnStartOver { get; set; }
+    [Parameter] public EventCallback<string> OnDownload { get; set; }
+    [Parameter] public EventCallback<(Dictionary<string, List<int>> Selections, GeneratedCV Cv)> OnRegenerate { get; set; }
+
+    private static string FormatLabel(string format) => format switch
+    {
+        "pdf" => "PDF",
+        "docx" => "DOCX",
+        _ => format.ToUpperInvariant()
+    };
+}

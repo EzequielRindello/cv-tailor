@@ -1,11 +1,10 @@
 <div class="mb-4">
-    <label class="form-label form-label-custom mb-3">Select Format(s)</label>
-    <div class="format-options">
+    <span class="form-label form-label-custom mb-3 d-block" id="format-label">Select Format(s)</span>
+    <div class="format-options" role="group" aria-labelledby="format-label">
         @foreach (var format in Formats)
         {
-            <div class="format-card @(IsSelected(format.Key) ? "selected" : "")"
-                 @onclick="() => Toggle(format.Key)">
-                <div class="format-icon">
+            <label class="format-card @(IsSelected(format.Key) ? "selected" : "")">
+                <div class="format-icon" aria-hidden="true">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
@@ -26,17 +25,28 @@
                        class="form-check-input format-checkbox"
                        checked="@IsSelected(format.Key)"
                        disabled="@Disabled"
-                       @onclick:stopPropagation="true"
                        @onchange="() => Toggle(format.Key)" />
-            </div>
+            </label>
         }
     </div>
+    @if (ShowError)
+    {
+        <div class="field-error" role="alert">
+            <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+            @Error
+        </div>
+    }
 </div>
 
 @code {
     [Parameter] public Dictionary<string, bool> Selected { get; set; } = new();
     [Parameter] public EventCallback<string> OnToggle { get; set; }
     [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>Shown under the cards while no format is selected.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    private bool ShowError => !string.IsNullOrEmpty(Error) && !Selected.Values.Any(v => v);
 
     private static readonly FormatOption[] Formats = { new("pdf", "PDF"), new("docx", "Word") };
 

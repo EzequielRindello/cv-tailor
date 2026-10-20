@@ -55,6 +55,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 builder.Services.AddScoped<CVGeneratorService>();
 builder.Services.AddScoped<BrowserStore>();
+builder.Services.AddScoped<ToastService>();
 
 var app = builder.Build();
 

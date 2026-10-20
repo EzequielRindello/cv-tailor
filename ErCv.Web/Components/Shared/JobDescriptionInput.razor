@@ -1,13 +1,52 @@
+@using ErCvApi.Helpers
+@implements IDisposable
+
 <div class="mb-4">
     <label class="form-label form-label-custom" for="job-description">Job Description</label>
     <textarea id="job-description"
-              class="form-control job-description-input"
-              rows="12"
+              class="form-control job-description-input @(ShowError ? "is-invalid" : "")"
+              rows="14"
               placeholder="Paste the job description here..."
               disabled="@Disabled"
               title="@HelperText"
+              aria-describedby="@(ShowError ? "job-description-error job-description-meta" : "job-description-meta")"
+              aria-invalid="@(ShowError ? "true" : null)"
               value="@Value"
+              @oninput="OnInput"
               @onchange="OnChanged"></textarea>
+    @if (ShowError)
+    {
+        <div class="field-error" id="job-description-error" role="alert">
+            <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+            @Error
+        </div>
+    }
+    <div class="jd-meta" id="job-description-meta">
+        <span class="jd-counter">@_text.Length.ToString("N0") characters</span>
+        <span class="jd-counter">
+            @if (_skills.Count == 0)
+            {
+                <text>No skills detected yet</text>
+            }
+            else
+            {
+                <text>@_skills.Count skill@(_skills.Count == 1 ? "" : "s") detected</text>
+            }
+        </span>
+    </div>
+    @if (_skills.Count > 0)
+    {
+        <ul class="jd-skills" aria-label="Detected skills">
+            @foreach (var skill in _skills.Take(MaxShownSkills))
+            {
+                <li class="jd-skill">@skill</li>
+            }
+            @if (_skills.Count > MaxShownSkills)
+            {
+                <li class="jd-skill jd-skill-more">+@(_skills.Count - MaxShownSkills)</li>
+            }
+        </ul>
+    }
     @if (!string.IsNullOrEmpty(HelperText))
     {
         <div class="input-helper-text">@HelperText</div>
@@ -15,10 +54,72 @@
 </div>
 
 @code {
+    private const int MaxShownSkills = 12;
+    private const int DebounceMs = 400;
+
+    private static readonly JobDescriptionParser Parser = new();
+
+    private string _text = string.Empty;
+    private string? _lastValueParam;
+    private List<string> _skills = new();
+    private CancellationTokenSource? _debounce;
+
     [Parameter] public string Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public string? HelperText { get; set; }
 
-    private Task OnChanged(ChangeEventArgs e) => ValueChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+    /// <summary>Shown under the field until the user types something.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    private bool ShowError => !string.IsNullOrEmpty(Error) && string.IsNullOrWhiteSpace(_text);
+
+    protected override void OnParametersSet()
+    {
+        // Sync from the parent only when it actually changed the value (sample, history, paste shortcut),
+        // so a parent re-render while typing does not overwrite the live text
+        if (Value == _lastValueParam) return;
+
+        _lastValueParam = Value;
+        _text = Value;
+        _skills = DetectSkills(_text);
+    }
+
+    private async Task OnInput(ChangeEventArgs e)
+    {
+        _text = e.Value?.ToString() ?? string.Empty;
+
+        _debounce?.Cancel();
+        _debounce?.Dispose();
+        _debounce = new CancellationTokenSource();
+        var token = _debounce.Token;
+
+        try
+        {
+            await Task.Delay(DebounceMs, token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        _skills = DetectSkills(_text);
+    }
+
+    private Task OnChanged(ChangeEventArgs e)
+    {
+        _text = e.Value?.ToString() ?? string.Empty;
+        _lastValueParam = _text;
+        _skills = DetectSkills(_text);
+        return ValueChanged.InvokeAsync(_text);
+    }
+
+    private static List<string> DetectSkills(string text) =>
+        Parser.Parse(text).TechnicalSkills.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+    public void Dispose()
+    {
+        _debounce?.Cancel();
+        _debounce?.Dispose();
+    }
 }

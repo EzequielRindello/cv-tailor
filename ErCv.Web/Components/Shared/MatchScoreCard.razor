@@ -1,8 +1,21 @@
+@using ErCvApi.Constants
 @{
     var c = string.IsNullOrEmpty(Data.ColorClass) ? "yellow" : Data.ColorClass;
     var pct = Math.Clamp(Data.Overall, 0, 100);
     var skillsOk = Data.SkillsMatched >= Data.TotalSkills * 0.6;
     var keywordsOk = Data.KeywordsMatched >= Data.TotalKeywords * 0.5;
+
+    // Points each part contributed, mirroring MatchScoreCalculator (seniority is the remainder of the overall score)
+    var skillPct = Data.TotalSkills > 0 ? Math.Min(Data.SkillsMatched * 100.0 / Data.TotalSkills, 100) : 0;
+    var keywordPct = Data.TotalKeywords > 0
+        ? Math.Min(Data.KeywordsMatched * 100.0 / Data.TotalKeywords * MatchScoreConstants.KeywordBoostMultiplier, 100)
+        : 0;
+    var skillMax = MatchScoreConstants.SkillWeight * 100;
+    var keywordMax = MatchScoreConstants.KeywordWeight * 100;
+    var seniorityMax = MatchScoreConstants.SeniorityWeight * 100;
+    var skillPts = skillPct * MatchScoreConstants.SkillWeight;
+    var keywordPts = keywordPct * MatchScoreConstants.KeywordWeight;
+    var seniorityPts = Math.Clamp(pct - skillPts - keywordPts, 0, seniorityMax);
 }
 
 <div class="card match-score-card">
@@ -15,33 +28,40 @@
             <span class="match-badge @c">@Label(c)</span>
         </div>
 
-        <div class="match-percent-row">
-            <span class="match-percent @c">@pct%</span>
+        <div class="match-gauge-row">
+            <ScoreGauge Value="pct" Tone="@c" Label="Match score" />
+
+            <div class="match-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-icon @(skillsOk ? "ok" : "warn")">
+                        <i class="bi @(skillsOk ? "bi-check" : "bi-circle")"></i>
+                    </span>
+                    Technical skills: <strong>@Data.SkillsMatched/@Data.TotalSkills</strong> matched
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-icon @(keywordsOk ? "ok" : "warn")">
+                        <i class="bi @(keywordsOk ? "bi-check" : "bi-circle")"></i>
+                    </span>
+                    Keywords: <strong>@Data.KeywordsMatched/@Data.TotalKeywords</strong> present
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-icon @(Data.SeniorityMatch ? "ok" : "warn")">
+                        <i class="bi @(Data.SeniorityMatch ? "bi-check" : "bi-circle")"></i>
+                    </span>
+                    Seniority level: <strong>@(Data.SeniorityMatch ? "Match" : "Mismatch")</strong>
+                </div>
+            </div>
         </div>
 
-        <div class="match-bar-track">
-            <div class="match-bar-fill @c" style="width: @(pct)%"></div>
+        <div class="stack-bar" aria-hidden="true">
+            @Segment("skills", skillMax, skillPts)
+            @Segment("keywords", keywordMax, keywordPts)
+            @Segment("seniority", seniorityMax, seniorityPts)
         </div>
-
-        <div class="match-breakdown">
-            <div class="breakdown-item">
-                <span class="breakdown-icon @(skillsOk ? "ok" : "warn")">
-                    <i class="bi @(skillsOk ? "bi-check" : "bi-circle")"></i>
-                </span>
-                Technical skills: <strong>@Data.SkillsMatched/@Data.TotalSkills</strong> matched
-            </div>
-            <div class="breakdown-item">
-                <span class="breakdown-icon @(keywordsOk ? "ok" : "warn")">
-                    <i class="bi @(keywordsOk ? "bi-check" : "bi-circle")"></i>
-                </span>
-                Keywords: <strong>@Data.KeywordsMatched/@Data.TotalKeywords</strong> present
-            </div>
-            <div class="breakdown-item">
-                <span class="breakdown-icon @(Data.SeniorityMatch ? "ok" : "warn")">
-                    <i class="bi @(Data.SeniorityMatch ? "bi-check" : "bi-circle")"></i>
-                </span>
-                Seniority level: <strong>@(Data.SeniorityMatch ? "Match" : "Mismatch")</strong>
-            </div>
+        <div class="stack-legend">
+            <span><i class="stack-dot skills"></i>Skills <strong>@Math.Round(skillPts)/@skillMax</strong></span>
+            <span><i class="stack-dot keywords"></i>Keywords <strong>@Math.Round(keywordPts)/@keywordMax</strong></span>
+            <span><i class="stack-dot seniority"></i>Seniority <strong>@Math.Round(seniorityPts)/@seniorityMax</strong></span>
         </div>
     </div>
 </div>
@@ -55,4 +75,9 @@
         "red" => "Weak Match",
         _ => "Moderate Match"
     };
+
+    // Each segment is as wide as its weight; the inner fill is how much of that weight was earned
+    private static RenderFragment Segment(string kind, double max, double earned) => @<div class="stack-seg" style="width: @(max.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%">
+        <div class="stack-fill @kind" style="width: @((max > 0 ? Math.Clamp(earned / max * 100, 0, 100) : 0).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+    </div>;
 }

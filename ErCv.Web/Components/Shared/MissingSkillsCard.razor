@@ -29,40 +29,32 @@
 
             @if (Data.PotentialScoreIncrease > 0)
             {
-                <p class="tip-text">
-                    <i class="bi bi-lightbulb-fill missing-tip-icon"></i>
-                    Adding missing skills could increase your match score by up to <strong>+@Data.PotentialScoreIncrease%</strong>
-                </p>
+                <div class="gain-callout">
+                    <span class="gain-icon" aria-hidden="true"><i class="bi bi-graph-up-arrow"></i></span>
+                    <p class="gain-text">
+                        Adding the missing skills could raise your match score by up to
+                        <strong class="gain-figure">+@Data.PotentialScoreIncrease%</strong>
+                    </p>
+                </div>
             }
 
             @if (_open)
             {
                 <div style="margin-top: var(--spacing-md)">
-                    @if (Data.RequiredMissing.Count > 0)
-                    {
-                        <div class="missing-group">
-                            <div class="group-label required">Required - Missing</div>
-                            <div class="skill-tags">
-                                @foreach (var s in Data.RequiredMissing)
-                                {
-                                    <span class="skill-pill required">@s</span>
-                                }
-                            </div>
-                        </div>
-                    }
-
-                    @if (Data.NiceToHaveMissing.Count > 0)
-                    {
-                        <div class="missing-group">
-                            <div class="group-label nice">Nice to Have - Missing</div>
-                            <div class="skill-tags">
-                                @foreach (var s in Data.NiceToHaveMissing)
-                                {
-                                    <span class="skill-pill nice">@s</span>
-                                }
-                            </div>
-                        </div>
-                    }
+                    <div class="skill-legend" aria-hidden="true">
+                        <span><i class="skill-legend-dot required"></i>Required</span>
+                        <span><i class="skill-legend-dot nice"></i>Nice to have</span>
+                    </div>
+                    <ul class="skill-cloud" aria-label="Missing skills">
+                        @foreach (var s in Data.RequiredMissing)
+                        {
+                            <li class="skill-pill required"><span class="visually-hidden">Required: </span>@s</li>
+                        }
+                        @foreach (var s in Data.NiceToHaveMissing)
+                        {
+                            <li class="skill-pill nice"><span class="visually-hidden">Nice to have: </span>@s</li>
+                        }
+                    </ul>
 
                     @if (Data.Suggestions.Count > 0)
                     {
@@ -85,5 +77,5 @@
 @code {
     [Parameter, EditorRequired] public MissingSkillsAnalysis Data { get; set; } = new();
 
-    private bool _open;
+    private bool _open = true;
 }

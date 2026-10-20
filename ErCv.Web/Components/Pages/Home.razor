@@ -7,24 +7,20 @@
 @inject BrowserStore Store
 @inject IJSRuntime JS
 @inject ILogger<Home> Logger
+@inject ToastService Toasts
 
 <PageTitle>CV Generator - Tailored Professional Resumes</PageTitle>
+
+<div class="visually-hidden" role="status" aria-live="polite">@_announcement</div>
 
 @if (_view == "generate")
 {
     <div class="container app-shell py-4 py-lg-5">
-        <AppHeader />
+        <Hero />
         <div class="row justify-content-center">
             <div class="col-lg-8 col-xl-7">
                 <div class="card main-card">
                     <div class="card-body form-card-body">
-                        @if (!string.IsNullOrEmpty(_error))
-                        {
-                            <div class="alert alert-danger alert-dismissible" role="alert">
-                                @_error
-                                <button type="button" class="btn-close" aria-label="Close" @onclick="() => _error = string.Empty"></button>
-                            </div>
-                        }
                         @if (_showHistory)
                         {
                             <HistoryPanel Entries="_history"
@@ -44,35 +40,72 @@
                                     @(_showHistory ? "Hide History" : "History")
                                 </button>
                             </div>
-                            <div class="form-section form-section-primary">
-                                <ProfileSelector Profiles="_profiles"
-                                                 @bind-Value="_profileId"
-                                                 Disabled="_loading" />
-                                <JobDescriptionInput @bind-Value="_jobDescription"
-                                                     Disabled="_loading"
-                                                     HelperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate" />
-                            </div>
-                            <div class="form-section">
-                                <TemplateSelector Value="_settings.Template"
-                                                  ValueChanged="SetTemplate"
-                                                  Disabled="_loading" />
-                            </div>
-                            <div class="form-section form-section-inline">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <FormatSelector Selected="_settings.SelectedFormats"
-                                                        OnToggle="ToggleFormat"
-                                                        Disabled="_loading" />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <PageOptions AllowTwoPages="_settings.AllowTwoPages"
-                                                     AllowTwoPagesChanged="SetAllowTwoPages"
+                            <ComposerSteps Current="_step" OnGoTo="GoToStepAsync" Disabled="_loading" />
+                            @if (_step == 1)
+                            {
+                                <div class="form-section form-section-primary">
+                                    <JobDescriptionInput @bind-Value="_jobDescription"
+                                                         Error="@_jdError"
+                                                         Disabled="_loading"
+                                                         HelperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate" />
+                                    <SampleJobPicker Current="@_jobDescription"
+                                                     OnSelect="s => _jobDescription = s"
                                                      Disabled="_loading" />
+                                </div>
+                            }
+                            else if (_step == 2)
+                            {
+                                <div class="form-section form-section-primary">
+                                    <ProfileSelector Profiles="_profiles"
+                                                     @bind-Value="_profileId"
+                                                     Disabled="_loading" />
+                                    <TemplateSelector Value="@_settings.Template"
+                                                      ValueChanged="SetTemplate"
+                                                      Disabled="_loading" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-section form-section-primary">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <FormatSelector Selected="_settings.SelectedFormats"
+                                                            Error="@_formatError"
+                                                            OnToggle="ToggleFormat"
+                                                            Disabled="_loading" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <PageOptions AllowTwoPages="_settings.AllowTwoPages"
+                                                         AllowTwoPagesChanged="SetAllowTwoPages"
+                                                         Disabled="_loading" />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="form-section form-actions">
-                                <GenerateButton Loading="_loading" Disabled="_loading" OnClick="GenerateAsync" />
+                            }
+                            <div class="form-section form-actions composer-nav">
+                                @if (_step > 1)
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-lg composer-back-btn"
+                                            disabled="@_loading"
+                                            @onclick="() => GoToStepAsync(_step - 1)">
+                                        <i class="bi bi-arrow-left me-1"></i>
+                                        Back
+                                    </button>
+                                }
+                                @if (_step < LastStep)
+                                {
+                                    <button type="button"
+                                            class="btn btn-primary btn-lg generate-btn"
+                                            @onclick="() => GoToStepAsync(_step + 1)">
+                                        Next
+                                        <i class="bi bi-arrow-right ms-1"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <GenerateButton Loading="_loading" Disabled="_loading" OnClick="GenerateAsync" />
+                                }
                             </div>
                         </form>
                     </div>
@@ -83,89 +116,38 @@
 }
 else
 {
-    <div class="details-fullscreen">
-        <AppHeader />
-        <div class="details-header">
-            <div class="details-header-inner">
-                <button type="button" class="btn btn-outline-secondary" disabled="@_loading" @onclick="BackToGenerate">
-                    <i class="bi bi-arrow-left me-1"></i>
-                    Back to Generate
-                </button>
-            </div>
-        </div>
-        <div class="details-layout">
-            <div class="details-preview-panel">
-                @if (_analysis != null)
-                {
-                    <CVPreview Html="@_analysis.PreviewHtml" />
-                }
-                else
-                {
-                    <div class="card main-card">
-                        <div class="card-body text-center">
-                            <p class="analysis-empty">No details to display yet.</p>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <div class="details-analysis-panel">
-                @if (_analysis != null)
-                {
-                    <div class="analysis-stack">
-                        <div class="analysis-cards">
-                            <MatchScoreCard Data="_analysis.MatchScore" />
-                            <ATSScoreCard Data="_analysis.ATSScore" />
-                            <MissingSkillsCard Data="_analysis.MissingSkills" />
-                            <KeywordAnalysisCard Data="_analysis.KeywordAnalysis" />
-                        </div>
-                        @if (!_showBulletEditor)
-                        {
-                            <div class="analysis-actions">
-                                <button type="button" class="btn btn-outline-primary me-3" @onclick="() => _showBulletEditor = true">
-                                    <i class="bi bi-pencil-square me-1"></i>
-                                    Edit Bullets &amp; Regenerate
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" @onclick="ResetAsync">
-                                    <i class="bi bi-arrow-counterclockwise me-1"></i>
-                                    Start Over
-                                </button>
-                            </div>
-                        }
-                        else
-                        {
-                            <BulletEditor GeneratedCv="_analysis.GeneratedCV"
-                                          OnRegenerate="RegenerateAsync"
-                                          OnCancel="() => _showBulletEditor = false"
-                                          Loading="_loading" />
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="card main-card">
-                        <div class="card-body text-center">
-                            <p class="analysis-empty">Generate a CV to view details.</p>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
+    <ResultsWorkspace Analysis="_analysis"
+                      Documents="_documents"
+                      Loading="_loading"
+                      Stage="_stage"
+                      @bind-Editing="_showBulletEditor"
+                      OnBack="BackToGenerate"
+                      OnStartOver="ResetAsync"
+                      OnDownload="DownloadAsync"
+                      OnRegenerate="RegenerateAsync" />
 }
 
 @code {
+    private const int LastStep = 3;
+
     private string _view = "generate";
+    private int _step = 1;
     private string _jobDescription = string.Empty;
     private string _profileId = "cv-master";
     private List<ProfileInfo> _profiles = new() { new("cv-master", "Default") };
     private AppSettings _settings = new();
     private List<HistoryEntry> _history = new();
     private AnalysisResult? _analysis;
+    private Dictionary<string, byte[]> _documents = new();
     private bool _loading;
+    private GenerationStage _stage;
     private bool _showHistory;
     private bool _showBulletEditor;
-    private string _error = string.Empty;
+    private string? _jdError;
+    private string? _formatError;
+    private bool _focusJd;
+    private bool _focusResults;
+    private string _announcement = string.Empty;
     private DotNetObjectReference<Home>? _selfRef;
 
     protected override async Task OnInitializedAsync()
@@ -192,6 +174,29 @@ else
         await JS.InvokeVoidAsync("cvApp.registerShortcuts", _selfRef);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Focus waits for the render that creates the target element
+        if (_focusResults && _view == "details" && _analysis != null)
+        {
+            _focusResults = false;
+            await JS.InvokeVoidAsync("cvApp.focusElement", "results-region");
+            return;
+        }
+
+        if (!_focusJd || _view != "generate" || _step != 1) return;
+
+        _focusJd = false;
+        await JS.InvokeVoidAsync("cvApp.focusElement", "job-description");
+    }
+
+    private void RequireJobDescription()
+    {
+        _step = 1;
+        _jdError = "Paste a job description to continue";
+        _focusJd = true;
+    }
+
     [JSInvokable]
     public Task OnPasteShortcut(string text) => InvokeAsync(() =>
     {
@@ -203,10 +208,29 @@ else
     [JSInvokable]
     public Task OnGenerateShortcut(string textareaValue) => InvokeAsync(async () =>
     {
-        if (_view != "generate" || _loading || string.IsNullOrWhiteSpace(textareaValue)) return;
-        _jobDescription = textareaValue;
+        // The editor only exists on step 1; on later steps the text already lives in _jobDescription
+        var text = string.IsNullOrWhiteSpace(textareaValue) ? _jobDescription : textareaValue;
+        if (_view != "generate" || _loading) return;
+
+        _jobDescription = text;
         await GenerateAsync();
+
+        // A JS-invoked method does not re-render on its own; validation errors need it
+        StateHasChanged();
     });
+
+    private Task GoToStepAsync(int step)
+    {
+        if (step > 1 && string.IsNullOrWhiteSpace(_jobDescription))
+        {
+            RequireJobDescription();
+            return Task.CompletedTask;
+        }
+
+        _jdError = null;
+        _step = Math.Clamp(step, 1, LastStep);
+        return Task.CompletedTask;
+    }
 
     private async Task SetTemplate(string template)
     {
@@ -234,23 +258,46 @@ else
 
     private string TemplateLabel() => TemplateEnum().ToString();
 
-    private async Task DownloadAsync(string format, byte[] bytes)
+    private async Task DownloadAsync(string format)
     {
-        using var stream = new MemoryStream(bytes);
-        using var reference = new DotNetStreamReference(stream);
-        await JS.InvokeVoidAsync("cvApp.downloadFile", CvService.BuildFileName(format), reference);
+        if (!_documents.TryGetValue(format, out var bytes)) return;
+
+        try
+        {
+            using var stream = new MemoryStream(bytes);
+            using var reference = new DotNetStreamReference(stream);
+            await JS.InvokeVoidAsync("cvApp.downloadFile", CvService.BuildFileName(format), reference);
+            Toasts.Success($"Download started: {format.ToUpperInvariant()}");
+        }
+        catch (Exception ex) when (ex is JSException or InvalidOperationException)
+        {
+            Logger.LogError(ex, "Error downloading {Format}", format);
+            Toasts.Error($"Could not download the {format.ToUpperInvariant()} file", "Retry", () => DownloadAsync(format));
+        }
     }
 
     private async Task GenerateAsync()
     {
-        if (string.IsNullOrWhiteSpace(_jobDescription)) { _error = "Please paste a job description"; return; }
-        if (SelectedFormats().Count == 0) { _error = "Please select at least one format"; return; }
+        if (string.IsNullOrWhiteSpace(_jobDescription)) { RequireJobDescription(); return; }
+        if (SelectedFormats().Count == 0) { _formatError = "Select at least one format"; return; }
 
-        _error = string.Empty;
+        _jdError = null;
+        _formatError = null;
         _loading = true;
         _analysis = null;
+        _documents = new();
         _showBulletEditor = false;
+        _showHistory = false;
+        _stage = GenerationStage.Parsing;
+        _view = "details";
         StateHasChanged();
+
+        // Progress<T> posts to the Blazor sync context, so the callback can touch component state directly
+        var progress = new Progress<GenerationStage>(stage =>
+        {
+            _stage = stage;
+            StateHasChanged();
+        });
 
         try
         {
@@ -261,23 +308,24 @@ else
                 Template = TemplateEnum(),
                 AllowTwoPages = _settings.AllowTwoPages,
                 ProfileId = _profileId
-            });
+            }, progress);
 
-            foreach (var (format, bytes) in documents)
-                await DownloadAsync(format, bytes);
-
+            _documents = documents;
             _analysis = analysis;
+            _focusResults = true;
+            _announcement = $"CV ready. Match score {analysis.MatchScore.Overall} percent. ATS score {analysis.ATSScore.Overall} out of 100.";
             _history = await Store.AddToHistoryAsync(_jobDescription, analysis.MatchScore.Overall, TemplateLabel());
-            _view = "details";
         }
         catch (ArgumentException ex)
         {
-            _error = ex.Message;
+            _view = "generate";
+            Toasts.Error(ex.Message);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error generating CV");
-            _error = "An error occurred while generating the CV";
+            _view = "generate";
+            Toasts.Error("Something went wrong while generating the CV", "Retry", GenerateAsync);
         }
         finally
         {
@@ -290,7 +338,6 @@ else
         if (_analysis == null) return;
 
         _loading = true;
-        _error = string.Empty;
         StateHasChanged();
 
         try
@@ -304,21 +351,20 @@ else
                 AllowTwoPages = _settings.AllowTwoPages
             });
 
-            foreach (var (format, bytes) in documents)
-                await DownloadAsync(format, bytes);
-
+            _documents = documents;
             _analysis.GeneratedCV = edit.Cv;
             _analysis.PreviewHtml = previewHtml;
             _showBulletEditor = false;
+            Toasts.Success("CV regenerated");
         }
         catch (ArgumentException ex)
         {
-            _error = ex.Message;
+            Toasts.Error(ex.Message);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error regenerating CV");
-            _error = "Error regenerating CV";
+            Toasts.Error("Something went wrong while regenerating the CV", "Retry", () => RegenerateAsync(edit));
         }
         finally
         {
@@ -329,8 +375,9 @@ else
     private async Task LoadHistoryEntry(HistoryEntry entry)
     {
         _jobDescription = entry.JobDescription;
+        _step = 1;
         _showHistory = false;
-        _error = string.Empty;
+        _jdError = null;
         await JS.InvokeVoidAsync("cvApp.scrollToTop");
     }
 
@@ -347,7 +394,6 @@ else
         _view = "generate";
         _showHistory = false;
         _showBulletEditor = false;
-        _error = string.Empty;
         await JS.InvokeVoidAsync("cvApp.scrollToTop");
     }
 
@@ -361,10 +407,13 @@ else
         await Store.SaveSettingsAsync(_settings);
 
         _analysis = null;
+        _documents = new();
         _showBulletEditor = false;
         _showHistory = false;
+        _step = 1;
         _view = "generate";
-        _error = string.Empty;
+        _jdError = null;
+        _formatError = null;
         await JS.InvokeVoidAsync("cvApp.scrollToTop");
     }
 

@@ -197,7 +197,11 @@ dotnet test --filter Category=Unit               # helpers only, under a second
 dotnet test --filter Category=Invariant          # the product promise: output only contains what the master profile says
 dotnet test --filter Category=Api                # WebApplicationFactory integration tests
 dotnet test --filter Category=Documents          # DOCX, PDF and HTML preview
+dotnet test --filter "Category!=E2E"             # everything except the browser tests
+dotnet test ErCv.E2E                             # browser tests only (Playwright), about 1 minute
 ```
+
+The browser tests (`ErCv.E2E`) start the web app on a free port and drive it with Playwright: generate flow, downloads, edit and regenerate, persistence, keyboard shortcuts, 360 / 390 / 768px viewports and an axe accessibility scan in light and dark. They use a browser that is already installed (Chrome, then Edge) and download nothing. Set `E2E_BROWSER_CHANNEL` to pick another one, or `E2E_BASE_URL` to test an app that is already running.
 
 PDF tests use the Chromium that PuppeteerSharp downloads on first use; set `PUPPETEER_EXECUTABLE_PATH` to use an installed Chrome instead (CI does). One test is skipped on purpose: Minimalist 1-page mode can spill onto a second page (`MATCH-08` in `features.md`).
 
