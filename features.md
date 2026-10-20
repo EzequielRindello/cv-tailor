@@ -52,8 +52,8 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | UX-09 | Responsive pass | E2 Redesign | P1 | M | Todo |
 | UX-10 | CV template visual polish | E2 Redesign | P2 | M | Todo |
 | PROF-01 | In-browser profile editor | E3 Your profile | P1 | L | Todo |
-| PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | Todo |
-| PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Todo |
+| PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | In progress |
+| PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
 | PROF-04 | Profile health check | E3 Your profile | P2 | M | Todo |
 | PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Todo |
 | MATCH-01 | Fix fuzzy-match false positives | E4 Matching | P0 | S | Done |
@@ -436,21 +436,23 @@ Files: new `Components/Pages/Profile.razor`, `UI/BrowserStore.cs`
 Verify: bUnit tests for the editor; E2E create profile, generate, output uses it.
 
 ### PROF-02: Import/export + validation
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** In progress (validator done, import/export UI pending) · **Priority:** P1 · **Effort:** M
 
 - [ ] Import JSON file; export current profile as JSON
-- [ ] Validation with field-level errors (required fields, date formats, empty bullets)
+- [x] Validation with field-level errors (required fields, date formats, empty bullets)
 - [ ] Downloadable blank template
 
 Verify: unit tests for the validator; E2E import round-trip.
 
 ### PROF-03: Generate from a custom profile
-**Status:** Todo · **Priority:** P1 · **Effort:** S
+**Status:** Done · **Priority:** P1 · **Effort:** S
 
-- [ ] `CVGeneratorService` overload that takes a `CVMaster` instead of a `profileId`
-- [ ] Demo profile stays the default
+- [x] `CVGeneratorService` overload that takes a `CVMaster` instead of a `profileId`
+- [x] Demo profile stays the default
 
-Verify: TEST-03 invariants run against a custom profile.
+Notes: `BuildCvAsync(request, profile, progress)` validates the profile with `ProfileValidator` and raises `ArgumentException` listing the first 5 field paths. The stored `profileId` path is unchanged. `DateParser.TryParseStrict` was added for the validator (the tolerant `TryParse` reads "13/2024" as 2024).
+
+Verify: `CustomProfileTests` runs the no-fabrication, header, score-range and no-mutation checks against custom profiles.
 
 ### PROF-04: Profile health check
 **Status:** Todo · **Priority:** P2 · **Effort:** M

@@ -17,6 +17,7 @@ namespace ErCvApi.Services
         private readonly MissingSkillsAnalyzer _missingSkillsAnalyzer;
         private readonly KeywordAnalyzer _keywordAnalyzer;
         private readonly ATSChecker _atsChecker;
+        private readonly ProfileValidator _profileValidator = new();
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<CVGeneratorService> _logger;
         private readonly string _harvardTemplatePath;
@@ -152,6 +153,18 @@ namespace ErCvApi.Services
             return await GenerateCVInternalAsync(request, progress);
         }
 
+        /// <summary>
+        /// Builds a CV from a profile the caller supplies (PROF-03) instead of a stored <c>profileId</c>.
+        /// The profile is validated first; an invalid one raises <see cref="ArgumentException"/> listing the problems.
+        /// </summary>
+        public async Task<(Dictionary<string, byte[]> Documents, AnalysisResult Analysis)> BuildCvAsync(
+            GenerateRequest request, CVMaster profile, IProgress<GenerationStage>? progress = null)
+        {
+            ValidateGenerateRequest(request);
+            ValidateProfile(profile);
+            return await GenerateCVInternalAsync(request, progress, profile);
+        }
+
         public async Task<(Dictionary<string, byte[]> Documents, string PreviewHtml)> RebuildCvAsync(RegenerateRequest request)
         {
             ValidateRegenerateRequest(request);
@@ -177,10 +190,11 @@ namespace ErCvApi.Services
             new OkObjectResult(new { status = ApiConstants.StatusHealthy, timestamp = DateTime.UtcNow });
 
         private async Task<(Dictionary<string, byte[]>, AnalysisResult)>
-            GenerateCVInternalAsync(GenerateRequest request, IProgress<GenerationStage>? progress = null)
+            GenerateCVInternalAsync(
+                GenerateRequest request, IProgress<GenerationStage>? progress = null, CVMaster? profile = null)
         {
             await ReportAsync(progress, GenerationStage.Parsing);
-            var cvMaster = await LoadCVMasterAsync(request.ProfileId);
+            var cvMaster = profile ?? await LoadCVMasterAsync(request.ProfileId);
             var requirements = _parser.Parse(request.JobDescription);
 
             await ReportAsync(progress, GenerationStage.Scoring);
@@ -302,6 +316,16 @@ namespace ErCvApi.Services
                 throw new ArgumentException(ApiConstants.ErrorFormatsRequired);
 
             ValidateFormats(request.Formats);
+        }
+
+        private void ValidateProfile(CVMaster? profile)
+        {
+            var result = _profileValidator.Validate(profile);
+            if (result.IsValid) return;
+
+            var shown = result.Issues.Take(5).Select(i => $"{i.Path}: {i.Message}");
+            var more = result.Issues.Count > 5 ? $" (and {result.Issues.Count - 5} more)" : string.Empty;
+            throw new ArgumentException("Profile is not valid. " + string.Join(" ", shown) + more);
         }
 
         private void ValidateRegenerateRequest(RegenerateRequest request)
