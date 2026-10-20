@@ -13,7 +13,7 @@
 @if (_view == "generate")
 {
     <div class="container app-shell py-4 py-lg-5">
-        <AppHeader />
+        <Hero />
         <div class="row justify-content-center">
             <div class="col-lg-8 col-xl-7">
                 <div class="card main-card">
@@ -47,6 +47,9 @@
                             <div class="form-section form-section-primary">
                                 <ProfileSelector Profiles="_profiles"
                                                  @bind-Value="_profileId"
+                                                 Disabled="_loading" />
+                                <SampleJobPicker Current="_jobDescription"
+                                                 OnSelect="s => _jobDescription = s"
                                                  Disabled="_loading" />
                                 <JobDescriptionInput @bind-Value="_jobDescription"
                                                      Disabled="_loading"
@@ -84,7 +87,6 @@
 else
 {
     <div class="details-fullscreen">
-        <AppHeader />
         <div class="details-header">
             <div class="details-header-inner">
                 <button type="button" class="btn btn-outline-secondary" disabled="@_loading" @onclick="BackToGenerate">

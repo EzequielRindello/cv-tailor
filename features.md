@@ -315,11 +315,11 @@ Files: `wwwroot/css/site.css`, `wwwroot/lib/fonts/*`, `Components/**/*.razor.css
 Verify: visual check in light and dark; contrast check with axe (UX-08).
 
 ### UX-02: App shell and editorial hero
-**Status:** Todo · **Priority:** P0 · **Effort:** M
+**Status:** In progress ("Try demo" arrives with APP-03) · **Priority:** P0 · **Effort:** M
 
-- [ ] Top bar: wordmark, "Try demo", GitHub link, theme toggle
-- [ ] Hero: serif headline, one-line value prop ("Tailored to every job. Nothing invented."), short 3-point "how it works"
-- [ ] Footer with privacy note and version
+- [x] Top bar: wordmark, GitHub link, theme toggle (the "Try demo" button is added with APP-03)
+- [x] Hero: serif headline, one-line value prop ("Tailored to every job. Nothing invented."), short 3-point "how it works"
+- [x] Footer with privacy note and version
 
 Files: `Components/Layout/MainLayout.razor`, `Components/Shared/AppHeader.razor`
 Verify: E2E screenshot; first view looks finished on desktop and mobile.
@@ -603,12 +603,12 @@ Verify: bUnit + E2E.
 Verify: E2E.
 
 ### APP-03: Sample JD gallery
-**Status:** Todo · **Priority:** P0 · **Effort:** S
+**Status:** In progress (E2E and the "Try demo" top bar link pending) · **Priority:** P0 · **Effort:** S
 
 Why: portfolio visitors rarely have a JD at hand.
 
-- [ ] 5 to 6 curated JDs (backend, frontend, full stack, data, DevOps, junior)
-- [ ] One click fills the composer
+- [x] 6 curated JDs (backend, frontend, full stack, data, DevOps, junior) in `Data/SampleJobDescriptions.cs`
+- [x] One click fills the composer (`SampleJobPicker.razor`)
 
 Verify: E2E: pick sample, generate.
 

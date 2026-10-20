@@ -1,0 +1,15 @@
+<footer class="app-footer">
+    <p>
+        We don't store your data. There is no database and no account.
+        Your history and settings stay in your own browser.
+    </p>
+    <p class="app-footer-version">v@(Version)</p>
+</footer>
+
+@code {
+    private static readonly string Version =
+        (typeof(AppFooter).Assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+            .Cast<System.Reflection.AssemblyInformationalVersionAttribute>()
+            .FirstOrDefault()?.InformationalVersion ?? "1.0.0")
+        .Split('+')[0];
+}
