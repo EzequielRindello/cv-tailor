@@ -76,7 +76,7 @@
 @code {
     [Parameter, EditorRequired] public KeywordAnalysis Data { get; set; } = new();
 
-    private bool _open;
+    private bool _open = true;
 
     private RenderFragment KeywordRow(KeywordItem item) => @<div class="keyword-row">
         <span class="kw-status @(item.PresentInCV ? "present" : "missing")">

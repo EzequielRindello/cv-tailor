@@ -1,0 +1,25 @@
+<div class="score-gauge @Tone" role="img" aria-label="@Label @Percent out of 100">
+    <svg viewBox="0 0 120 120" class="gauge-svg" aria-hidden="true" focusable="false">
+        <circle class="gauge-track" cx="60" cy="60" r="52" />
+        <circle class="gauge-arc" cx="60" cy="60" r="52" pathLength="100" style="--gauge-value: @Percent" />
+    </svg>
+    <div class="gauge-center" aria-hidden="true">
+        <span class="gauge-num" style="--target: @Percent"></span>
+        @if (!string.IsNullOrEmpty(Unit))
+        {
+            <span class="gauge-unit">@Unit</span>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Value { get; set; }
+
+    /// <summary>green, yellow or red (the ColorClass the score calculators already return).</summary>
+    [Parameter] public string Tone { get; set; } = "yellow";
+
+    [Parameter] public string Label { get; set; } = "Score";
+    [Parameter] public string? Unit { get; set; } = "%";
+
+    private int Percent => Math.Clamp(Value, 0, 100);
+}

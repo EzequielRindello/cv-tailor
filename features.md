@@ -348,12 +348,12 @@ Files: `Components/Pages/Home.razor`, new `Components/Shared/ResultsWorkspace.ra
 Verify: E2E: generate without download prompt, then click to download.
 
 ### UX-05: Score visualizations
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** Done (bUnit render tests wait for TEST-06) · **Priority:** P1 · **Effort:** M
 
-- [ ] Radial gauges for Match and ATS (inline SVG, no chart library)
-- [ ] Stacked breakdown bar for skills / keywords / seniority
-- [ ] Missing skills as a chip cloud, required vs nice-to-have
-- [ ] Count-up animation, disabled under `prefers-reduced-motion`
+- [x] Radial gauges for Match and ATS (inline SVG, no chart library): `ScoreGauge.razor`
+- [x] Stacked breakdown bar for skills / keywords / seniority (segment width = weight, fill = points earned)
+- [x] Missing skills as a chip cloud, required vs nice-to-have (solid vs outline, with a legend)
+- [x] Count-up animation, disabled under `prefers-reduced-motion`
 
 Files: `MatchScoreCard.razor`, `ATSScoreCard.razor`, `MissingSkillsCard.razor`, `KeywordAnalysisCard.razor`
 Verify: bUnit render tests for each color state (TEST-06).
