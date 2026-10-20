@@ -96,12 +96,24 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 
 ## Milestones
 
-1. **M1 Foundation**: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, MATCH-01, MATCH-02, MATCH-03, ENG-02, ENG-03, OPS-01. Fixes ship with their tests from day one.
-2. **M2 Redesign**: UX-01 to UX-09, APP-03, TEST-07 (E2E written against the new UI).
-3. **M3 Your data**: PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
-4. **M4 Output**: EDIT-01 to EDIT-06, MATCH-08, UX-10.
-5. **M5 Polish & presentation**: OPS-02 to OPS-05, ENG-01, ENG-04, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10.
-6. **M6 Optional AI**: AI-01 to AI-05.
+1. **M1 Foundation** (v2.0.2, released): TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, MATCH-01, MATCH-02, MATCH-03, ENG-02, ENG-03, OPS-01. Fixes ship with their tests from day one.
+2. **M2 Redesign** (v2.0.3, released): UX-01 to UX-09, APP-03, TEST-07 (E2E written against the new UI).
+3. **M3 Your data** (v2.0.4): PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
+4. **M4 Output** (v2.0.5): EDIT-01 to EDIT-06, MATCH-08, UX-10.
+5. **M5 Polish & presentation** (v2.0.6): OPS-02 to OPS-05, ENG-01, ENG-04, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10.
+6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05.
+
+### Versioning
+
+One milestone is one version: `2.0.<N+1>` for milestone `M<N>`. The version before the roadmap was 2.0.1.
+
+**PR names.** Branch `feature/m<N>-<short-name>` (for example `feature/m3-your-data`). PR title `v2.0.<N+1>: M<N> <name>` (for example `v2.0.4: M3 Your data`). A fix to something already released goes in its own small PR titled `fix: <what>` and does not change the version.
+
+**When a milestone is ready to merge**, the same PR also:
+1. Sets `<Version>` in `ErCv.Web/ErCv.Web.csproj` (the app footer shows it).
+2. Updates "Current version" in `README.md`.
+3. Marks the milestone as `released` in the list above and checks that every item in it is `Done` in the dashboard.
+4. Updates the "Open items after" section: what was left to a later milestone, and which one owns it.
 
 ---
 

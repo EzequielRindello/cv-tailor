@@ -186,7 +186,11 @@ er-cv-generator/
 ```
 
 ---
-### version 2.0.1
+
+## Version
+
+Current version: **2.0.3** (M2 Redesign). Each milestone of the roadmap ships as one version, see [Versioning in `features.md`](features.md#versioning).
+
 ---
 
 ## Tests
