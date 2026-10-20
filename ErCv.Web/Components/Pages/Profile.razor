@@ -153,8 +153,14 @@
 
                 <div class="profile-save-bar">
                     <button type="button" class="btn btn-primary" id="profile-save" @onclick="SaveAsync">Save profile</button>
+                    <button type="button" class="btn btn-outline-secondary" id="profile-health-check"
+                            @onclick="() => _health = ProfileHealthChecker.Check(_profile)">Check profile health</button>
                     <span class="profile-saved" role="status">@_status</span>
                 </div>
+                @if (_health != null)
+                {
+                    <div class="mt-3"><ProfileHealthCard Findings="_health" /></div>
+                }
             </div>
         </div>
     }
@@ -165,6 +171,7 @@
 
     private CVMaster _profile = Blank();
     private Dictionary<string, string> _errors = new();
+    private List<HealthFinding>? _health;
     private bool _loaded;
     private string _status = string.Empty;
 

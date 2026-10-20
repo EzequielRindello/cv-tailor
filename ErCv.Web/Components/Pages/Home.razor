@@ -79,6 +79,10 @@
                             else
                             {
                                 <div class="form-section form-section-primary">
+                                    @if (_health != null)
+                                    {
+                                        <ProfileHealthCard Findings="_health" />
+                                    }
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <FormatSelector Selected="_settings.SelectedFormats"
@@ -148,6 +152,7 @@ else
     private string _profileId = "cv-master";
     private CVMaster? _importedProfile;
     private CVMaster? _myProfile;
+    private List<HealthFinding>? _health;
     private List<ProfileInfo> _profiles = new() { new("cv-master", "Default") };
     private AppSettings _settings = new();
     private List<HistoryEntry> _history = new();
@@ -235,17 +240,31 @@ else
         StateHasChanged();
     });
 
-    private Task GoToStepAsync(int step)
+    private async Task GoToStepAsync(int step)
     {
         if (step > 1 && string.IsNullOrWhiteSpace(_jobDescription))
         {
             RequireJobDescription();
-            return Task.CompletedTask;
+            return;
         }
 
         _jdError = null;
         _step = Math.Clamp(step, 1, LastStep);
-        return Task.CompletedTask;
+        if (_step == LastStep) await CheckProfileHealthAsync();
+    }
+
+    /// <summary>PROF-04: advice on the profile that is about to be used. A profile that cannot be loaded just skips it.</summary>
+    private async Task CheckProfileHealthAsync()
+    {
+        try
+        {
+            _health = ProfileHealthChecker.Check(ActiveProfile ?? await CvService.GetProfileAsync(_profileId));
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException)
+        {
+            Logger.LogWarning(ex, "Could not run the profile health check.");
+            _health = null;
+        }
     }
 
     /// <summary>The profile sent with the request: an imported one wins, then the saved "My profile" if selected. Null means a stored demo profile.</summary>

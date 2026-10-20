@@ -54,7 +54,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | PROF-01 | In-browser profile editor | E3 Your profile | P1 | L | Done |
 | PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | Done |
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
-| PROF-04 | Profile health check | E3 Your profile | P2 | M | Todo |
+| PROF-04 | Profile health check | E3 Your profile | P2 | M | Done |
 | PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Todo |
 | MATCH-01 | Fix fuzzy-match false positives | E4 Matching | P0 | S | Done |
 | MATCH-02 | Word-boundary ATS keyword density | E4 Matching | P0 | S | Done |
@@ -458,12 +458,14 @@ Notes: `BuildCvAsync(request, profile, progress)` validates the profile with `Pr
 Verify: `CustomProfileTests` runs the no-fabrication, header, score-range and no-mutation checks against custom profiles.
 
 ### PROF-04: Profile health check
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+**Status:** Done · **Priority:** P2 · **Effort:** M
 
-- [ ] Flags bullets without metrics, weak opening verbs, experiences without skill tags, overlapping or invalid dates
-- [ ] Shown as a checklist before generating
+- [x] Flags bullets without metrics, weak opening verbs, experiences without skill tags, overlapping or invalid dates
+- [x] Shown as a checklist before generating
 
-Verify: unit tests per rule.
+Notes: `ProfileHealthChecker.Check` returns `HealthFinding(rule, path, message)`. Metrics reuse `ATSConstants.MetricsRegex`, so a flagged bullet is one the ATS check would also not count. Weak verbs are judged on the first word only. Roles that overlap by one month or less are treated as a hand-over. `ProfileHealthCard` is shown at the top of step 3 for the profile about to be used (demo, My profile or imported) and on `/profile` through "Check profile health". It is advice only and never blocks generating.
+
+Verify: `ProfileHealthCheckerTests` (one group per rule); `ProfileHealthTests` E2E (checklist shows warnings, CV still generates; editor button).
 
 ### PROF-05: Import from an existing resume
 **Status:** Todo · **Priority:** P3 · **Effort:** L

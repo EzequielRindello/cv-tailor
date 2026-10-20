@@ -62,6 +62,7 @@ namespace ErCv.E2E
 
             await NextAsync();
             await AssertNoSeriousViolationsAsync("step 3");
+            await Assertions.Expect(Page.Locator("#profile-health")).ToBeVisibleAsync();
         }
 
         [Fact]
