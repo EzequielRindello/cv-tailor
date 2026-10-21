@@ -8,6 +8,7 @@ on:
   #   - cron: "0 6 * * 1"
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
@@ -61,3 +62,7 @@ jobs:
             --title "chore: refresh job post corpus ($(date -u +%Y-%m-%d))" \
             --body "Automated run of \`dotnet run --project ErCv.Collector -- refresh\`. Review the added and removed posts and \`corpus/report.md\` before merging." \
           || gh pr edit "$branch" --body "Updated by a later run on $(date -u +%Y-%m-%d)."
+
+          # GitHub does not run pull_request workflows for a PR opened with GITHUB_TOKEN, so CI is started here.
+          # Its checks land on the branch's head commit, which is what the PR shows.
+          gh workflow run ci.yml --ref "$branch"

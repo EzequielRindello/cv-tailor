@@ -4,6 +4,8 @@ on:
   push:
     branches: [master]
   pull_request:
+  # The corpus refresh starts it on its own PR branch: a PR opened with GITHUB_TOKEN does not trigger pull_request.
+  workflow_dispatch:
 
 permissions:
   contents: read
