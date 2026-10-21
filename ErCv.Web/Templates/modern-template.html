@@ -204,6 +204,8 @@
     <div class="body-grid">
         <!-- Left Column -->
         <div class="left-col">
+            {{#Sections}}
+            {{#IsSkills}}
             <!-- Skills -->
             {{#HasSkills}}
             <div class="section-title">Skills</div>
@@ -216,7 +218,9 @@
             </div>
             {{/SkillCategories}}
             {{/HasSkills}}
+            {{/IsSkills}}
 
+            {{#IsEducation}}
             <!-- Education -->
             <div class="section-title">Education</div>
             {{#Education}}
@@ -226,16 +230,22 @@
                 <div class="edu-date">{{GraduationDate}} · {{Location}}</div>
             </div>
             {{/Education}}
+            {{/IsEducation}}
+            {{/Sections}}
         </div>
 
         <!-- Right Column -->
         <div class="right-col">
+            {{#Sections}}
+            {{#IsSummary}}
             <!-- Summary -->
             {{#HasSummary}}
             <div class="section-title">Profile</div>
             <div class="summary-text">{{Summary}}</div>
             {{/HasSummary}}
+            {{/IsSummary}}
 
+            {{#IsExperience}}
             <!-- Experience -->
             <div class="section-title">Experience</div>
             {{#Experience}}
@@ -250,7 +260,9 @@
                 </ul>
             </div>
             {{/Experience}}
+            {{/IsExperience}}
 
+            {{#IsProjects}}
             <!-- Projects -->
             {{#HasProjects}}
             <div class="section-title">Projects</div>
@@ -263,6 +275,8 @@
             </div>
             {{/Projects}}
             {{/HasProjects}}
+            {{/IsProjects}}
+            {{/Sections}}
         </div>
     </div>
 </body>

@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using ErCv.Web.Constants;
 using ErCv.Web.Models;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
@@ -45,19 +46,51 @@ public partial class DocumentRenderer
     private static string? _downloadedExecutablePath;
 
     private readonly string _templatePath;
+    private readonly IReadOnlyList<string> _defaultSectionOrder;
 
     #endregion
 
     #region Constructors
 
-    public DocumentRenderer(string templatePath)
+    public DocumentRenderer(string templatePath, IReadOnlyList<string>? defaultSectionOrder = null)
     {
         _templatePath = templatePath;
+        _defaultSectionOrder = defaultSectionOrder ?? DocumentConstants.HarvardSectionOrder;
     }
 
     #endregion
 
     #region Public Methods
+
+    /// <summary>The renderer for a template: its file in <paramref name="templatesFolder"/> and the order it prints sections in.</summary>
+    public static DocumentRenderer ForTemplate(string templatesFolder, CVTemplate template)
+    {
+        var file = template switch
+        {
+            CVTemplate.Modern => TemplatePaths.ModernTemplate,
+            CVTemplate.Minimalist => TemplatePaths.MinimalistTemplate,
+            _ => TemplatePaths.HarvardTemplate
+        };
+        return new DocumentRenderer(Path.Combine(templatesFolder, file), DefaultSectionOrder(template));
+    }
+
+    public static IReadOnlyList<string> DefaultSectionOrder(CVTemplate template) => template switch
+    {
+        CVTemplate.Modern => DocumentConstants.ModernSectionOrder,
+        CVTemplate.Minimalist => DocumentConstants.MinimalistSectionOrder,
+        _ => DocumentConstants.HarvardSectionOrder
+    };
+
+    /// <summary>
+    /// The user's order with unknown keys and repeats dropped, then every section it left out in the default order,
+    /// so a stale or partial order (an older history entry, an API call) still prints every section once.
+    /// </summary>
+    public static List<string> ResolveSectionOrder(IEnumerable<string>? chosen, IReadOnlyList<string> defaults)
+    {
+        var order = (chosen ?? Enumerable.Empty<string>()).Where(defaults.Contains).Distinct().ToList();
+        order.AddRange(defaults.Where(key => !order.Contains(key)));
+        return order;
+    }
 
     public Task<byte[]> RenderPdfAsync(GeneratedCV cv) => RenderPdfAsync(RenderHtml(cv));
 
@@ -129,6 +162,14 @@ public partial class DocumentRenderer
             Location = cv.Header?.Location ?? "",
             LinkedIn = cv.Header?.LinkedIn ?? "",
             GitHub = cv.Header?.GitHub ?? "",
+            Sections = ResolveSectionOrder(cv.SectionOrder, _defaultSectionOrder).Select(key => new
+            {
+                IsSummary = key == DocumentConstants.SectionSummaryKey,
+                IsEducation = key == DocumentConstants.SectionEducationKey,
+                IsExperience = key == DocumentConstants.SectionExperienceKey,
+                IsSkills = key == DocumentConstants.SectionSkillsKey,
+                IsProjects = key == DocumentConstants.SectionProjectsKey
+            }).ToList(),
             HasSummary = !string.IsNullOrEmpty(cv.Summary),
             Summary = cv.Summary ?? "",
             Education = cv.Education ?? new List<Education>(),
@@ -163,32 +204,9 @@ public partial class DocumentRenderer
 
             AddHeader(body, cv.Header);
 
-            if (!string.IsNullOrEmpty(cv.Summary))
-            {
-                AddSectionTitle(body, DocumentConstants.SectionSummary);
-                AddParagraph(body, cv.Summary);
-            }
-
-            AddSectionTitle(body, DocumentConstants.SectionEducation);
-            foreach (var edu in cv.Education ?? new List<Education>())
-                AddEducation(body, edu);
-
-            AddSectionTitle(body, DocumentConstants.SectionExperience);
-            foreach (var exp in cv.Experience ?? new List<Experience>())
-                AddExperience(body, exp);
-
-            if (cv.Skills?.Any() == true)
-            {
-                AddSectionTitle(body, DocumentConstants.SectionSkills);
-                AddSkills(body, cv.Skills);
-            }
-
-            if (cv.Projects?.Any() == true)
-            {
-                AddSectionTitle(body, DocumentConstants.SectionProjects);
-                foreach (var project in cv.Projects)
-                    AddProject(body, project);
-            }
+            // The DOCX has one layout, so without a chosen order it uses Harvard's
+            foreach (var section in ResolveSectionOrder(cv.SectionOrder, DocumentConstants.HarvardSectionOrder))
+                AddSection(body, cv, section);
 
             // The schema requires the section properties to be the last child of the body
             body.AppendChild(new SectionProperties(
@@ -312,6 +330,36 @@ public partial class DocumentRenderer
         cRun.AppendChild(new Text(string.Join($" {DocumentConstants.BulletSymbol} ", contactParts)));
 
         body.AppendChild(new Paragraph());
+    }
+
+    private void AddSection(Body body, GeneratedCV cv, string section)
+    {
+        switch (section)
+        {
+            case DocumentConstants.SectionSummaryKey when !string.IsNullOrEmpty(cv.Summary):
+                AddSectionTitle(body, DocumentConstants.SectionSummary);
+                AddParagraph(body, cv.Summary);
+                break;
+            case DocumentConstants.SectionEducationKey:
+                AddSectionTitle(body, DocumentConstants.SectionEducation);
+                foreach (var edu in cv.Education ?? new List<Education>())
+                    AddEducation(body, edu);
+                break;
+            case DocumentConstants.SectionExperienceKey:
+                AddSectionTitle(body, DocumentConstants.SectionExperience);
+                foreach (var exp in cv.Experience ?? new List<Experience>())
+                    AddExperience(body, exp);
+                break;
+            case DocumentConstants.SectionSkillsKey when cv.Skills?.Any() == true:
+                AddSectionTitle(body, DocumentConstants.SectionSkills);
+                AddSkills(body, cv.Skills);
+                break;
+            case DocumentConstants.SectionProjectsKey when cv.Projects?.Any() == true:
+                AddSectionTitle(body, DocumentConstants.SectionProjects);
+                foreach (var project in cv.Projects)
+                    AddProject(body, project);
+                break;
+        }
     }
 
     private void AddSectionTitle(Body body, string title)

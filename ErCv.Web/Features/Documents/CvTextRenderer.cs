@@ -6,7 +6,7 @@ namespace ErCv.Web.Features.Documents;
 
 /// <summary>
 /// The CV as plain text or Markdown (EDIT-06), for the paste-in fields of an applicant tracking system.
-/// Same sections and order as the DOCX, with nothing the CV does not already hold.
+/// Same sections and order as the DOCX (the user's order when they chose one), with nothing the CV does not hold.
 /// </summary>
 public static class CvTextRenderer
 {
@@ -55,15 +55,17 @@ public static class CvTextRenderer
             .Select(Esc);
         text.AppendLine(string.Join(DocumentConstants.DetailSeparator, contact));
 
-        if (!string.IsNullOrWhiteSpace(cv.Summary))
+        void WriteSummary()
         {
+            if (string.IsNullOrWhiteSpace(cv.Summary)) return;
             Section(DocumentConstants.SectionSummary);
             text.AppendLine(Esc(cv.Summary));
         }
 
-        var education = cv.Education ?? new List<Education>();
-        if (education.Any())
+        void WriteEducation()
         {
+            var education = cv.Education ?? new List<Education>();
+            if (!education.Any()) return;
             Section(DocumentConstants.SectionEducation);
             foreach (var edu in education)
             {
@@ -77,9 +79,10 @@ public static class CvTextRenderer
             }
         }
 
-        var experience = cv.Experience ?? new List<Experience>();
-        if (experience.Any())
+        void WriteExperience()
         {
+            var experience = cv.Experience ?? new List<Experience>();
+            if (!experience.Any()) return;
             Section(DocumentConstants.SectionExperience);
             foreach (var exp in experience)
             {
@@ -102,14 +105,16 @@ public static class CvTextRenderer
             }
         }
 
-        if (cv.Skills?.Any() == true)
+        void WriteSkills()
         {
+            if (cv.Skills?.Any() != true) return;
             Section(DocumentConstants.SectionSkills);
             text.AppendLine(string.Join(", ", cv.Skills.Select(Esc)));
         }
 
-        if (cv.Projects?.Any() == true)
+        void WriteProjects()
         {
+            if (cv.Projects?.Any() != true) return;
             Section(DocumentConstants.SectionProjects);
             foreach (var project in cv.Projects)
             {
@@ -122,6 +127,19 @@ public static class CvTextRenderer
                     var technologies = DocumentConstants.TechnologiesLabel + string.Join(", ", project.Technologies.Select(Esc));
                     text.AppendLine(markdown ? Italic(technologies) : technologies);
                 }
+            }
+        }
+
+        // One layout like the DOCX, so without a chosen order it follows Harvard's
+        foreach (var section in DocumentRenderer.ResolveSectionOrder(cv.SectionOrder, DocumentConstants.HarvardSectionOrder))
+        {
+            switch (section)
+            {
+                case DocumentConstants.SectionSummaryKey: WriteSummary(); break;
+                case DocumentConstants.SectionEducationKey: WriteEducation(); break;
+                case DocumentConstants.SectionExperienceKey: WriteExperience(); break;
+                case DocumentConstants.SectionSkillsKey: WriteSkills(); break;
+                case DocumentConstants.SectionProjectsKey: WriteProjects(); break;
             }
         }
 

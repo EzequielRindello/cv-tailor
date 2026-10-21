@@ -37,16 +37,8 @@ public static class DocumentSupport
         return new CVSelector().SelectAndAdaptCV(master, req, twoPages);
     }
 
-    public static DocumentRenderer Renderer(CVTemplate template)
-    {
-        var file = template switch
-        {
-            CVTemplate.Modern => TemplatePaths.ModernTemplate,
-            CVTemplate.Minimalist => TemplatePaths.MinimalistTemplate,
-            _ => TemplatePaths.HarvardTemplate
-        };
-        return new DocumentRenderer(Path.Combine(AppContext.BaseDirectory, TemplatePaths.TemplatesFolder, file));
-    }
+    public static DocumentRenderer Renderer(CVTemplate template) =>
+        DocumentRenderer.ForTemplate(Path.Combine(AppContext.BaseDirectory, TemplatePaths.TemplatesFolder), template);
 
     public static int BulletCount(GeneratedCV cv) => cv.Experience.Sum(e => e.Bullets.Count);
 

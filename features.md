@@ -66,8 +66,8 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | MATCH-07 | Skill/alias dictionary as data file, tuned on real posts | E4 Matching | P1 | M | Done |
 | MATCH-08 | Page fit measured on the rendered PDF | E4 Matching | P1 | M | Done |
 | MATCH-09 | Seniority detection from the title and wording | E4 Matching | P1 | S | Done |
-| EDIT-01 | Inline editing in the workspace | E5 Editing | P2 | L | Todo |
-| EDIT-02 | Live HTML preview, documents on download | E5 Editing | P2 | M | Todo |
+| EDIT-01 | Inline editing in the workspace | E5 Editing | P2 | L | Done |
+| EDIT-02 | Live HTML preview, documents on download | E5 Editing | P2 | M | Done |
 | EDIT-03 | Cover letter generator | E5 Editing | P2 | M | Todo |
 | EDIT-04 | CV output language (EN/ES) | E5 Editing | P2 | M | Todo |
 | EDIT-05 | More templates | E5 Editing | P3 | M | Todo |
@@ -690,21 +690,36 @@ Done notes:
 ## E5. Editing and output
 
 ### EDIT-01: Inline editing
-**Status:** Todo · **Priority:** P2 · **Effort:** L
+**Status:** Done · **Priority:** P2 · **Effort:** L
 
-- [ ] Edit bullet text in the workspace; edited bullets are flagged as user-edited
-- [ ] Toggle summary, projects and individual skills
-- [ ] Reorder sections
+- [x] Edit bullet text in the workspace; edited bullets are flagged as user-edited
+- [x] Toggle summary, projects and individual skills
+- [x] Reorder sections
 
 Verify: bUnit + E2E.
 
-### EDIT-02: Live HTML preview
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+Done notes:
+- `Features/Editing/CvDraft.cs` holds the edits apart from the generated CV, so each one can be undone (one bullet, or "Undo all changes"): bullet text, bullets, summary, skills and projects in or out, bullet and section order. `Build()` gives the CV as edited. A rewrite is trimmed, cannot be empty or longer than `ApiConstants.MaxEditedBulletLength` (600, checked again in the service), and typing the profile's text again undoes it.
+- No fabrication with edits: the app still writes nothing; a bullet the user rewrote is listed in `GeneratedCV.EditedBullets` with the profile's original (`BulletEdit`), shown with an "Edited" badge, and the "Why" tab explains it as the profile bullet it came from.
+- Section order: `GeneratedCV.SectionOrder` (keys `DocumentConstants.Section*Key`). The templates print their sections in a `{{#Sections}}` loop; each template's own order is a constant (`HarvardSectionOrder`, `ModernSectionOrder`, `MinimalistSectionOrder`), so an empty order prints exactly as before. Modern keeps its two columns: a section moves within its column, and the editor says so. The DOCX and the text export follow the chosen order, Harvard's by default. `DocumentRenderer.ResolveSectionOrder` drops unknown keys and repeats and adds what is missing, so every section prints once. `DocumentRenderer.ForTemplate` now pairs each template file with its order (it replaces the per-template paths in the service and the tests).
+- `Components/Shared/CvEditor.razor` replaces `BulletEditor.razor`, keeping drag and Alt+Up/Down for bullets and its focus handling. Rewrite opens a textarea (Ctrl+Enter saves, Escape cancels). Edits survive closing and reopening the editor; a new generation starts a new draft.
+- Edits only reach the CV the user sees; the match, ATS and keyword scores stay those of the generated CV.
+- Tests: `CvDraftTests` (unit, including every bullet being a profile bullet or a flagged rewrite of one, and the generated CV never changing), `SectionOrderTests` (HTML of each template, Modern columns, DOCX, text export, resolving), `CvEditorTests` (bUnit), E2E `EditingTests`.
 
-- [ ] Preview updates from HTML only while editing
-- [ ] PDF/DOCX rendered on download, not on every change
+### EDIT-02: Live HTML preview
+**Status:** Done · **Priority:** P2 · **Effort:** M
+
+- [x] Preview updates from HTML only while editing
+- [x] PDF/DOCX rendered on download, not on every change
 
 Verify: E2E: edit updates preview without a render delay.
+
+Done notes:
+- Every edit renders the preview HTML only (`CVGeneratorService.RenderPreviewHtml`), there is no "Regenerate" step any more. The PDF and DOCX of an edited CV are built when a download button is clicked (`RenderEditedDocumentAsync`) and kept until the next edit.
+- The edited CV is printed as the user left it, never trimmed by the page fit (MATCH-08 would undo their choices). When an edited PDF runs past the page limit, a toast says how many pages it has.
+- The preview keeps its scroll position across the reloads (`cvApp.keepScroll`, set up by the page; the sandboxed CV document still runs no script).
+- The UI no longer calls `RebuildCvAsync` (removed); `POST /api/cv/regenerate` keeps its own path for API clients.
+- Tests: `EditedCvTests` (service: preview, edited PDF and DOCX, not trimmed, input limits), E2E `EditingTests` (preview follows an unchecked bullet, a rewrite and a section move without regenerating, scroll kept, the DOCX downloaded after an edit holds it).
 
 ### EDIT-03: Cover letter generator
 **Status:** Todo · **Priority:** P2 · **Effort:** M

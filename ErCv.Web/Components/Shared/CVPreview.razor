@@ -1,3 +1,5 @@
+@inject IJSRuntime JS
+
 @if (!string.IsNullOrEmpty(Html))
 {
     <div class="card main-card mb-4">
@@ -7,7 +9,8 @@
                 @Actions
             </div>
             <div class="cv-preview-frame-wrapper">
-                <iframe srcdoc="@_normalizedHtml"
+                <iframe @ref="_frame"
+                        srcdoc="@_normalizedHtml"
                         title="CV Preview"
                         class="cv-preview-frame"
                         sandbox="allow-same-origin"></iframe>
@@ -56,6 +59,8 @@
 
     private string? _sourceHtml;
     private string _normalizedHtml = string.Empty;
+    private ElementReference _frame;
+    private bool _scrollKept;
 
     #endregion
 
@@ -67,6 +72,15 @@
 
         _sourceHtml = Html;
         _normalizedHtml = Normalize(Html ?? string.Empty);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // The frame only exists once there is HTML, so this waits for the first render that has it
+        if (_scrollKept || string.IsNullOrEmpty(Html)) return;
+
+        _scrollKept = true;
+        await JS.InvokeVoidAsync(UiConstants.JsKeepScroll, _frame);
     }
 
     #endregion

@@ -180,6 +180,8 @@
             </div>
         </div>
 
+        {{#Sections}}
+        {{#IsSummary}}
         <!-- Professional Summary -->
         {{#HasSummary}}
         <div class="section">
@@ -187,7 +189,9 @@
             <div class="summary-content">{{Summary}}</div>
         </div>
         {{/HasSummary}}
+        {{/IsSummary}}
 
+        {{#IsEducation}}
         <!-- Education -->
         <div class="section">
             <div class="section-title">Education</div>
@@ -201,7 +205,9 @@
             </div>
             {{/Education}}
         </div>
+        {{/IsEducation}}
 
+        {{#IsExperience}}
         <!-- Experience -->
         <div class="section">
             <div class="section-title">Experience</div>
@@ -220,7 +226,9 @@
             </div>
             {{/Experience}}
         </div>
+        {{/IsExperience}}
 
+        {{#IsSkills}}
         <!-- Skills -->
         {{#HasSkills}}
         <div class="section">
@@ -235,7 +243,9 @@
             </div>
         </div>
         {{/HasSkills}}
+        {{/IsSkills}}
 
+        {{#IsProjects}}
         <!-- Projects -->
         {{#HasProjects}}
         <div class="section">
@@ -253,6 +263,8 @@
             {{/Projects}}
         </div>
         {{/HasProjects}}
+        {{/IsProjects}}
+        {{/Sections}}
     </div>
 </body>
 </html>

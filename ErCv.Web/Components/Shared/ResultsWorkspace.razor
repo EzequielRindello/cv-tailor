@@ -104,12 +104,12 @@ else
             </div>
 
             <div class="details-analysis-panel">
-                @if (Editing)
+                @if (Editing && Draft != null)
                 {
-                    <BulletEditor GeneratedCv="Analysis.GeneratedCV"
-                                  OnRegenerate="OnRegenerate"
-                                  OnCancel="() => EditingChanged.InvokeAsync(false)"
-                                  Loading="Loading" />
+                    <CvEditor Draft="Draft"
+                              Template="Template"
+                              OnChanged="OnDraftChanged"
+                              OnClose="() => EditingChanged.InvokeAsync(false)" />
                 }
                 else
                 {
@@ -183,7 +183,9 @@ else
     [Parameter] public EventCallback OnBack { get; set; }
     [Parameter] public EventCallback OnStartOver { get; set; }
     [Parameter] public EventCallback<string> OnDownload { get; set; }
-    [Parameter] public EventCallback<(Dictionary<string, List<int>> Selections, GeneratedCV Cv)> OnRegenerate { get; set; }
+    [Parameter] public CvDraft? Draft { get; set; }
+    [Parameter] public CVTemplate Template { get; set; }
+    [Parameter] public EventCallback OnDraftChanged { get; set; }
 
     #endregion
 
@@ -204,7 +206,7 @@ else
     {
         if (Editing == _wasEditing) return;
 
-        // Opening the editor brings it into view; closing it (after a regenerate) shows the updated preview
+        // Opening the editor brings it into view; closing it shows the edited preview
         _pane = Editing ? PaneInsights : PanePreview;
         _wasEditing = Editing;
     }

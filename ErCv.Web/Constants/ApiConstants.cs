@@ -16,6 +16,9 @@ public static class ApiConstants
 
     // The very-long fixture is 50k characters; real posts in the corpus are far shorter
     public const int MaxJobDescriptionLength = 100_000;
+
+    // EDIT-01: a rewritten bullet; the editor's textarea and the service check share it
+    public const int MaxEditedBulletLength = 600;
     public const long MaxRequestBodyBytes = 2 * 1024 * 1024;
 
     #endregion
@@ -30,7 +33,7 @@ public static class ApiConstants
     public const string ProfileIdPrefix = "cv-master-";
     public const string DefaultProfileName = "Default";
 
-    // Key of one experience in RegenerateRequest.BulletSelections (BulletEditor writes it, the service reads it)
+    // Key of one experience in RegenerateRequest.BulletSelections (the API client writes it, the service reads it)
     public const string BulletSelectionKeyPrefix = "exp";
 
     #endregion

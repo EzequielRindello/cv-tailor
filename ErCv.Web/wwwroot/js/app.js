@@ -27,6 +27,21 @@ window.cvApp = {
         }
     },
 
+    // The live preview (EDIT-02) reloads its srcdoc on every edit; this puts the reader back where they were.
+    // The page sets this up from outside: the sandboxed CV document itself runs no script.
+    keepScroll: (frame) => {
+        if (!frame || frame.__keepScroll) return;
+        frame.__keepScroll = true;
+        let top = 0;
+        const track = () => frame.contentWindow?.addEventListener('scroll', () => { top = frame.contentWindow.scrollY; }, { passive: true });
+        frame.addEventListener('load', () => {
+            frame.contentWindow?.scrollTo(0, top);
+            track();
+        });
+        // The first document may have loaded before this ran
+        track();
+    },
+
     getItem: (key) => {
         try { return localStorage.getItem(key); } catch { return null; }
     },

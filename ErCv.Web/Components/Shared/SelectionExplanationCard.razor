@@ -94,6 +94,11 @@
                 var included = current != null
                     ? current.Bullets.ToHashSet()
                     : exp.Bullets.Where(b => b.Selected).Select(b => b.Text).ToHashSet();
+
+                // A bullet the user rewrote (EDIT-01) is still the profile bullet the score explains
+                if (current != null)
+                    foreach (var edit in Cv!.EditedBullets.Where(e => current.Bullets.Contains(e.Edited)))
+                        included.Add(edit.Original);
                 items.Add(new Item(exp, included));
             }
             return items;

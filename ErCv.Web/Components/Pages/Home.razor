@@ -127,7 +127,9 @@ else
                       OnBack="BackToGenerate"
                       OnStartOver="ResetAsync"
                       OnDownload="DownloadAsync"
-                      OnRegenerate="RegenerateAsync" />
+                      Draft="_draft"
+                      Template="_resultTemplate"
+                      OnDraftChanged="OnDraftChanged" />
 }
 
 @code {
@@ -140,6 +142,10 @@ else
     private const int StepJobDescription = 1;
     private const int StepProfile = 2;
     private const int LastStep = 3;
+
+    // Page limit an edited PDF is checked against (it is printed as edited, never trimmed)
+    private const int OnePage = 1;
+    private const int TwoPages = 2;
 
     // Element ids the page moves focus to
     private const string ResultsRegionId = "results-region";
@@ -163,6 +169,12 @@ else
     private GenerationStage _stage;
     private bool _showHistory;
     private bool _showBulletEditor;
+
+    // EDIT-01/02: the edits to the CV on screen and the options it was generated with
+    private CvDraft? _draft;
+    private CVTemplate _resultTemplate;
+    private bool _resultTwoPages;
+    private HashSet<string> _staleFormats = new();
     private string? _jdError;
     private string? _formatError;
     private bool _focusJd;
@@ -300,12 +312,18 @@ else
 
         try
         {
+            if (_staleFormats.Contains(format)) bytes = await RenderEditedAsync(format);
+
             using var stream = new MemoryStream(bytes);
             using var reference = new DotNetStreamReference(stream);
             await JS.InvokeVoidAsync(UiConstants.JsDownloadFile, BuildFileName(format), reference);
             Toasts.Success($"Download started: {format.ToUpperInvariant()}");
         }
-        catch (Exception ex) when (ex is JSException or InvalidOperationException)
+        catch (ArgumentException ex)
+        {
+            Toasts.Error(ex.Message);
+        }
+        catch (Exception ex)
         {
             Logger.LogError(ex, "Error downloading {Format}", format);
             Toasts.Error($"Could not download the {format.ToUpperInvariant()} file", "Retry", () => DownloadAsync(format));
@@ -322,6 +340,8 @@ else
         _loading = true;
         _analysis = null;
         _documents = new();
+        _draft = null;
+        _staleFormats = new();
         _showBulletEditor = false;
         _showHistory = false;
         _stage = GenerationStage.Parsing;
@@ -352,6 +372,9 @@ else
 
             _documents = documents;
             _analysis = analysis;
+            _resultTemplate = request.Template;
+            _resultTwoPages = request.AllowTwoPages;
+            _draft = new CvDraft(analysis.GeneratedCV, DocumentRenderer.DefaultSectionOrder(request.Template));
             _focusResults = true;
             Toasts.Success("CV ready");
             _announcement = $"CV ready. Match score {analysis.MatchScore.Overall} percent. ATS score {analysis.ATSScore.Overall} out of {ATSConstants.MaxScore}.";
@@ -381,42 +404,21 @@ else
         }
     }
 
-    private async Task RegenerateAsync((Dictionary<string, List<int>> Selections, GeneratedCV Cv) edit)
+    /// <summary>EDIT-02: every edit re-renders the preview HTML only; the documents are rebuilt when downloaded.</summary>
+    private void OnDraftChanged()
     {
-        if (_analysis == null) return;
+        if (_analysis == null || _draft == null) return;
 
-        _loading = true;
-        StateHasChanged();
-
+        var cv = _draft.Build();
         try
         {
-            var (documents, previewHtml) = await CvService.RebuildCvAsync(new RegenerateRequest
-            {
-                GeneratedCV = edit.Cv,
-                BulletSelections = edit.Selections,
-                Formats = SelectedFormats(),
-                Template = TemplateEnum(),
-                AllowTwoPages = _settings.AllowTwoPages
-            });
-
-            _documents = documents;
-            _analysis.GeneratedCV = edit.Cv;
-            _analysis.PreviewHtml = previewHtml;
-            _showBulletEditor = false;
-            Toasts.Success("CV regenerated");
+            _analysis.PreviewHtml = CvService.RenderPreviewHtml(cv, _resultTemplate);
+            _analysis.GeneratedCV = cv;
+            _staleFormats = _documents.Keys.ToHashSet();
         }
         catch (ArgumentException ex)
         {
             Toasts.Error(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error regenerating CV");
-            Toasts.Error("Something went wrong while regenerating the CV", "Retry", () => RegenerateAsync(edit));
-        }
-        finally
-        {
-            _loading = false;
         }
     }
 
@@ -476,6 +478,8 @@ else
 
         _analysis = null;
         _documents = new();
+        _draft = null;
+        _staleFormats = new();
         _showBulletEditor = false;
         _showHistory = false;
         _step = StepJobDescription;
@@ -489,6 +493,20 @@ else
     #endregion
 
     #region Helpers
+
+    /// <summary>Renders one document of the edited CV and says when an edited PDF runs past the page limit.</summary>
+    private async Task<byte[]> RenderEditedAsync(string format)
+    {
+        var (bytes, pages) = await CvService.RenderEditedDocumentAsync(_analysis!.GeneratedCV, _resultTemplate, format);
+        _documents[format] = bytes;
+        _staleFormats.Remove(format);
+
+        var maxPages = _resultTwoPages ? TwoPages : OnePage;
+        if (pages > maxPages)
+            Toasts.Info($"The edited PDF has {pages} pages. Leave out a few bullets to bring it back to {maxPages}.");
+
+        return bytes;
+    }
 
     /// <summary>The profile sent with the request: the saved "My profile" if selected. Null means the stored profile chosen in step 2.</summary>
     private CVMaster? ActiveProfile => _settings.ProfileSource == UiConstants.ProfileSourceMine ? _myProfile : null;

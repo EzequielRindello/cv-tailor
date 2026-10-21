@@ -36,9 +36,7 @@ public class CVGeneratorService
     private readonly PageConstraintHelper _pageConstraint = new();
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<CVGeneratorService> _logger;
-    private readonly string _harvardTemplatePath;
-    private readonly string _modernTemplatePath;
-    private readonly string _minimalistTemplatePath;
+    private readonly string _templatesFolder;
 
     #endregion
 
@@ -54,10 +52,7 @@ public class CVGeneratorService
         _missingSkillsAnalyzer = new MissingSkillsAnalyzer();
         _keywordAnalyzer = new KeywordAnalyzer();
         _atsChecker = new ATSChecker();
-
-        _harvardTemplatePath   = TemplatePath(TemplatePaths.HarvardTemplate);
-        _modernTemplatePath    = TemplatePath(TemplatePaths.ModernTemplate);
-        _minimalistTemplatePath= TemplatePath(TemplatePaths.MinimalistTemplate);
+        _templatesFolder = Path.Combine(_env.ContentRootPath, TemplatePaths.TemplatesFolder);
     }
 
     #endregion
@@ -188,10 +183,27 @@ public class CVGeneratorService
         return await GenerateCVInternalAsync(request, progress, profile);
     }
 
-    public async Task<(Dictionary<string, byte[]> Documents, string PreviewHtml)> RebuildCvAsync(RegenerateRequest request)
+    /// <summary>EDIT-02: the preview of a CV being edited. HTML only, so it can follow every change.</summary>
+    public string RenderPreviewHtml(GeneratedCV cv, CVTemplate template)
     {
-        ValidateRegenerateRequest(request);
-        return await RegenerateCVInternalAsync(request);
+        ValidateEditedCv(cv);
+        return DocumentRenderer.ForTemplate(_templatesFolder, template).RenderHtml(cv);
+    }
+
+    /// <summary>
+    /// EDIT-02: one document of an edited CV, rendered when the user downloads it. The CV is printed as the user left
+    /// it, never trimmed: <c>Pages</c> lets the caller say when it runs past the page limit (0 for a DOCX).
+    /// </summary>
+    public async Task<(byte[] Bytes, int Pages)> RenderEditedDocumentAsync(GeneratedCV cv, CVTemplate template, string format)
+    {
+        ValidateEditedCv(cv);
+        var normalized = NormalizeAndValidateFormat(format);
+        var renderer = DocumentRenderer.ForTemplate(_templatesFolder, template);
+
+        if (normalized == ApiConstants.FormatDocx) return (renderer.RenderDocx(cv), 0);
+
+        var pdf = await renderer.RenderPdfAsync(renderer.RenderHtml(cv));
+        return (pdf, DocumentRenderer.CountPages(pdf));
     }
 
     public IActionResult GetProfiles()
@@ -239,7 +251,7 @@ public class CVGeneratorService
 
         // The analysis reads the CV after the measured page fit, which can trim more than the selection did
         await ReportAsync(progress, GenerationStage.Rendering);
-        var renderer = new DocumentRenderer(ResolveTemplatePath(request.Template));
+        var renderer = DocumentRenderer.ForTemplate(_templatesFolder, request.Template);
         var (generatedCV, previewHtml, documents) =
             await RenderDocumentsAsync(request.Formats, renderer, selectedCV, request.AllowTwoPages);
         explanation = CVSelector.FollowFinalCv(explanation, generatedCV);
@@ -290,7 +302,7 @@ public class CVGeneratorService
 
         cv = _pageConstraint.EnforcePageConstraint(cv, request.AllowTwoPages);
 
-        var renderer = new DocumentRenderer(ResolveTemplatePath(request.Template));
+        var renderer = DocumentRenderer.ForTemplate(_templatesFolder, request.Template);
         var (_, previewHtml, documents) = await RenderDocumentsAsync(request.Formats, renderer, cv, request.AllowTwoPages);
 
         return (documents, previewHtml);
@@ -335,16 +347,6 @@ public class CVGeneratorService
 
         return (cv, html, docs);
     }
-
-    private string ResolveTemplatePath(CVTemplate template) => template switch
-    {
-        CVTemplate.Modern     => _modernTemplatePath,
-        CVTemplate.Minimalist => _minimalistTemplatePath,
-        _                     => _harvardTemplatePath
-    };
-
-    private string TemplatePath(string filename) =>
-        Path.Combine(_env.ContentRootPath, TemplatePaths.TemplatesFolder, filename);
 
     private async Task<CVMaster> LoadCVMasterAsync(string profileId = ApiConstants.DefaultProfileId)
     {
@@ -396,6 +398,15 @@ public class CVGeneratorService
             throw new ArgumentException(ApiConstants.ErrorFormatsRequired);
 
         ValidateFormats(request.Formats);
+    }
+
+    private static void ValidateEditedCv(GeneratedCV? cv)
+    {
+        if (cv == null)
+            throw new ArgumentException(ApiConstants.ErrorGeneratedCvRequired);
+
+        if (cv.Experience.SelectMany(e => e.Bullets).Any(b => b.Length > ApiConstants.MaxEditedBulletLength))
+            throw new ArgumentException($"A bullet can be at most {ApiConstants.MaxEditedBulletLength} characters.");
     }
 
     private void ValidateFormats(IEnumerable<string> formats)

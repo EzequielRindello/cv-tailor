@@ -183,23 +183,6 @@ public class GenerateFlowTests : E2ETestBase
     }
 
     [Fact]
-    public async Task Editing_bullets_and_regenerating_updates_the_preview()
-    {
-        await GenerateAsync();
-
-        await Button("Edit", exact: true).ClickAsync();
-        var firstBullet = (await Page.Locator("#bullet-text-0-0").InnerTextAsync()).Trim();
-        await Assertions.Expect(PreviewBody).ToContainTextAsync(firstBullet);
-
-        await Page.Locator("#bullet-0-0").UncheckAsync();
-        await Button("Regenerate CV").ClickAsync();
-
-        await Assertions.Expect(Page.Locator(".app-toast").Filter(new() { HasText = "CV regenerated" })).ToBeVisibleAsync();
-        await Assertions.Expect(PreviewBody).Not.ToContainTextAsync(firstBullet);
-        await Assertions.Expect(Page.Locator(".bullet-editor-card")).ToHaveCountAsync(0);
-    }
-
-    [Fact]
     public async Task Back_to_the_composer_keeps_the_job_description_and_start_over_clears_it()
     {
         await GenerateAsync("DevOps");

@@ -1,0 +1,397 @@
+@inject IJSRuntime JS
+
+<div class="card bullet-editor-card">
+    <div class="card-body">
+        <div class="cv-editor-head">
+            <h5 class="bullet-editor-title">
+                <i class="bi bi-pencil-square bullet-title-icon" aria-hidden="true"></i>
+                Edit CV
+            </h5>
+            <div class="bullet-editor-subtitle">
+                Changes show in the preview right away. The PDF and DOCX are built when you download them.
+            </div>
+        </div>
+
+        <section class="cv-editor-section" aria-labelledby="editor-sections-title">
+            <h6 class="cv-editor-section-title" id="editor-sections-title">Sections</h6>
+            @if (Template == CVTemplate.Modern)
+            {
+                <p class="cv-editor-hint">Modern prints two columns, so a section moves within its own column.</p>
+            }
+            <ol class="cv-editor-sections">
+                @for (var i = 0; i < Draft.SectionOrder.Count; i++)
+                {
+                    var index = i;
+                    var key = Draft.SectionOrder[index];
+                    <li class="cv-editor-section-row" @key="key">
+                        <span class="cv-editor-section-name" id="section-name-@key">@SectionLabel(key)</span>
+                        @if (key == DocumentConstants.SectionSummaryKey && Draft.HasSummary)
+                        {
+                            <label class="cv-editor-include">
+                                <input type="checkbox" id="editor-include-summary" checked="@Draft.IncludeSummary" @onchange="ToggleSummary" />
+                                Include
+                            </label>
+                        }
+                        <span class="bullet-move">
+                            <button type="button" class="bullet-move-btn" id="section-up-@key"
+                                    aria-label="Move @SectionLabel(key) up" disabled="@(index == 0)"
+                                    @onclick="() => MoveSection(index, -1)">
+                                <i class="bi bi-chevron-up" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="bullet-move-btn" id="section-down-@key"
+                                    aria-label="Move @SectionLabel(key) down" disabled="@(index == Draft.SectionOrder.Count - 1)"
+                                    @onclick="() => MoveSection(index, 1)">
+                                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                            </button>
+                        </span>
+                    </li>
+                }
+            </ol>
+        </section>
+
+        <section class="cv-editor-section" aria-labelledby="editor-experience-title">
+            <h6 class="cv-editor-section-title" id="editor-experience-title">Experience</h6>
+            <div class="bullet-editor-subtitle mb-2">
+                Uncheck to leave a bullet out · Drag
+                <i class="bi bi-grip-vertical bullet-drag-icon" aria-hidden="true"></i>
+                or press Alt+↑/↓ to reorder · Rewritten bullets are marked as edited
+            </div>
+
+            @for (var expIdx = 0; expIdx < Draft.Experiences.Count; expIdx++)
+            {
+                var ei = expIdx;
+                var exp = Draft.Experiences[ei];
+                var includedCount = exp.Bullets.Count(b => b.IsIncluded);
+
+                <div class="bullet-exp-block" @key="ei">
+                    <div class="bullet-exp-header">
+                        <div class="bullet-exp-role">@exp.Source.Role</div>
+                        <div class="exp-company-label">@exp.Source.Company · @exp.Source.StartDate – @exp.Source.EndDate</div>
+                    </div>
+
+                    <div class="bullets-list">
+                        @for (var bulletIdx = 0; bulletIdx < exp.Bullets.Count; bulletIdx++)
+                        {
+                            var bi = bulletIdx;
+                            var bullet = exp.Bullets[bi];
+                            var canExclude = includedCount > 1;
+                            var editing = _editing == (ei, bi);
+                            var dragging = _dragExp == ei && _dragIdx == bi;
+                            var rowClass = "bullet-row" + (!bullet.IsIncluded ? " deselected" : "") + (dragging ? " dragging" : "")
+                                           + (editing ? " editing" : "");
+
+                            <div class="@rowClass"
+                                 draggable="@(editing ? "false" : "true")"
+                                 @ondragstart="() => DragStart(ei, bi)"
+                                 @ondragover="() => DragOver(ei, bi)"
+                                 @ondragover:preventDefault
+                                 @ondragend="DragEnd"
+                                 @onkeydown="e => OnRowKeyDown(e, ei, bi)">
+                                <span class="drag-handle" aria-hidden="true">⠿</span>
+                                <input type="checkbox"
+                                       id="bullet-@ei-@bi"
+                                       class="bullet-checkbox"
+                                       aria-labelledby="bullet-text-@ei-@bi"
+                                       checked="@bullet.IsIncluded"
+                                       disabled="@(bullet.IsIncluded && !canExclude)"
+                                       title="@(bullet.IsIncluded && !canExclude ? "At least 1 bullet must remain" : "")"
+                                       @onchange="() => ToggleBullet(ei, bi)" />
+                                @if (editing)
+                                {
+                                    <div class="bullet-edit-area">
+                                        <label class="visually-hidden" for="bullet-edit-@ei-@bi">Bullet text</label>
+                                        <textarea id="bullet-edit-@ei-@bi"
+                                                  class="form-control form-control-sm"
+                                                  rows="3"
+                                                  maxlength="@ApiConstants.MaxEditedBulletLength"
+                                                  @bind="_editText"
+                                                  @bind:event="oninput"
+                                                  @onkeydown="e => OnEditKeyDown(e, ei, bi)"></textarea>
+                                        @if (_editError != null)
+                                        {
+                                            <div class="field-error mt-1" role="alert">@_editError</div>
+                                        }
+                                        <div class="bullet-edit-actions">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelEdit">Cancel</button>
+                                            <button type="button" class="btn btn-sm btn-primary" @onclick="() => SaveEdit(ei, bi)">Save</button>
+                                        </div>
+                                    </div>
+                                    <span class="visually-hidden" id="bullet-text-@ei-@bi">@bullet.Text</span>
+                                }
+                                else
+                                {
+                                    <span class="bullet-text" id="bullet-text-@ei-@bi">
+                                        @bullet.Text
+                                        @if (bullet.IsEdited)
+                                        {
+                                            <span class="bullet-edited-badge">Edited</span>
+                                        }
+                                    </span>
+                                    <span class="bullet-move">
+                                        <button type="button" class="bullet-move-btn" id="bullet-edit-btn-@ei-@bi"
+                                                aria-label="Rewrite bullet" aria-describedby="bullet-text-@ei-@bi"
+                                                @onclick="() => StartEdit(ei, bi)">
+                                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                                        </button>
+                                        @if (bullet.IsEdited)
+                                        {
+                                            <button type="button" class="bullet-move-btn" aria-label="Undo rewrite"
+                                                    @onclick="() => RevertBullet(ei, bi)">
+                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                                            </button>
+                                        }
+                                        <button type="button" class="bullet-move-btn" aria-label="Move bullet up"
+                                                disabled="@(bi == 0)" @onclick="() => MoveBullet(ei, bi, -1)">
+                                            <i class="bi bi-chevron-up" aria-hidden="true"></i>
+                                        </button>
+                                        <button type="button" class="bullet-move-btn" aria-label="Move bullet down"
+                                                disabled="@(bi == exp.Bullets.Count - 1)" @onclick="() => MoveBullet(ei, bi, 1)">
+                                            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                                        </button>
+                                    </span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </section>
+
+        @if (Draft.Skills.Count > 0)
+        {
+            <section class="cv-editor-section" aria-labelledby="editor-skills-title">
+                <h6 class="cv-editor-section-title" id="editor-skills-title">Skills</h6>
+                <div class="cv-editor-chips">
+                    @for (var i = 0; i < Draft.Skills.Count; i++)
+                    {
+                        var index = i;
+                        var skill = Draft.Skills[index];
+                        <button type="button"
+                                class="cv-editor-chip @(skill.IsIncluded ? "included" : "")"
+                                aria-pressed="@(skill.IsIncluded ? "true" : "false")"
+                                @onclick="() => ToggleSkill(index)">
+                            <i class="bi @(skill.IsIncluded ? "bi-check-lg" : "bi-plus-lg")" aria-hidden="true"></i>
+                            @skill.Item
+                        </button>
+                    }
+                </div>
+            </section>
+        }
+
+        @if (Draft.Projects.Count > 0)
+        {
+            <section class="cv-editor-section" aria-labelledby="editor-projects-title">
+                <h6 class="cv-editor-section-title" id="editor-projects-title">Projects</h6>
+                @for (var i = 0; i < Draft.Projects.Count; i++)
+                {
+                    var index = i;
+                    var project = Draft.Projects[index];
+                    <label class="cv-editor-include cv-editor-project">
+                        <input type="checkbox" id="editor-project-@index" checked="@project.IsIncluded" @onchange="() => ToggleProject(index)" />
+                        @project.Item.Name
+                    </label>
+                }
+            </section>
+        }
+
+        <div class="visually-hidden" role="status" aria-live="polite">@_announcement</div>
+
+        <div class="bullet-editor-actions">
+            <button type="button" class="btn btn-outline-secondary btn-sm" disabled="@(!Draft.IsChanged)" @onclick="ResetAll">
+                <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Undo all changes
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" @onclick="OnClose">Done</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    #region Constants
+
+    // Value of the drag fields while no bullet is being dragged
+    private const int NoDrag = -1;
+
+    #endregion
+
+    #region Parameters
+
+    [Parameter, EditorRequired] public CvDraft Draft { get; set; } = default!;
+    [Parameter] public CVTemplate Template { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    #endregion
+
+    #region State
+
+    private int _dragExp = NoDrag;
+    private int _dragIdx = NoDrag;
+    private (int Exp, int Idx)? _editing;
+    private string _editText = string.Empty;
+    private string? _editError;
+    private string? _focusAfterRender;
+    private string _announcement = string.Empty;
+
+    #endregion
+
+    #region Lifecycle
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Focus follows the element the last action moved or opened
+        if (_focusAfterRender is not { } target) return;
+
+        _focusAfterRender = null;
+        await JS.InvokeVoidAsync(UiConstants.JsFocusElement, target);
+    }
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task OnRowKeyDown(KeyboardEventArgs e, int expIdx, int bulletIdx)
+    {
+        if (!e.AltKey || _editing != null) return;
+
+        if (e.Key == "ArrowUp") await MoveBullet(expIdx, bulletIdx, -1);
+        else if (e.Key == "ArrowDown") await MoveBullet(expIdx, bulletIdx, 1);
+    }
+
+    private async Task OnEditKeyDown(KeyboardEventArgs e, int expIdx, int bulletIdx)
+    {
+        if (e.Key == "Escape") CancelEdit();
+        else if (e.Key == "Enter" && e.CtrlKey) await SaveEdit(expIdx, bulletIdx);
+    }
+
+    private async Task ToggleBullet(int expIdx, int bulletIdx)
+    {
+        if (Draft.ToggleBullet(expIdx, bulletIdx)) await OnChanged.InvokeAsync();
+    }
+
+    private void StartEdit(int expIdx, int bulletIdx)
+    {
+        _editing = (expIdx, bulletIdx);
+        _editText = Draft.Experiences[expIdx].Bullets[bulletIdx].Text;
+        _editError = null;
+        _focusAfterRender = $"bullet-edit-{expIdx}-{bulletIdx}";
+    }
+
+    private async Task SaveEdit(int expIdx, int bulletIdx)
+    {
+        if (!Draft.EditBullet(expIdx, bulletIdx, _editText))
+        {
+            _editError = string.IsNullOrWhiteSpace(_editText)
+                ? "A bullet cannot be empty."
+                : $"A bullet can be at most {ApiConstants.MaxEditedBulletLength} characters.";
+            return;
+        }
+
+        _editing = null;
+        _editError = null;
+        _focusAfterRender = $"bullet-edit-btn-{expIdx}-{bulletIdx}";
+        _announcement = "Bullet rewritten";
+        await OnChanged.InvokeAsync();
+    }
+
+    private void CancelEdit()
+    {
+        if (_editing is { } row) _focusAfterRender = $"bullet-edit-btn-{row.Exp}-{row.Idx}";
+        _editing = null;
+        _editError = null;
+    }
+
+    private async Task RevertBullet(int expIdx, int bulletIdx)
+    {
+        Draft.RevertBullet(expIdx, bulletIdx);
+        _focusAfterRender = $"bullet-edit-btn-{expIdx}-{bulletIdx}";
+        _announcement = "Rewrite undone";
+        await OnChanged.InvokeAsync();
+    }
+
+    private void DragStart(int expIdx, int bulletIdx)
+    {
+        _dragExp = expIdx;
+        _dragIdx = bulletIdx;
+    }
+
+    private void DragOver(int expIdx, int bulletIdx)
+    {
+        if (_dragExp != expIdx || _dragIdx < 0 || _dragIdx == bulletIdx) return;
+
+        Draft.MoveBullet(expIdx, _dragIdx, bulletIdx);
+        _dragIdx = bulletIdx;
+    }
+
+    // The preview follows once, when the bullet is dropped, not on every row it passes over
+    private async Task DragEnd()
+    {
+        var moved = _dragExp != NoDrag;
+        _dragExp = NoDrag;
+        _dragIdx = NoDrag;
+        if (moved) await OnChanged.InvokeAsync();
+    }
+
+    private async Task ToggleSummary()
+    {
+        Draft.ToggleSummary();
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task ToggleSkill(int index)
+    {
+        Draft.ToggleSkill(index);
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task ToggleProject(int index)
+    {
+        Draft.ToggleProject(index);
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task MoveSection(int index, int delta)
+    {
+        var target = index + delta;
+        var key = Draft.SectionOrder[index];
+        Draft.MoveSection(index, target);
+
+        _focusAfterRender = $"section-{(delta < 0 ? "up" : "down")}-{key}";
+        _announcement = $"{SectionLabel(key)} moved to position {target + 1} of {Draft.SectionOrder.Count}";
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task ResetAll()
+    {
+        Draft.Reset();
+        _editing = null;
+        _announcement = "All changes undone";
+        await OnChanged.InvokeAsync();
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private async Task MoveBullet(int expIdx, int bulletIdx, int delta)
+    {
+        var target = bulletIdx + delta;
+        var count = Draft.Experiences[expIdx].Bullets.Count;
+        if (target < 0 || target >= count) return;
+
+        Draft.MoveBullet(expIdx, bulletIdx, target);
+        _focusAfterRender = $"bullet-{expIdx}-{target}";
+        _announcement = $"Bullet moved to position {target + 1} of {count}";
+        await OnChanged.InvokeAsync();
+    }
+
+    private static string SectionLabel(string key) => key switch
+    {
+        DocumentConstants.SectionSummaryKey => "Summary",
+        DocumentConstants.SectionEducationKey => "Education",
+        DocumentConstants.SectionExperienceKey => "Experience",
+        DocumentConstants.SectionSkillsKey => "Skills",
+        _ => "Projects"
+    };
+
+    #endregion
+}

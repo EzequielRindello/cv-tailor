@@ -175,12 +175,16 @@
         </div>
     </div>
 
+    {{#Sections}}
+    {{#IsSummary}}
     <!-- Summary -->
     {{#HasSummary}}
     <div class="section-title">Profile</div>
     <div class="summary-text">{{Summary}}</div>
     {{/HasSummary}}
+    {{/IsSummary}}
 
+    {{#IsExperience}}
     <!-- Experience -->
     <div class="section-title">Experience</div>
     {{#Experience}}
@@ -195,7 +199,9 @@
         </ul>
     </div>
     {{/Experience}}
+    {{/IsExperience}}
 
+    {{#IsEducation}}
     <!-- Education -->
     <div class="section-title">Education</div>
     {{#Education}}
@@ -207,7 +213,9 @@
         <div class="edu-date">{{GraduationDate}}</div>
     </div>
     {{/Education}}
+    {{/IsEducation}}
 
+    {{#IsSkills}}
     <!-- Skills -->
     {{#HasSkills}}
     <div class="section-title">Skills</div>
@@ -218,7 +226,9 @@
     </div>
     {{/SkillCategories}}
     {{/HasSkills}}
+    {{/IsSkills}}
 
+    {{#IsProjects}}
     <!-- Projects -->
     {{#HasProjects}}
     <div class="section-title">Projects</div>
@@ -231,5 +241,7 @@
     </div>
     {{/Projects}}
     {{/HasProjects}}
+    {{/IsProjects}}
+    {{/Sections}}
 </body>
 </html>

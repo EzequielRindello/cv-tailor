@@ -716,6 +716,126 @@ h1, h2, h3, .form-title {
   color: var(--color-text-tertiary);
 }
 
+/* ===== CvEditor (EDIT-01) ===== */
+.cv-editor-head {
+  margin-bottom: var(--spacing-md);
+}
+
+.cv-editor-section {
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.cv-editor-section-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-sm);
+}
+
+.cv-editor-hint {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.cv-editor-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cv-editor-section-row {
+  align-items: center;
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.cv-editor-section-name {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+}
+
+.cv-editor-include {
+  align-items: center;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--font-size-sm);
+  gap: var(--spacing-xs);
+}
+
+.cv-editor-include input {
+  accent-color: var(--color-primary-400);
+}
+
+.cv-editor-project {
+  display: flex;
+  font-size: var(--font-size-md);
+  padding: var(--spacing-xs) 0;
+}
+
+.cv-editor-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.cv-editor-chip {
+  align-items: center;
+  background: transparent;
+  border: 1px dashed var(--color-border-hover);
+  border-radius: 999px;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--font-size-sm);
+  gap: 4px;
+  padding: 2px var(--spacing-sm);
+}
+
+.cv-editor-chip.included {
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-100);
+  color: var(--color-text-primary);
+}
+
+.bullet-row.editing {
+  cursor: default;
+}
+
+.bullet-edit-area {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.bullet-edit-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: flex-end;
+}
+
+.bullet-edited-badge {
+  background: var(--color-warning-soft);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  margin-left: var(--spacing-xs);
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
 
 /* ===== CVPreview.css ===== */
 .cv-preview-frame-wrapper {

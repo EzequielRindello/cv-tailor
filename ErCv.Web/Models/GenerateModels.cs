@@ -8,7 +8,16 @@ public class GeneratedCV
     public List<Experience> Experience { get; set; } = new();
     public List<string> Skills { get; set; } = new();
     public List<Project> Projects { get; set; } = new();
+
+    /// <summary>Section keys (<c>DocumentConstants.Section*Key</c>) in the order the user chose; empty means the template's own order.</summary>
+    public List<string> SectionOrder { get; set; } = new();
+
+    /// <summary>Bullets the user rewrote in the editor (EDIT-01). Every other bullet is the profile's text.</summary>
+    public List<BulletEdit> EditedBullets { get; set; } = new();
 }
+
+/// <summary>A bullet the user rewrote: the profile's text and what it says now.</summary>
+public record BulletEdit(string Original, string Edited);
 
 public class JobRequirements
 {

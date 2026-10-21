@@ -12,6 +12,28 @@ public static class DocumentConstants
 
     #endregion
 
+    #region Section Order
+
+    // Keys of GeneratedCV.SectionOrder; the editor, the templates' Sections loop and the DOCX all use them
+    public const string SectionSummaryKey = "summary";
+    public const string SectionEducationKey = "education";
+    public const string SectionExperienceKey = "experience";
+    public const string SectionSkillsKey = "skills";
+    public const string SectionProjectsKey = "projects";
+
+    // The order each template prints when the user has not chosen one. The DOCX and the text export use Harvard's.
+    // Modern has two columns (skills and education on the left), so a section only moves within its column.
+    public static readonly IReadOnlyList<string> HarvardSectionOrder =
+        new[] { SectionSummaryKey, SectionEducationKey, SectionExperienceKey, SectionSkillsKey, SectionProjectsKey };
+
+    public static readonly IReadOnlyList<string> ModernSectionOrder =
+        new[] { SectionSkillsKey, SectionEducationKey, SectionSummaryKey, SectionExperienceKey, SectionProjectsKey };
+
+    public static readonly IReadOnlyList<string> MinimalistSectionOrder =
+        new[] { SectionSummaryKey, SectionExperienceKey, SectionEducationKey, SectionSkillsKey, SectionProjectsKey };
+
+    #endregion
+
     #region DOCX Layout
 
     public const string FontSizeName = "32";       // 16pt
