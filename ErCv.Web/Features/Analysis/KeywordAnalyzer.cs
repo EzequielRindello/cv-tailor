@@ -10,9 +10,6 @@ public class KeywordAnalyzer
     private static readonly HashSet<string> SoftSkillWords =
         new(KeywordAnalyzerConstants.SoftSkillWords, StringComparer.OrdinalIgnoreCase);
 
-    private static readonly HashSet<string> TechWords =
-        new(KeywordAnalyzerConstants.TechWords, StringComparer.OrdinalIgnoreCase);
-
     private static readonly HashSet<string> StopWords =
         new(KeywordAnalyzerConstants.StopWords, StringComparer.OrdinalIgnoreCase);
 
@@ -24,38 +21,53 @@ public class KeywordAnalyzer
     {
         var cvText = BuildCVText(generatedCV);
         var cvSkills = ExtractAllCVSkills(generatedCV);
-        var wordFrequencies = ExtractWordFrequencies(jobDescription);
+
+        // Technical keywords are the dictionary skills the job description names, the same ones the parser finds,
+        // so a word like "next" in "the next generation" is never a technical keyword (F22)
+        var technical = new List<KeywordItem>();
+        var skillWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (skill, hits) in FindSkills(jobDescription))
+        {
+            technical.Add(new KeywordItem
+            {
+                Word = skill.Name,
+                Frequency = hits.Count,
+                PresentInCV = SkillNormalizer.MatchesAny(skill.Name, cvSkills) || SkillNormalizer.ContainsSkill(cvText, skill.Name)
+            });
+            foreach (var (start, length) in hits)
+                skillWords.UnionWith(JobDescriptionConstants.WordSplit().Split(jobDescription.Substring(start, length).ToLower()));
+        }
+
+        // The words that name a skill are already counted as technical
+        var wordFrequencies = ExtractWordFrequencies(jobDescription)
+            .Where(kvp => !skillWords.Contains(kvp.Key))
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
         // Fuzzy matching against the CV is the expensive part, so each word is checked once
         var presentInCv = wordFrequencies.Keys.ToDictionary(
             w => w,
             w => SkillNormalizer.MatchesAny(w, cvSkills) || SkillNormalizer.ContainsTerm(cvText, w));
 
-        var technical = new List<KeywordItem>();
         var softSkills = new List<KeywordItem>();
         var industry = new List<KeywordItem>();
 
         foreach (var kvp in wordFrequencies.OrderByDescending(x => x.Value))
         {
             var word = kvp.Key;
-            var freq = kvp.Value;
+            var item = new KeywordItem { Word = word, Frequency = kvp.Value, PresentInCV = presentInCv[word] };
 
-            var item = new KeywordItem { Word = word, Frequency = freq, PresentInCV = presentInCv[word] };
-
-            if (TechWords.Contains(word) || SkillNormalizer.MatchesAny(word, TechWords))
-                technical.Add(item);
-            else if (SoftSkillWords.Contains(word))
+            if (SoftSkillWords.Contains(word))
                 softSkills.Add(item);
             else if (word.Length >= KeywordAnalyzerConstants.MinIndustryWordLength && !StopWords.Contains(word))
                 industry.Add(item);
         }
 
-        var presentList = wordFrequencies.Keys
-            .Where(w => presentInCv[w])
+        var presentList = technical.Where(k => k.PresentInCV).Select(k => k.Word)
+            .Concat(wordFrequencies.Keys.Where(w => presentInCv[w]))
             .Take(KeywordAnalyzerConstants.MaxPresentKeywords).ToList();
 
-        var missingList = wordFrequencies.Keys
-            .Where(w => !presentInCv[w] && (TechWords.Contains(w) || SoftSkillWords.Contains(w)))
+        var missingList = technical.Where(k => !k.PresentInCV).Select(k => k.Word)
+            .Concat(softSkills.Where(k => !k.PresentInCV).Select(k => k.Word))
             .Take(KeywordAnalyzerConstants.MaxMissingKeywords).ToList();
 
         var totalRelevant = Math.Max(technical.Count + softSkills.Count, 1);
@@ -76,6 +88,15 @@ public class KeywordAnalyzer
     #endregion
 
     #region Private Methods
+
+    // Most named first; on a tie, the one the job description names first
+    private static List<(Skill Skill, List<(int Start, int Length)> Hits)> FindSkills(string jobDescription) =>
+        SkillDictionary.All
+            .Select(skill => (Skill: skill, Hits: SkillNormalizer.FindSkill(jobDescription, skill).ToList()))
+            .Where(x => x.Hits.Count > 0)
+            .OrderByDescending(x => x.Hits.Count)
+            .ThenBy(x => x.Hits.Min(h => h.Start))
+            .ToList();
 
     private Dictionary<string, int> ExtractWordFrequencies(string text) =>
         JobDescriptionConstants.WordSplit().Split(text.ToLower())

@@ -20,13 +20,6 @@ public partial class SummaryGenerator
     private const string BackendRoleType = "Backend Developer";
     private const string FullStackRoleType = "Full Stack Developer";
 
-    private static readonly string[] TechRoleKeywords =
-    {
-        "developer","engineer","software","programmer","architect",
-        "devops","sre","data","backend","frontend","fullstack",
-        "full stack","full-stack","cloud","platform","tech"
-    };
-
     private static readonly Dictionary<string, string[]> RoleTypeSignals =
         new(StringComparer.OrdinalIgnoreCase)
         {
@@ -172,7 +165,7 @@ public partial class SummaryGenerator
 
     private bool IsTechRole(string? role) =>
         !string.IsNullOrEmpty(role) &&
-        TechRoleKeywords.Any(k => role.Contains(k, StringComparison.OrdinalIgnoreCase));
+        SelectionConstants.TechRoleKeywords.Any(k => role.Contains(k, StringComparison.OrdinalIgnoreCase));
 
     private string ExtractTopAchievement(List<Experience> experiences)
     {

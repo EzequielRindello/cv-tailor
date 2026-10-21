@@ -45,28 +45,6 @@ public static class KeywordAnalyzerConstants
         "resilient", "reliable",
         "remote", "async", "distributed", "time zones", "written communication",
     };
-    public static readonly string[] TechWords =
-    {
-        "react", "angular", "vue", "svelte", "next", "nuxt", "gatsby",
-        "node", "express", "nestjs", "fastapi", "django", "flask", "rails",
-        "spring", "laravel", "gin", "fiber",
-        "python", "java", "javascript", "typescript", "csharp", "c#",
-        "dotnet", "net", "go", "golang", "rust", "ruby", "php", "scala",
-        "kotlin", "swift", "dart", "elixir",
-        "sql", "nosql", "mongodb", "postgresql", "mysql", "redis",
-        "elasticsearch", "dynamodb", "cassandra", "kafka", "rabbitmq",
-        "snowflake", "databricks", "bigquery", "redshift",
-        "aws", "azure", "gcp", "docker", "kubernetes", "k8s", "helm",
-        "terraform", "ansible", "jenkins", "ci/cd", "cicd", "devops",
-        "linux", "nginx", "serverless",
-        "jest", "pytest", "cypress", "playwright", "selenium", "xunit",
-        "tdd", "bdd",
-        "api", "rest", "graphql", "grpc", "microservices", "event-driven",
-        "mvc", "cqrs", "ddd", "clean architecture",
-        "machine learning", "tensorflow", "pytorch", "llm", "openai",
-        "git", "github", "gitlab", "postman", "swagger", "openapi",
-        "vite", "webpack", "prisma", "typeorm",
-    };
     public static readonly string[] StopWords =
     {
         "the", "and", "for", "with", "you", "that", "this", "will", "from",

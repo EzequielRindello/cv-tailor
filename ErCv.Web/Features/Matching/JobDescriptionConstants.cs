@@ -6,38 +6,20 @@ public static partial class JobDescriptionConstants
 {
     #region Parsing
 
-    public const string DefaultSeniority = "mid-level";
     public const string YearsOfExperiencePattern = @"(\d+)\+?\s*(?:years?|yrs?)";
     public const string YearsWithTechPattern = @"(\d+)\+?\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience\s*)?(?:with\s*)?([a-z0-9\.\#\+\-\/]+)";
     public const string WordSplitPattern = @"\W+";
     public const string BulletLinePattern = @"^[\-\*\•\d\.]+\s*";
+    public const string TitlePunctuationPattern = @"[()\[\],/|:;.]";
     public const string ExperienceKeyword = "experience";
     public const string RequiredKeyword = "required";
     public const string MustHaveKeyword = "must have";
 
-    public const string SeniorityLevelSenior = "senior";
-    public const string SeniorityLevelJunior = "junior";
-
-    // "N years" alone decides the seniority when no seniority word is found
-    public const int SeniorYearsThreshold = 7;
-    public const int MidLevelYearsThreshold = 4;
-    public const int JuniorYearsThreshold = 1;
-
-    // How far back from a seniority word to look for a negation ("no senior experience needed")
-    public const int NegationWindowChars = 60;
-
-    public const int MinCapturedSkillLength = 2;
-    public const int MaxCapturedSkillLength = 39;
     public const int MinKeywordLength = 4;
     public const int MaxKeywords = 30;
     public const int MinRequirementLength = 11;
     public const int MaxRequirementLength = 199;
     public const int MaxRequirements = 10;
-
-    public static readonly string[] SeniorityNegations =
-    {
-        "no ", "not ", "without ", "don't ", "dont ", "non-", "doesn't require"
-    };
 
     [GeneratedRegex(YearsOfExperiencePattern)]
     public static partial Regex YearsOfExperience();
@@ -51,390 +33,77 @@ public static partial class JobDescriptionConstants
     [GeneratedRegex(BulletLinePattern)]
     public static partial Regex BulletLine();
 
+    [GeneratedRegex(TitlePunctuationPattern)]
+    public static partial Regex TitlePunctuation();
+
+    #endregion
+
+    #region Seniority
+
+    public const string LevelIntern = "intern";
+    public const string LevelJunior = "junior";
+    public const string DefaultSeniority = "mid-level";
+    public const string LevelSenior = "senior";
+    public const string LevelStaff = "staff";
+    public const string LevelLead = "lead";
+    public const string LevelPrincipal = "principal";
+
+    // The first line of a job description is read as its title when it is at most this long
+    public const int MaxTitleLength = 120;
+
+    // A level word followed by a role noun, with at most this many words between ("senior machine learning engineer")
+    public const int MaxWordsBeforeRoleNoun = 3;
+
+    // "N years" alone decides the seniority when no level is named
+    public const int SeniorYearsThreshold = 7;
+    public const int MidLevelYearsThreshold = 3;
+    public const int JuniorYearsThreshold = 1;
+
+    // How far back from a level word to look for a negation ("no senior experience needed")
+    public const int NegationWindowChars = 60;
+
+    public static readonly string[] SeniorityNegations =
+    {
+        "no ", "not ", "without ", "don't ", "dont ", "non-", "doesn't require"
+    };
+
+    /// <summary>
+    /// The levels the parser reports and the words that name them. A title is checked in this order and the first
+    /// level it names wins, so "Senior Staff Engineer" is staff and "Lead / Senior" is lead.
+    /// </summary>
+    public static readonly (string Level, string[] Words)[] SeniorityLevels =
+    {
+        (LevelIntern, new[] { "intern", "internship", "co-op" }),
+        (LevelJunior, new[] { "junior", "jr", "entry-level", "entry level", "new grad", "graduate", "university grad", "early career", "associate" }),
+        (LevelPrincipal, new[] { "principal", "distinguished", "fellow" }),
+        (LevelStaff, new[] { "staff" }),
+        (LevelLead, new[] { "lead", "tech lead", "team lead" }),
+        (DefaultSeniority, new[] { "mid-level", "mid level", "intermediate", "semi senior", "semi-senior", "ssr" }),
+        (LevelSenior, new[] { "senior", "sr" }),
+    };
+
+    /// <summary>Roman numerals after the role ("Software Engineer II"). They count only when the title names no level word.</summary>
+    public static readonly (string Level, string[] Numerals)[] NumberedLevels =
+    {
+        (LevelJunior, new[] { "i" }),
+        (DefaultSeniority, new[] { "ii" }),
+        (LevelSenior, new[] { "iii", "iv" }),
+    };
+
+    // Phrases that hold a level word without naming a level
+    public static readonly string[] NotLevelPhrases = { "member of technical staff" };
+
+    // What a level word must be followed by in the body to describe the role, not the team ("senior engineers")
+    public static readonly string[] RoleNouns =
+    {
+        "engineer", "developer", "programmer", "scientist", "architect", "sre", "analyst", "role", "position",
+        "ingeniero", "ingeniera", "desarrollador", "desarrolladora", "programador", "programadora"
+    };
+
     #endregion
 
     #region Keyword Lists
 
-    public static readonly string[] SeniorityKeywords =
-    {
-        "principal", "staff engineer", "distinguished", "fellow",
-        "architect", "lead", "tech lead", "team lead",
-        "senior", "sr.",
-        "mid-level", "mid level", "intermediate",
-        "junior", "jr.", "entry-level", "entry level",
-        "associate", "intern", "graduate", "new grad"
-    };
-    public static readonly string[] NegationWords =
-    {
-        "no", "not", "without", "non", "don't", "doesn't", "require",
-        "required", "necessary", "needed", "prefer", "need"
-    };
-
-    public static readonly string[] CommonTechKeywords =
-    {
-        "c#", "csharp", "c sharp",
-        ".net", "dotnet", "dot net",
-        "java",
-        "javascript", "js",
-        "typescript", "ts",
-        "python",
-        "ruby",
-        "go", "golang",
-        "rust",
-        "c++", "cpp",
-        "c",
-        "php",
-        "scala",
-        "kotlin",
-        "swift",
-        "objective-c",
-        "r",
-        "matlab",
-        "perl",
-        "lua",
-        "dart",
-        "haskell",
-        "elixir",
-        "erlang",
-        "clojure",
-        "f#",
-        "vb.net", "visual basic",
-        "cobol",
-        "fortran",
-        "assembly",
-        "groovy",
-        "shell", "bash", "zsh", "powershell",
-        "sql",
-        "plsql", "pl/sql",
-        "t-sql",
-        "react", "react.js", "reactjs",
-        "angular", "angularjs",
-        "vue", "vue.js", "vuejs",
-        "svelte", "sveltekit",
-        "next.js", "nextjs", "next",
-        "nuxt", "nuxt.js",
-        "gatsby",
-        "remix",
-        "astro",
-        "solid", "solidjs",
-        "ember", "ember.js",
-        "backbone",
-        "jquery",
-        "alpine.js",
-        "htmx",
-        "lit",
-        "preact",
-        "stencil",
-        "qwik",
-        "css", "css3",
-        "scss", "sass",
-        "less",
-        "tailwind", "tailwindcss",
-        "bootstrap",
-        "material ui", "mui",
-        "chakra ui",
-        "ant design", "antd",
-        "styled-components",
-        "emotion",
-        "radix ui",
-        "shadcn",
-        "bulma",
-        "foundation",
-        "storybook",
-        "asp.net", "asp.net core",
-        "node.js", "nodejs", "node",
-        "express", "express.js",
-        "nest.js", "nestjs",
-        "fastify",
-        "hapi",
-        "koa",
-        "django",
-        "flask",
-        "fastapi",
-        "spring", "spring boot",
-        "quarkus",
-        "micronaut",
-        "rails", "ruby on rails",
-        "sinatra",
-        "laravel",
-        "symfony",
-        "codeigniter",
-        "gin", "gin-gonic",
-        "echo",
-        "fiber",
-        "actix",
-        "axum",
-        "phoenix",
-        "ktor",
-        "postgresql", "postgres",
-        "mysql",
-        "sql server", "mssql",
-        "sqlite",
-        "oracle",
-        "mariadb",
-        "cockroachdb",
-        "tidb",
-        "aurora",
-        "mongodb", "mongo",
-        "dynamodb",
-        "cosmosdb",
-        "cassandra",
-        "couchdb",
-        "couchbase",
-        "firestore", "firebase",
-        "neo4j",
-        "arangodb",
-        "rethinkdb",
-        "faunadb",
-        "redis",
-        "memcached",
-        "hazelcast",
-        "etcd",
-        "elasticsearch", "elastic",
-        "opensearch",
-        "solr",
-        "typesense",
-        "algolia",
-        "meilisearch",
-        "kafka",
-        "rabbitmq",
-        "activemq",
-        "sqs", "amazon sqs",
-        "sns",
-        "nats",
-        "pulsar",
-        "celery",
-        "bull", "bullmq",
-        "sidekiq",
-        "aws", "amazon web services",
-        "ec2",
-        "s3",
-        "lambda",
-        "rds",
-        "ecs",
-        "eks",
-        "cloudfront",
-        "cloudwatch",
-        "iam",
-        "vpc",
-        "route53",
-        "api gateway",
-        "sagemaker",
-        "bedrock",
-        "amplify",
-        "elastic beanstalk",
-        "fargate",
-        "step functions",
-        "azure",
-        "azure devops",
-        "azure functions",
-        "azure blob",
-        "azure sql",
-        "azure kubernetes", "aks",
-        "azure container", "aci",
-        "cosmos db",
-        "azure active directory", "aad",
-        "azure service bus",
-        "azure event hub",
-        "azure logic apps",
-        "azure app service",
-        "gcp", "google cloud",
-        "bigquery",
-        "cloud run",
-        "cloud functions",
-        "gke",
-        "pubsub",
-        "cloud storage",
-        "spanner",
-        "vertex ai",
-        "docker",
-        "kubernetes", "k8s",
-        "helm",
-        "podman",
-        "containerd",
-        "openshift",
-        "rancher",
-        "nomad",
-        "ci/cd", "cicd",
-        "github actions",
-        "gitlab ci", "gitlab",
-        "jenkins",
-        "circleci",
-        "travis ci",
-        "teamcity",
-        "bamboo",
-        "argo cd", "argocd",
-        "flux",
-        "spinnaker",
-        "terraform",
-        "ansible",
-        "chef",
-        "puppet",
-        "pulumi",
-        "cloudformation",
-        "cdk",
-        "bicep",
-        "prometheus",
-        "grafana",
-        "datadog",
-        "newrelic", "new relic",
-        "splunk",
-        "sentry",
-        "jaeger",
-        "zipkin",
-        "opentelemetry",
-        "dynatrace",
-        "kibana",
-        "logstash",
-        "rest", "restful", "rest api",
-        "graphql",
-        "grpc",
-        "soap",
-        "websocket", "websockets",
-        "openapi", "swagger",
-        "postman",
-        "insomnia",
-        "oauth", "oauth2",
-        "jwt",
-        "saml",
-        "webhooks",
-        "microservices",
-        "monorepo",
-        "event-driven",
-        "event sourcing",
-        "cqrs",
-        "domain-driven design", "ddd",
-        "hexagonal architecture",
-        "clean architecture",
-        "layered architecture",
-        "serverless",
-        "soa",
-        "mvc", "mvvm", "mvp",
-        "unit testing",
-        "integration testing",
-        "e2e testing", "end-to-end",
-        "tdd", "test-driven development",
-        "bdd",
-        "jest",
-        "vitest",
-        "mocha",
-        "jasmine",
-        "cypress",
-        "playwright",
-        "selenium",
-        "puppeteer",
-        "xunit", "xunit.net",
-        "nunit",
-        "mstest",
-        "pytest",
-        "junit",
-        "testng",
-        "enzyme",
-        "testing library",
-        "git",
-        "github",
-        "gitlab",
-        "bitbucket",
-        "svn", "subversion",
-        "machine learning", "ml",
-        "deep learning",
-        "tensorflow",
-        "pytorch",
-        "scikit-learn", "sklearn",
-        "keras",
-        "hugging face",
-        "langchain",
-        "llm",
-        "openai",
-        "nlp",
-        "computer vision",
-        "pandas",
-        "numpy",
-        "jupyter",
-        "spark", "apache spark",
-        "dbt",
-        "airflow", "apache airflow",
-        "hadoop",
-        "hive",
-        "flink", "apache flink",
-        "databricks",
-        "snowflake",
-        "redshift",
-        "bigquery",
-        "looker",
-        "tableau",
-        "power bi",
-        "linux",
-        "unix",
-        "nginx",
-        "apache",
-        "iis",
-        "vite",
-        "webpack",
-        "rollup",
-        "esbuild",
-        "babel",
-        "eslint",
-        "prettier",
-        "nx",
-        "turborepo",
-        "lerna",
-        "vercel",
-        "netlify",
-        "heroku",
-        "railway",
-        "supabase",
-        "prisma",
-        "drizzle",
-        "typeorm", "type orm",
-        "entity framework", "ef core",
-        "dapper",
-        "hibernate",
-        "sequelize",
-        "mongoose",
-        "knex",
-        "liquibase",
-        "flyway",
-        "figma",
-        "jira",
-        "confluence",
-        "notion",
-        "linear",
-        "oauth", "oauth2",
-        "openid connect", "oidc",
-        "sso",
-        "rbac",
-        "abac",
-        "zero trust",
-        "ssl", "tls",
-        "https",
-        "encryption",
-        "vault", "hashicorp vault",
-        "owasp",
-        "react native",
-        "flutter",
-        "xamarin",
-        "maui", ".net maui",
-        "ionic",
-        "expo",
-        "android",
-        "ios",
-        "xcode",
-        "android studio",
-        "agile",
-        "scrum",
-        "kanban",
-        "devops",
-        "devsecops",
-        "sre", "site reliability",
-        "pair programming",
-        "code review",
-        "pull request",
-        "trunk-based development",
-        "continuous integration",
-        "continuous deployment",
-        "continuous delivery",
-    };
     public static readonly string[] CommonWords =
     {
         "the", "and", "for", "with", "you", "that", "this", "will", "from",

@@ -53,7 +53,7 @@ public class JobDescriptionParserTests
     [InlineData("We need a Senior engineer", "senior")]
     [InlineData("Junior developer wanted", "junior")]
     [InlineData("Looking for a principal engineer", "principal")]
-    [InlineData("Entry-level position", "entry-level")]
+    [InlineData("Entry-level position", "junior")]
     public void Detects_explicit_seniority(string jd, string expected)
     {
         Assert.Equal(expected, _parser.Parse(jd).SeniorityLevel);
@@ -70,6 +70,7 @@ public class JobDescriptionParserTests
     [Theory]
     [InlineData("8 years of experience with systems", "senior")]
     [InlineData("5 years of experience with systems", "mid-level")]
+    [InlineData("3 years of experience with systems", "mid-level")]
     [InlineData("2 years of experience with systems", "junior")]
     [InlineData("a role with no tenure mentioned", "mid-level")]
     public void Falls_back_to_years_of_experience(string jd, string expected)
@@ -154,10 +155,93 @@ public class JobDescriptionParserTests
         Assert.DoesNotContain(notASkill, _parser.Parse(jd).TechnicalSkills);
     }
 
-    [Fact]
-    public void Years_with_a_technology_still_captures_unlisted_technologies()
+    // F19: the word after "N years of" is a skill only when the dictionary knows it
+    [Theory]
+    [InlineData("5+ years of professional software experience", "professional")]
+    [InlineData("3+ years of building production systems", "building")]
+    [InlineData("4 years of industry experience", "industry")]
+    [InlineData("2 years of hands-on work", "hands-on")]
+    [InlineData("5+ years of experience with Zig", "zig")]
+    public void Words_after_years_that_are_not_skills_are_ignored(string jd, string notASkill)
     {
-        Assert.Contains("haskell", _parser.Parse("5+ years of experience with Haskell").TechnicalSkills);
+        Assert.DoesNotContain(notASkill, _parser.Parse(jd).TechnicalSkills);
+    }
+
+    [Theory]
+    [InlineData("5+ years of experience with Haskell", "haskell")]
+    [InlineData("3 years of go in production", "go")]
+    public void Years_with_a_dictionary_skill_counts_it_even_in_lowercase(string jd, string skill)
+    {
+        Assert.Contains(skill, _parser.Parse(jd).TechnicalSkills);
+    }
+
+    // F18 and F21, on sentences from the real posts of the corpus report
+    [Theory]
+    [InlineData("AI systems that enable the next generation of intelligent apps", "next.js")]
+    [InlineData("You will own end-to-end feature delivery, author tech specs", "e2e testing")]
+    [InlineData("trusted account and commerce foundation that lets anyone build", "foundation")]
+    [InlineData("so work is faster, clearer, and less fragmented", "less")]
+    [InlineData("Write solid automation in Python and/or Bash", "solidjs")]
+    [InlineData("integrations with international banking rails", "ruby on rails")]
+    [InlineData("Minnesota, Vermont or Washington D.C. : $116,960.00", "c")]
+    [InlineData("one of the following- Kotlin, Java, Swift, Objective-C, Go, or Python", "c")]
+    [InlineData("languages such as TypeScript, Node.js, or Python", "javascript")]
+    [InlineData("To learn more, please visit https://www.redditinc.com/careers/", "https")]
+    public void Ordinary_english_is_not_read_as_a_skill(string jd, string notASkill)
+    {
+        Assert.DoesNotContain(notASkill, _parser.Parse(jd).TechnicalSkills);
+    }
+
+    [Fact]
+    public void Skills_recent_posts_ask_for_are_in_the_dictionary()
+    {
+        var r = _parser.Parse("Build AI agents and MCP servers, run evals, own observability for distributed systems, "
+            + "join the on-call rotation, lead incident response, system design, data modeling, ETL into an Iceberg lakehouse, "
+            + "LLMs, accessibility and networking.");
+
+        foreach (var skill in new[] { "ai agents", "mcp", "evals", "observability", "distributed systems", "on-call",
+                     "incident response", "system design", "data modeling", "etl", "iceberg", "lakehouse", "llm",
+                     "accessibility", "networking" })
+            Assert.Contains(skill, r.TechnicalSkills);
+    }
+
+    // MATCH-09: the title (first line) decides when it names a level
+    [Theory]
+    [InlineData("Staff Software Engineer", "staff")]
+    [InlineData("Senior Staff Engineer, Infrastructure", "staff")]
+    [InlineData("Senior / Staff Security Engineer", "staff")]
+    [InlineData("Principal Engineer", "principal")]
+    [InlineData("Tech Lead, Payments", "lead")]
+    [InlineData("Sr. Backend Engineer", "senior")]
+    [InlineData("Software Engineer II", "mid-level")]
+    [InlineData("Software Engineer III", "senior")]
+    [InlineData("Software Engineer I", "junior")]
+    [InlineData("Software Engineering Intern", "intern")]
+    [InlineData("Software Engineering Internship, Summer 2027", "intern")]
+    [InlineData("Early Career Software Engineer", "junior")]
+    [InlineData("Software Engineer, New Grad", "junior")]
+    [InlineData("Desarrollador .NET Semi Senior", "mid-level")]
+    [InlineData("Member of Technical Staff", "mid-level")]
+    public void The_title_names_the_level(string title, string expected)
+    {
+        Assert.Equal(expected, _parser.Parse(title + "\n\nWe build products.").SeniorityLevel);
+    }
+
+    [Fact]
+    public void The_body_does_not_override_a_level_in_the_title()
+    {
+        var r = _parser.Parse("Senior Software Engineer\n\nYou will mentor junior engineers and pair with our staff engineer.");
+
+        Assert.Equal("senior", r.SeniorityLevel);
+    }
+
+    [Theory]
+    [InlineData("Software Engineer, Payments\n\nYou will lead the design of our APIs with principal engineers.", "mid-level")]
+    [InlineData("About us\n\nWe are hiring a staff backend engineer to own our data platform.", "staff")]
+    [InlineData("About us\n\nAs a senior machine learning engineer you will train models.", "senior")]
+    public void Without_a_level_in_the_title_the_body_names_the_role_not_the_team(string jd, string expected)
+    {
+        Assert.Equal(expected, _parser.Parse(jd).SeniorityLevel);
     }
 
     [Theory]

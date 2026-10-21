@@ -46,6 +46,13 @@ public static partial class Classifier
         ("devops", new[] { "devops", "sre", "site reliability", "platform", "infrastructure", "cloud", "reliability", "production engineer", "kubernetes", "observability" }),
     };
 
+    // Level words that leave no doubt. "Associate" and numbered levels ("Engineer 3") mean different things per company.
+    private static readonly string[] ClearLevelWords =
+    {
+        "intern", "internship", "new grad", "graduate", "junior", "jr", "entry level", "entry-level", "early career",
+        "senior", "sr", "staff", "lead", "principal", "distinguished"
+    };
+
     [GeneratedRegex(@"\b(engineer|developer) i\b")]
     private static partial Regex NumberedJunior();
 
@@ -69,6 +76,13 @@ public static partial class Classifier
         foreach (var (family, terms) in Families)
             if (terms.Any(term => HasWord(t, term))) return family;
         return Software;
+    }
+
+    /// <summary>True when the title names its level with a word that leaves no doubt ("Senior", "Junior", not "Associate").</summary>
+    public static bool NamesClearLevel(string title)
+    {
+        var t = Prepare(title).Replace("member of technical staff", " ");
+        return ClearLevelWords.Any(w => HasWord(t, w));
     }
 
     public static string Seniority(string title)

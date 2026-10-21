@@ -74,6 +74,20 @@ public class SummaryGeneratorTests
         Assert.StartsWith("Senior ", Summary(cv, Req()));
     }
 
+    // H10: the summary and the selector share one tech-role list, so a consultant role counts as tech years here too
+    [Fact]
+    public void Years_of_experience_count_every_role_the_selector_treats_as_tech()
+    {
+        var cv = Master(new[]
+        {
+            Exp(role: "Software Engineer", start: $"Jan {Year(3)}"),
+            Exp(role: "IT Consultant", start: $"Jan {Year(6)}", end: $"Jan {Year(3)}"),
+            Exp(role: "Barista", start: $"Jan {Year(12)}", end: $"Jan {Year(6)}")
+        });
+
+        Assert.Contains("with 6+ years of experience", Summary(cv, Req()));
+    }
+
     [Fact]
     public void Falls_back_to_all_roles_when_none_is_tech()
     {

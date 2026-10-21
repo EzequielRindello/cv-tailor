@@ -1,8 +1,24 @@
 namespace ErCv.Web.Features.Selection;
 
-/// <summary>Labels of the score parts shown in the selection explanation (MATCH-04). Shared by the scorer and the selector.</summary>
+/// <summary>Values shared by the scorer, the selector and the summary generator.</summary>
 public static class SelectionConstants
 {
+    #region Roles
+
+    /// <summary>
+    /// A role whose title holds one of these is a tech role: the selector keeps its full score for a technical job
+    /// description and the summary counts its years. One list, so both agree on what a tech role is.
+    /// </summary>
+    public static readonly string[] TechRoleKeywords =
+    {
+        "developer", "engineer", "software", "programmer", "architect",
+        "devops", "sre", "data", "backend", "frontend", "fullstack",
+        "full stack", "full-stack", "tech", "cloud", "platform", "analyst",
+        "consultant", "specialist"
+    };
+
+    #endregion
+
     #region Explanation Labels
 
     public const string LabelMatchedSkills = "Matched skills";

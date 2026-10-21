@@ -38,13 +38,6 @@ public class CVSelector
     private const double ProjectPointsPerKeyword = 2.0;
     private const int MaxKeywordsPerProject = 10;
 
-    private static readonly string[] TechRoleIndicators =
-    {
-        "developer", "engineer", "software", "programmer", "architect",
-        "devops", "sre", "data", "backend", "frontend", "fullstack",
-        "full stack", "full-stack", "tech", "cloud", "analyst",
-        "consultant", "specialist"
-    };
     private static readonly string[] StrongActionVerbs =
     {
         "built", "developed", "designed", "implemented", "architected",
@@ -189,7 +182,7 @@ public class CVSelector
 
     private bool IsTechExperience(Experience e) =>
         !string.IsNullOrEmpty(e.Role) &&
-        TechRoleIndicators.Any(k => e.Role.Contains(k, StringComparison.OrdinalIgnoreCase));
+        SelectionConstants.TechRoleKeywords.Any(k => e.Role.Contains(k, StringComparison.OrdinalIgnoreCase));
 
     private List<(Experience Experience, ExperienceExplanation Explanation)> SelectExperiences(
         List<RelevanceScore> scored,

@@ -22,23 +22,6 @@ public class SkillNormalizerTests
     }
 
     [Fact]
-    public void Every_alias_maps_to_a_stable_canonical_form()
-    {
-        var aliases = (Dictionary<string, string>)typeof(SkillNormalizer)
-            .GetField("Aliases", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
-            .GetValue(null)!;
-
-        Assert.True(aliases.Count > 50);
-        foreach (var (alias, canonical) in aliases)
-        {
-            Assert.Equal(canonical, SkillNormalizer.Normalize(alias));
-            Assert.Equal(canonical, SkillNormalizer.Normalize(alias.ToUpperInvariant()));
-            // Canonical forms must not be re-aliased (no alias chains).
-            Assert.Equal(canonical, SkillNormalizer.Normalize(canonical));
-        }
-    }
-
-    [Fact]
     public void Unknown_skill_is_lowercased_and_trimmed()
     {
         Assert.Equal("haskell", SkillNormalizer.Normalize("  Haskell "));
@@ -123,6 +106,64 @@ public class SkillNormalizerTests
     public void ContainsSkill_accepts_aliases_but_not_substrings(string text, string skill, bool expected)
     {
         Assert.Equal(expected, SkillNormalizer.ContainsSkill(text, skill));
+    }
+
+    // MATCH-07: a dot between letters, an address or an underscore joins one name
+    [Theory]
+    [InlineData("TypeScript, Node.js, or Python", "js", false)]
+    [InlineData("contributions to llama.cpp", "cpp", false)]
+    [InlineData("Learn more at grafana.com today", "grafana", false)]
+    [InlineData("email candidate_accessibility@elastic.co", "accessibility", false)]
+    [InlineData("We use Go.", "go", true)]
+    [InlineData("CSS-in-JS tooling", "js", true)]
+    public void ContainsTerm_does_not_split_dotted_names_or_addresses(string text, string term, bool expected)
+    {
+        Assert.Equal(expected, SkillNormalizer.ContainsTerm(text, term));
+    }
+
+    // F21: a single letter next to a hyphen, ampersand or abbreviation dot belongs to another word
+    [Theory]
+    [InlineData("Washington D.C., and Washington State", "c", false)]
+    [InlineData("Kotlin, Swift, Objective-C, Go", "c", false)]
+    [InlineData("MVVM-C architecture", "c", false)]
+    [InlineData("our R&D strategy", "r", false)]
+    [InlineData("C-level stakeholders", "c", false)]
+    [InlineData("Java, Go, C, or C++", "c", true)]
+    [InlineData("Rust, CUDA, or C (with a preference for Rust)", "c", true)]
+    [InlineData("Typescript/Javascript, Go, Rust, C/C++ and Python", "c", true)]
+    [InlineData("Python, R, JMP, or equivalent", "r", true)]
+    public void A_single_letter_term_is_a_word_of_its_own(string text, string term, bool expected)
+    {
+        Assert.Equal(expected, SkillNormalizer.ContainsTerm(text, term));
+    }
+
+    // F18: a text form with a capital letter only counts written that way, and exception phrases never count
+    [Theory]
+    [InlineData("datasets go directly into training", "go", false)]
+    [InlineData("sync with go-to-market on launches", "go", false)]
+    [InlineData("Node, Python, or Go. You have built", "go", true)]
+    [InlineData("shapes what we build next.", "next.js", false)]
+    [InlineData("we use Next.js and Tailwind", "next.js", true)]
+    [InlineData("propose a solid technical approach", "solidjs", false)]
+    [InlineData("international banking rails", "ruby on rails", false)]
+    [InlineData("from Sinatra toward Rails", "ruby on rails", true)]
+    [InlineData("graduating in Spring 2027", "spring", false)]
+    [InlineData("exposure to Spring / Spring Boot", "spring", true)]
+    [InlineData("node health checks and draining", "node.js", false)]
+    [InlineData("please visit https://www.example.com", "https", false)]
+    [InlineData("a strong foundation in optimizing workloads", "foundation", false)]
+    [InlineData("work is faster, clearer, and less fragmented", "less", false)]
+    public void ContainsSkill_needs_the_written_form_and_skips_exceptions(string text, string skill, bool expected)
+    {
+        Assert.Equal(expected, SkillNormalizer.ContainsSkill(text, skill));
+    }
+
+    [Fact]
+    public void FindSkill_returns_every_text_form_of_a_skill()
+    {
+        var hits = SkillNormalizer.FindSkill("Go services, a Golang CLI, and go-live support", "go").ToList();
+
+        Assert.Equal(new[] { (0, 2), (15, 6) }, hits.OrderBy(h => h.Start));
     }
 
     [Fact]

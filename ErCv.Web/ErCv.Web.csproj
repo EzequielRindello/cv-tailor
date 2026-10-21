@@ -20,6 +20,9 @@
 		<!-- APP-03 samples, written by the corpus collector (APP-05). Embedded so the app does not depend on the corpus folder. -->
 		<None Remove="Data\sample-jobs.json" />
 		<EmbeddedResource Include="Data\sample-jobs.json" LogicalName="ErCv.Web.Data.sample-jobs.json" />
+		<!-- MATCH-07 skill dictionary, embedded for the same reason and read once at startup -->
+		<None Remove="Data\skills.json" />
+		<EmbeddedResource Include="Data\skills.json" LogicalName="ErCv.Web.Data.skills.json" />
 	</ItemGroup>
 
 	<ItemGroup>

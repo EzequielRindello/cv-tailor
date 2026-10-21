@@ -4,91 +4,9 @@ public static class SkillNormalizer
 {
     #region Constants
 
-    private static readonly Dictionary<string, string> Aliases =
-        new(StringComparer.OrdinalIgnoreCase)
-        {
-            { "dotnet",             ".net" },
-            { "dot net",            ".net" },
-            { ".net core",          ".net" },
-            { "asp.net",            "asp.net core" },
-            { "aspnet",             "asp.net core" },
-            { "asp.net core",       "asp.net core" },
-            { "c sharp",            "c#" },
-            { "csharp",             "c#" },
-            { "js",                 "javascript" },
-            { "ecmascript",         "javascript" },
-            { "ts",                 "typescript" },
-            { "react.js",           "react" },
-            { "reactjs",            "react" },
-            { "nextjs",             "next.js" },
-            { "next",               "next.js" },
-            { "vue.js",             "vue" },
-            { "vuejs",              "vue" },
-            { "nuxt.js",            "nuxt" },
-            { "nuxtjs",             "nuxt" },
-            { "angularjs",          "angular" },
-            { "angular.js",         "angular" },
-            { "node",               "node.js" },
-            { "nodejs",             "node.js" },
-            { "nest",               "nestjs" },
-            { "nest.js",            "nestjs" },
-            { "py",                 "python" },
-            { "golang",             "go" },
-            { "postgres",           "postgresql" },
-            { "mongo",              "mongodb" },
-            { "mssql",              "sql server" },
-            { "ms sql",             "sql server" },
-            { "mysql server",       "mysql" },
-            { "redis cache",        "redis" },
-            { "elastic",            "elasticsearch" },
-            { "opensearch",         "elasticsearch" },
-            { "amazon web services","aws" },
-            { "google cloud",       "gcp" },
-            { "google cloud platform", "gcp" },
-            { "microsoft azure",    "azure" },
-            { "k8s",                "kubernetes" },
-            { "kube",               "kubernetes" },
-            { "docker container",   "docker" },
-            { "docker compose",     "docker" },
-            { "cicd",               "ci/cd" },
-            { "ci cd",              "ci/cd" },
-            { "continuous integration", "ci/cd" },
-            { "continuous deployment",  "ci/cd" },
-            { "continuous delivery",    "ci/cd" },
-            { "github action",      "github actions" },
-            { "gh actions",         "github actions" },
-            { "tf",                 "terraform" },
-            { "graph ql",           "graphql" },
-            { "rest api",           "rest" },
-            { "restful",            "rest" },
-            { "restful api",        "rest" },
-            { "grpc api",           "grpc" },
-            { "ef core",            "entity framework" },
-            { "ef",                 "entity framework" },
-            { "type orm",           "typeorm" },
-            { "tailwindcss",        "tailwind" },
-            { "tailwind css",       "tailwind" },
-            { "sass",               "scss" },
-            { "rn",                 "react native" },
-            { "ml",                 "machine learning" },
-            { "artificial intelligence", "ai" },
-            { "sklearn",            "scikit-learn" },
-            { "test driven development", "tdd" },
-            { "test-driven development", "tdd" },
-            { "agile methodology",  "agile" },
-            { "agile methodologies","agile" },
-            { "scrum methodology",  "scrum" },
-            { "micro services",     "microservices" },
-            { "micro-services",     "microservices" },
-        };
-
     // Phrases that look like an extension of another skill but are a different technology.
     private static readonly HashSet<string> DistinctProducts =
         new(StringComparer.OrdinalIgnoreCase) { "react native" };
-
-    private static readonly Lazy<Dictionary<string, List<string>>> AliasesByCanonical = new(() =>
-        Aliases.GroupBy(kvp => kvp.Value, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.Select(kvp => kvp.Key).ToList(), StringComparer.OrdinalIgnoreCase));
 
     #endregion
 
@@ -98,7 +16,7 @@ public static class SkillNormalizer
     {
         if (string.IsNullOrWhiteSpace(skill)) return "";
         var trimmed = skill.Trim().ToLower();
-        return Aliases.TryGetValue(trimmed, out var canonical) ? canonical : trimmed;
+        return SkillDictionary.Find(trimmed)?.Name ?? trimmed;
     }
 
     public static bool FuzzyMatch(string a, string b)
@@ -129,9 +47,7 @@ public static class SkillNormalizer
         while ((at = text.IndexOf(term, at, StringComparison.OrdinalIgnoreCase)) >= 0)
         {
             var end = at + term.Length;
-            var startsToken = at == 0 || !char.IsLetterOrDigit(text[at - 1]);
-            var endsToken = end >= text.Length || !(char.IsLetterOrDigit(text[end]) || text[end] == '#' || text[end] == '+');
-            if (startsToken && endsToken)
+            if (StartsToken(text, at, term) && EndsToken(text, end, term))
             {
                 yield return (at, term.Length);
                 at = end;
@@ -143,31 +59,82 @@ public static class SkillNormalizer
         }
     }
 
-    /// <summary>Like <see cref="FindTerm"/>, but also finds every alias of the skill ("golang" for "go").</summary>
+    /// <summary>
+    /// Every place the skill is written in <paramref name="text"/>, under any of its text forms ("golang" for "go").
+    /// A skill the dictionary does not know is searched by its own name.
+    /// </summary>
     public static IEnumerable<(int Start, int Length)> FindSkill(string? text, string? skill)
     {
         if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(skill)) return Enumerable.Empty<(int, int)>();
 
-        var canonical = Normalize(skill);
-        var terms = new List<string> { canonical };
-        if (AliasesByCanonical.Value.TryGetValue(canonical, out var aliases)) terms.AddRange(aliases);
-
-        return terms.SelectMany(t => FindTerm(text, t));
+        var known = SkillDictionary.Find(skill);
+        return known != null ? FindSkill(text, known) : FindTerm(text, Normalize(skill));
     }
 
-    /// <summary>Like <see cref="ContainsTerm"/>, but also accepts any alias of the skill ("golang" for "go").</summary>
-    public static bool ContainsSkill(string? text, string? skill)
+    /// <summary>
+    /// Every place a dictionary skill is written in <paramref name="text"/>: a text form with a capital letter only
+    /// counts written that way, and a match inside one of the skill's exception phrases does not count.
+    /// </summary>
+    public static IEnumerable<(int Start, int Length)> FindSkill(string text, Skill skill)
     {
-        if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(skill)) return false;
-
-        var canonical = Normalize(skill);
-        if (ContainsTerm(text, canonical)) return true;
-
-        return AliasesByCanonical.Value.TryGetValue(canonical, out var aliases) &&
-               aliases.Any(alias => ContainsTerm(text, alias));
+        foreach (var form in skill.TextForms)
+        {
+            var exactCase = form.Any(char.IsUpper);
+            foreach (var hit in FindTerm(text, form))
+            {
+                if (exactCase && string.CompareOrdinal(text, hit.Start, form, 0, form.Length) != 0) continue;
+                if (InsideException(text, hit, skill.Except)) continue;
+                yield return hit;
+            }
+        }
     }
+
+    /// <summary>True when the skill is written in <paramref name="text"/> (see <see cref="FindSkill(string?, string?)"/>).</summary>
+    public static bool ContainsSkill(string? text, string? skill) => FindSkill(text, skill).Any();
+
     public static bool MatchesAny(string skill, IEnumerable<string> collection)
         => collection.Any(c => FuzzyMatch(skill, c));
+
+    #endregion
+
+    #region Private Methods
+
+    private static bool StartsToken(string text, int at, string term)
+    {
+        if (at == 0) return true;
+        var before = text[at - 1];
+        if (char.IsLetterOrDigit(before) || before is '_' or '@') return false;
+        // A dot between letters joins one name: "node.js" holds no "js", "D.C." no "c"
+        if (before == '.' && at >= 2 && char.IsLetterOrDigit(text[at - 2])) return false;
+        // A single letter after a hyphen or apostrophe ends a word ("Objective-C", "MVVM-C")
+        return term.Length > 1 || before is not ('-' or '\'');
+    }
+
+    private static bool EndsToken(string text, int end, string term)
+    {
+        if (end >= text.Length) return true;
+        var after = text[end];
+        if (char.IsLetterOrDigit(after) || after is '#' or '+' or '_' or '@') return false;
+        // "grafana.com" is an address, not the product
+        if (after == '.' && end + 1 < text.Length && char.IsLetterOrDigit(text[end + 1])) return false;
+        // "R&D", "C-level", "C's"
+        return term.Length > 1 || after is not ('-' or '&' or '\'');
+    }
+
+    private static bool InsideException(string text, (int Start, int Length) hit, IReadOnlyList<string> phrases)
+    {
+        var hitEnd = hit.Start + hit.Length;
+        foreach (var phrase in phrases)
+        {
+            // A phrase that contains the hit starts between hitEnd - phrase.Length and hit.Start
+            var from = Math.Max(0, hitEnd - phrase.Length);
+            var count = Math.Min(text.Length, hit.Start + phrase.Length) - from;
+            if (count >= phrase.Length && text.IndexOf(phrase, from, count, StringComparison.OrdinalIgnoreCase) is var at
+                && at >= 0 && at <= hit.Start)
+                return true;
+        }
+        return false;
+    }
 
     #endregion
 }
