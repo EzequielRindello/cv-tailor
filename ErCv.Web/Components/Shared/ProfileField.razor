@@ -22,6 +22,8 @@
 </div>
 
 @code {
+    #region Parameters
+
     [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
     [Parameter] public string? Value { get; set; }
@@ -31,5 +33,11 @@
     [Parameter] public bool Multiline { get; set; }
     [Parameter] public string? CssClass { get; set; }
 
+    #endregion
+
+    #region Event Handlers
+
     private Task OnChange(ChangeEventArgs e) => ValueChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+
+    #endregion
 }

@@ -1,13 +1,20 @@
-using ErCv.Web.Components;
-using ErCv.Web.UI;
-using ErCvApi.Services;
-using Microsoft.AspNetCore.HttpOverrides;
 using System.Threading.RateLimiting;
+using ErCv.Web.Components;
+using ErCv.Web.Configuration;
+using ErCv.Web.Features.Documents;
+using ErCv.Web.Services;
+using ErCv.Web.UI;
+using Microsoft.AspNetCore.HttpOverrides;
+
+const string ApiRateLimitPolicy = "api";
+const string PortVariable = "PORT";
+const string ErrorPath = "/Error";
 
 var builder = WebApplication.CreateBuilder(args);
+var settings = ErCvOptions.Load(builder.Configuration);
 
 // Render injects the port to bind to
-var port = Environment.GetEnvironmentVariable("PORT");
+var port = Environment.GetEnvironmentVariable(PortVariable);
 if (!string.IsNullOrWhiteSpace(port))
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
@@ -26,13 +33,13 @@ builder.Services.AddAuthorization();
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddPolicy("api", context =>
+    options.AddPolicy(ApiRateLimitPolicy, context =>
     {
         var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
         {
-            PermitLimit = 60,
-            Window = TimeSpan.FromMinutes(1),
+            PermitLimit = settings.RateLimit.PermitLimit,
+            Window = TimeSpan.FromSeconds(settings.RateLimit.WindowSeconds),
             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
             QueueLimit = 0,
             AutoReplenishment = true
@@ -42,14 +49,16 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(10);
+    options.IdleTimeout = TimeSpan.FromMinutes(settings.Session.IdleTimeoutMinutes);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    // Render's proxy is not on a fixed, known network
+    // Render's proxy is not on a fixed, known network. Trusting only the last hop (the one Render appends) is what
+    // stops a client from spoofing X-Forwarded-For to get a fresh rate limit partition, so keep this at 1.
+    options.ForwardLimit = 1;
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
@@ -68,19 +77,29 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler(new ExceptionHandlerOptions
+    {
+        ExceptionHandlingPath = ErrorPath,
+        CreateScopeForErrors = true,
+        // Kestrel rejects an oversized body (RequestSizeLimit) with this exception; answer its 413, not a 500
+        StatusCodeSelector = ex => ex is BadHttpRequestException badRequest
+            ? badRequest.StatusCode
+            : StatusCodes.Status500InternalServerError
+    });
+    app.UseHsts();
 }
 
+app.UseSecurityHeaders();
 app.UseRateLimiter();
 app.UseSession();
 app.UseAuthorization();
 app.UseAntiforgery();
 app.MapStaticAssets();
-app.MapControllers().RequireRateLimiting("api");
+app.MapControllers().RequireRateLimiting(ApiRateLimitPolicy);
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.Lifetime.ApplicationStopping.Register(() => ErCvApi.Helpers.DocumentRenderer.ShutdownAsync().GetAwaiter().GetResult());
+app.Lifetime.ApplicationStopping.Register(() => DocumentRenderer.ShutdownAsync().GetAwaiter().GetResult());
 
 app.Run();
 

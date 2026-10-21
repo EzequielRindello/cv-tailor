@@ -27,25 +27,39 @@
 </div>
 
 @code {
+    #region Constants
+
+    private static readonly TemplateOption[] Templates =
+    {
+        new(UiConstants.TemplateHarvard, "Harvard", "Classic • ATS-safe"),
+        new(UiConstants.TemplateModern, "Modern", "2-column • Color accent"),
+        new(UiConstants.TemplateMinimalist, "Minimalist", "Clean • Lots of space")
+    };
+
+    #endregion
+
+    #region Parameters
+
     [Parameter] public string Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
     [Parameter] public bool Disabled { get; set; }
 
-    private static readonly TemplateOption[] Templates =
-    {
-        new("harvard", "Harvard", "Classic • ATS-safe"),
-        new("modern", "Modern", "2-column • Color accent"),
-        new("minimalist", "Minimalist", "Clean • Lots of space")
-    };
+    #endregion
+
+    #region Event Handlers
 
     private async Task Select(string key)
     {
         if (!Disabled) await ValueChanged.InvokeAsync(key);
     }
 
+    #endregion
+
+    #region Helpers
+
     private RenderFragment Preview(string key) => key switch
     {
-        "modern" => @<svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        UiConstants.TemplateModern => @<svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width="60" height="80" fill="white" />
             <rect width="60" height="12" fill="#2563eb" />
             <rect x="4" y="3" width="28" height="3" rx="1" fill="white" />
@@ -67,7 +81,7 @@
             <rect x="26" y="43" width="27" height="1.5" rx="0.5" fill="#888" />
             <rect x="26" y="46" width="30" height="1.5" rx="0.5" fill="#888" />
         </svg>,
-        "minimalist" => @<svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        UiConstants.TemplateMinimalist => @<svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width="60" height="80" fill="white" />
             <rect x="6" y="6" width="48" height="4" rx="1" fill="#111" opacity="0.7" />
             <rect x="6" y="12" width="44" height="1.5" rx="0.5" fill="#aaa" />
@@ -103,4 +117,6 @@
             <rect x="8" y="64" width="36" height="1.5" rx="0.5" fill="#888" />
         </svg>
     };
+
+    #endregion
 }

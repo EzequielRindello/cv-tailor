@@ -64,12 +64,22 @@
 </div>
 
 @code {
+    #region Constants
+
+    private const string PointsFormat = "0.#";
+
+    #endregion
+
+    #region Parameters
+
     [Parameter] public SelectionExplanation Explanation { get; set; } = new();
 
     /// <summary>The CV as it is now. After an edit it can differ from what the first selection chose.</summary>
     [Parameter] public GeneratedCV? Cv { get; set; }
 
-    private sealed record Item(ExperienceExplanation Experience, HashSet<string> Included);
+    #endregion
+
+    #region Helpers
 
     private List<Item> Items
     {
@@ -90,8 +100,16 @@
         }
     }
 
-    private static string Points(double value) => value.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+    private static string Points(double value) => value.ToString(PointsFormat, System.Globalization.CultureInfo.InvariantCulture);
 
     private static string Signed(double value) =>
         (value > 0 ? "+" : string.Empty) + Points(value);
+
+    #endregion
+
+    #region Nested Types
+
+    private sealed record Item(ExperienceExplanation Experience, HashSet<string> Included);
+
+    #endregion
 }

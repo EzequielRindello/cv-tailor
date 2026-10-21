@@ -1,4 +1,3 @@
-@using ErCvApi.Helpers
 
 <details class="profile-health" id="profile-health" open="@Open">
     <summary class="profile-health-summary">
@@ -33,6 +32,8 @@
 </details>
 
 @code {
+    #region Constants
+
     private static readonly (HealthRule Rule, string Label)[] Rules =
     {
         (HealthRule.NoMetrics, "Bullets have numbers or percentages"),
@@ -41,10 +42,18 @@
         (HealthRule.Dates, "Dates are readable and do not overlap")
     };
 
+    #endregion
+
+    #region Parameters
+
     [Parameter, EditorRequired] public List<HealthFinding> Findings { get; set; } = new();
 
     /// <summary>Collapsed by default so it does not compete with the form; the editor opens it because the visitor asked for the check.</summary>
     [Parameter] public bool Open { get; set; }
+
+    #endregion
+
+    #region Helpers
 
     private string Badge
     {
@@ -54,4 +63,6 @@
             return rules == 0 ? "All clear" : $"{rules} to improve";
         }
     }
+
+    #endregion
 }

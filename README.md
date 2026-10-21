@@ -85,45 +85,24 @@ GET /api/cv/download/{pdf|docx}
 ```
 er-cv-generator/
 ├── ErCv.Web/
-│   ├── Controllers/CVController.cs          # POST /generate, /regenerate, GET /download/:format
-│   ├── Services/CVGeneratorService.cs       # orchestrates full flow
-│   ├── Helpers/
-│   │   ├── JobDescriptionParser.cs          # extracts TechnicalSkills, Keywords, SeniorityLevel
-│   │   ├── RelevanceScorer.cs               # scores each experience: skills 40%, keywords 30%, recency 20%, seniority 10%
-│   │   ├── CVSelector.cs                    # picks top experiences/bullets; deprioritizes non-tech roles for tech JDs
-│   │   ├── SummaryGenerator.cs              # builds 2-3 line summary: role + tech YoE + skills + achievement + soft skills
-│   │   ├── PageConstraintHelper.cs          # trims bullets → projects → experiences to enforce page limit (returns a copy)
-│   │   ├── DateParser.cs                    # "Jun 2024", "2024-06", "Present"... to month indexes; recency and merged years of experience
-│   │   ├── SkillNormalizer.cs               # skill aliases, whole-token matching (ContainsTerm / ContainsSkill)
-│   │   ├── CvCloner.cs                      # deep copies, so a generated CV never shares state with the master
-│   │   ├── DocumentRenderer.cs              # Mustache HTML → PDF via PuppeteerSharp, DOCX via OpenXML
-│   │   ├── MatchScoreCalculator.cs          # overall % = skills(50%) + keywords(30%) + seniority(20%)
-│   │   ├── MissingSkillsAnalyzer.cs         # required vs nice-to-have gaps with suggestions
-│   │   ├── KeywordAnalyzer.cs               # frequency + present/missing per category
-│   │   └── ATSChecker.cs                    # email, phone, keyword density, sections, bullet length, metrics, template
-│   ├── Constants/
-│   │   ├── JobDescriptionConstants.cs       # 250+ tech keywords, seniority keywords, negation words, stopwords
-│   │   ├── KeywordAnalyzerConstants.cs      # soft skills, tech words for categorization, stopwords
-│   │   ├── MatchScoreConstants.cs           # weights, seniority map, color thresholds
-│   │   ├── MissingSkillsConstants.cs        # nice-to-have keyword list, limits, suggestion templates
-│   │   ├── ATSConstants.cs                  # penalties, thresholds, issue messages
-│   │   ├── DocumentConstants.cs             # section names, font sizes, language/soft-skill keyword lists
-│   │   ├── ApiConstants.cs                  # session keys, error messages, content types
-│   │   └── TemplatePaths.cs                 # file path constants for templates and data
-│   ├── Models/
-│   │   ├── CVMaster.cs                      # Header, Education, Experience, Skills, Project
-│   │   ├── GenerateModels.cs                # GeneratedCV, JobRequirements, RelevanceScore
-│   │   └── FeatureModels.cs                 # MatchScore, MissingSkillsAnalysis, KeywordAnalysis, ATSScore, enums
-│   ├── Templates/
-│   │   ├── harvard-template.html            # single-column, Times New Roman — best ATS compatibility
-│   │   ├── minimalist-template.html         # single-column, Helvetica — clean modern look, ATS-safe
-│   │   └── modern-template.html             # two-column grid — NOT recommended for ATS portals
-│   ├── Data/cv-master.json                  # master CV source — all experiences, skills, projects
-│   ├── Components/                          # Blazor Server UI (App, Routes, Layout, Pages/Home, Shared/*)
-│   ├── UI/                                  # BrowserStore (localStorage) + UI models
+│   ├── Api/CVController.cs                  # POST /generate, /regenerate, GET /download/:format (no logic, calls the service)
+│   ├── Services/CVGeneratorService.cs       # orchestrates full flow, validates requests, owns the session
+│   ├── Features/                            # the domain, one folder per feature; each feature keeps its own *Constants.cs
+│   │   ├── Matching/                        # JobDescriptionParser, SkillNormalizer, SampleJobDescriptions, JobDescriptionConstants
+│   │   ├── Analysis/                        # MatchScoreCalculator, MissingSkillsAnalyzer, KeywordAnalyzer, ATSChecker, JdHighlighter
+│   │   ├── Selection/                       # CVSelector, RelevanceScorer, SummaryGenerator, PageConstraintHelper, CvCloner
+│   │   ├── Profiles/                        # ProfileValidator, ProfileHealthChecker, ProfileJson, DateParser
+│   │   └── Documents/                       # DocumentRenderer (Mustache HTML, PDF via PuppeteerSharp, DOCX via OpenXML)
+│   ├── Constants/                           # cross-cutting only: ApiConstants (limits, messages, formats), TemplatePaths
+│   ├── Configuration/                       # ErCvOptions (the "ErCv" section of appsettings.json), SecurityHeaders
+│   ├── Models/                              # CVMaster, GeneratedCV, request and analysis models
+│   ├── Templates/                           # harvard, minimalist (single-column, ATS-safe) and modern (two-column) HTML templates
+│   ├── Data/                                # content only: cv-master.json (demo profile), sample-jobs.json (embedded samples)
+│   ├── Components/                          # Blazor Server UI (App, Routes, Layout, Pages/Home, Profile, Error, Shared/*)
+│   ├── UI/                                  # BrowserStore (localStorage), ToastService, ApplicationTracker, UiConstants, UI models
 │   ├── wwwroot/                             # css/site.css, js/app.js, lib/ (Bootstrap 5.3.2 + Icons 1.13.1, vendored)
-│   └── Program.cs                           # Blazor + API + rate limiter + forwarded headers, binds to PORT
-├── ErCv.Tests/                              # xUnit: Helpers (unit), Invariants, Documents (DOCX/PDF/HTML), Api, Collector, Fixtures (profiles + JD corpus)
+│   └── Program.cs                           # Blazor + API + rate limiter + security headers + forwarded headers, binds to PORT
+├── ErCv.Tests/                              # xUnit: Features (unit, mirrors ErCv.Web/Features), UI, Components (bUnit), Invariants, Documents, Api, Collector, Fixtures
 ├── ErCv.Collector/                          # console tool that keeps corpus/ fresh (not part of the web app)
 ├── corpus/                                  # real job posts, one JSON per post, plus report.md (see corpus/README.md)
 ├── .github/workflows/ci.yml                 # restore, build, test, Docker image build

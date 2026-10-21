@@ -85,13 +85,13 @@ else
 
         <div class="pane-switch" role="group" aria-label="Show preview or insights">
             <button type="button"
-                    class="pane-switch-btn @(_pane == "preview" ? "active" : "")"
-                    aria-pressed="@(_pane == "preview" ? "true" : "false")"
-                    @onclick='() => _pane = "preview"'>Preview</button>
+                    class="pane-switch-btn @(_pane == PanePreview ? "active" : "")"
+                    aria-pressed="@(_pane == PanePreview ? "true" : "false")"
+                    @onclick='() => _pane = PanePreview'>Preview</button>
             <button type="button"
-                    class="pane-switch-btn @(_pane == "insights" ? "active" : "")"
-                    aria-pressed="@(_pane == "insights" ? "true" : "false")"
-                    @onclick='() => _pane = "insights"'>@(Editing ? "Editor" : "Insights")</button>
+                    class="pane-switch-btn @(_pane == PaneInsights ? "active" : "")"
+                    aria-pressed="@(_pane == PaneInsights ? "true" : "false")"
+                    @onclick='() => _pane = PaneInsights'>@(Editing ? "Editor" : "Insights")</button>
         </div>
 
         <div class="details-layout" data-pane="@_pane">
@@ -156,24 +156,52 @@ else
 }
 
 @code {
+    #region Constants
+
+    private const string PanePreview = "preview";
+    private const string PaneInsights = "insights";
+
     private static readonly (string Key, string Label)[] Tabs =
     {
         ("match", "Match"), ("ats", "ATS"), ("keywords", "Keywords"), ("gaps", "Gaps"), ("why", "Why"), ("jd", "Job")
     };
 
-    private string _tab = "match";
+    #endregion
+
+    #region Parameters
+
+    [Parameter] public AnalysisResult? Analysis { get; set; }
+    [Parameter] public Dictionary<string, byte[]> Documents { get; set; } = new();
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public GenerationStage Stage { get; set; }
+    [Parameter] public bool Editing { get; set; }
+    [Parameter] public EventCallback<bool> EditingChanged { get; set; }
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback OnStartOver { get; set; }
+    [Parameter] public EventCallback<string> OnDownload { get; set; }
+    [Parameter] public EventCallback<(Dictionary<string, List<int>> Selections, GeneratedCV Cv)> OnRegenerate { get; set; }
+
+    #endregion
+
+    #region State
+
+    private string _tab = Tabs[0].Key;
     private bool _focusTab;
 
     // Below the desktop breakpoint only one of preview / insights is shown at a time
-    private string _pane = "preview";
+    private string _pane = PanePreview;
     private bool _wasEditing;
+
+    #endregion
+
+    #region Lifecycle
 
     protected override void OnParametersSet()
     {
         if (Editing == _wasEditing) return;
 
         // Opening the editor brings it into view; closing it (after a regenerate) shows the updated preview
-        _pane = Editing ? "insights" : "preview";
+        _pane = Editing ? PaneInsights : PanePreview;
         _wasEditing = Editing;
     }
 
@@ -182,8 +210,12 @@ else
         if (!_focusTab) return;
 
         _focusTab = false;
-        await JS.InvokeVoidAsync("cvApp.focusElement", $"insights-tab-{_tab}");
+        await JS.InvokeVoidAsync(UiConstants.JsFocusElement, $"insights-tab-{_tab}");
     }
+
+    #endregion
+
+    #region Event Handlers
 
     // Arrow keys, Home and End move between tabs (roving tabindex, per the ARIA tabs pattern)
     private void OnTabKeyDown(KeyboardEventArgs e)
@@ -203,21 +235,16 @@ else
         _focusTab = true;
     }
 
-    [Parameter] public AnalysisResult? Analysis { get; set; }
-    [Parameter] public Dictionary<string, byte[]> Documents { get; set; } = new();
-    [Parameter] public bool Loading { get; set; }
-    [Parameter] public GenerationStage Stage { get; set; }
-    [Parameter] public bool Editing { get; set; }
-    [Parameter] public EventCallback<bool> EditingChanged { get; set; }
-    [Parameter] public EventCallback OnBack { get; set; }
-    [Parameter] public EventCallback OnStartOver { get; set; }
-    [Parameter] public EventCallback<string> OnDownload { get; set; }
-    [Parameter] public EventCallback<(Dictionary<string, List<int>> Selections, GeneratedCV Cv)> OnRegenerate { get; set; }
+    #endregion
+
+    #region Helpers
 
     private static string FormatLabel(string format) => format switch
     {
-        "pdf" => "PDF",
-        "docx" => "DOCX",
+        ApiConstants.FormatPdf => "PDF",
+        ApiConstants.FormatDocx => "DOCX",
         _ => format.ToUpperInvariant()
     };
+
+    #endregion
 }

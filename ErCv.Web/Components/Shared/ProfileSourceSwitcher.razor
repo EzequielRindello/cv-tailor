@@ -3,12 +3,12 @@
     <div class="d-flex flex-wrap gap-3 align-items-center">
         <div class="form-check mb-0">
             <input class="form-check-input" type="radio" name="profile-source" id="source-demo"
-                   checked="@(Value == "demo")" disabled="@Disabled" @onchange="PickDemo" />
+                   checked="@(Value == UiConstants.ProfileSourceDemo)" disabled="@Disabled" @onchange="PickDemo" />
             <label class="form-check-label" for="source-demo">Demo profile</label>
         </div>
         <div class="form-check mb-0">
             <input class="form-check-input" type="radio" name="profile-source" id="source-mine"
-                   checked="@(Value == "mine")" disabled="@(Disabled || !HasMine)" @onchange="PickMine" />
+                   checked="@(Value == UiConstants.ProfileSourceMine)" disabled="@(Disabled || !HasMine)" @onchange="PickMine" />
             <label class="form-check-label" for="source-mine">My profile</label>
         </div>
         <a href="/profile" id="profile-edit-link">@(HasMine ? "Edit my profile" : "Create my profile")</a>
@@ -16,12 +16,20 @@
 </fieldset>
 
 @code {
-    [Parameter] public string Value { get; set; } = "demo";
+    #region Parameters
+
+    [Parameter] public string Value { get; set; } = UiConstants.ProfileSourceDemo;
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
     [Parameter] public bool HasMine { get; set; }
     [Parameter] public bool Disabled { get; set; }
 
-    private Task PickDemo() => ValueChanged.InvokeAsync("demo");
+    #endregion
 
-    private Task PickMine() => ValueChanged.InvokeAsync("mine");
+    #region Event Handlers
+
+    private Task PickDemo() => ValueChanged.InvokeAsync(UiConstants.ProfileSourceDemo);
+
+    private Task PickMine() => ValueChanged.InvokeAsync(UiConstants.ProfileSourceMine);
+
+    #endregion
 }

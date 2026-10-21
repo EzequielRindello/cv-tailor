@@ -113,9 +113,13 @@
 </div>
 
 @code {
-    private string _statusFilter = string.Empty;
-    private HistorySort _sort = HistorySort.Newest;
-    private long? _openId;
+    #region Constants
+
+    private const string DateDisplayFormat = "yyyy-MM-dd HH:mm";
+
+    #endregion
+
+    #region Parameters
 
     [Parameter] public List<HistoryEntry> Entries { get; set; } = new();
     [Parameter] public EventCallback<HistoryEntry> OnLoad { get; set; }
@@ -125,6 +129,18 @@
     /// <summary>Raised after the application details of an entry were edited, so the caller can save it.</summary>
     [Parameter] public EventCallback<HistoryEntry> OnUpdate { get; set; }
     [Parameter] public bool Disabled { get; set; }
+
+    #endregion
+
+    #region State
+
+    private string _statusFilter = string.Empty;
+    private HistorySort _sort = HistorySort.Newest;
+    private long? _openId;
+
+    #endregion
+
+    #region Event Handlers
 
     private void OnFilterChange(ChangeEventArgs e) => _statusFilter = e.Value?.ToString() ?? string.Empty;
 
@@ -136,6 +152,10 @@
         change(entry);
         return OnUpdate.InvokeAsync(entry);
     }
+
+    #endregion
+
+    #region Helpers
 
     /// <summary>"Role at Company" once the visitor filled those in; otherwise the first line of the job description.</summary>
     private static string Heading(HistoryEntry entry)
@@ -150,6 +170,8 @@
 
     private static string FormatDate(string iso) =>
         DateTime.TryParse(iso, null, System.Globalization.DateTimeStyles.RoundtripKind, out var d)
-            ? d.ToString("yyyy-MM-dd HH:mm") + " UTC"
+            ? d.ToString(DateDisplayFormat) + " UTC"
             : "-";
+
+    #endregion
 }

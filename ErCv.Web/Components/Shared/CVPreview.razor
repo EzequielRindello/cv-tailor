@@ -16,10 +16,7 @@
 }
 
 @code {
-    [Parameter] public string? Html { get; set; }
-
-    private string? _sourceHtml;
-    private string _normalizedHtml = string.Empty;
+    #region Constants
 
     private const string ViewportMeta = "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
 
@@ -45,6 +42,23 @@
         </style>
         """;
 
+    #endregion
+
+    #region Parameters
+
+    [Parameter] public string? Html { get; set; }
+
+    #endregion
+
+    #region State
+
+    private string? _sourceHtml;
+    private string _normalizedHtml = string.Empty;
+
+    #endregion
+
+    #region Lifecycle
+
     protected override void OnParametersSet()
     {
         if (Html == _sourceHtml) return;
@@ -53,22 +67,28 @@
         _normalizedHtml = Normalize(Html ?? string.Empty);
     }
 
+    #endregion
+
+    #region Helpers
+
     private static string Normalize(string html)
     {
-        if (!Regex.IsMatch(html, "<meta[^>]*name=[\"']viewport[\"'][^>]*>", RegexOptions.IgnoreCase))
+        if (!ViewportMetaTag().IsMatch(html))
         {
-            html = Regex.IsMatch(html, "<head[^>]*>", RegexOptions.IgnoreCase)
-                ? Regex.Replace(html, "<head([^>]*)>", $"<head$1>\n{ViewportMeta}", RegexOptions.IgnoreCase)
+            html = HeadOpenTag().IsMatch(html)
+                ? HeadOpenTag().Replace(html, $"<head$1>\n{ViewportMeta}")
                 : $"{ViewportMeta}\n{html}";
         }
 
-        if (!Regex.IsMatch(html, "id=[\"']cv-preview-fix[\"']", RegexOptions.IgnoreCase))
+        if (!PreviewFixMarker().IsMatch(html))
         {
-            html = Regex.IsMatch(html, "</head>", RegexOptions.IgnoreCase)
-                ? Regex.Replace(html, "</head>", PreviewFixStyle.Replace("$", "$$") + "\n</head>", RegexOptions.IgnoreCase)
+            html = HeadCloseTag().IsMatch(html)
+                ? HeadCloseTag().Replace(html, PreviewFixStyle.Replace("$", "$$") + "\n</head>")
                 : $"{PreviewFixStyle}\n{html}";
         }
 
         return html;
     }
+
+    #endregion
 }

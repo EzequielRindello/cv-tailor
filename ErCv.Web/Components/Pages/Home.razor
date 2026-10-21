@@ -1,9 +1,6 @@
 @page "/"
 @using System.Text.Json
-@using ErCvApi.Helpers
-@using ErCvApi.Models
-@using ErCvApi.Services
-@using static ErCvApi.Services.CVGeneratorService
+@using static ErCv.Web.Services.CVGeneratorService
 @implements IAsyncDisposable
 @inject CVGeneratorService CvService
 @inject BrowserStore Store
@@ -15,7 +12,7 @@
 
 <div class="visually-hidden" role="status" aria-live="polite">@_announcement</div>
 
-@if (_view == "generate")
+@if (_view == ViewGenerate)
 {
     <div class="container app-shell py-4 py-lg-5">
         <Hero />
@@ -44,7 +41,7 @@
                                 </button>
                             </div>
                             <ComposerSteps Current="_step" OnGoTo="GoToStepAsync" Disabled="_loading" />
-                            @if (_step == 1)
+                            @if (_step == StepJobDescription)
                             {
                                 <div class="form-section form-section-primary">
                                     <JobDescriptionInput @bind-Value="_jobDescription"
@@ -56,7 +53,7 @@
                                                      Disabled="_loading" />
                                 </div>
                             }
-                            else if (_step == 2)
+                            else if (_step == StepProfile)
                             {
                                 <div class="form-section form-section-primary">
                                     <ProfileSourceSwitcher Value="@_settings.ProfileSource"
@@ -135,14 +132,30 @@ else
 }
 
 @code {
+    #region Constants
+
+    private const string ViewGenerate = "generate";
+    private const string ViewDetails = "details";
+
+    // Composer steps
+    private const int StepJobDescription = 1;
+    private const int StepProfile = 2;
     private const int LastStep = 3;
 
-    private string _view = "generate";
-    private int _step = 1;
+    // Element ids the page moves focus to
+    private const string ResultsRegionId = "results-region";
+    private const string JobDescriptionId = "job-description";
+
+    #endregion
+
+    #region State
+
+    private string _view = ViewGenerate;
+    private int _step = StepJobDescription;
     private string _jobDescription = string.Empty;
-    private string _profileId = "cv-master";
+    private string _profileId = ApiConstants.DefaultProfileId;
     private CVMaster? _myProfile;
-    private List<ProfileInfo> _profiles = new() { new("cv-master", "Default") };
+    private List<ProfileInfo> _profiles = new() { new(ApiConstants.DefaultProfileId, ApiConstants.DefaultProfileName) };
     private AppSettings _settings = new();
     private List<HistoryEntry> _history = new();
     private AnalysisResult? _analysis;
@@ -157,6 +170,10 @@ else
     private bool _focusResults;
     private string _announcement = string.Empty;
     private DotNetObjectReference<Home>? _selfRef;
+
+    #endregion
+
+    #region Lifecycle
 
     protected override async Task OnInitializedAsync()
     {
@@ -177,41 +194,51 @@ else
 
         // Registered before the storage reads: each read is a round trip, and a shortcut pressed meanwhile was lost
         _selfRef = DotNetObjectReference.Create(this);
-        await JS.InvokeVoidAsync("cvApp.registerShortcuts", _selfRef);
+        await JS.InvokeVoidAsync(UiConstants.JsRegisterShortcuts, _selfRef);
 
         _settings = await Store.LoadSettingsAsync();
         _history = await Store.GetHistoryAsync();
         _myProfile = await Store.LoadMyProfileAsync();
-        if (_myProfile == null) _settings.ProfileSource = "demo";
+        if (_myProfile == null) _settings.ProfileSource = UiConstants.ProfileSourceDemo;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         // Focus waits for the render that creates the target element
-        if (_focusResults && _view == "details" && _analysis != null)
+        if (_focusResults && _view == ViewDetails && _analysis != null)
         {
             _focusResults = false;
-            await JS.InvokeVoidAsync("cvApp.focusElement", "results-region");
+            await JS.InvokeVoidAsync(UiConstants.JsFocusElement, ResultsRegionId);
             return;
         }
 
-        if (!_focusJd || _view != "generate" || _step != 1) return;
+        if (!_focusJd || _view != ViewGenerate || _step != StepJobDescription) return;
 
         _focusJd = false;
-        await JS.InvokeVoidAsync("cvApp.focusElement", "job-description");
+        await JS.InvokeVoidAsync(UiConstants.JsFocusElement, JobDescriptionId);
     }
 
-    private void RequireJobDescription()
+    public async ValueTask DisposeAsync()
     {
-        _step = 1;
-        _jdError = "Paste a job description to continue";
-        _focusJd = true;
+        try
+        {
+            await JS.InvokeVoidAsync(UiConstants.JsUnregisterShortcuts);
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+
+        _selfRef?.Dispose();
     }
+
+    #endregion
+
+    #region Event Handlers
 
     [JSInvokable]
     public Task OnPasteShortcut(string text) => InvokeAsync(() =>
     {
-        if (_loading || _view != "generate") return;
+        if (_loading || _view != ViewGenerate) return;
         _jobDescription = text;
         StateHasChanged();
     });
@@ -221,7 +248,7 @@ else
     {
         // The editor only exists on step 1; on later steps the text already lives in _jobDescription
         var text = string.IsNullOrWhiteSpace(textareaValue) ? _jobDescription : textareaValue;
-        if (_view != "generate" || _loading) return;
+        if (_view != ViewGenerate || _loading) return;
 
         _jobDescription = text;
         await GenerateAsync();
@@ -232,19 +259,16 @@ else
 
     private Task GoToStepAsync(int step)
     {
-        if (step > 1 && string.IsNullOrWhiteSpace(_jobDescription))
+        if (step > StepJobDescription && string.IsNullOrWhiteSpace(_jobDescription))
         {
             RequireJobDescription();
             return Task.CompletedTask;
         }
 
         _jdError = null;
-        _step = Math.Clamp(step, 1, LastStep);
+        _step = Math.Clamp(step, StepJobDescription, LastStep);
         return Task.CompletedTask;
     }
-
-    /// <summary>The profile sent with the request: the saved "My profile" if selected. Null means a stored demo profile.</summary>
-    private CVMaster? ActiveProfile => _settings.ProfileSource == "mine" ? _myProfile : null;
 
     private async Task SetProfileSource(string source)
     {
@@ -270,14 +294,6 @@ else
         await Store.SaveSettingsAsync(_settings);
     }
 
-    private List<string> SelectedFormats() =>
-        _settings.SelectedFormats.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
-
-    private CVTemplate TemplateEnum() =>
-        Enum.TryParse<CVTemplate>(_settings.Template, ignoreCase: true, out var t) ? t : CVTemplate.Harvard;
-
-    private string TemplateLabel() => TemplateEnum().ToString();
-
     private async Task DownloadAsync(string format)
     {
         if (!_documents.TryGetValue(format, out var bytes)) return;
@@ -286,7 +302,7 @@ else
         {
             using var stream = new MemoryStream(bytes);
             using var reference = new DotNetStreamReference(stream);
-            await JS.InvokeVoidAsync("cvApp.downloadFile", CvService.BuildFileName(format), reference);
+            await JS.InvokeVoidAsync(UiConstants.JsDownloadFile, CvService.BuildFileName(format), reference);
             Toasts.Success($"Download started: {format.ToUpperInvariant()}");
         }
         catch (Exception ex) when (ex is JSException or InvalidOperationException)
@@ -309,7 +325,7 @@ else
         _showBulletEditor = false;
         _showHistory = false;
         _stage = GenerationStage.Parsing;
-        _view = "details";
+        _view = ViewDetails;
         StateHasChanged();
 
         // Progress<T> posts to the Blazor sync context, so the callback can touch component state directly
@@ -337,7 +353,7 @@ else
             _documents = documents;
             _analysis = analysis;
             _focusResults = true;
-            _announcement = $"CV ready. Match score {analysis.MatchScore.Overall} percent. ATS score {analysis.ATSScore.Overall} out of 100.";
+            _announcement = $"CV ready. Match score {analysis.MatchScore.Overall} percent. ATS score {analysis.ATSScore.Overall} out of {ATSConstants.MaxScore}.";
             _history = await Store.AddToHistoryAsync(_jobDescription, analysis.MatchScore.Overall, TemplateLabel(), new HistoryEntry
             {
                 TemplateKey = _settings.Template,
@@ -349,13 +365,13 @@ else
         }
         catch (ArgumentException ex)
         {
-            _view = "generate";
+            _view = ViewGenerate;
             Toasts.Error(ex.Message);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error generating CV");
-            _view = "generate";
+            _view = ViewGenerate;
             Toasts.Error("Something went wrong while generating the CV", "Retry", GenerateAsync);
         }
         finally
@@ -421,29 +437,6 @@ else
         await GenerateAsync();
     }
 
-    /// <summary>Returns a message when the profile the entry used is gone and the demo profile is used instead.</summary>
-    private string? RestoreProfile(HistoryEntry entry)
-    {
-        if (entry.ProfileSource == null) return null;
-
-        if (entry.ProfileId != null && _profiles.Any(p => p.Id == entry.ProfileId))
-            _profileId = entry.ProfileId;
-
-        if (entry.ProfileSource == "mine" && _myProfile != null)
-        {
-            _settings.ProfileSource = "mine";
-            return null;
-        }
-
-        _settings.ProfileSource = "demo";
-        return entry.ProfileSource switch
-        {
-            "imported" => "The imported profile was not kept, so the demo profile was used.",
-            "mine" => "Your saved profile was not found, so the demo profile was used.",
-            _ => null
-        };
-    }
-
     private Task SaveHistoryEntry(HistoryEntry entry) => Store.UpdateHistoryEntryAsync(entry);
 
     private async Task DeleteHistoryEntry(long id) => _history = await Store.RemoveFromHistoryAsync(id);
@@ -456,10 +449,10 @@ else
 
     private async Task BackToGenerate()
     {
-        _view = "generate";
+        _view = ViewGenerate;
         _showHistory = false;
         _showBulletEditor = false;
-        await JS.InvokeVoidAsync("cvApp.scrollToTop");
+        await JS.InvokeVoidAsync(UiConstants.JsScrollToTop);
     }
 
     private async Task ResetAsync()
@@ -475,23 +468,57 @@ else
         _documents = new();
         _showBulletEditor = false;
         _showHistory = false;
-        _step = 1;
-        _view = "generate";
+        _step = StepJobDescription;
+        _view = ViewGenerate;
         _jdError = null;
         _formatError = null;
-        await JS.InvokeVoidAsync("cvApp.scrollToTop");
+        await JS.InvokeVoidAsync(UiConstants.JsScrollToTop);
     }
 
-    public async ValueTask DisposeAsync()
+    #endregion
+
+    #region Helpers
+
+    /// <summary>The profile sent with the request: the saved "My profile" if selected. Null means a stored demo profile.</summary>
+    private CVMaster? ActiveProfile => _settings.ProfileSource == UiConstants.ProfileSourceMine ? _myProfile : null;
+
+    private void RequireJobDescription()
     {
-        try
+        _step = StepJobDescription;
+        _jdError = "Paste a job description to continue";
+        _focusJd = true;
+    }
+
+    private List<string> SelectedFormats() =>
+        _settings.SelectedFormats.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
+
+    private CVTemplate TemplateEnum() =>
+        Enum.TryParse<CVTemplate>(_settings.Template, ignoreCase: true, out var t) ? t : CVTemplate.Harvard;
+
+    private string TemplateLabel() => TemplateEnum().ToString();
+
+    /// <summary>Returns a message when the profile the entry used is gone and the demo profile is used instead.</summary>
+    private string? RestoreProfile(HistoryEntry entry)
+    {
+        if (entry.ProfileSource == null) return null;
+
+        if (entry.ProfileId != null && _profiles.Any(p => p.Id == entry.ProfileId))
+            _profileId = entry.ProfileId;
+
+        if (entry.ProfileSource == UiConstants.ProfileSourceMine && _myProfile != null)
         {
-            await JS.InvokeVoidAsync("cvApp.unregisterShortcuts");
-        }
-        catch (JSDisconnectedException)
-        {
+            _settings.ProfileSource = UiConstants.ProfileSourceMine;
+            return null;
         }
 
-        _selfRef?.Dispose();
+        _settings.ProfileSource = UiConstants.ProfileSourceDemo;
+        return entry.ProfileSource switch
+        {
+            UiConstants.ProfileSourceImported => "The imported profile was not kept, so the demo profile was used.",
+            UiConstants.ProfileSourceMine => "Your saved profile was not found, so the demo profile was used.",
+            _ => null
+        };
     }
+
+    #endregion
 }

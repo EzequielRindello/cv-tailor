@@ -28,9 +28,17 @@
 </nav>
 
 @code {
+    #region Constants
+
     private static readonly string[] Titles = { "Job description", "Profile & template", "Options" };
+
+    #endregion
+
+    #region Parameters
 
     [Parameter] public int Current { get; set; } = 1;
     [Parameter] public EventCallback<int> OnGoTo { get; set; }
     [Parameter] public bool Disabled { get; set; }
+
+    #endregion
 }
