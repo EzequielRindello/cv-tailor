@@ -35,14 +35,14 @@ public class ProfileImportTests : E2ETestBase
     {
         await OpenProfilePageAsync();
         await Page.Locator("#profile-use-demo").ClickAsync();
-        await Assertions.Expect(Page.Locator("#p-fullName")).ToHaveValueAsync("Alex Rivera");
+        await Assertions.Expect(Page.Locator("#p-fullName")).ToHaveValueAsync("Ezequiel Rindello");
 
         var download = await Page.RunAndWaitForDownloadAsync(() => Page.Locator("#profile-export").ClickAsync());
         await using var stream = await download.CreateReadStreamAsync();
         var exported = await new StreamReader(stream!).ReadToEndAsync();
-        Assert.Contains("Rivera", exported);
+        Assert.Contains("Rindello", exported);
 
-        await SaveMyProfileFromJsonAsync(exported.Replace("Alex Rivera", "Zed Tester"));
+        await SaveMyProfileFromJsonAsync(exported.Replace("Ezequiel Rindello", "Zed Tester"));
         await Assertions.Expect(Page.Locator("#p-fullName")).ToHaveValueAsync("Zed Tester");
 
         await ChooseMyProfileAsync();

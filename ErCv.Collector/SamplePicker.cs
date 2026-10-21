@@ -4,13 +4,17 @@ namespace ErCv.Collector;
 
 /// <summary>
 /// Picks the APP-03 samples from the corpus: one post per role family, the one the parser gets the most skills from
-/// (newest first on a tie), preferring posts short enough to read in the composer. "Junior" is the entry-level pick from any family.
+/// (newest first on a tie), preferring posts whose title names a clear level and that are short enough to read in the
+/// composer. Programs (accelerators, fellowships) are never picked. "Junior" is the entry-level pick from any family.
 /// </summary>
 public static class SamplePicker
 {
     #region Constants
 
     private const int ReadableLength = 8000;
+
+    // A program is not a normal job to tailor a CV to (APP-06: an accelerator post was the Full stack sample)
+    private static readonly string[] ProgramWords = { "accelerator", "fellowship", "residency", "apprenticeship", "bootcamp" };
 
     public static readonly (string Id, string Label, Func<Posting, bool> Fits)[] Slots =
     {
@@ -39,8 +43,9 @@ public static class SamplePicker
         foreach (var (id, label, fits) in Slots)
         {
             var best = scored
-                .Where(s => fits(s.Posting) && !used.Contains(s.Posting.Id))
-                .OrderBy(s => s.Posting.Text.Length > ReadableLength ? 1 : 0)
+                .Where(s => fits(s.Posting) && !used.Contains(s.Posting.Id) && !IsProgram(s.Posting))
+                .OrderBy(s => Classifier.NamesClearLevel(s.Posting.Title) ? 0 : 1)
+                .ThenBy(s => s.Posting.Text.Length > ReadableLength ? 1 : 0)
                 .ThenByDescending(s => s.Skills)
                 .ThenByDescending(s => s.Posting.PostedAt)
                 .ThenBy(s => s.Posting.Id, StringComparer.Ordinal)
@@ -71,6 +76,9 @@ public static class SamplePicker
     #region Private Methods
 
     private static bool IsEntry(Posting p) => p.Seniority is "junior" or "intern";
+
+    private static bool IsProgram(Posting p) =>
+        ProgramWords.Any(w => p.Title.Contains(w, StringComparison.OrdinalIgnoreCase));
 
     #endregion
 }

@@ -2870,19 +2870,6 @@ body:not(:has(#samples)) .app-try-demo {
 }
 
 
-/* ===== ProfileSelector.css ===== */
-.profile-selector {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-default);
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-size-md);
-}
-
-.profile-selector:focus {
-  border-color: var(--color-border-focus);
-  box-shadow: var(--shadow-focus);
-}
-
 /* ===== TemplateSelector.css ===== */
 .template-options {
   display: flex;
@@ -2966,11 +2953,6 @@ body:not(:has(#samples)) .app-try-demo {
 }
 
 
-.profile-tools-active {
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--spacing-xs);
-}
-
 .profile-tools-errors {
   font-size: var(--font-size-sm);
   color: var(--color-error);
@@ -2983,30 +2965,118 @@ body:not(:has(#samples)) .app-try-demo {
 
 .profile-page-intro {
   color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* The save bar is sticky, which an overflow: hidden card would cancel */
+.profile-page .main-card {
+  overflow: visible;
+}
+
+/* Where to start from, the JSON file and clearing, in one bar above the form */
+.profile-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-bg-hover);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+}
+
+.profile-toolbar-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.profile-toolbar-label {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+.profile-toolbar-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.profile-toolbar .btn,
+.profile-remove,
+.profile-save-bar .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-toolbar-clear {
+  margin-left: auto;
+}
+
+.profile-errors {
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  background: var(--color-error-soft);
+  color: var(--color-error);
+  font-size: var(--font-size-md);
+}
+
+.profile-errors-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.profile-errors ul {
+  margin: 0;
+  padding-left: 1.25rem;
 }
 
 .profile-section {
   border-top: 1px solid var(--color-border-default);
-  padding-top: var(--spacing-lg);
-  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-xl);
 }
 
 .profile-section h2 {
   font-size: 1.15rem;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.profile-section-hint {
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-md);
+  color: var(--color-text-tertiary);
+}
+
+.profile-section > h2 + .profile-entry,
+.profile-section > h2 + .profile-add-entry {
+  margin-top: var(--spacing-md);
 }
 
 .profile-entry {
-  border: 1px solid var(--color-border-default);
-  border-radius: 8px;
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
   margin-bottom: var(--spacing-md);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
 }
 
 .profile-entry-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px dashed var(--color-border-default);
 }
 
 .profile-entry-head h3 {
@@ -3014,15 +3084,47 @@ body:not(:has(#samples)) .app-try-demo {
   margin: 0;
 }
 
+.profile-entry-summary {
+  margin: 2px 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.profile-remove {
+  flex-shrink: 0;
+}
+
+/* Destructive buttons on the profile page: a red outline and no fill, which the dark theme's soft red made muddy */
+.profile-toolbar-clear,
+.profile-remove {
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: color-mix(in srgb, var(--color-error) 50%, transparent);
+  --bs-btn-hover-bg: var(--color-error-soft);
+  --bs-btn-hover-border-color: var(--color-error);
+  --bs-btn-active-bg: var(--color-error-soft);
+  --bs-btn-active-border-color: var(--color-error);
+}
+
 .profile-list {
-  margin-top: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.profile-list-count {
+  display: inline-block;
+  min-width: 1.5em;
+  margin-left: var(--spacing-xs);
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-hover);
+  font-size: var(--font-size-xs);
+  text-align: center;
 }
 
 .profile-list-row {
   display: flex;
   gap: var(--spacing-sm);
   align-items: flex-start;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
 }
 
 .profile-list-row .profile-list-item {
@@ -3037,17 +3139,82 @@ body:not(:has(#samples)) .app-try-demo {
   clip: rect(0 0 0 0);
 }
 
+.profile-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-top: 4px;
+  padding: 0;
+  border: 1px solid transparent;
+  color: var(--color-text-tertiary);
+}
+
+.profile-icon-btn:hover,
+.profile-icon-btn:focus-visible {
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+.profile-add-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 0;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-link);
+}
+
+.profile-add-inline:hover {
+  text-decoration: underline;
+}
+
+/* The tag field after a list (skills used after bullets) needs its own breathing room */
+.profile-list + .profile-field {
+  margin-top: var(--spacing-md);
+}
+
+.profile-add-entry {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px dashed var(--color-border-hover);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.profile-add-entry:hover,
+.profile-add-entry:focus-visible {
+  border-color: var(--color-primary-500);
+  background: var(--color-bg-selected);
+  color: var(--color-primary-500);
+}
+
 .profile-field-error {
   color: var(--color-error);
   font-size: var(--font-size-sm);
   margin-top: 2px;
 }
 
+/* Stays at the bottom of the screen while the form scrolls, so saving never needs a long scroll */
 .profile-save-bar {
+  position: sticky;
+  bottom: var(--spacing-md);
+  z-index: 5;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-lg);
 }
 
 .profile-source a {
@@ -3059,6 +3226,8 @@ body:not(:has(#samples)) .app-try-demo {
   border-radius: 8px;
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
+  /* Scrolled to from the check button: clear the sticky top bar */
+  scroll-margin-top: calc(var(--spacing-xxl) + var(--spacing-lg));
 }
 
 .profile-health-title {

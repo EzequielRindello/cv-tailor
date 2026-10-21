@@ -22,6 +22,30 @@ public class KeywordAnalyzerTests
         Assert.False(docker.PresentInCV);
     }
 
+    // F22: technical keywords come from the skill dictionary, so ordinary English is not a technical keyword
+    [Fact]
+    public void Ordinary_words_are_not_technical_keywords()
+    {
+        var r = _analyzer.Analyze("Help us build the next generation of payments. You will go deep on reliability.", Generated());
+
+        Assert.Empty(r.TechnicalKeywords);
+        Assert.DoesNotContain("next", r.MissingFromCV);
+    }
+
+    [Fact]
+    public void Technical_keywords_are_dictionary_skills_including_phrases()
+    {
+        var cv = Generated(skills: new[] { "Golang" });
+
+        var r = _analyzer.Analyze("We use Next.js, Go and machine learning. Go services run on Kubernetes.", cv);
+
+        Assert.Equal(new[] { "go", "next.js", "machine learning", "kubernetes" }, r.TechnicalKeywords.Select(k => k.Word));
+        Assert.Equal(2, r.TechnicalKeywords[0].Frequency);
+        Assert.True(r.TechnicalKeywords[0].PresentInCV);
+        Assert.DoesNotContain(r.IndustryKeywords, k => k.Word is "next" or "machine" or "learning" or "kubernetes");
+        Assert.Contains("next.js", r.MissingFromCV);
+    }
+
     [Fact]
     public void Soft_skill_words_are_classified_as_soft_skills()
     {

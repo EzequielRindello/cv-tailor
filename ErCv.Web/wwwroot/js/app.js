@@ -48,6 +48,20 @@ window.cvApp = {
             requestAnimationFrame(() => window.cvApp.focusElement(id, attempts - 1));
     },
 
+    // Scrolls a section to the top of the screen and moves focus to it, retrying while Blazor renders it
+    revealElement: (id, attempts = 15) => {
+        const el = document.getElementById(id);
+        if (el) {
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+            el.focus({ preventScroll: true });
+            return;
+        }
+
+        if (attempts > 0)
+            requestAnimationFrame(() => window.cvApp.revealElement(id, attempts - 1));
+    },
+
     scrollToTop: () => {
         document.getElementById('app-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     },

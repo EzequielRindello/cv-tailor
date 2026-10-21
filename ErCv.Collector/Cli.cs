@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace ErCv.Collector;
 
 /// <summary>
-/// dotnet run --project ErCv.Collector -- refresh | report | check | remove &lt;id or url&gt; [--reason "..."]
+/// dotnet run --project ErCv.Collector -- refresh | report | samples | check | remove &lt;id or url&gt; [--reason "..."]
 /// Paths default to the repository this tool lives in (corpus/ and ErCv.Web/Data/sample-jobs.json).
 /// </summary>
 public static class Cli
@@ -29,6 +29,8 @@ public static class Cli
           refresh            Fetch the boards in corpus/sources.json, drop expired, closed and taken-down posts,
                              add new ones, then re-pick the app's sample job descriptions. Safe to run again.
           report             Write corpus/report.md (skill frequency over time, parser gaps, seniority wording).
+          samples            Re-pick the app's sample job descriptions from the posts already in the corpus
+                             (no network). Run it after changing the parser or the skill dictionary.
           check              Validate the corpus against today's date and the freshness window.
           remove <id|url>    Delete a post and record a takedown so it is never collected again.
                              Options: --reason "<why>"
@@ -62,6 +64,9 @@ public static class Cli
                 var reportPath = Path.Combine(store.Root, ReportFile);
                 File.WriteAllText(reportPath, RelevanceReport.Build(store.LoadPostings(), store.LoadConfig(), now));
                 Console.WriteLine($"Wrote {reportPath}");
+                return 0;
+            case "samples":
+                WriteSamples(store, samplesPath);
                 return 0;
             case "check":
                 return Check(store, samplesPath, now);

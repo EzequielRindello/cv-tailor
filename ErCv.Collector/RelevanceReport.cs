@@ -7,7 +7,7 @@ namespace ErCv.Collector;
 
 /// <summary>
 /// corpus/report.md: what recent posts ask for, set against the parser and its skill dictionary
-/// (JobDescriptionConstants.CommonTechKeywords, the future MATCH-07 data file).
+/// (SkillDictionary, ErCv.Web/Data/skills.json).
 /// </summary>
 public static partial class RelevanceReport
 {
@@ -120,18 +120,11 @@ public static partial class RelevanceReport
     }
 
     internal static HashSet<string> DictionaryCanonical() =>
-        JobDescriptionConstants.CommonTechKeywords.Select(SkillNormalizer.Normalize).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        SkillDictionary.All.Select(s => s.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-    internal static string ParserLevel(string level) => level switch
-    {
-        "intern" => "intern",
-        "junior" or "jr." or "entry-level" or "entry level" or "associate" or "graduate" or "new grad" => "junior",
-        "senior" or "sr." => "senior",
-        "staff engineer" => "staff",
-        "lead" or "tech lead" or "team lead" => "lead",
-        "principal" or "distinguished" or "fellow" or "architect" => "principal",
-        _ => "mid"
-    };
+    // The parser reports the collector's levels, except that it calls mid "mid-level"
+    internal static string ParserLevel(string level) =>
+        level == JobDescriptionConstants.DefaultSeniority ? "mid" : level;
 
     #endregion
 
@@ -186,7 +179,7 @@ public static partial class RelevanceReport
         sb.AppendLine("## Skills the parser misses");
         sb.AppendLine();
         sb.AppendLine("Terms that recent posts use but the skill dictionary does not have, so the parser never extracts them, "
-            + "match scores ignore them and the gaps tab cannot mention them. Candidates for the MATCH-07 dictionary; "
+            + "match scores ignore them and the gaps tab cannot mention them. Candidates for `Data/skills.json`; "
             + "some are concepts rather than skills and a person should decide.");
         sb.AppendLine();
         sb.AppendLine("### Known technologies and practices not in the dictionary");
@@ -229,9 +222,8 @@ public static partial class RelevanceReport
     private static void AppendWrong(StringBuilder sb, List<Analyzed> posts)
     {
         var dictionary = DictionaryCanonical();
-        var forms = JobDescriptionConstants.CommonTechKeywords
-            .GroupBy(SkillNormalizer.Normalize, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.Append(g.Key).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), StringComparer.OrdinalIgnoreCase);
+        var forms = SkillDictionary.All.Where(s => s.TextForms.Count > 0)
+            .ToDictionary(s => s.Name, s => s.TextForms.ToList(), StringComparer.OrdinalIgnoreCase);
 
         sb.AppendLine("## Skills the parser gets wrong");
         sb.AppendLine();
@@ -266,7 +258,8 @@ public static partial class RelevanceReport
             .ToList();
         sb.AppendLine("### Words taken as skills from \"N years of ...\"");
         sb.AppendLine();
-        sb.AppendLine("Not in the dictionary; the parser keeps the word that follows \"N years of\". Most are not skills.");
+        sb.AppendLine("Skills the parser reports that are not in the dictionary. The word after \"N years of\" only counts when the dictionary knows it, "
+            + "so anything listed here is a parser bug.");
         sb.AppendLine();
         sb.AppendLine(captured.Count == 0 ? "None." : string.Join(", ", captured.Select(g => $"{Md(g.Key)} ({g.Count()})")));
         sb.AppendLine();
@@ -299,7 +292,7 @@ public static partial class RelevanceReport
         sb.AppendLine();
         sb.AppendLine($"{unused.Count} of the {counts.Count} distinct dictionary skills (after alias normalization) appear in none of the {posts.Count} posts, "
             + $"and {rare.Count} in only one. Not a reason to delete them on its own (the corpus is software roles at product companies), "
-            + "but they cost nothing to find and the ones that look dated are candidates to drop or merge in MATCH-07.");
+            + "but they cost nothing to find and a profile can still list them. Review the ones that look dated when the dictionary is next tuned.");
         sb.AppendLine();
         sb.AppendLine($"**In no post:** {string.Join(", ", unused.Select(Md))}");
         sb.AppendLine();
@@ -309,7 +302,8 @@ public static partial class RelevanceReport
 
     private static void AppendSeniority(StringBuilder sb, List<Analyzed> posts)
     {
-        var parserKeywords = JobDescriptionConstants.SeniorityKeywords;
+        var parserWords = JobDescriptionConstants.SeniorityLevels.SelectMany(l => l.Words)
+            .Concat(JobDescriptionConstants.NumberedLevels.SelectMany(l => l.Numerals)).ToList();
         sb.AppendLine("## Seniority wording");
         sb.AppendLine();
         sb.AppendLine("### Words in titles");
@@ -320,16 +314,17 @@ public static partial class RelevanceReport
         {
             var n = posts.Count(a => TitleHas(a.P.Title, term));
             if (n == 0) continue;
-            var keyword = parserKeywords.FirstOrDefault(k => k.TrimEnd('.') == term) ?? parserKeywords.FirstOrDefault(k => k.StartsWith(term + " "));
-            var shown = keyword == null ? "**none**" : keyword.TrimEnd('.') == term ? Md(keyword) : $"only inside \"{Md(keyword)}\"";
+            var keyword = parserWords.FirstOrDefault(k => k == term) ?? parserWords.FirstOrDefault(k => k.StartsWith(term + " "));
+            var shown = keyword == null ? "**none**" : keyword == term ? Md(keyword) : $"only inside \"{Md(keyword)}\"";
             sb.AppendLine($"| {Md(term)} | {n} | {shown} |");
         }
         sb.AppendLine();
 
         sb.AppendLine("### Title level against the level the parser reads from the post");
         sb.AppendLine();
-        sb.AppendLine("Rows: level from the title (the collector's classifier). Columns: `JobDescriptionParser` seniority on the full post. "
-            + "The parser takes the first seniority word it meets, which in long posts is often a team mention rather than the role.");
+        sb.AppendLine("Rows: level from the title (the collector's classifier). Columns: `JobDescriptionParser` seniority on the full post "
+            + "(the title, then the body). The parser reads the level from the title when the title names one, so disagreement comes from "
+            + "titles without a level word, where it falls back to the body and the years asked for.");
         sb.AppendLine();
         sb.AppendLine($"| Title \\ Parser | {string.Join(" | ", Levels)} |");
         sb.AppendLine($"|---|{string.Concat(Levels.Select(_ => "---|"))}");

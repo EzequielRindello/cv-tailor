@@ -13,7 +13,7 @@ The posts belong to the employers who published them. They are kept here only to
 | `takedowns.json` | Posts or whole boards that must never be collected again |
 | `manifest.json` | Count, date range and the time of the last refresh that changed something |
 | `report.md` | Relevance report (skill frequency over time, parser gaps, seniority wording) |
-| `../ErCv.Web/Data/sample-jobs.json` | The six APP-03 samples, written by `refresh` (embedded in the web app) |
+| `../ErCv.Web/Data/sample-jobs.json` | The six APP-03 samples, written by `refresh` and `samples` (embedded in the web app) |
 
 ## Commands
 
@@ -22,6 +22,7 @@ The collector is a console tool (`ErCv.Collector`), not part of the web app or i
 ```
 dotnet run --project ErCv.Collector -- refresh     # the refresh command: safe to run again
 dotnet run --project ErCv.Collector -- report      # rewrite report.md from the committed posts
+dotnet run --project ErCv.Collector -- samples     # re-pick the app samples from the committed posts (no network)
 dotnet run --project ErCv.Collector -- check       # every rule below, measured from today
 dotnet run --project ErCv.Collector -- remove <id-or-url> --reason "<why>"
 ```

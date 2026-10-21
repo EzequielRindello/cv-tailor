@@ -64,6 +64,38 @@ public class CorpusTests
         });
     }
 
+    // APP-06: no program (accelerator, fellowship) and a title that names its level
+    [Fact]
+    public void Samples_are_normal_jobs_with_a_clear_level_in_the_title()
+    {
+        Assert.All(SampleJobDescriptions.All, s =>
+        {
+            Assert.DoesNotContain("accelerator", s.Title, StringComparison.OrdinalIgnoreCase);
+            Assert.True(Classifier.NamesClearLevel(s.Title), s.Title);
+        });
+    }
+
+    // F18 on the committed corpus: Next.js only where a post names it
+    [Fact]
+    public void Next_js_is_found_only_in_posts_that_name_it()
+    {
+        var parser = new JobDescriptionParser();
+
+        Assert.All(FixtureLoader.CorpusPostings.Where(p => parser.Parse(p.JobDescription).TechnicalSkills.Contains("next.js")),
+            p => Assert.True(p.JobDescription.Contains("next.js", StringComparison.OrdinalIgnoreCase)
+                || p.JobDescription.Contains("nextjs", StringComparison.OrdinalIgnoreCase), p.Id));
+    }
+
+    // MATCH-09 acceptance: the level the parser reads agrees with the title level on more than 85% of the posts
+    [Fact]
+    public void Parser_agrees_with_the_title_level_on_most_of_the_corpus()
+    {
+        var parser = new JobDescriptionParser();
+        var agree = FixtureLoader.CorpusPostings.Count(p => RelevanceReport.ParserLevel(parser.Parse(p.JobDescription).SeniorityLevel) == p.Seniority);
+
+        Assert.True(agree > FixtureLoader.CorpusPostings.Count * 0.85, $"{agree} of {FixtureLoader.CorpusPostings.Count}");
+    }
+
     [Fact]
     public void Samples_are_what_the_picker_chooses_from_the_committed_corpus()
     {
@@ -94,8 +126,9 @@ public class CorpusTests
 
         var r = new JobDescriptionParser().Parse(post.JobDescription);
 
-        Assert.Contains(r.SeniorityLevel, JobDescriptionConstants.SeniorityKeywords.Append(JobDescriptionConstants.DefaultSeniority));
+        Assert.Contains(r.SeniorityLevel, JobDescriptionConstants.SeniorityLevels.Select(l => l.Level));
         Assert.All(r.TechnicalSkills, s => Assert.Equal(s, SkillNormalizer.Normalize(s)));
+        Assert.All(r.TechnicalSkills, s => Assert.NotNull(SkillDictionary.Find(s)));
         Assert.DoesNotContain(r.TechnicalSkills, s => s is "in" or "or" or "of" or "and" or "the" or "experience");
         Assert.Equal(r.TechnicalSkills.Count, r.TechnicalSkills.Distinct(StringComparer.OrdinalIgnoreCase).Count());
         Assert.InRange(r.Keywords.Count, 1, 30);

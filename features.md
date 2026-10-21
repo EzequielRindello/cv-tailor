@@ -41,21 +41,21 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | TEST-08 | Golden snapshot tests for generation output | E1 Tests | P2 | S | Todo |
 | TEST-09 | Retire the Node scripts in `testing/` | E1 Tests | P2 | S | Todo |
 | TEST-10 | Coverage report and target | E1 Tests | P2 | S | Todo |
-| UX-01 | Design system: tokens, fonts, dark mode | E2 Redesign | P0 | M | Todo |
-| UX-02 | New app shell and editorial hero | E2 Redesign | P0 | M | Todo |
-| UX-03 | Guided 3-step composer | E2 Redesign | P0 | M | Todo |
-| UX-04 | Results workspace (no auto-download) | E2 Redesign | P0 | L | Todo |
-| UX-05 | Score visualizations | E2 Redesign | P1 | M | Todo |
-| UX-06 | Generation progress and skeletons | E2 Redesign | P1 | S | Todo |
-| UX-07 | Empty, error and toast states | E2 Redesign | P1 | S | Todo |
-| UX-08 | Accessibility (WCAG AA, keyboard reorder) | E2 Redesign | P1 | M | Todo |
-| UX-09 | Responsive pass | E2 Redesign | P1 | M | Todo |
+| UX-01 | Design system: tokens, fonts, dark mode | E2 Redesign | P0 | M | Done |
+| UX-02 | New app shell and editorial hero | E2 Redesign | P0 | M | Done |
+| UX-03 | Guided 3-step composer | E2 Redesign | P0 | M | Done |
+| UX-04 | Results workspace (no auto-download) | E2 Redesign | P0 | L | Done |
+| UX-05 | Score visualizations | E2 Redesign | P1 | M | Done |
+| UX-06 | Generation progress and skeletons | E2 Redesign | P1 | S | Done |
+| UX-07 | Empty, error and toast states | E2 Redesign | P1 | S | Done |
+| UX-08 | Accessibility (WCAG AA, keyboard reorder) | E2 Redesign | P1 | M | Done |
+| UX-09 | Responsive pass | E2 Redesign | P1 | M | Done |
 | UX-10 | CV template visual polish | E2 Redesign | P2 | M | Todo |
 | PROF-01 | In-browser profile editor | E3 Your profile | P1 | L | Done |
 | PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | Done |
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
 | PROF-04 | Profile health check | E3 Your profile | P2 | M | Done |
-| PROF-06 | The owner's real profile as the demo | E3 Your profile | P1 | S | Todo |
+| PROF-06 | The owner's real profile as the demo | E3 Your profile | P1 | S | Done |
 | PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Todo |
 | MATCH-01 | Fix fuzzy-match false positives | E4 Matching | P0 | S | Done |
 | MATCH-02 | Word-boundary ATS keyword density | E4 Matching | P0 | S | Done |
@@ -63,9 +63,9 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | MATCH-04 | Explainability: "why this was chosen" | E4 Matching | P1 | M | Done |
 | MATCH-05 | JD highlighter | E4 Matching | P1 | M | Done |
 | MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Todo |
-| MATCH-07 | Skill/alias dictionary as data file, tuned on real posts | E4 Matching | P1 | M | Todo |
+| MATCH-07 | Skill/alias dictionary as data file, tuned on real posts | E4 Matching | P1 | M | Done |
 | MATCH-08 | Page fit measured on the rendered PDF | E4 Matching | P1 | M | Todo |
-| MATCH-09 | Seniority detection from the title and wording | E4 Matching | P1 | S | Todo |
+| MATCH-09 | Seniority detection from the title and wording | E4 Matching | P1 | S | Done |
 | EDIT-01 | Inline editing in the workspace | E5 Editing | P2 | L | Todo |
 | EDIT-02 | Live HTML preview, documents on download | E5 Editing | P2 | M | Todo |
 | EDIT-03 | Cover letter generator | E5 Editing | P2 | M | Todo |
@@ -77,7 +77,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | APP-03 | Sample JD gallery | E6 Workflow | P0 | S | Done |
 | APP-04 | Import JD from URL (Greenhouse/Lever) | E6 Workflow | P3 | M | Todo |
 | APP-05 | Real job-post corpus, dated and kept fresh | E6 Workflow | P1 | L | Done |
-| APP-06 | Corpus follow-ups: sample picker rules, first Action run | E6 Workflow | P2 | S | Todo |
+| APP-06 | Corpus follow-ups: sample picker rules, first Action run | E6 Workflow | P2 | S | In progress |
 | AI-01 | LLM options + feature flag | E7 AI | P3 | S | Parked |
 | AI-02 | Semantic matching (indices only) | E7 AI | P3 | M | Parked |
 | AI-03 | Bullet rewrite suggestions (user accepts) | E7 AI | P3 | M | Parked |
@@ -158,10 +158,11 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 
 | # | Finding | Status |
 |---|---|---|
-| F18 | Dictionary entries that are ordinary English match prose: the alias `next` (Next.js) hits 40% of posts ("the next generation"), plus `end-to-end`, `foundation`, `less`, `solid`, `rails`. | Open (MATCH-07, M3.2) |
-| F19 | `YearsWithTechPattern` still takes the word after "N years of" as a skill when it is not one: `professional`, `building`, `industry`, `hands-on`. | Open (MATCH-07, M3.2) |
-| F20 | Seniority: "Staff ..." titles are not recognized (only the phrase "staff engineer" is), "II", "internship" and "early career" are not keywords, and the first level word in the text wins ("lead the design" reads as lead). The parser agrees with the title level in 46% of posts. | Open (MATCH-09, M3.2) |
-| F21 | The single-letter skill `c` matches "Washington D.C." in pay-range text. | Open (MATCH-07, M3.2) |
+| F18 | Dictionary entries that are ordinary English match prose: the alias `next` (Next.js) hits 40% of posts ("the next generation"), plus `end-to-end`, `foundation`, `less`, `solid`, `rails`. | Fixed with MATCH-07 (next.js in 77 posts before, 3 after) |
+| F19 | `YearsWithTechPattern` still takes the word after "N years of" as a skill when it is not one: `professional`, `building`, `industry`, `hands-on`. | Fixed with MATCH-07 (only dictionary words count) |
+| F20 | Seniority: "Staff ..." titles are not recognized (only the phrase "staff engineer" is), "II", "internship" and "early career" are not keywords, and the first level word in the text wins ("lead the design" reads as lead). The parser agrees with the title level in 46% of posts. | Fixed with MATCH-09 (91% agreement) |
+| F21 | The single-letter skill `c` matches "Washington D.C." in pay-range text. | Fixed with MATCH-07 |
+| F22 | `KeywordAnalyzer` keeps its own `TechWords` list, apart from the dictionary, and classifies single JD words with it: "next" (as in "the next generation") is still listed as a technical keyword in the keywords tab, because the alias `next` still normalizes to Next.js. | Fixed in M3.2 (MATCH-07 follow-up): technical keywords are the dictionary skills the job description names (phrases such as "machine learning" included), `KeywordAnalyzerConstants.TechWords` is gone, and the words of a skill are no longer repeated as industry keywords |
 
 ### System hardening (between M3 and M3.2)
 
@@ -178,7 +179,7 @@ A review of the C# code before M3.2, branch `feature/system-hardening`. No behav
 | H7 | Security: no security headers or HSTS; `UseExceptionHandler("/Error")` pointed at a page that did not exist; the container ran as root with Chrome `--no-sandbox`. | Fixed: headers, HSTS, error page, non-root user |
 | H8 | Structure: the whole domain sat in `Helpers/`, constants in `Data/Constants/Helpers/`, namespaces did not match folders. | Fixed: `Features/<Feature>/`, namespaces = folders, file-scoped |
 | H9 | Magic numbers and repeated literals (scoring weights, limits, profile ids, JS interop names, template keys) inline across helpers and components. | Fixed: named constants, hosting values in `appsettings.json` |
-| H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Open: unifying them changes selection, so it belongs to MATCH-07 (M3.2) |
+| H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Fixed with MATCH-07: one list, `SelectionConstants.TechRoleKeywords`, the summary's stricter one plus nothing broad: the selector no longer treats analyst, consultant or specialist roles as tech (a union was tried first and made "Certification Specialist" count as tech years in the real demo profile) |
 | H11 | Swashbuckle 6.5.0 is old (Development only). | Open: ENG-06 (M5) replaces it |
 
 ### Open items after M3
@@ -514,17 +515,28 @@ Notes: `ProfileHealthChecker.Check` returns `HealthFinding(rule, path, message)`
 Verify: `ProfileHealthCheckerTests` (one group per rule); `ProfileHealthTests` E2E (checklist on `/profile` shows warnings and the CV still generates; step 3 has no checklist).
 
 ### PROF-06: The owner's real profile as the demo
-**Status:** Todo · **Priority:** P1 · **Effort:** S
+**Status:** Done · **Priority:** P1 · **Effort:** S
 
 Why: the demo profile is a made-up person (Alex Rivera). The portfolio is stronger if the demo is the owner's own, real CV.
 
-- [ ] The owner provides the profile (JSON, or typed in the `/profile` editor) and it replaces `Data/cv-master.json` as the demo profile
-- [ ] Tests and fixtures that assert on "Rivera" or on its bullets are updated to the new demo, or keep a small fixture copy of the old one so edge cases stay covered
-- [ ] The step 2 choice stays "Demo profile / My profile / Create my profile"; "Create my profile" opens the `/profile` editor (import, export and the blank template live there, not in the composer)
+- [x] The owner provides the profile (JSON, or typed in the `/profile` editor) and it replaces `Data/cv-master.json` as the demo profile
+- [x] Tests and fixtures that assert on "Rivera" or on its bullets are updated to the new demo, or keep a small fixture copy of the old one so edge cases stay covered
+- [x] The step 2 choice stays "Demo profile / My profile / Create my profile"; "Create my profile" opens the `/profile` editor (import, export and the blank template live there, not in the composer)
 
 Notes: waiting for the owner to upload their profile. Do not invent it. Check the personal data in it (phone, email) before committing it to a public repo.
 
 Verify: the E2E suite and the document matrices pass on the new demo profile.
+
+Done notes:
+- `Data/cv-master.json` is now Ezequiel Rindello's profile, built from the owner's CV (`ezequiel-rindello-cv.pdf`, October 2026) and portfolio site; nothing was added that those do not say. Internal ticket numbers were left out. The phone is left empty on purpose (public repo); the email, LinkedIn and GitHub are the ones the portfolio already publishes.
+- The work at Primero Systems is three entries, one per project (Chamber Mate, KOORUS, LabLink 360), same role and dates: the selector shows at most 3 bullets per experience, so one entry showed only 3 development bullets and filled the page with the non-tech jobs. The earlier non-tech jobs stay in the profile (a profile is a superset; the selector penalizes them for technical posts).
+- Step 2 now reads "Senior sample profile / Creator's profile / My profile / Create my profile". The senior sample (`Data/cv-master-senior.json`, the earlier made-up demo Alex Rivera) is the first choice and the default, so a first visit shows what a full senior CV looks like; the owner's profile is "Creator's profile". The radios replace the old "CV Profile" dropdown (`ProfileSelector`, removed). The API still defaults to the creator's profile when a request names none. The profile page can start from either one.
+- The phone in the creator's profile is the placeholder "55555" (the owner's choice, so the real number stays out of the public repo). It is shorter than the ATS check's minimum, so that CV shows the "phone" ATS issue.
+- Alex Rivera stays as the `cv-master` test fixture with its edge cases; the real profile joins every profile matrix as `FixtureLoader.DemoProfileId`, read from `ErCv.Web/Data` (document, PDF, invariant, explanation, highlighter, validator and round-trip tests). E2E assertions now look for "Rindello".
+- Fixed on the way: the summary read "...years of experience. specializing in ..."; "specializing in" now continues the first sentence (`SummaryGeneratorTests`).
+- The profile health check flags most bullets for having no number: the source CV has none, and the profile does not invent them.
+- Profile page (`/profile`), found while doing this: every comma-separated field (skills used, technologies, courses, the skills groups) was always red with the word "Error", because `ProfileTagField` passed the literal text `"Error"` instead of its `Error` parameter. Fixed, with a component test. Empty-item messages now say which item ("Skill 3 is empty. Remove the extra comma."), and the problem summary above the form lists each problem and where it is ("Experience 1, start date: ...") instead of only a count.
+- Profile page layout: one toolbar for "Start from", the JSON file and clearing; section hints; entries with their role and company under the title; icon buttons to remove a bullet; dashed "Add experience" buttons; wider gutters; a save bar that stays at the bottom of the screen while the form scrolls, "Check profile health" scrolls to the health card and moves focus to it (`cvApp.revealElement`), and the destructive buttons (Clear my profile, Remove) are a red outline without the soft red fill that looked muddy in dark mode.
 
 ### PROF-05: Import from an existing resume
 **Status:** Todo · **Priority:** P3 · **Effort:** L
@@ -599,19 +611,32 @@ Verify: `JdHighlighterTests` (lossless split over profiles x corpus, whole token
 Verify: unit tests with corpus JDs.
 
 ### MATCH-07: Skill dictionary as data, tuned on real posts
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** Done · **Priority:** P1 · **Effort:** M
 
-- [ ] Aliases and tech keywords moved to `Data/skills.json`
-- [ ] One test per alias
-- [ ] Ordinary English words stop matching as skills: `next`, `end-to-end`, `foundation`, `less`, `solid`, `rails` need context or a stricter match (F18)
-- [ ] The word after "N years of" is a skill only if it is in the dictionary: `professional`, `building`, `industry`, `hands-on` stop appearing (F19)
-- [ ] The single-letter skill `c` no longer matches "Washington D.C." or `objective-c` (F21)
-- [ ] Add the skills recent posts ask for and the dictionary lacks: AI agents/agentic, observability, distributed systems, on-call, incident response, system design, LLMs, MCP, evals, data modeling, ETL, lakehouse, Iceberg, accessibility, networking
-- [ ] Review the 205 dictionary skills no post asks for: keep the ones a real CV can list (they still help matching a profile), drop duplicates and typos; do not delete a skill only because it is rare in 194 posts
+- [x] Aliases and tech keywords moved to `Data/skills.json`
+- [x] One test per alias
+- [x] Ordinary English words stop matching as skills: `next`, `end-to-end`, `foundation`, `less`, `solid`, `rails` need context or a stricter match (F18)
+- [x] The word after "N years of" is a skill only if it is in the dictionary: `professional`, `building`, `industry`, `hands-on` stop appearing (F19)
+- [x] The single-letter skill `c` no longer matches "Washington D.C." or `objective-c` (F21)
+- [x] Add the skills recent posts ask for and the dictionary lacks: AI agents/agentic, observability, distributed systems, on-call, incident response, system design, LLMs, MCP, evals, data modeling, ETL, lakehouse, Iceberg, accessibility, networking
+- [x] Review the 205 dictionary skills no post asks for: keep the ones a real CV can list (they still help matching a profile), drop duplicates and typos; do not delete a skill only because it is rare in 194 posts
 
 Notes: `corpus/report.md` is the evidence and the acceptance check: regenerate it after the change (`dotnet run --project ErCv.Collector -- report`) and the false positives above must be gone. The change moves scores, so review the corpus impact by hand as in MATCH-01.
 
 Verify: unit tests with corpus posts (a post with "the next generation" has no `next` skill); adding an alias requires no code change; `CorpusTests` still pass; report before/after attached to the PR.
+
+Done notes:
+- `Data/skills.json` (embedded, read once by `Features/Matching/SkillDictionary.cs`) holds one entry per skill: `name` (canonical, lowercase), `aliases` (other names, normalized to `name`), optional `match` (the forms searched in a job post or a bullet; a form with a capital letter only counts written that way, `[]` means a profile skill name only) and optional `except` (phrases in which a match does not count, such as "go-to-market" for Go or "spring 2027" for Spring). `SkillNormalizer` and the parser read it; the hardcoded `CommonTechKeywords` and alias table are gone.
+- Token boundaries are stricter for every match: a dot between letters, an `@` or an `_` joins one name ("Node.js" no longer yields `javascript`, "grafana.com" no `grafana`), and a single letter next to `-`, `&` or `'` belongs to another word ("Objective-C", "R&D", "C-level").
+- F18: `next` and `foundation` are no longer searched in text (they stay profile names), `solid` and `rails` count only as SolidJS and Rails, `less` only as LESS, bare `end-to-end` is no longer a skill (e2e testing needs "e2e/end-to-end testing" or "tests"), Go only counts written "Go" or "golang". Other product names that are English words got the same capital-letter rule after reading their corpus matches (Spark, Helm, Node, Bootstrap, Snowflake, Swift, REST, Notion, Linear and more); `https` only counts as "HTTPS" (it matched URLs).
+- F19: the word after "N years of" counts only when it is one of the dictionary's text forms ("3 years of go" still gives Go).
+- New skills: the 15 in the list above plus generative AI, RAG, prompt engineering, fine-tuning, embeddings, LangGraph, MLflow, CUDA, JAX, ClickHouse, NoSQL, Parquet, data warehouse, ELT, A/B testing, threat modeling, SIEM, penetration testing, Istio, Envoy, Gradle, JVM, Jetpack Compose, SwiftUI, DNS, CDN, SLOs, concurrency, data structures, algorithms, API design, design systems, GitOps, infrastructure as code, WebRTC. 417 skills (397 before).
+- Review of the unused skills: duplicates merged (`bigquery`, `oauth` and `gitlab` were listed twice; `cpp`, `css3`, `solid`, `ember.js`, `express.js`, `rails`, `argocd`, `newrelic`, `websocket`, `oauth2`, `ddd`, `xunit.net`, `subversion`, `apache spark`, `apache airflow`, `apache flink`, `oidc`, `vault`, `maui`, `site reliability` and `plsql` are now aliases of one skill), FaunaDB dropped (the service shut down), the rest kept. Aliases that would drop a cloud platform ("AWS Lambda" normalizing to plain `lambda`) are not allowed, so a profile listing "AWS Lambda" still counts for a job asking for AWS (`SkillDictionaryTests`).
+- H10 fixed here: the selector and the summary share `SelectionConstants.TechRoleKeywords` (without analyst, consultant and specialist).
+- Before/after on the 194 posts (`corpus/report.md`): next.js 77 posts to 3, go 69 to 48, end-to-end 49 to 0, foundation 31 to 0, solid 31 to 0, less 20 to 0, c 13 to 8, javascript 35 to 31, https 7 to 0, words after "N years of" (professional 15, building 12, ...) to none. The new top skills are python, observability, AI agents, machine learning and distributed systems. The "ordinary English" table now lists concepts that are normally lowercase (observability, on-call, system design), which are real skills.
+- Tests: `SkillDictionaryTests` (file well formed, one test per alias and per text form, profile-only skills, cloud platforms), new cases in `SkillNormalizerTests` and `JobDescriptionParserTests` with sentences from the corpus posts, `CorpusTests` (every parsed skill is in the dictionary, Next.js only where a post names it).
+- Left out on purpose (still in the report's watch list): bare "agents" (support agents, "teams and their agents"; AI agents and agentic are in), vendor and model names (Claude, Copilot, Gemini, Salesforce) and concepts such as scalability and experimentation.
+- F22, found while closing this item, fixed in the same milestone: the keywords tab takes its technical keywords from the dictionary (`KeywordAnalyzerTests`).
 
 ### MATCH-08: Page fit measured on the rendered PDF
 **Status:** Todo · **Priority:** P1 · **Effort:** M
@@ -622,13 +647,21 @@ Verify: unit tests with corpus posts (a post with "the next generation" has no `
 Verify: TEST-04 page count assertion over the whole corpus.
 
 ### MATCH-09: Seniority detection
-**Status:** Todo · **Priority:** P1 · **Effort:** S
+**Status:** Done · **Priority:** P1 · **Effort:** S
 
-- [ ] "Staff", "Principal", "II/III", "Intern/Internship" and "Early career" are recognized as levels (F20)
-- [ ] The title decides when it names a level; the first level word in the body ("lead the design") only breaks ties
-- [ ] Agreement with the title level in the corpus goes from 46% to a target recorded in the PR (aim: above 85%)
+- [x] "Staff", "Principal", "II/III", "Intern/Internship" and "Early career" are recognized as levels (F20)
+- [x] The title decides when it names a level; the first level word in the body ("lead the design") only breaks ties
+- [x] Agreement with the title level in the corpus goes from 46% to a target recorded in the PR (aim: above 85%)
 
 Verify: unit tests per title pattern; `corpus/report.md` shows the new agreement figure.
+
+Done notes:
+- The first line is the title when it is at most 120 characters. Levels are checked in a fixed order (intern, junior, principal, staff, lead, mid, senior, the same order as the collector's classifier), so "Senior Staff Engineer" is staff; roman numerals after the role count only when no level word is named (I junior, II mid, III and IV senior). "Member of Technical Staff" is not staff. Spanish titles work too ("Ingeniero ... Senior", "Semi Senior" is mid).
+- When the title names no level, the body counts only a level word followed within three words by a singular role noun ("a senior machine learning engineer"), so "lead the design" and "our senior engineers" no longer decide; then the years asked for; then mid-level. A level word in the body never overrides the title.
+- The parser now reports one of seven levels (`intern`, `junior`, `mid-level`, `senior`, `staff`, `lead`, `principal`) instead of the matched word (`staff engineer`, `sr.`, `entry-level`); all of them are in `MatchScoreConstants.SeniorityMap`.
+- "3+ years" now reads as mid-level (`MidLevelYearsThreshold` 4 to 3): 9 of the posts with a plain title (no level word) that the parser read as junior asked for 3+ years, and 3 years is mid on most career ladders.
+- Agreement with the title level: 89 of 194 (46%) before, 176 of 194 (91%) after. The 18 left are titles without a level word where the body or the years asked for point to another level (8 read as junior, 9 as senior, 1 as staff).
+- Tests: `JobDescriptionParserTests` (one case per title pattern, title over body, body role phrases), `CorpusTests.Parser_agrees_with_the_title_level_on_most_of_the_corpus` (more than 85%).
 
 ---
 
@@ -771,13 +804,18 @@ Headline findings from `corpus/report.md` (not fixed here, see F18 to F21, owned
 Verify: the refresh command run twice in a row: the second run reported "Added 0, updated 0, removed 0, unchanged 194" and every file under `corpus/` plus `sample-jobs.json` had the same hash before and after. `check` reports no post older than the window as of today. `CorpusTests` (unit): the corpus follows every rule as of its last refresh, no post is older than the window, every post, sample and corpus fixture has `postedAt` and an https source url, samples are what the picker chooses, the parser reads all 194 posts without junk, and the report runs on the committed corpus. `CollectorTests` (unit, fake HTTP, no network): idempotent refresh, expiry, closed posts, failing board, edits, takedown by url and by board, `robots.txt`, User-Agent, request spacing, sample picking. `SampleJobPickerTests` (bUnit) and the E2E `Picking_a_sample_shows_where_and_when_it_was_posted_with_a_link_to_the_original`; the full E2E suite (accessibility and responsive included) passes with the real samples.
 
 ### APP-06: Corpus follow-ups
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** In progress · **Priority:** P2 · **Effort:** S
 
-- [ ] Sample picker skips posts that are not a normal job (accelerators, programs, fellowships) and prefers posts with a clear level in the title; the Full stack sample (an accelerator post) and the Junior sample (Associate DevOps) are the cases that triggered it
+- [x] Sample picker skips posts that are not a normal job (accelerators, programs, fellowships) and prefers posts with a clear level in the title; the Full stack sample (an accelerator post) and the Junior sample (Associate DevOps) are the cases that triggered it
 - [ ] Run the corpus refresh workflow once from the Actions tab and review the PR it opens; fix whatever the first real run shows
 - [ ] Decide whether to enable the weekly cron (the user turns it on, see the workflow file)
 
 Verify: `CorpusTests` samples test updated to the new rule; the first run's PR exists and `check` passes on it.
+
+Progress notes:
+- The picker leaves out titles with "accelerator", "fellowship", "residency", "apprenticeship" or "bootcamp" and prefers titles that name a clear level (`Classifier.NamesClearLevel`: junior, new grad, senior, staff and so on; not "Associate" or "Engineer 3"). New samples: Backend MongoDB (Senior), Frontend GitLab (Staff), Full stack GitLab (Staff Fullstack), Data Elastic (Lead Data Engineer), DevOps Databricks (Senior Production Engineer), Junior Palantir (New Grad). Tests: `CorpusTests.Samples_are_normal_jobs_with_a_clear_level_in_the_title`, `CollectorPartsTests.Sample_picker_skips_programs_and_prefers_a_clear_level`.
+- New collector command `samples`: re-picks the samples from the committed corpus without the network (needed whenever the parser or the dictionary changes, since the picker ranks by parsed skills).
+- Still open: the first run of the refresh workflow on GitHub (the repo owner allows Actions to create PRs, then runs it from the Actions tab) and the cron decision. Until a refresh runs, `check` fails on one post that aged out of the window (`lever-palantir-67110929...`, posted 2026-07-22).
 
 ---
 

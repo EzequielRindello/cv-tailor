@@ -7,15 +7,26 @@ public class JobDescriptionParser
 {
     #region Constants
 
-    private static readonly HashSet<string> CommonTechKeywords =
-        new(JobDescriptionConstants.CommonTechKeywords, StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> CommonWords =
         new(JobDescriptionConstants.CommonWords, StringComparer.OrdinalIgnoreCase);
 
-    // Built once: one pattern per seniority word, in list order, because the first unnegated match wins
-    private static readonly (string Keyword, Regex Pattern)[] SeniorityPatterns =
-        new HashSet<string>(JobDescriptionConstants.SeniorityKeywords, StringComparer.OrdinalIgnoreCase)
-            .Select(k => (k, new Regex($@"\b{Regex.Escape(k)}\b", RegexOptions.IgnoreCase | RegexOptions.Compiled)))
+    // Built once, in the order of SeniorityLevels: a level word as a whole word of the title
+    private static readonly (string Level, Regex Pattern)[] TitleLevelPatterns =
+        JobDescriptionConstants.SeniorityLevels
+            .Select(l => (l.Level, new Regex($@"(?<![a-z0-9]){Alternation(l.Words)}(?![a-z0-9])", RegexOptions.Compiled)))
+            .ToArray();
+
+    private static readonly (string Level, Regex Pattern)[] NumberedLevelPatterns =
+        JobDescriptionConstants.NumberedLevels
+            .Select(l => (l.Level, new Regex($@"(?<![a-z0-9]){Alternation(JobDescriptionConstants.RoleNouns)}\s+{Alternation(l.Numerals)}(?![a-z0-9])", RegexOptions.Compiled)))
+            .ToArray();
+
+    // A level word that describes the role in the body: followed, within a few words, by a singular role noun
+    private static readonly (string Level, Regex Pattern)[] BodyLevelPatterns =
+        JobDescriptionConstants.SeniorityLevels
+            .Select(l => (l.Level, new Regex(
+                $@"(?<![a-z0-9-]){Alternation(l.Words)}\.?\s+(?:[a-z0-9+#./-]+\s+){{0,{JobDescriptionConstants.MaxWordsBeforeRoleNoun}}}?{Alternation(JobDescriptionConstants.RoleNouns)}(?![a-z0-9])",
+                RegexOptions.Compiled)))
             .ToArray();
 
     private static readonly HashSet<string> NeverSkills = new(StringComparer.OrdinalIgnoreCase)
@@ -37,8 +48,6 @@ public class JobDescriptionParser
         "seeking","hire","join","opportunity","what","will",
         "have","with","that","this","from","your",
         "library","libraries","framework","frameworks","methodology",
-        // words that follow "N years of/in" without naming a technology
-        "in","or","of","and","as","on","at","to","for","a","an","the","b2b","b2c",
     };
 
     #endregion
@@ -60,7 +69,7 @@ public class JobDescriptionParser
 
         return new JobRequirements
         {
-            TechnicalSkills = ExtractTechnicalSkills(jobDescription, normalizedText),
+            TechnicalSkills = ExtractTechnicalSkills(jobDescription),
             Keywords = ExtractKeywords(normalizedText),
             SeniorityLevel = ExtractSeniorityLevel(normalizedText),
             RequiredExperience = ExtractRequiredExperience(normalizedText)
@@ -71,32 +80,21 @@ public class JobDescriptionParser
 
     #region Private Methods
 
-    private List<string> ExtractTechnicalSkills(string originalText, string normalizedText)
+    // Searched in the original text: some text forms only count capitalized ("Go", not "go ahead")
+    private List<string> ExtractTechnicalSkills(string text)
     {
-        var foundSkills = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var tech in CommonTechKeywords)
-        {
-            if (SkillNormalizer.ContainsTerm(normalizedText, tech))
-                foundSkills.Add(tech);
-        }
-        var yearsMatches = JobDescriptionConstants.YearsWithTech().Matches(originalText);
-        foreach (Match match in yearsMatches)
-        {
-            if (match.Groups.Count > 2)
-            {
-                var tech = match.Groups[2].Value.Trim();
-                if (!string.IsNullOrWhiteSpace(tech)
-                    && tech.Length >= JobDescriptionConstants.MinCapturedSkillLength
-                    && tech.Length <= JobDescriptionConstants.MaxCapturedSkillLength
-                    && !NeverSkills.Contains(tech) && !CommonWords.Contains(tech))
-                    foundSkills.Add(tech);
-            }
-        }
-        return foundSkills
-            .Select(s => SkillNormalizer.Normalize(s))
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
+        var found = SkillDictionary.All
+            .Where(skill => SkillNormalizer.FindSkill(text, skill).Any())
+            .Select(skill => skill.Name)
             .ToList();
+
+        // "5 years of go" names a skill even in lowercase, but only a word the dictionary knows ("5 years of building" does not)
+        foreach (Match match in JobDescriptionConstants.YearsWithTech().Matches(text))
+        {
+            var skill = SkillDictionary.FindByTextForm(match.Groups[2].Value.TrimEnd('.'));
+            if (skill != null && !found.Contains(skill.Name)) found.Add(skill.Name);
+        }
+        return found;
     }
 
     private List<string> ExtractKeywords(string text) =>
@@ -108,28 +106,44 @@ public class JobDescriptionParser
             .Select(g => g.Key)
             .ToList();
 
+    /// <summary>
+    /// The title (the first line) decides when it names a level. Otherwise the first level the body gives the role
+    /// ("a senior backend engineer", not "lead the design" or "senior engineers"), then the years asked for.
+    /// </summary>
     private string ExtractSeniorityLevel(string text)
     {
-        foreach (var (keyword, pattern) in SeniorityPatterns)
-        {
-            foreach (Match match in pattern.Matches(text))
-            {
-                var start = Math.Max(0, match.Index - JobDescriptionConstants.NegationWindowChars);
-                var context = text.Substring(start, match.Index - start).ToLower();
-                if (!JobDescriptionConstants.SeniorityNegations.Any(n => context.Contains(n)))
-                    return keyword.ToLower();
-            }
-        }
+        var title = text.TrimStart().Split('\n', 2)[0].Trim();
+        if (title.Length <= JobDescriptionConstants.MaxTitleLength && TitleLevel(title) is { } titleLevel)
+            return titleLevel;
+
+        var bodyLevel = BodyLevelPatterns
+            .SelectMany(p => p.Pattern.Matches(text).Where(m => !IsNegated(text, m.Index)).Select(m => (p.Level, m.Index)))
+            .OrderBy(x => x.Index)
+            .Select(x => x.Level)
+            .FirstOrDefault();
+        if (bodyLevel != null) return bodyLevel;
 
         var yearsMatch = JobDescriptionConstants.YearsOfExperience().Match(text);
         if (yearsMatch.Success && int.TryParse(yearsMatch.Groups[1].Value, out int years))
         {
-            if (years >= JobDescriptionConstants.SeniorYearsThreshold) return JobDescriptionConstants.SeniorityLevelSenior;
+            if (years >= JobDescriptionConstants.SeniorYearsThreshold) return JobDescriptionConstants.LevelSenior;
             if (years >= JobDescriptionConstants.MidLevelYearsThreshold) return JobDescriptionConstants.DefaultSeniority;
-            if (years >= JobDescriptionConstants.JuniorYearsThreshold) return JobDescriptionConstants.SeniorityLevelJunior;
+            if (years >= JobDescriptionConstants.JuniorYearsThreshold) return JobDescriptionConstants.LevelJunior;
         }
 
         return JobDescriptionConstants.DefaultSeniority;
+    }
+
+    private static string? TitleLevel(string title)
+    {
+        var t = " " + JobDescriptionConstants.TitlePunctuation().Replace(title, " ") + " ";
+        foreach (var phrase in JobDescriptionConstants.NotLevelPhrases) t = t.Replace(phrase, " ");
+
+        foreach (var (level, pattern) in TitleLevelPatterns)
+            if (pattern.Matches(t).Any(m => !IsNegated(t, m.Index))) return level;
+        foreach (var (level, pattern) in NumberedLevelPatterns)
+            if (pattern.IsMatch(t)) return level;
+        return null;
     }
 
     private List<string> ExtractRequiredExperience(string text)
@@ -152,6 +166,15 @@ public class JobDescriptionParser
         }
         return requirements.Take(JobDescriptionConstants.MaxRequirements).ToList();
     }
+
+    private static bool IsNegated(string text, int index)
+    {
+        var start = Math.Max(0, index - JobDescriptionConstants.NegationWindowChars);
+        var context = text.Substring(start, index - start);
+        return JobDescriptionConstants.SeniorityNegations.Any(n => context.Contains(n));
+    }
+
+    private static string Alternation(IEnumerable<string> words) => $"(?:{string.Join("|", words.Select(Regex.Escape))})";
 
     #endregion
 }

@@ -1,0 +1,233 @@
+{
+  "header": {
+    "fullName": "Alex Rivera",
+    "email": "alex.rivera@email.com",
+    "phone": "+1 (415) 555-0192",
+    "location": "San Francisco, CA",
+    "linkedin": "linkedin.com/in/alex-rivera-dev",
+    "github": "github.com/alexrivera-dev"
+  },
+  "education": [
+    {
+      "degree": "B.S. Computer Science",
+      "institution": "University of California, Berkeley",
+      "location": "Berkeley, CA",
+      "graduationDate": "May 2017",
+      "gpa": "3.7",
+      "relevantCourses": [
+        "Data Structures & Algorithms",
+        "Distributed Systems",
+        "Database Systems",
+        "Operating Systems",
+        "Software Engineering"
+      ],
+      "honors": "Magna Cum Laude"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Senior Software Engineer",
+      "company": "Stripe",
+      "location": "Remote · San Francisco, CA",
+      "startDate": "Mar 2022",
+      "endDate": "Present",
+      "bullets": [
+        "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+        "Redesigned the merchant onboarding API (Node.js + TypeScript) reducing integration time from 3 weeks to 4 days for enterprise clients",
+        "Built a distributed rate-limiting system using Redis and Lua scripts handling 500K+ requests/second across 12 global regions",
+        "Led a team of 6 engineers through a zero-downtime migration from PostgreSQL 12 to 14, reducing query latency by 38%",
+        "Implemented automated canary deployments with GitHub Actions and ArgoCD cutting deployment incidents by 72%",
+        "Designed and enforced API versioning strategy across 15+ internal microservices improving backward compatibility and reducing breaking changes by 90%",
+        "Mentored 4 junior and mid-level engineers through weekly 1:1s, code reviews, and pair programming sessions",
+        "Built observability dashboards in Grafana + Prometheus reducing mean time to detection (MTTD) for production incidents from 18 min to 4 min"
+      ],
+      "skills": [
+        "Go",
+        "Node.js",
+        "TypeScript",
+        "Kafka",
+        "Redis",
+        "PostgreSQL",
+        "Kubernetes",
+        "ArgoCD",
+        "GitHub Actions",
+        "Grafana",
+        "Prometheus",
+        "Microservices",
+        "REST API",
+        "Docker",
+        "AWS"
+      ]
+    },
+    {
+      "role": "Software Engineer",
+      "company": "Airbnb",
+      "location": "San Francisco, CA",
+      "startDate": "Jun 2019",
+      "endDate": "Feb 2022",
+      "bullets": [
+        "Built and maintained React + TypeScript frontend features for the host dashboard serving 4M+ active hosts worldwide",
+        "Developed a dynamic pricing recommendation engine using Python and scikit-learn increasing host revenue by an average of 22%",
+        "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s",
+        "Implemented A/B testing infrastructure integrated with Mixpanel supporting 50+ concurrent experiments across the platform",
+        "Reduced CI/CD pipeline duration from 28 minutes to 9 minutes by parallelizing test suites and optimizing Docker layer caching",
+        "Refactored the search ranking service (Java + Elasticsearch) improving relevance scores by 31% based on user engagement metrics",
+        "Wrote comprehensive integration and E2E tests using Jest and Cypress achieving 87% code coverage on critical paths",
+        "Collaborated with product, design, and data teams in an agile environment shipping features on 2-week sprint cycles"
+      ],
+      "skills": [
+        "React",
+        "TypeScript",
+        "JavaScript",
+        "Python",
+        "GraphQL",
+        "Java",
+        "Elasticsearch",
+        "Jest",
+        "Cypress",
+        "Docker",
+        "CI/CD",
+        "A/B Testing",
+        "REST API",
+        "Agile",
+        "Scrum"
+      ]
+    },
+    {
+      "role": "Software Engineer",
+      "company": "Twilio",
+      "location": "San Francisco, CA",
+      "startDate": "Jul 2017",
+      "endDate": "May 2019",
+      "bullets": [
+        "Built core features for Twilio's SMS and voice API platform using Java and Spring Boot serving 1B+ API calls/month",
+        "Designed and implemented a webhook retry mechanism with exponential backoff reducing message delivery failures by 44%",
+        "Created internal developer tooling in Python that automated repetitive QA workflows saving the team 15 hours/week",
+        "Contributed to the migration of a monolithic Rails application to microservices, owning 3 of the 12 extracted services",
+        "Built REST APIs following OpenAPI spec with full Swagger documentation adopted by 3,000+ external developers",
+        "Optimized SQL queries and added strategic indexes on MySQL databases reducing average query time from 340ms to 45ms",
+        "Participated in on-call rotation, resolving 95% of P1 incidents within SLA and writing detailed post-mortems"
+      ],
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "Python",
+        "Ruby",
+        "Rails",
+        "MySQL",
+        "REST API",
+        "Swagger",
+        "OpenAPI",
+        "Microservices",
+        "Docker",
+        "SQL",
+        "AWS"
+      ]
+    },
+    {
+      "role": "Software Engineering Intern",
+      "company": "Box",
+      "location": "Redwood City, CA",
+      "startDate": "Jun 2016",
+      "endDate": "Aug 2016",
+      "bullets": [
+        "Built an internal analytics dashboard using React and D3.js to visualize file upload/download patterns across enterprise accounts",
+        "Fixed 12 production bugs in the Node.js content delivery service as first contributions to a large codebase",
+        "Wrote unit tests for 3 untested modules achieving 70% coverage and catching 2 pre-existing bugs"
+      ],
+      "skills": [
+        "React",
+        "JavaScript",
+        "Node.js",
+        "D3.js",
+        "Python",
+        "SQL"
+      ]
+    }
+  ],
+  "skills": {
+    "languages": [
+      "Go",
+      "TypeScript",
+      "JavaScript",
+      "Python",
+      "Java",
+      "SQL",
+      "Ruby",
+      "Bash"
+    ],
+    "frameworks": [
+      "Node.js",
+      "React",
+      "Next.js",
+      "Spring Boot",
+      "Rails",
+      "FastAPI",
+      "GraphQL",
+      "REST API Design"
+    ],
+    "databases": [
+      "PostgreSQL",
+      "MySQL",
+      "MongoDB",
+      "Redis",
+      "Elasticsearch",
+      "DynamoDB"
+    ],
+    "tools": [
+      "Git",
+      "GitHub",
+      "Docker",
+      "Postman",
+      "Swagger",
+      "VS Code",
+      "IntelliJ"
+    ],
+    "cloud": [
+      "AWS",
+      "GCP",
+      "Kubernetes",
+      "ArgoCD",
+      "Terraform",
+      "GitHub Actions",
+      "Grafana",
+      "Prometheus"
+    ],
+    "practices": [
+      "Agile",
+      "Scrum",
+      "TDD",
+      "CI/CD",
+      "Microservices",
+      "System Design",
+      "Code Review",
+      "Mentoring",
+      "On-call",
+      "A/B Testing"
+    ]
+  },
+  "projects": [
+    {
+      "name": "OpenMQ: Open Source Message Queue",
+      "description": "Built a lightweight distributed message queue in Go inspired by Kafka. Supports pub/sub, consumer groups, and at-least-once delivery. Used by 3 open source projects with 800+ GitHub stars.",
+      "technologies": [ "Go", "gRPC", "Docker", "Kubernetes" ],
+      "highlights": [
+        "Achieved 95K messages/second throughput on a 3-node cluster in benchmarks",
+        "Implemented Raft consensus for leader election ensuring zero message loss during failover",
+        "Published detailed architecture docs and attracted 12 external contributors"
+      ],
+      "link": "github.com/alexrivera-dev/openmq"
+    },
+    {
+      "name": "Querywise: AI-powered SQL Assistant",
+      "description": "Full-stack web app that translates natural language questions into SQL queries using OpenAI API. Built with Next.js, FastAPI, and PostgreSQL. Supports schema introspection and query explanation.",
+      "technologies": [ "Next.js", "TypeScript", "FastAPI", "Python", "PostgreSQL", "OpenAI API" ],
+      "highlights": [
+        "Generates accurate SQL for 91% of natural language queries in internal testing",
+        "Built schema-aware prompt engineering reducing hallucinated column names by 78%",
+        "Deployed on Railway with zero-downtime deploys and automated integration tests"
+      ],
+      "link": "github.com/alexrivera-dev/querywise"
+    }
+  ]
+}

@@ -1,11 +1,19 @@
+@using static ErCv.Web.Services.CVGeneratorService
+
+@* Step 2: one choice per stored profile (the senior sample first), then the visitor's own saved profile *@
 <fieldset class="mb-4 profile-source">
     <legend class="form-label form-label-custom">Profile to use</legend>
     <div class="d-flex flex-wrap gap-3 align-items-center">
-        <div class="form-check mb-0">
-            <input class="form-check-input" type="radio" name="profile-source" id="source-demo"
-                   checked="@(Value == UiConstants.ProfileSourceDemo)" disabled="@Disabled" @onchange="PickDemo" />
-            <label class="form-check-label" for="source-demo">Demo profile</label>
-        </div>
+        @foreach (var profile in Ordered())
+        {
+            var id = RadioId(profile.Id);
+            <div class="form-check mb-0">
+                <input class="form-check-input" type="radio" name="profile-source" id="@id"
+                       checked="@(Value == UiConstants.ProfileSourceDemo && ProfileId == profile.Id)"
+                       disabled="@Disabled" @onchange="() => PickStored(profile.Id)" />
+                <label class="form-check-label" for="@id">@Label(profile)</label>
+            </div>
+        }
         <div class="form-check mb-0">
             <input class="form-check-input" type="radio" name="profile-source" id="source-mine"
                    checked="@(Value == UiConstants.ProfileSourceMine)" disabled="@(Disabled || !HasMine)" @onchange="PickMine" />
@@ -16,8 +24,19 @@
 </fieldset>
 
 @code {
+    #region Constants
+
+    // The creator's profile keeps the id the E2E tests and older bookmarks know
+    private const string CreatorRadioId = "source-demo";
+    private const string RadioIdPrefix = "source-";
+
+    #endregion
+
     #region Parameters
 
+    [Parameter] public List<ProfileInfo> Profiles { get; set; } = new();
+    [Parameter] public string ProfileId { get; set; } = ApiConstants.SeniorSampleProfileId;
+    [Parameter] public EventCallback<string> ProfileIdChanged { get; set; }
     [Parameter] public string Value { get; set; } = UiConstants.ProfileSourceDemo;
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
     [Parameter] public bool HasMine { get; set; }
@@ -27,9 +46,31 @@
 
     #region Event Handlers
 
-    private Task PickDemo() => ValueChanged.InvokeAsync(UiConstants.ProfileSourceDemo);
+    private async Task PickStored(string id)
+    {
+        await ProfileIdChanged.InvokeAsync(id);
+        await ValueChanged.InvokeAsync(UiConstants.ProfileSourceDemo);
+    }
 
     private Task PickMine() => ValueChanged.InvokeAsync(UiConstants.ProfileSourceMine);
+
+    #endregion
+
+    #region Helpers
+
+    private IEnumerable<ProfileInfo> Ordered() =>
+        Profiles.OrderBy(p => p.Id == ApiConstants.SeniorSampleProfileId ? 0 : p.Id == ApiConstants.DefaultProfileId ? 1 : 2)
+            .ThenBy(p => p.Id, StringComparer.Ordinal);
+
+    private static string RadioId(string profileId) =>
+        profileId == ApiConstants.DefaultProfileId ? CreatorRadioId : RadioIdPrefix + profileId;
+
+    private static string Label(ProfileInfo profile) => profile.Id switch
+    {
+        ApiConstants.SeniorSampleProfileId => UiConstants.SeniorSampleProfileLabel,
+        ApiConstants.DefaultProfileId => UiConstants.CreatorProfileLabel,
+        _ => profile.Name
+    };
 
     #endregion
 }

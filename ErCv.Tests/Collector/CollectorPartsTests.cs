@@ -26,6 +26,39 @@ public class CollectorPartsTests
     }
 
     [Theory]
+    [InlineData("Senior Backend Engineer", true)]
+    [InlineData("Software Engineer, New Grad 2027", true)]
+    [InlineData("Sr. Security Engineer", true)]
+    [InlineData("Associate DevOps Engineer", false)]
+    [InlineData("Software Engineer 3, Data Pipeline", false)]
+    [InlineData("Member of Technical Staff", false)]
+    public void A_clear_level_is_a_level_word_that_leaves_no_doubt(string title, bool expected)
+    {
+        Assert.Equal(expected, Classifier.NamesClearLevel(title));
+    }
+
+    // APP-06: an accelerator post with more skills used to win the Full stack sample
+    [Fact]
+    public void Sample_picker_skips_programs_and_prefers_a_clear_level()
+    {
+        static Posting Post(string id, string title, string text) => new()
+        {
+            Id = id, Source = "greenhouse", Url = "https://example.com/" + id, Company = "Acme", Title = title,
+            PostedAt = DateTimeOffset.Parse("2026-10-01T00:00:00Z"), RoleFamily = "fullstack", Seniority = Classifier.Seniority(title), Text = text
+        };
+        var postings = new[]
+        {
+            Post("program", "Accelerator Program - Software Engineer (Full-stack)", "React, Node.js, Kafka, Redis, PostgreSQL and AWS."),
+            Post("plain", "Full Stack Engineer", "React, Node.js and PostgreSQL."),
+            Post("clear", "Senior Full Stack Engineer", "React.")
+        };
+
+        var sample = SamplePicker.Pick(postings, out _).Single(s => s.Id == "fullstack");
+
+        Assert.Equal("clear", sample.PostingId);
+    }
+
+    [Theory]
     [InlineData("Account Executive - France")]
     [InlineData("Engineering Manager, Payments")]
     [InlineData("Solutions Engineer")]

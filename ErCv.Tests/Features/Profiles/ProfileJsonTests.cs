@@ -16,6 +16,7 @@ public class ProfileJsonTests
     }
 
     [Theory]
+    [InlineData("demo")]
     [InlineData("cv-master")]
     [InlineData("cv-master-senior")]
     public void Export_then_import_round_trips(string id)

@@ -1,6 +1,6 @@
 # Job-post corpus: relevance report
 
-Generated 2026-10-20 from 194 posts published between 2026-07-22 and 2026-10-20 (freshness window 90 days). Skills are what `JobDescriptionParser` extracts, so this report measures the parser as much as the market.
+Generated 2026-10-21 from 194 posts published between 2026-07-22 and 2026-10-20 (freshness window 90 days). Skills are what `JobDescriptionParser` extracts, so this report measures the parser as much as the market.
 
 Regenerate: `dotnet run --project ErCv.Collector -- report`. Source posts: `corpus/postings/`.
 
@@ -52,39 +52,39 @@ Share of the posts published each month that the parser finds the skill in (top 
 | Skill | All posts | 2026-07 (n=6) | 2026-08 (n=16) | 2026-09 (n=56) | 2026-10 (n=116) |
 |---|---|---|---|---|---|
 | python | 89 (46%) | 83% | 38% | 39% | 48% |
-| next.js | 77 (40%) | 33% | 56% | 46% | 34% |
-| go | 69 (36%) | 17% | 50% | 30% | 37% |
+| observability | 68 (35%) | 33% | 31% | 34% | 36% |
+| ai agents | 62 (32%) | 50% | 38% | 36% | 28% |
 | machine learning | 54 (28%) | 33% | 25% | 27% | 28% |
-| end-to-end | 49 (25%) | 0% | 44% | 32% | 21% |
-| typescript | 49 (25%) | 33% | 25% | 29% | 23% |
+| distributed systems | 49 (25%) | 0% | 31% | 30% | 23% |
+| go | 48 (25%) | 17% | 19% | 16% | 30% |
+| typescript | 48 (25%) | 33% | 25% | 27% | 23% |
 | aws | 45 (23%) | 17% | 31% | 20% | 24% |
+| llm | 40 (21%) | 50% | 31% | 20% | 18% |
 | gcp | 36 (19%) | 17% | 13% | 14% | 22% |
-| javascript | 35 (18%) | 0% | 25% | 23% | 16% |
 | java | 34 (18%) | 0% | 25% | 14% | 19% |
 | kubernetes | 34 (18%) | 0% | 19% | 18% | 18% |
-| foundation | 31 (16%) | 0% | 6% | 18% | 17% |
+| on-call | 33 (17%) | 0% | 25% | 13% | 19% |
+| javascript | 31 (16%) | 0% | 19% | 20% | 15% |
 | react | 31 (16%) | 17% | 13% | 27% | 11% |
-| solid | 31 (16%) | 17% | 19% | 14% | 16% |
 | sql | 31 (16%) | 17% | 31% | 14% | 15% |
-| llm | 29 (15%) | 33% | 6% | 16% | 15% |
 | ci/cd | 28 (14%) | 33% | 19% | 14% | 13% |
+| incident response | 27 (14%) | 0% | 6% | 16% | 15% |
 | azure | 26 (13%) | 0% | 6% | 11% | 16% |
-| spark | 21 (11%) | 17% | 6% | 4% | 15% |
-| less | 20 (10%) | 0% | 13% | 14% | 9% |
+| networking | 24 (12%) | 0% | 13% | 16% | 11% |
+| system design | 24 (12%) | 50% | 13% | 11% | 11% |
 | github | 19 (10%) | 0% | 13% | 13% | 9% |
+| infrastructure as code | 19 (10%) | 17% | 13% | 5% | 11% |
 | terraform | 19 (10%) | 0% | 19% | 5% | 11% |
+| data modeling | 18 (9%) | 17% | 6% | 7% | 10% |
 | openai | 18 (9%) | 0% | 6% | 18% | 6% |
 | rust | 18 (9%) | 17% | 13% | 13% | 7% |
 | c++ | 17 (9%) | 17% | 0% | 11% | 9% |
 | code review | 17 (9%) | 17% | 13% | 9% | 8% |
-| postgresql | 15 (8%) | 17% | 6% | 9% | 7% |
-| professional | 15 (8%) | 33% | 6% | 5% | 8% |
-| node.js | 14 (7%) | 0% | 19% | 2% | 9% |
-| c | 13 (7%) | 17% | 13% | 7% | 5% |
+| algorithms | 16 (8%) | 17% | 0% | 5% | 10% |
 
 ## Skills the parser misses
 
-Terms that recent posts use but the skill dictionary does not have, so the parser never extracts them, match scores ignore them and the gaps tab cannot mention them. Candidates for the MATCH-07 dictionary; some are concepts rather than skills and a person should decide.
+Terms that recent posts use but the skill dictionary does not have, so the parser never extracts them, match scores ignore them and the gaps tab cannot mention them. Candidates for `Data/skills.json`; some are concepts rather than skills and a person should decide.
 
 ### Known technologies and practices not in the dictionary
 
@@ -93,76 +93,27 @@ From a reviewer watch list (`RelevanceReport.WatchList`), in at least 2 posts.
 | Term | Posts | Share | Families |
 |---|---|---|---|
 | agents | 73 | 38% | ml 20, software 16, security 9 |
-| observability | 68 | 35% | devops 14, ml 11, software 9 |
-| distributed systems | 49 | 25% | software 16, devops 13, backend 7 |
-| agentic | 37 | 19% | ml 10, security 6, software 6 |
 | scalability | 30 | 15% | devops 8, software 6, data 5 |
-| networking | 29 | 15% | devops 12, security 5, software 5 |
-| on-call | 29 | 15% | devops 13, security 4, software 4 |
 | experimentation | 27 | 14% | ml 7, data 5, fullstack 4 |
-| incident response | 27 | 14% | devops 10, security 9, data 5 |
-| system design | 20 | 10% | backend 5, ml 4, devops 2 |
-| accessibility | 19 | 10% | frontend 6, software 3, devops 2 |
-| llms | 18 | 9% | ml 10, software 3, data 1 |
-| data modeling | 17 | 9% | data 9, software 4, backend 3 |
-| MCP | 16 | 8% | ml 9, backend 2, devops 2 |
-| algorithms | 16 | 8% | software 7, ml 4, security 3 |
 | Claude | 13 | 7% | software 4, ml 3, devops 2 |
-| data structures | 10 | 5% | software 5, data 2, security 2 |
-| lakehouse | 10 | 5% | data 3, software 2, backend 1 |
 | Salesforce | 9 | 5% | fullstack 2, software 2, backend 1 |
-| data warehouse | 9 | 5% | data 3, devops 2, backend 1 |
-| etl | 9 | 5% | data 9 |
-| generative ai | 9 | 5% | frontend 2, ml 2, backend 1 |
 | Anthropic | 8 | 4% | fullstack 2, software 2, backend 1 |
-| evals | 8 | 4% | ml 4, data 1, devops 1 |
-| Iceberg | 7 | 4% | software 3, data 2, backend 1 |
-| concurrency | 7 | 4% | software 4, backend 1, ml 1 |
-| a/b testing | 6 | 3% | frontend 2, data 1, devops 1 |
 | blockchain | 6 | 3% | backend 1, data 1, frontend 1 |
-| design systems | 6 | 3% | frontend 3, fullstack 2, mobile 1 |
-| dns | 6 | 3% | software 2, backend 1, devops 1 |
-| prompt engineering | 6 | 3% | ml 4, data 2 |
-| slos | 6 | 3% | devops 5, ml 1 |
-| threat modeling | 6 | 3% | security 6 |
 | Argo | 5 | 3% | devops 3, data 1, fullstack 1 |
 | Copilot | 5 | 3% | software 3, devops 1, mobile 1 |
-| api design | 5 | 3% | backend 2, software 2, devops 1 |
-| langgraph | 5 | 3% | ml 4, frontend 1 |
 | web3 | 5 | 3% | backend 1, frontend 1, fullstack 1 |
-| large language models | 4 | 2% | ml 3, software 1 |
-| nosql | 4 | 2% | software 2, devops 1, fullstack 1 |
-| parquet | 4 | 2% | software 3, backend 1 |
-| siem | 4 | 2% | security 4 |
 | Okta | 3 | 2% | ml 2, devops 1 |
-| RAG | 3 | 2% | ml 2, frontend 1 |
 | buildkite | 3 | 2% | qa 2, security 1 |
-| clickhouse | 3 | 2% | data 2, devops 1 |
-| genai | 3 | 2% | frontend 1, fullstack 1, ml 1 |
-| gradle | 3 | 2% | software 2, mobile 1 |
-| jetpack compose | 3 | 2% | mobile 3 |
 | performance tuning | 3 | 2% | backend 2, fullstack 1 |
-| slo | 3 | 2% | devops 2, backend 1 |
 | transformers | 3 | 2% | ml 3 |
-| CUDA | 2 | 1% | devops 1, ml 1 |
 | Combine | 2 | 1% | fullstack 1, mobile 1 |
-| Envoy | 2 | 1% | devops 1, security 1 |
 | Gemini | 2 | 1% | ml 2 |
-| JAX | 2 | 1% | ml 2 |
 | Ray | 2 | 1% | ml 2 |
-| cdn | 2 | 1% | devops 1, software 1 |
-| elt | 2 | 1% | data 2 |
-| embeddings | 2 | 1% | data 1, software 1 |
-| fine-tuning | 2 | 1% | ml 2 |
 | gdpr | 2 | 1% | security 2 |
 | iso 27001 | 2 | 1% | security 2 |
-| istio | 2 | 1% | devops 1, security 1 |
-| jvm | 2 | 1% | backend 1, security 1 |
 | load balancing | 2 | 1% | devops 2 |
-| mlflow | 2 | 1% | ml 2 |
 | multithreading | 2 | 1% | fullstack 1, software 1 |
 | pci | 2 | 1% | security 2 |
-| penetration testing | 2 | 1% | security 2 |
 | soc 2 | 2 | 1% | security 2 |
 | tcp/ip | 2 | 1% | devops 1, security 1 |
 
@@ -170,7 +121,7 @@ From a reviewer watch list (`RelevanceReport.WatchList`), in at least 2 posts.
 
 CamelCase or `*.js` words in at least 3 posts that are not in the dictionary, the watch list or a company name in the corpus. Expect some noise (other companies' products, brand names).
 
-SaaS (21), CapitalG (6), DatadogLife (6), ElevenAPI (6), ElevenAgents (6), ElevenCreative (6), PinFlex (6), SpaceX (6), SpaceXSI (6), WeWork (6), ChatGPT (5), GitOps (5), IaC (4), SpaceXAI (4), DataFusion (3), LiveKit (3), NetSuite (3), RemoteUS (3), WebRTC (3)
+SaaS (21), CapitalG (6), DatadogLife (6), ElevenAPI (6), ElevenAgents (6), ElevenCreative (6), PinFlex (6), SpaceX (6), SpaceXSI (6), WeWork (6), ChatGPT (5), SpaceXAI (4), DataFusion (3), LiveKit (3), NetSuite (3), RemoteUS (3)
 
 ## Skills the parser gets wrong
 
@@ -180,33 +131,44 @@ Skills found in at least 3 posts where, in most of those posts, every match is w
 
 | Skill | Posts | Only lowercase prose | Example |
 |---|---|---|---|
-| next.js | 77 | 74 | "...ge AI systems that enable the next generation of intelligent app..." |
-| end-to-end | 49 | 46 | "...nsure alignment. You will own end-to-end feature delivery, author tech..." |
-| foundation | 31 | 29 | "...trusted account and commerce foundation that lets anyone, anywhere, b..." |
-| less | 20 | 20 | "...work is faster, clearer, and less fragmented. Millions of indiv..." |
+| observability | 68 | 57 | "...th dbt tests, CI/CD, and data observability - Experience evangelizing and..." |
+| distributed systems | 49 | 45 | "...tical cloud-native enterprise distributed systems. - Strong Proficiency in Java..." |
+| on-call | 33 | 31 | "...thin team services. Fully own on-call responsibilities, driving inc..." |
+| incident response | 27 | 23 | "...anges, backups, restores, and incident response - Reducing operational load b..." |
+| networking | 24 | 23 | "...Karpenter autoscaling, Cilium networking, and ArgoCD-driven GitOps dep..." |
+| system design | 24 | 21 | "...xperience contributing to the system design or architecture (architecture..." |
+| data modeling | 18 | 18 | "...forcing best practices around data modeling, testing, documentation, and..." |
+| algorithms | 16 | 16 | "...principles (data structures, algorithms, version control) - Familiari..." |
 | code review | 17 | 15 | "..., testing, documentation, and code review Qualifications Twilio value..." |
+| infrastructure as code | 19 | 12 | "...P, with a cloud warehouse and infrastructure as code. You provision, deploy, monit..." |
+| data structures | 10 | 10 | "...tware engineering principles (data structures, algorithms, version control)..." |
 | dbt | 10 | 10 | "...rks, including expertise with dbt tests, CI/CD, and data observ..." |
 | event-driven | 10 | 10 | "...rs use to build long-running, event-driven, and scheduled applications...." |
-| https | 7 | 7 | ".... To learn more, please visit https://www.redditinc.com/careers/..." |
+| evals | 8 | 8 | "...lly moves loss and downstream evals. - Treat data quality as a sy..." |
+| concurrency | 7 | 7 | "...e: realtime inference on GPU, concurrency, autoscaling, observability,..." |
+| design systems | 10 | 7 | "...tain and enhance Ramp's brand design system and component library, ensuri..." |
+| accessibility | 8 | 6 | "...visual and interaction craft, accessibility, performance, resilience, ins..." |
 | microservices | 6 | 6 | "...specs, and build robust APIs, microservices, and tooling relied on by cro..." |
+| threat modeling | 6 | 6 | "...orm infrastructure. - Conduct threat modeling, architecture reviews, and te..." |
+| data warehouse | 10 | 5 | "...atastores (relational, NoSQL, data warehouse solutions) - Strong product s..." |
+| prompt engineering | 6 | 5 | "...Haves - Experience with LLMs, prompt engineering, or building tools on top of..." |
 | deep learning | 4 | 4 | "...- Strong expertise in applied deep learning and mainstream RecSys model a..." |
 | serverless | 4 | 4 | "...as of application deployment, serverless computing, or container orche..." |
 | agile | 3 | 3 | "...expect - To work in a small, agile, data-driven, customer-obsess..." |
-| rails | 5 | 3 | "...ns with international banking rails - giving every other team a r..." |
 
 ### Words taken as skills from "N years of ..."
 
-Not in the dictionary; the parser keeps the word that follows "N years of". Most are not skills.
+Skills the parser reports that are not in the dictionary. The word after "N years of" only counts when the dictionary knows it, so anything listed here is a parser bug.
 
-professional (15), building (12), industry (6), hands-on (4), working (4), designing (3), applied (2), thereafter (2), across (1), cloud (1), contributing (1), delivering (1), demonstrated (1), deploying (1), full-time (1), fully (1), leading (1), progressive (1), qa (1), securing (1), security (1), shipping (1), total (1), why (1), writing (1)
+None.
 
 ## Dictionary skills nobody asks for
 
-205 of the 397 distinct dictionary skills (after alias normalization) appear in none of the 194 posts, and 66 in only one. Not a reason to delete them on its own (the corpus is software roles at product companies), but they cost nothing to find and the ones that look dated are candidates to drop or merge in MATCH-07.
+193 of the 417 distinct dictionary skills (after alias normalization) appear in none of the 194 posts, and 60 in only one. Not a reason to delete them on its own (the corpus is software roles at product companies), but they cost nothing to find and a profile can still list them. Review the ones that look dated when the dictionary is next tuned.
 
-**In no post:** .net, .net maui, aad, aci, activemq, actix, algolia, alpine.js, amazon sqs, amplify, android studio, ant design, antd, api gateway, arangodb, asp.net core, astro, axum, azure active directory, azure app service, azure container, azure devops, azure event hub, azure functions, azure kubernetes, azure logic apps, azure service bus, azure sql, backbone, bdd, bicep, bitbucket, bull, bullmq, bulma, celery, chakra ui, chef, circleci, clojure, cloud functions, cloudwatch, cobol, cockroachdb, codeigniter, confluence, containerd, cosmos db, cosmosdb, couchbase, couchdb, cqrs, css3, dapper, dart, ddd, domain-driven design, drizzle, dynatrace, e2e testing, elastic beanstalk, elixir, ember, ember.js, emotion, entity framework, enzyme, erlang, esbuild, etcd, event sourcing, expo, express, express.js, f#, fargate, fastify, faunadb, fiber, firestore, flask, flutter, flyway, fortran, gatsby, gin, gin-gonic, groovy, hapi, hashicorp vault, haskell, hazelcast, heroku, hexagonal architecture, hibernate, htmx, iis, insomnia, integration testing, ionic, jaeger, jasmine, jest, jquery, junit, kanban, keras, knex, koa, ktor, laravel, layered architecture, lerna, liquibase, lit, logstash, lua, mariadb, material ui, matlab, maui, meilisearch, memcached, micronaut, mocha, mongoose, monorepo, mstest, mui, mvc, nats, neo4j, nestjs, netlify, newrelic, nginx, nunit, nuxt, nx, openapi, openshift, pair programming, perl, phoenix, php, pl/sql, plsql, podman, power bi, powershell, preact, pubsub, pull request, pulsar, puppet, puppeteer, quarkus, qwik, radix ui, railway, rancher, rds, redshift, rethinkdb, rollup, sagemaker, scrum, sequelize, shadcn, sidekiq, sns, soa, solidjs, solr, sqlite, ssl, stencil, step functions, styled-components, subversion, sveltekit, svn, swagger, symfony, t-sql, tdd, teamcity, testing library, testng, tidb, travis ci, trunk-based development, turborepo, typeorm, typesense, unit testing, vb.net, visual basic, vite, vitest, xamarin, xunit, xunit.net, zipkin, zsh
+**In no post:** .net, .net maui, aci, activemq, actix, ai, algolia, alpine.js, amplify, android studio, ant design, apache, api gateway, arangodb, asp.net core, assembly, astro, axum, azure app service, azure container, azure devops, azure event hub, azure functions, azure kubernetes, azure logic apps, azure service bus, azure sql, backbone, bdd, bicep, bitbucket, bootstrap, bullmq, bulma, celery, chakra ui, chef, circleci, clojure, cloud functions, cloudwatch, cobol, cockroachdb, codeigniter, confluence, containerd, cosmos db, couchbase, couchdb, cqrs, dapper, dart, domain-driven design, drizzle, dynatrace, echo, elastic beanstalk, elixir, ember, emotion, entity framework, enzyme, erlang, esbuild, etcd, event sourcing, expo, express, f#, fargate, fastify, fiber, firestore, flask, flutter, flyway, fortran, foundation, gatsby, gin, groovy, hapi, haskell, hazelcast, heroku, hexagonal architecture, hibernate, htmx, https, iis, insomnia, integration testing, ionic, jaeger, jasmine, jest, jquery, junit, kanban, keras, knex, koa, ktor, laravel, layered architecture, lerna, less, liquibase, lit, logstash, lua, mariadb, material ui, matlab, meilisearch, memcached, micronaut, mocha, mongoose, monorepo, mstest, mvc, mvp, nats, neo4j, nestjs, netlify, nginx, nunit, nuxt, nx, openapi, openshift, pair programming, perl, phoenix, php, pl/sql, podman, powershell, preact, pull request, pulsar, puppet, puppeteer, quarkus, qwik, radix ui, railway, rancher, rds, redshift, remix, rethinkdb, rollup, sagemaker, scrum, sequelize, shadcn, sidekiq, sns, soa, solidjs, solr, sqlite, ssl, stencil, step functions, styled-components, sveltekit, svn, swagger, symfony, t-sql, tdd, teamcity, testing library, testng, tidb, travis ci, trunk-based development, turborepo, typeorm, typesense, unit testing, vb.net, visual basic, vite, vitest, xamarin, xunit, zipkin, zsh
 
-**In one post:** abac, aks, angular, apache flink, assembly, aurora, babel, bamboo, c#, cassandra, clean architecture, cloud run, cloud storage, cloudformation, cloudfront, computer vision, cpp, cypress, django, echo, ecs, encryption, eslint, firebase, flux, gitlab ci, hadoop, hive, jupyter, jwt, kibana, mvp, mvvm, nomad, numpy, oauth2, objective-c, openid connect, oracle, playwright, postman, prettier, prisma, pytest, remix, route53, ruby on rails, scikit-learn, scss, selenium, shell, sinatra, soap, spanner, spinnaker, splunk, spring boot, sql server, sqs, storybook, tailwind, tls, unix, vpc, webpack, websocket
+**In one post:** abac, aks, angular, aurora, babel, bamboo, c#, cassandra, clean architecture, cloud run, cloud storage, cloudformation, cloudfront, computer vision, cypress, django, e2e testing, ecs, encryption, eslint, firebase, flux, gitlab ci, hadoop, hive, jupyter, jwt, kibana, mvvm, nomad, numpy, objective-c, oracle, playwright, postman, power bi, prettier, prisma, pubsub, pytest, route53, scikit-learn, scss, selenium, shell, sinatra, soap, spanner, spinnaker, splunk, spring boot, sql server, sqs, storybook, swiftui, tailwind, tls, unix, vpc, webpack
 
 ## Seniority wording
 
@@ -215,34 +177,34 @@ professional (15), building (12), industry (6), hands-on (4), working (4), desig
 | Title word | Posts | Parser keyword |
 |---|---|---|
 | intern | 12 | intern |
-| internship | 2 | **none** |
+| internship | 2 | internship |
 | new grad | 5 | new grad |
 | graduate | 1 | graduate |
-| early career | 1 | **none** |
+| early career | 1 | early career |
 | associate | 2 | associate |
-| ii | 2 | **none** |
+| ii | 2 | ii |
 | senior | 45 | senior |
-| sr | 2 | sr. |
-| staff | 36 | only inside "staff engineer" |
+| sr | 2 | sr |
+| staff | 36 | staff |
 | lead | 3 | lead |
 | principal | 9 | principal |
-| architect | 1 | architect |
+| architect | 1 | **none** |
 
 ### Title level against the level the parser reads from the post
 
-Rows: level from the title (the collector's classifier). Columns: `JobDescriptionParser` seniority on the full post. The parser takes the first seniority word it meets, which in long posts is often a team mention rather than the role.
+Rows: level from the title (the collector's classifier). Columns: `JobDescriptionParser` seniority on the full post (the title, then the body). The parser reads the level from the title when the title names one, so disagreement comes from titles without a level word, where it falls back to the body and the years asked for.
 
 | Title \ Parser | intern | junior | mid | senior | staff | lead | principal |
 |---|---|---|---|---|---|---|---|
-| intern | 8 | 0 | 1 | 2 | 0 | 0 | 2 |
-| junior | 0 | 6 | 1 | 2 | 0 | 0 | 1 |
-| mid | 0 | 11 | 35 | 10 | 0 | 16 | 9 |
-| senior | 0 | 0 | 0 | 24 | 0 | 10 | 8 |
-| staff | 0 | 0 | 4 | 3 | 5 | 14 | 10 |
-| lead | 0 | 0 | 0 | 0 | 0 | 2 | 1 |
+| intern | 13 | 0 | 0 | 0 | 0 | 0 | 0 |
+| junior | 0 | 10 | 0 | 0 | 0 | 0 | 0 |
+| mid | 0 | 8 | 63 | 9 | 1 | 0 | 0 |
+| senior | 0 | 0 | 0 | 42 | 0 | 0 | 0 |
+| staff | 0 | 0 | 0 | 0 | 36 | 0 | 0 |
+| lead | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 | principal | 0 | 0 | 0 | 0 | 0 | 0 | 9 |
 
-Agreement: 89 of 194 (46%).
+Agreement: 176 of 194 (91%).
 
 ### Years of experience asked for
 

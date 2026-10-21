@@ -6,8 +6,13 @@ namespace ErCv.Tests.Fixtures;
 
 public static class FixtureLoader
 {
+    /// <summary>The app's own demo profile (PROF-06), read from ErCv.Web/Data so the matrices run on what visitors see.</summary>
+    public const string DemoProfileId = "demo";
+
+    // "cv-master" is the earlier made-up demo (Alex Rivera), kept as a fixture for its edge cases
     public static readonly string[] ProfileIds =
     {
+        DemoProfileId,
         "cv-master",
         "cv-master-senior",
         "cv-master-junior",
@@ -51,7 +56,9 @@ public static class FixtureLoader
 
     public static CVMaster LoadProfile(string id)
     {
-        var json = File.ReadAllText(FixturePath("profiles", $"{id}.json"));
+        var json = File.ReadAllText(id == DemoProfileId
+            ? Path.Combine(RepoRoot(), "ErCv.Web", "Data", "cv-master.json")
+            : FixturePath("profiles", $"{id}.json"));
         return JsonSerializer.Deserialize<CVMaster>(json, JsonOptions)
             ?? throw new InvalidOperationException($"Failed to deserialize profile '{id}'");
     }

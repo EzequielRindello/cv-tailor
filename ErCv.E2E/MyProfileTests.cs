@@ -23,6 +23,9 @@ public class MyProfileTests : E2ETestBase
         await Assertions.Expect(Page.Locator("#p-fullName-err")).ToBeVisibleAsync();
         await Assertions.Expect(Page.Locator("#p-email-err")).ToBeVisibleAsync();
         await Assertions.Expect(Page.Locator("#exp-0-role-err")).ToBeVisibleAsync();
+        // The summary at the top says where each problem is, in words
+        await Assertions.Expect(Page.Locator("#profile-errors")).ToContainTextAsync("Header, full name: Full name is required.");
+        await Assertions.Expect(Page.Locator("#profile-errors")).ToContainTextAsync("Experience 1, role");
 
         var saved = await Page.EvaluateAsync<string?>("() => localStorage.getItem('cv-generator-my-profile')");
         Assert.Null(saved);

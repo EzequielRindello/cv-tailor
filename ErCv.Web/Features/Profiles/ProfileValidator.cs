@@ -91,11 +91,11 @@ public class ProfileValidator
 
             for (var b = 0; b < (x.Bullets?.Count ?? 0); b++)
                 if (string.IsNullOrWhiteSpace(x.Bullets![b]))
-                    result.Issues.Add(new ProfileIssue($"experience[{i}].bullets[{b}]", "Bullet is empty."));
+                    result.Issues.Add(new ProfileIssue($"experience[{i}].bullets[{b}]", $"Bullet {b + 1} is empty. Write it or remove it."));
 
             for (var s = 0; s < (x.Skills?.Count ?? 0); s++)
                 if (string.IsNullOrWhiteSpace(x.Skills![s]))
-                    result.Issues.Add(new ProfileIssue($"experience[{i}].skills[{s}]", "Skill is empty."));
+                    result.Issues.Add(new ProfileIssue($"experience[{i}].skills[{s}]", $"Skill {s + 1} is empty. Remove the extra comma."));
         }
     }
 
@@ -136,7 +136,7 @@ public class ProfileValidator
 
             for (var h = 0; h < (p.Highlights?.Count ?? 0); h++)
                 if (string.IsNullOrWhiteSpace(p.Highlights![h]))
-                    result.Issues.Add(new ProfileIssue($"projects[{i}].highlights[{h}]", "Highlight is empty."));
+                    result.Issues.Add(new ProfileIssue($"projects[{i}].highlights[{h}]", $"Highlight {h + 1} is empty. Write it or remove it."));
         }
     }
 
