@@ -188,8 +188,7 @@ Nothing in the code is blocked. These wait on the repo owner, not on a milestone
 
 | Item | Why it is not done | Owner |
 |---|---|---|
-| First run of the corpus refresh workflow on GitHub, and a review of the PR it opens | Needs the repo setting "Allow GitHub Actions to create and approve pull requests" (off as of 2026-10-21) and a person to start it from the Actions tab. | APP-06 (repo owner) |
-| `check` fails on one post that aged out of the 90-day window (`lever-palantir-67110929...`, posted 2026-07-22) | Fixed by the first refresh above. | APP-06 (repo owner) |
+| Merge PR #12 (first corpus refresh) | Reviewed and green locally; merging is the repo owner's call. Until it is merged, `check` on master fails on the expired Palantir post. | APP-06 (repo owner) |
 | Weekly cron for the refresh workflow | The repo owner decides; it is commented out in the workflow file. | APP-06 (repo owner) |
 | TEST-08 snapshots over `FixtureLoader.CorpusJdNames` | Snapshots are not built yet. | TEST-08 (M5) |
 
@@ -818,7 +817,7 @@ Verify: the refresh command run twice in a row: the second run reported "Added 0
 **Status:** In progress · **Priority:** P2 · **Effort:** S
 
 - [x] Sample picker skips posts that are not a normal job (accelerators, programs, fellowships) and prefers posts with a clear level in the title; the Full stack sample (an accelerator post) and the Junior sample (Associate DevOps) are the cases that triggered it
-- [ ] Run the corpus refresh workflow once from the Actions tab and review the PR it opens; fix whatever the first real run shows
+- [x] Run the corpus refresh workflow once from the Actions tab and review the PR it opens; fix whatever the first real run shows
 - [ ] Decide whether to enable the weekly cron (the user turns it on, see the workflow file)
 
 Verify: `CorpusTests` samples test updated to the new rule; the first run's PR exists and `check` passes on it.
@@ -826,7 +825,9 @@ Verify: `CorpusTests` samples test updated to the new rule; the first run's PR e
 Progress notes:
 - The picker leaves out titles with "accelerator", "fellowship", "residency", "apprenticeship" or "bootcamp" and prefers titles that name a clear level (`Classifier.NamesClearLevel`: junior, new grad, senior, staff and so on; not "Associate" or "Engineer 3"). New samples: Backend MongoDB (Senior), Frontend GitLab (Staff), Full stack GitLab (Staff Fullstack), Data Elastic (Lead Data Engineer), DevOps Databricks (Senior Production Engineer), Junior Palantir (New Grad). Tests: `CorpusTests.Samples_are_normal_jobs_with_a_clear_level_in_the_title`, `CollectorPartsTests.Sample_picker_skips_programs_and_prefers_a_clear_level`.
 - New collector command `samples`: re-picks the samples from the committed corpus without the network (needed whenever the parser or the dictionary changes, since the picker ranks by parsed skills).
-- Still open: the first run of the refresh workflow on GitHub (the repo owner allows Actions to create PRs, then runs it from the Actions tab) and the cron decision. Until a refresh runs, `check` fails on one post that aged out of the window (`lever-palantir-67110929...`, posted 2026-07-22).
+- First run on GitHub (2026-10-21, run 39670556900, PR #12): added 39, updated 14, removed 39, unchanged 141; `check` passes ("194 postings, all inside the 90-day window, samples in sync"), the expired Palantir post is gone, title level agreement 177 of 194 (91%). Two samples changed (Backend: Coinbase Staff, DevOps: Asana Senior). On the PR branch the full suite without browsers (9061 passed, 1 skipped) and the E2E suite (47) pass locally.
+- What the first run showed: CI did not run on PR #12, because GitHub does not start `pull_request` workflows for a PR opened with `GITHUB_TOKEN`. Fixed: `ci.yml` also takes `workflow_dispatch`, and the refresh workflow (now with `actions: write`) starts it on its branch after opening the PR, so the checks show on the PR.
+- Still open: the cron decision.
 
 ---
 
