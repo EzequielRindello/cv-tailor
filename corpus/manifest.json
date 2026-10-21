@@ -1,23 +1,23 @@
 {
-  "refreshedAt": "2026-10-20T20:34:52+00:00",
+  "refreshedAt": "2026-10-21T20:28:35+00:00",
   "windowDays": 90,
   "count": 194,
-  "oldestPostedAt": "2026-07-22T22:12:20+00:00",
-  "newestPostedAt": "2026-10-20T19:23:16+00:00",
+  "oldestPostedAt": "2026-07-24T10:53:37+00:00",
+  "newestPostedAt": "2026-10-21T20:01:47+00:00",
   "bySource": {
-    "ashby": 48,
+    "ashby": 47,
     "greenhouse": 114,
     "lever": 28,
-    "workable": 4
+    "workable": 5
   },
   "byRoleFamily": {
-    "backend": 13,
-    "data": 25,
-    "devops": 29,
-    "frontend": 10,
+    "backend": 14,
+    "data": 28,
+    "devops": 26,
+    "frontend": 8,
     "fullstack": 9,
-    "ml": 32,
-    "mobile": 11,
+    "ml": 34,
+    "mobile": 10,
     "qa": 4,
     "security": 20,
     "software": 41
