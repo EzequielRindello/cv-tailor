@@ -74,14 +74,30 @@
 </div>
 
 @code {
+    #region Parameters
+
     [Parameter] public JdHighlight Data { get; set; } = new();
+
+    #endregion
+
+    #region State
 
     private string? _selected;
 
-    private JdSkillInfo? Find(string skill) =>
-        Data.Skills.FirstOrDefault(s => string.Equals(s.Skill, skill, StringComparison.OrdinalIgnoreCase));
+    #endregion
+
+    #region Event Handlers
 
     // Selecting the same skill again closes its details
     private void Select(string skill) =>
         _selected = string.Equals(_selected, skill, StringComparison.OrdinalIgnoreCase) ? null : skill;
+
+    #endregion
+
+    #region Helpers
+
+    private JdSkillInfo? Find(string skill) =>
+        Data.Skills.FirstOrDefault(s => string.Equals(s.Skill, skill, StringComparison.OrdinalIgnoreCase));
+
+    #endregion
 }

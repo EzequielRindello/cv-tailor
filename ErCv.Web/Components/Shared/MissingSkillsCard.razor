@@ -75,7 +75,15 @@
 </div>
 
 @code {
+    #region Parameters
+
     [Parameter, EditorRequired] public MissingSkillsAnalysis Data { get; set; } = new();
 
+    #endregion
+
+    #region State
+
     private bool _open = true;
+
+    #endregion
 }

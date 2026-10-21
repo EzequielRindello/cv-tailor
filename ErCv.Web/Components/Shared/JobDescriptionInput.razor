@@ -1,4 +1,3 @@
-@using ErCvApi.Helpers
 @implements IDisposable
 
 <div class="mb-4">
@@ -54,15 +53,16 @@
 </div>
 
 @code {
+    #region Constants
+
     private const int MaxShownSkills = 12;
     private const int DebounceMs = 400;
 
     private static readonly JobDescriptionParser Parser = new();
 
-    private string _text = string.Empty;
-    private string? _lastValueParam;
-    private List<string> _skills = new();
-    private CancellationTokenSource? _debounce;
+    #endregion
+
+    #region Parameters
 
     [Parameter] public string Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
@@ -72,7 +72,18 @@
     /// <summary>Shown under the field until the user types something.</summary>
     [Parameter] public string? Error { get; set; }
 
-    private bool ShowError => !string.IsNullOrEmpty(Error) && string.IsNullOrWhiteSpace(_text);
+    #endregion
+
+    #region State
+
+    private string _text = string.Empty;
+    private string? _lastValueParam;
+    private List<string> _skills = new();
+    private CancellationTokenSource? _debounce;
+
+    #endregion
+
+    #region Lifecycle
 
     protected override void OnParametersSet()
     {
@@ -84,6 +95,16 @@
         _text = Value;
         _skills = DetectSkills(_text);
     }
+
+    public void Dispose()
+    {
+        _debounce?.Cancel();
+        _debounce?.Dispose();
+    }
+
+    #endregion
+
+    #region Event Handlers
 
     private async Task OnInput(ChangeEventArgs e)
     {
@@ -114,12 +135,14 @@
         return ValueChanged.InvokeAsync(_text);
     }
 
+    #endregion
+
+    #region Helpers
+
+    private bool ShowError => !string.IsNullOrEmpty(Error) && string.IsNullOrWhiteSpace(_text);
+
     private static List<string> DetectSkills(string text) =>
         Parser.Parse(text).TechnicalSkills.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
-    public void Dispose()
-    {
-        _debounce?.Cancel();
-        _debounce?.Dispose();
-    }
+    #endregion
 }

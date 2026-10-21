@@ -20,30 +20,49 @@
             </a>
             <button type="button"
                     class="app-theme-toggle"
-                    aria-label="@(_theme == "dark" ? "Switch to light theme" : "Switch to dark theme")"
-                    title="@(_theme == "dark" ? "Switch to light theme" : "Switch to dark theme")"
+                    aria-label="@(_theme == ThemeDark ? "Switch to light theme" : "Switch to dark theme")"
+                    title="@(_theme == ThemeDark ? "Switch to light theme" : "Switch to dark theme")"
                     @onclick="ToggleThemeAsync">
-                <i class="bi @(_theme == "dark" ? "bi-sun" : "bi-moon")" aria-hidden="true"></i>
+                <i class="bi @(_theme == ThemeDark ? "bi-sun" : "bi-moon")" aria-hidden="true"></i>
             </button>
         </nav>
     </div>
 </header>
 
 @code {
-    private string _theme = "light";
+    #region Constants
+
+    private const string ThemeLight = "light";
+    private const string ThemeDark = "dark";
+
+    #endregion
+
+    #region State
+
+    private string _theme = ThemeLight;
+
+    #endregion
+
+    #region Lifecycle
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
         // The theme is resolved before first paint by the script in App.razor
-        _theme = await JS.InvokeAsync<string>("cvApp.getTheme");
+        _theme = await JS.InvokeAsync<string>(UiConstants.JsGetTheme);
         StateHasChanged();
     }
 
+    #endregion
+
+    #region Event Handlers
+
     private async Task ToggleThemeAsync()
     {
-        _theme = _theme == "dark" ? "light" : "dark";
-        await JS.InvokeVoidAsync("cvApp.setTheme", _theme);
+        _theme = _theme == ThemeDark ? ThemeLight : ThemeDark;
+        await JS.InvokeVoidAsync(UiConstants.JsSetTheme, _theme);
     }
+
+    #endregion
 }

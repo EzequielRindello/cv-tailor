@@ -1,6 +1,4 @@
 @page "/profile"
-@using ErCvApi.Helpers
-@using ErCvApi.Services
 @inject CVGeneratorService CvService
 @inject BrowserStore Store
 @inject IJSRuntime JS
@@ -167,13 +165,26 @@
 </div>
 
 @code {
+    #region Constants
+
+    private const string ExportFileName = "cv-profile.json";
+    private const string TemplateFileName = "cv-profile-template.json";
+
     private static readonly ProfileValidator Validator = new();
+
+    #endregion
+
+    #region State
 
     private CVMaster _profile = Blank();
     private Dictionary<string, string> _errors = new();
     private List<HealthFinding>? _health;
     private bool _loaded;
     private string _status = string.Empty;
+
+    #endregion
+
+    #region Lifecycle
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -185,6 +196,54 @@
         _loaded = true;
         StateHasChanged();
     }
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task SaveAsync()
+    {
+        _status = string.Empty;
+        var issues = Validator.Validate(_profile).Issues;
+        _errors = issues.GroupBy(i => i.Path).ToDictionary(g => g.Key, g => g.First().Message);
+        if (_errors.Count > 0) return;
+
+        await Store.SaveMyProfileAsync(_profile);
+        _status = "Saved in this browser.";
+        Toasts.Success("Profile saved");
+    }
+
+    private async Task UseDemoAsync()
+    {
+        _profile = await CvService.GetProfileAsync(ApiConstants.DefaultProfileId);
+        Normalize(_profile);
+        _errors = new();
+        _status = string.Empty;
+    }
+
+    private async Task ClearAsync()
+    {
+        await Store.ClearMyProfileAsync();
+        _profile = Blank();
+        _errors = new();
+        _status = "Profile cleared.";
+    }
+
+    private void ImportProfile(CVMaster imported)
+    {
+        Normalize(imported);
+        _profile = imported;
+        _errors = new();
+        _status = "Imported. Review it and save.";
+    }
+
+    private Task ExportAsync() => DownloadAsync(ExportFileName, ProfileJson.Serialize(_profile));
+
+    private Task TemplateAsync() => DownloadAsync(TemplateFileName, ProfileJson.Template());
+
+    #endregion
+
+    #region Helpers
 
     private static CVMaster Blank() => new() { Experience = new List<Experience> { new() } };
 
@@ -212,50 +271,12 @@
     private string? FirstErr(string pathPrefix) =>
         _errors.FirstOrDefault(kv => kv.Key.StartsWith(pathPrefix, StringComparison.Ordinal)).Value;
 
-    private async Task SaveAsync()
-    {
-        _status = string.Empty;
-        var issues = Validator.Validate(_profile).Issues;
-        _errors = issues.GroupBy(i => i.Path).ToDictionary(g => g.Key, g => g.First().Message);
-        if (_errors.Count > 0) return;
-
-        await Store.SaveMyProfileAsync(_profile);
-        _status = "Saved in this browser.";
-        Toasts.Success("Profile saved");
-    }
-
-    private async Task UseDemoAsync()
-    {
-        _profile = await CvService.GetProfileAsync("cv-master");
-        Normalize(_profile);
-        _errors = new();
-        _status = string.Empty;
-    }
-
-    private async Task ClearAsync()
-    {
-        await Store.ClearMyProfileAsync();
-        _profile = Blank();
-        _errors = new();
-        _status = "Profile cleared.";
-    }
-
-    private void ImportProfile(CVMaster imported)
-    {
-        Normalize(imported);
-        _profile = imported;
-        _errors = new();
-        _status = "Imported. Review it and save.";
-    }
-
-    private Task ExportAsync() => DownloadAsync("cv-profile.json", ProfileJson.Serialize(_profile));
-
-    private Task TemplateAsync() => DownloadAsync("cv-profile-template.json", ProfileJson.Template());
-
     private async Task DownloadAsync(string fileName, string text)
     {
         using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(text));
         using var reference = new DotNetStreamReference(stream);
-        await JS.InvokeVoidAsync("cvApp.downloadFile", fileName, reference);
+        await JS.InvokeVoidAsync(UiConstants.JsDownloadFile, fileName, reference);
     }
+
+    #endregion
 }

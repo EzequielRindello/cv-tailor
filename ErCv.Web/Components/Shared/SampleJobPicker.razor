@@ -1,5 +1,4 @@
 @using System.Globalization
-@using ErCv.Web.Data
 
 @if (Visible)
 {
@@ -35,13 +34,21 @@
 }
 
 @code {
+    #region Parameters
+
     [Parameter] public string Current { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> OnSelect { get; set; }
     [Parameter] public bool Disabled { get; set; }
+
+    #endregion
+
+    #region Helpers
 
     private SampleJobDescription? ActiveSample =>
         SampleJobDescriptions.All.FirstOrDefault(s => string.Equals(s.Text, Current, StringComparison.Ordinal));
 
     // Shown while the editor is empty or holds one of the samples (so another can be picked); hidden once the user has their own text
     private bool Visible => string.IsNullOrWhiteSpace(Current) || ActiveSample != null;
+
+    #endregion
 }

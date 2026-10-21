@@ -20,7 +20,15 @@
 </div>
 
 @code {
+    #region Lifecycle
+
     protected override void OnInitialized() => Toasts.Changed += OnChanged;
+
+    public void Dispose() => Toasts.Changed -= OnChanged;
+
+    #endregion
+
+    #region Event Handlers
 
     private void OnChanged() => _ = InvokeAsync(StateHasChanged);
 
@@ -30,6 +38,10 @@
         if (toast.Action != null) await toast.Action();
     }
 
+    #endregion
+
+    #region Helpers
+
     private static string Icon(ToastKind kind) => kind switch
     {
         ToastKind.Success => "bi-check-circle-fill",
@@ -37,5 +49,5 @@
         _ => "bi-info-circle-fill"
     };
 
-    public void Dispose() => Toasts.Changed -= OnChanged;
+    #endregion
 }

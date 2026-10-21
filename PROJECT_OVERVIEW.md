@@ -23,10 +23,11 @@
 
 ## Architecture
 - **High-level design:** Layered monolith: API + Blazor Server components in one project.
-  - Controller layer: HTTP endpoints (`/generate`, `/regenerate`, `/download`, `/profiles`, `/health`).
-  - Service orchestration layer: `CVGeneratorService` coordinates parsing, scoring, selection, rendering, and analysis.
-  - Helper domain layer: focused classes for parser, scorer, selector, ATS checks, and constraints.
-  - UI layer: Blazor Server page (`Components/Pages/Home.razor`) with feature cards and editor-driven regeneration.
+  - API layer (`Api/`): HTTP endpoints (`/generate`, `/regenerate`, `/download`, `/profiles`, `/health`).
+  - Service orchestration layer (`Services/`): `CVGeneratorService` validates requests and coordinates parsing, scoring, selection, rendering, and analysis.
+  - Domain layer (`Features/<Feature>/`): Matching, Analysis, Selection, Profiles and Documents, each with its own constants.
+  - UI layer: Blazor Server pages (`Components/Pages/Home.razor`, `Profile.razor`) with feature cards and editor-driven regeneration.
+  - Coding conventions (folders, regions, constants, performance and security rules) are in `CLAUDE.md`.
 - **Key design decisions:**
   - Keep CV source-of-truth in JSON profiles (`Data/cv-master*.json`) for deterministic generation.
   - Use heuristic ranking/scoring (transparent logic) instead of opaque model-only matching.
@@ -76,4 +77,4 @@
 - Replace direct helper instantiation with DI for easier testing and configurability.
 - Add robust date parsing/normalization and structured validation errors.
 - Add unit/integration tests for parser, scorer, selector, and rendering pipelines.
-- Add production hardening: request size/rate limits, stronger session storage strategy, and telemetry.
+- Production hardening: request size, job description and PDF concurrency limits, security headers and a non-root container are in place; a stronger session storage strategy and telemetry are still open.

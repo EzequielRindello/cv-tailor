@@ -22,6 +22,8 @@
 </div>
 
 @code {
+    #region Constants
+
     private static readonly (GenerationStage Stage, string Label)[] Steps =
     {
         (GenerationStage.Parsing, "Parsing"),
@@ -30,7 +32,17 @@
         (GenerationStage.Rendering, "Rendering")
     };
 
+    #endregion
+
+    #region Parameters
+
     [Parameter] public GenerationStage Current { get; set; }
 
+    #endregion
+
+    #region Helpers
+
     private string CurrentLabel => Steps[(int)Current].Label;
+
+    #endregion
 }

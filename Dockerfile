@@ -18,6 +18,9 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable \
     ASPNETCORE_ENVIRONMENT=Production
 WORKDIR /app
 COPY --from=build /app .
+# Run as the image's built-in non-root user, so a compromised Chrome (it runs with --no-sandbox) is not root.
+# Its home (/home/app) is writable, which Chrome needs for its profile and crash data.
+USER $APP_UID
 # Render provides PORT; Program.cs binds to it
 EXPOSE 10000
 ENTRYPOINT ["dotnet", "ErCv.Web.dll"]

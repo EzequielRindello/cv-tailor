@@ -51,14 +51,26 @@
 </div>
 
 @code {
+    #region Parameters
+
     [Parameter, EditorRequired] public ATSScore Data { get; set; } = new();
+
+    #endregion
+
+    #region State
 
     private bool _open = true;
 
+    #endregion
+
+    #region Helpers
+
     private static string Label(string status) => status switch
     {
-        "green" => "ATS Ready",
-        "red" => "ATS Risk",
+        MatchScoreConstants.GreenClass => "ATS Ready",
+        MatchScoreConstants.RedClass => "ATS Risk",
         _ => "Needs Attention"
     };
+
+    #endregion
 }

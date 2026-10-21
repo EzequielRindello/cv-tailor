@@ -4,15 +4,23 @@
               ValueChanged="OnChange" />
 
 @code {
+    #region Parameters
+
     [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
     [Parameter, EditorRequired] public List<string> Values { get; set; } = new();
     [Parameter] public string? Error { get; set; }
     [Parameter] public string? CssClass { get; set; }
 
+    #endregion
+
+    #region Event Handlers
+
     private void OnChange(string text)
     {
         Values.Clear();
         Values.AddRange(text.Split(',').Select(t => t.Trim()).Where(t => t.Length > 0));
     }
+
+    #endregion
 }

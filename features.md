@@ -135,7 +135,7 @@ Found during the roadmap review. Each one is covered by a feature below.
 | F6 | Page fit is estimated by character count, not measured; a "1-page" CV can spill over. | `Helpers/PageConstraintHelper.cs` | MATCH-08, TEST-04 |
 | F7 | Generate auto-downloads files before the user sees the preview. | `Components/Pages/Home.razor:268` | UX-04 |
 | F8 | 500 responses include `ex.Message`; logging uses `Console.WriteLine`. | `Services/CVGeneratorService.cs:63`, helpers | ENG-03 (fixed) |
-| F9 | Mixed namespaces (`ErCvApi.*` and `ErCv.Web.*`); helpers built with `new` instead of DI. | Whole project | ENG-01 |
+| F9 | Mixed namespaces (`ErCvApi.*` and `ErCv.Web.*`); helpers built with `new` instead of DI. | Whole project | Namespaces fixed in the system hardening (H8); DI is ENG-01 |
 | F10 | Docs drift: legacy FIX-002 says low match is below 30%, code uses below 40%. Node runner expectations depend on a fixture in `testing/`. | `Helpers/MatchScoreCalculator.cs:43`, `testing/` | OPS-04, TEST-09 |
 | F11 | Bullet reordering is drag-only, not keyboard accessible. | `Components/Shared/BulletEditor.razor` | UX-08 |
 
@@ -162,6 +162,24 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 | F19 | `YearsWithTechPattern` still takes the word after "N years of" as a skill when it is not one: `professional`, `building`, `industry`, `hands-on`. | Open (MATCH-07, M3.2) |
 | F20 | Seniority: "Staff ..." titles are not recognized (only the phrase "staff engineer" is), "II", "internship" and "early career" are not keywords, and the first level word in the text wins ("lead the design" reads as lead). The parser agrees with the title level in 46% of posts. | Open (MATCH-09, M3.2) |
 | F21 | The single-letter skill `c` matches "Washington D.C." in pay-range text. | Open (MATCH-07, M3.2) |
+
+### System hardening (between M3 and M3.2)
+
+A review of the C# code before M3.2, branch `feature/system-hardening`. No behavior change: every existing test passes (tests were only moved and renamed to the new namespaces), and the corpus report regenerates byte for byte. No version bump (not a milestone). The conventions it set are in `CLAUDE.md`.
+
+| # | Finding | Status |
+|---|---|---|
+| H1 | Performance: every render read the HTML template from disk and rebuilt the Stubble renderer, and one generation rendered the HTML twice (PDF and preview). | Fixed: templates cached, one renderer, HTML rendered once |
+| H2 | Performance: `KeywordAnalyzer` copied the tech word set into a new list for every JD word, and matched each word against the CV twice. | Fixed |
+| H3 | Performance: the seniority check built a new `Regex` per keyword on every parse (21 patterns, more than the regex cache holds); parser lookup sets were rebuilt per instance. | Fixed: patterns and sets built once |
+| H4 | Performance: `JsonSerializerOptions` and lookup dictionaries created per call; fixed regexes mixed three styles. | Fixed: static, all fixed patterns are `[GeneratedRegex]` |
+| H5 | Security: no server-side length limit on the job description (API or UI), and a 30 MB default request body. | Fixed: 100,000 characters (`ApiConstants`), 2 MB body |
+| H6 | Security: the UI calls the service directly, so it bypasses the rate limiter, and each generation opened a Chrome page with no cap. | Fixed: at most 2 PDF renders at a time |
+| H7 | Security: no security headers or HSTS; `UseExceptionHandler("/Error")` pointed at a page that did not exist; the container ran as root with Chrome `--no-sandbox`. | Fixed: headers, HSTS, error page, non-root user |
+| H8 | Structure: the whole domain sat in `Helpers/`, constants in `Data/Constants/Helpers/`, namespaces did not match folders. | Fixed: `Features/<Feature>/`, namespaces = folders, file-scoped |
+| H9 | Magic numbers and repeated literals (scoring weights, limits, profile ids, JS interop names, template keys) inline across helpers and components. | Fixed: named constants, hosting values in `appsettings.json` |
+| H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Open: unifying them changes selection, so it belongs to MATCH-07 (M3.2) |
+| H11 | Swashbuckle 6.5.0 is old (Development only). | Open: ENG-06 (M5) replaces it |
 
 ### Open items after M3
 

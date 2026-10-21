@@ -18,16 +18,35 @@
     <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="lib/bootstrap-icons/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="css/site.css" />
-    <HeadOutlet @rendermode="InteractiveServerNoPrerender" />
+    <HeadOutlet @rendermode="PageRenderMode" />
 </head>
 <body>
-    <Routes @rendermode="InteractiveServerNoPrerender" />
+    <Routes @rendermode="PageRenderMode" />
     <script src="_framework/blazor.web.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
 
 @code {
+    #region Constants
+
     // No prerender: the page reads localStorage on first load, which is only available in the browser
     private static readonly InteractiveServerRenderMode InteractiveServerNoPrerender = new(prerender: false);
+
+    #endregion
+
+    #region Parameters
+
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+
+    #endregion
+
+    #region Helpers
+
+    // Pages marked [ExcludeFromInteractiveRouting] (the error page) render as static HTML, without a circuit
+    private IComponentRenderMode? PageRenderMode =>
+        HttpContext.AcceptsInteractiveRouting() ? InteractiveServerNoPrerender : null;
+
+    #endregion
 }
+

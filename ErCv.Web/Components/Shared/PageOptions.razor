@@ -27,12 +27,20 @@
 </div>
 
 @code {
+    #region Parameters
+
     [Parameter] public bool AllowTwoPages { get; set; }
     [Parameter] public EventCallback<bool> AllowTwoPagesChanged { get; set; }
     [Parameter] public bool Disabled { get; set; }
+
+    #endregion
+
+    #region Event Handlers
 
     private async Task Select(bool value)
     {
         if (!Disabled) await AllowTwoPagesChanged.InvokeAsync(value);
     }
+
+    #endregion
 }

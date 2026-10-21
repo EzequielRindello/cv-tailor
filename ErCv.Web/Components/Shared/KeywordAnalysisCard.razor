@@ -74,9 +74,19 @@
 </div>
 
 @code {
+    #region Parameters
+
     [Parameter, EditorRequired] public KeywordAnalysis Data { get; set; } = new();
 
+    #endregion
+
+    #region State
+
     private bool _open = true;
+
+    #endregion
+
+    #region Helpers
 
     private RenderFragment KeywordRow(KeywordItem item) => @<div class="keyword-row">
         <span class="kw-status @(item.PresentInCV ? "present" : "missing")">
@@ -85,4 +95,6 @@
         <span class="kw-word">@item.Word</span>
         <span class="kw-freq">×@item.Frequency</span>
     </div>;
+
+    #endregion
 }

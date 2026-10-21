@@ -13,13 +13,27 @@
 </div>
 
 @code {
+    #region Constants
+
+    private const int MaxPercent = 100;
+
+    #endregion
+
+    #region Parameters
+
     [Parameter] public int Value { get; set; }
 
     /// <summary>green, yellow or red (the ColorClass the score calculators already return).</summary>
-    [Parameter] public string Tone { get; set; } = "yellow";
+    [Parameter] public string Tone { get; set; } = MatchScoreConstants.YellowClass;
 
     [Parameter] public string Label { get; set; } = "Score";
     [Parameter] public string? Unit { get; set; } = "%";
 
-    private int Percent => Math.Clamp(Value, 0, 100);
+    #endregion
+
+    #region Helpers
+
+    private int Percent => Math.Clamp(Value, 0, MaxPercent);
+
+    #endregion
 }
