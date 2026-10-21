@@ -170,7 +170,7 @@ er-cv-generator/
 
 ## Version
 
-Current version: **2.0.4** (M3 Your data). Each milestone of the roadmap ships as one version, see [Versioning in `features.md`](features.md#versioning).
+Current version: **2.0.4.1** (M3.2 Real-post fixes). Each milestone of the roadmap ships as one version, see [Versioning in `features.md`](features.md#versioning).
 
 ---
 

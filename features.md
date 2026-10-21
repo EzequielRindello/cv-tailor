@@ -102,7 +102,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 1. **M1 Foundation** (v2.0.2, released): TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, MATCH-01, MATCH-02, MATCH-03, ENG-02, ENG-03, OPS-01. Fixes ship with their tests from day one.
 2. **M2 Redesign** (v2.0.3, released): UX-01 to UX-09, APP-03, TEST-07 (E2E written against the new UI).
 3. **M3 Your data** (v2.0.4, released): PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
-3.2. **M3.2 Real-post fixes** (v2.0.4.1, before M4): MATCH-07, MATCH-09, APP-06, PROF-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
+3.2. **M3.2 Real-post fixes** (v2.0.4.1, released): MATCH-07, MATCH-09, APP-06, PROF-06. APP-06 is released with two steps that wait on the repo owner, see "Open items after M3.2". Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
 4. **M4 Output** (v2.0.5): EDIT-01 to EDIT-06, MATCH-08, UX-10.
 5. **M5 Polish & presentation** (v2.0.6): OPS-02 to OPS-05, ENG-01, ENG-04, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05.
@@ -181,6 +181,17 @@ A review of the C# code before M3.2, branch `feature/system-hardening`. No behav
 | H9 | Magic numbers and repeated literals (scoring weights, limits, profile ids, JS interop names, template keys) inline across helpers and components. | Fixed: named constants, hosting values in `appsettings.json` |
 | H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Fixed with MATCH-07: one list, `SelectionConstants.TechRoleKeywords`, the summary's stricter one plus nothing broad: the selector no longer treats analyst, consultant or specialist roles as tech (a union was tried first and made "Certification Specialist" count as tech years in the real demo profile) |
 | H11 | Swashbuckle 6.5.0 is old (Development only). | Open: ENG-06 (M5) replaces it |
+
+### Open items after M3.2
+
+Nothing in the code is blocked. These wait on the repo owner, not on a milestone:
+
+| Item | Why it is not done | Owner |
+|---|---|---|
+| First run of the corpus refresh workflow on GitHub, and a review of the PR it opens | Needs the repo setting "Allow GitHub Actions to create and approve pull requests" (off as of 2026-10-21) and a person to start it from the Actions tab. | APP-06 (repo owner) |
+| `check` fails on one post that aged out of the 90-day window (`lever-palantir-67110929...`, posted 2026-07-22) | Fixed by the first refresh above. | APP-06 (repo owner) |
+| Weekly cron for the refresh workflow | The repo owner decides; it is commented out in the workflow file. | APP-06 (repo owner) |
+| TEST-08 snapshots over `FixtureLoader.CorpusJdNames` | Snapshots are not built yet. | TEST-08 (M5) |
 
 ### Open items after M3
 
