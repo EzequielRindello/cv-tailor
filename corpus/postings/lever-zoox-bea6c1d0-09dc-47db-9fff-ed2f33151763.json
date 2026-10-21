@@ -1,0 +1,15 @@
+{
+  "id": "lever-zoox-bea6c1d0-09dc-47db-9fff-ed2f33151763",
+  "source": "lever",
+  "board": "zoox",
+  "sourceId": "bea6c1d0-09dc-47db-9fff-ed2f33151763",
+  "url": "https://jobs.lever.co/zoox/bea6c1d0-09dc-47db-9fff-ed2f33151763",
+  "company": "Zoox",
+  "title": "Senior Staff / Principal Software Engineer - Freeway Autonomy",
+  "postedAt": "2026-08-31T20:13:10+00:00",
+  "retrievedAt": "2026-10-21T20:28:35+00:00",
+  "roleFamily": "software",
+  "seniority": "principal",
+  "location": "Foster City, CA, Hybrid",
+  "text": "Zoox is on an ambitious journey to develop a full-stack autonomous robotaxi solution, and freeways are the next frontier. We are looking for a Senior Staff or Principal Software Engineer who has played a significant role in removing the driver from an autonomous vehicle operating on freeways, and who can help Zoox navigate that same journey. You will bring deep technical expertise in a relevant autonomy domain - the specific domain is flexible - along with the hard-won judgment that comes from having taken a freeway driving program from supervised operation to driverless. This is a highly visible role with broad influence across the Autonomy organization.\n\nIn this role, you will:\n- Guide autonomy-wide initiatives toward driverless freeway operation, including setting the technical vision and strategy, building the roadmap, and driving cross-functional execution\n- Identify the highest-risk gaps between our current freeway capabilities and driver-out readiness, and lead the engineering work to close them\n- Develop algorithms that enable freeway driving capabilities, spanning architecture, design, implementation, integration, testing, and verification and validation\n- Communicate technical trade-offs, risk assessments, and readiness recommendations to diverse stakeholders, including senior and executive leadership\n- Mentor engineers across the freeway program and raise the bar for how we design, test, and validate high-speed autonomous driving\n\nQualifications:\n- 10+ years of industry software experience\n- Demonstrated technical leadership of removing the human driver from an autonomous vehicle operating on freeways or highways\n- Deep technical expertise in at least one autonomy domain, such as behavior/motion planning, perception, prediction, simulation, or systems engineering\n- Proven ability to lead large, cross-functional engineering efforts from ambiguity to shipped results\n- Strong written and verbal communication skills, with the ability to translate complex technical trade-offs for varied audiences including executives\n\nBonus Qualifications:\n- Experience scaling and operating a driverless service after driver removal\n- Experience constructing safety cases or defining driver-out readiness criteria for high-speed autonomous driving\n- Proficiency in C++"
+}
