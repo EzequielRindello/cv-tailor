@@ -1,3 +1,4 @@
+using ErCv.Web.Constants;
 using ErCv.Web.Features.Analysis;
 using ErCv.Web.Features.Matching;
 using ErCv.Web.Models;
@@ -73,14 +74,16 @@ public class CVSelector
     public GeneratedCV SelectAndAdaptCV(
         CVMaster cvMaster,
         JobRequirements requirements,
-        bool allowTwoPages = false) =>
-        SelectWithExplanation(cvMaster, requirements, allowTwoPages).Cv;
+        bool allowTwoPages = false,
+        string language = ApiConstants.LanguageEnglish) =>
+        SelectWithExplanation(cvMaster, requirements, allowTwoPages, language).Cv;
 
     /// <summary>Same selection as <see cref="SelectAndAdaptCV"/>, plus why each experience and bullet scored as it did.</summary>
     public (GeneratedCV Cv, SelectionExplanation Explanation) SelectWithExplanation(
         CVMaster cvMaster,
         JobRequirements requirements,
-        bool allowTwoPages = false)
+        bool allowTwoPages = false,
+        string language = ApiConstants.LanguageEnglish)
     {
         var maxExperiences = allowTwoPages ? MaxExperiencesTwoPages : MaxExperiencesOnePage;
         var maxBulletsPerExp = allowTwoPages ? MaxBulletsTwoPages : MaxBulletsOnePage;
@@ -100,7 +103,7 @@ public class CVSelector
             selectedExperiences, requirements, cvMaster.Skills, maxSkills: RelevanceScorer.DefaultMaxSkills);
 
         var summary = _summaryGenerator.GenerateSummary(
-            cvMaster, requirements, selectedExperiences, topSkills);
+            cvMaster, requirements, selectedExperiences, topSkills, language);
 
         var generatedCV = new GeneratedCV
         {
@@ -109,7 +112,8 @@ public class CVSelector
             Education = cvMaster.Education.Select(CvCloner.Clone).ToList(),
             Experience = selectedExperiences,
             Skills = topSkills,
-            Projects = new List<Project>()
+            Projects = new List<Project>(),
+            Language = language
         };
 
         if (cvMaster.Projects?.Any() == true)

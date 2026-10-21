@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using ErCv.Web.Constants;
 using ErCv.Web.Features.Matching;
 using ErCv.Web.Features.Profiles;
 using ErCv.Web.Models;
@@ -49,6 +50,20 @@ public partial class SummaryGenerator
         { "collaborat","cross-functional collaboration" }
     };
 
+    // EDIT-04: the same soft skills written in Spanish. Role titles stay as they are: tech titles are usually
+    // written in English in Spanish CVs too, and a translated title would have to pick a grammatical gender.
+    private static readonly Dictionary<string, string> SpanishSoftSkills = new()
+    {
+        { "team collaboration", "trabajo en equipo" }, { "leadership", "liderazgo" },
+        { "communication", "comunicación" }, { "problem-solving", "resolución de problemas" },
+        { "agile methodologies", "metodologías ágiles" }, { "mentoring", "mentoría" },
+        { "cross-functional collaboration", "colaboración entre equipos" }
+    };
+
+    // Spanish writes "e" instead of "y" before a word that starts with the sound /i/ ("Go e Istio"), not before "hie"
+    [GeneratedRegex(@"^(i|hi(?!e))", RegexOptions.IgnoreCase)]
+    private static partial Regex StartsWithISound();
+
     [GeneratedRegex(@"(improving|increasing|reducing|achieving|exceeding|delivering|cutting|boosting).*?(\d+)%", RegexOptions.IgnoreCase)]
     private static partial Regex Achievement();
 
@@ -75,8 +90,10 @@ public partial class SummaryGenerator
         CVMaster cvMaster,
         JobRequirements requirements,
         List<Experience> selectedExperiences,
-        List<string> topSkills)
+        List<string> topSkills,
+        string language = ApiConstants.LanguageEnglish)
     {
+        var spanish = language == ApiConstants.LanguageSpanish;
         var yearsOfExperience = CalculateTechYearsOfExperience(cvMaster.Experience);
         var candidateTitle = DeriveRoleFromCV(cvMaster.Experience, requirements);
 
@@ -88,15 +105,31 @@ public partial class SummaryGenerator
 
         // One sentence: "specializing in" continues the opening clause, it does not start a sentence of its own
         var parts = new List<string>();
-        parts.Add(keyTechSkills.Any()
-            ? $"{candidateTitle} with {yearsOfExperience}+ years of experience, specializing in {FormatSkillsList(keyTechSkills)}"
-            : $"{candidateTitle} with {yearsOfExperience}+ years of experience");
+        if (spanish)
+        {
+            parts.Add(keyTechSkills.Any()
+                ? $"{candidateTitle} con {yearsOfExperience}+ años de experiencia, con foco en {FormatSpanishList(keyTechSkills)}"
+                : $"{candidateTitle} con {yearsOfExperience}+ años de experiencia");
 
-        var achievement = ExtractTopAchievement(selectedExperiences);
-        if (!string.IsNullOrEmpty(achievement)) parts.Add($"Proven track record of {achievement}");
+            // The achievement is quoted from a bullet, which is in the profile's language, so it is left out here
+            var softSkills = ExtractSoftSkills(requirements, selectedExperiences)
+                .Take(MaxSoftSkills)
+                .Select(s => SpanishSoftSkills.TryGetValue(s, out var es) ? es : s)
+                .ToList();
+            if (softSkills.Any()) parts.Add($"Sólidas habilidades de {FormatSpanishList(softSkills)}");
+        }
+        else
+        {
+            parts.Add(keyTechSkills.Any()
+                ? $"{candidateTitle} with {yearsOfExperience}+ years of experience, specializing in {FormatSkillsList(keyTechSkills)}"
+                : $"{candidateTitle} with {yearsOfExperience}+ years of experience");
 
-        var softSkills = ExtractSoftSkills(requirements, selectedExperiences);
-        if (softSkills.Any()) parts.Add($"Strong {string.Join(" and ", softSkills.Take(MaxSoftSkills))} skills");
+            var achievement = ExtractTopAchievement(selectedExperiences);
+            if (!string.IsNullOrEmpty(achievement)) parts.Add($"Proven track record of {achievement}");
+
+            var softSkills = ExtractSoftSkills(requirements, selectedExperiences);
+            if (softSkills.Any()) parts.Add($"Strong {string.Join(" and ", softSkills.Take(MaxSoftSkills))} skills");
+        }
 
         var summary = string.Join(". ", parts) + ".";
         if (summary.Length > MaxSummaryLength)
@@ -187,6 +220,15 @@ public partial class SummaryGenerator
         if (skills.Count == 1) return skills[0];
         if (skills.Count == 2) return $"{skills[0]} and {skills[1]}";
         return $"{string.Join(", ", skills.Take(skills.Count - 1))}, and {skills.Last()}";
+    }
+
+    /// <summary>"A, B y C": Spanish lists have no comma before the last item.</summary>
+    private static string FormatSpanishList(List<string> items)
+    {
+        if (items.Count == 1) return items[0];
+        var last = items[^1];
+        var conjunction = StartsWithISound().IsMatch(last) ? "e" : "y";
+        return $"{string.Join(", ", items.Take(items.Count - 1))} {conjunction} {last}";
     }
 
     private List<string> ExtractSoftSkills(JobRequirements requirements, List<Experience> experiences)

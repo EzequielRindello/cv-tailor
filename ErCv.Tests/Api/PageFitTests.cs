@@ -54,18 +54,28 @@ public class PageFitTests
         Assert.Equal(bullets.OrderBy(b => b), explained.OrderBy(b => b));
     }
 
-    [Fact]
-    public async Task The_measured_fit_trims_what_the_estimate_alone_keeps()
+    // The measured fit only ever removes: with a PDF in the request the CV keeps a subset of what the
+    // estimate alone keeps, and the DOCX shows exactly that subset. (Which cases trim depends on the
+    // template's layout; the trimming itself is unit tested with a fake renderer in PageConstraintHelperTests.)
+    [Theory]
+    [InlineData(CVTemplate.Minimalist)]
+    [InlineData(CVTemplate.Executive)]
+    [InlineData(CVTemplate.Compact)]
+    public async Task The_measured_fit_keeps_a_subset_of_the_estimate(CVTemplate template)
     {
         using var app = new ApiApp();
+        var docxOnly = Request("docx");
+        var withPdf = Request("pdf", "docx");
+        docxOnly.Template = withPdf.Template = template;
 
-        var (_, estimated) = await BuildAsync(app, Request("docx"));
-        var (documents, measured) = await BuildAsync(app, Request("pdf", "docx"));
+        var (_, estimated) = await BuildAsync(app, docxOnly);
+        var (documents, measured) = await BuildAsync(app, withPdf);
 
-        var trimmed = Bullets(estimated.GeneratedCV).Except(Bullets(measured.GeneratedCV)).ToList();
-        Assert.NotEmpty(trimmed);
+        Assert.Subset(Bullets(estimated.GeneratedCV).ToHashSet(), Bullets(measured.GeneratedCV).ToHashSet());
+        using (var pdf = PdfDocument.Open(documents["pdf"]))
+            Assert.Equal(1, pdf.NumberOfPages);
 
         var docx = Squash(DocxText(documents["docx"]));
-        Assert.All(trimmed, b => Assert.DoesNotContain(Squash(b), docx));
+        Assert.All(Bullets(estimated.GeneratedCV).Except(Bullets(measured.GeneratedCV)), b => Assert.DoesNotContain(Squash(b), docx));
     }
 }

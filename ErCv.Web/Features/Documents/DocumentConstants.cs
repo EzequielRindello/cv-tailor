@@ -2,16 +2,6 @@ namespace ErCv.Web.Features.Documents;
 
 public static class DocumentConstants
 {
-    #region Section Titles
-
-    public const string SectionSummary = "PROFESSIONAL SUMMARY";
-    public const string SectionEducation = "EDUCATION";
-    public const string SectionExperience = "EXPERIENCE";
-    public const string SectionSkills = "SKILLS";
-    public const string SectionProjects = "PROJECTS";
-
-    #endregion
-
     #region Section Order
 
     // Keys of GeneratedCV.SectionOrder; the editor, the templates' Sections loop and the DOCX all use them
@@ -32,6 +22,21 @@ public static class DocumentConstants
     public static readonly IReadOnlyList<string> MinimalistSectionOrder =
         new[] { SectionSummaryKey, SectionExperienceKey, SectionEducationKey, SectionSkillsKey, SectionProjectsKey };
 
+    // Compact puts the skills right after the experience, where a dense one-page reader looks for them
+    public static readonly IReadOnlyList<string> CompactSectionOrder =
+        new[] { SectionSummaryKey, SectionExperienceKey, SectionSkillsKey, SectionEducationKey, SectionProjectsKey };
+
+    public static readonly IReadOnlyList<string> ExecutiveSectionOrder =
+        new[] { SectionSummaryKey, SectionExperienceKey, SectionEducationKey, SectionSkillsKey, SectionProjectsKey };
+
+    #endregion
+
+    #region Style Classes
+
+    // Prefixes of the classes in Templates/partials/base-styles.html; the key comes from ApiConstants.Accents / FontPairings
+    public const string AccentClassPrefix = "accent-";
+    public const string FontsClassPrefix = "fonts-";
+
     #endregion
 
     #region DOCX Layout
@@ -45,8 +50,6 @@ public static class DocumentConstants
     public const int DocxMarginHorizontalTwips = 1080;   // 0.75in
     public const uint SectionBorderSize = 6;             // eighths of a point
     public const string DateGap = "     ";
-    public const string TechnologiesLabel = "Technologies: ";
-    public const string GpaLabel = "GPA: ";
     public const string DetailSeparator = " | ";
     public const string DateRangeSeparator = " – ";
 
@@ -81,10 +84,6 @@ public static class DocumentConstants
     #endregion
 
     #region Skill Categories
-
-    public const string CategoryTechnical = "Technical";
-    public const string CategoryLanguages = "Languages";
-    public const string CategorySoftSkills = "Soft Skills";
 
     public static readonly string[] LanguageKeywords =
     {

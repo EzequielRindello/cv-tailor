@@ -55,6 +55,9 @@ public static class CvCloner
         Skills = (cv.Skills ?? new List<string>()).ToList(),
         Projects = (cv.Projects ?? new List<Project>()).Select(Clone).ToList(),
         SectionOrder = (cv.SectionOrder ?? new List<string>()).ToList(),
+        Language = cv.Language,
+        Accent = cv.Accent,
+        Fonts = cv.Fonts,
         EditedBullets = (cv.EditedBullets ?? new List<BulletEdit>()).ToList()
     };
 }

@@ -26,6 +26,7 @@ public partial class DocumentRenderer
     // Templates ship with the app and never change while it runs, so each one is read from disk once.
     // The Stubble renderer is thread safe and caches parsed templates, so one instance serves every request.
     private static readonly ConcurrentDictionary<string, string> TemplateCache = new();
+    private static readonly ConcurrentDictionary<string, Dictionary<string, string>> PartialsCache = new();
     private static readonly StubbleVisitorRenderer Stubble = new StubbleBuilder().Build();
 
     // Every page object of a PDF carries "/Type /Page" ("/Pages" is the page tree, so a letter may not follow).
@@ -46,16 +47,18 @@ public partial class DocumentRenderer
     private static string? _downloadedExecutablePath;
 
     private readonly string _templatePath;
-    private readonly IReadOnlyList<string> _defaultSectionOrder;
+    private readonly string _partialsFolder;
+    private readonly CVTemplate _template;
 
     #endregion
 
     #region Constructors
 
-    public DocumentRenderer(string templatePath, IReadOnlyList<string>? defaultSectionOrder = null)
+    public DocumentRenderer(string templatePath, CVTemplate template = CVTemplate.Harvard)
     {
         _templatePath = templatePath;
-        _defaultSectionOrder = defaultSectionOrder ?? DocumentConstants.HarvardSectionOrder;
+        _partialsFolder = Path.Combine(Path.GetDirectoryName(templatePath) ?? string.Empty, TemplatePaths.PartialsFolder);
+        _template = template;
     }
 
     #endregion
@@ -69,16 +72,28 @@ public partial class DocumentRenderer
         {
             CVTemplate.Modern => TemplatePaths.ModernTemplate,
             CVTemplate.Minimalist => TemplatePaths.MinimalistTemplate,
+            CVTemplate.Compact => TemplatePaths.CompactTemplate,
+            CVTemplate.Executive => TemplatePaths.ExecutiveTemplate,
             _ => TemplatePaths.HarvardTemplate
         };
-        return new DocumentRenderer(Path.Combine(templatesFolder, file), DefaultSectionOrder(template));
+        return new DocumentRenderer(Path.Combine(templatesFolder, file), template);
     }
 
     public static IReadOnlyList<string> DefaultSectionOrder(CVTemplate template) => template switch
     {
         CVTemplate.Modern => DocumentConstants.ModernSectionOrder,
         CVTemplate.Minimalist => DocumentConstants.MinimalistSectionOrder,
+        CVTemplate.Compact => DocumentConstants.CompactSectionOrder,
+        CVTemplate.Executive => DocumentConstants.ExecutiveSectionOrder,
         _ => DocumentConstants.HarvardSectionOrder
+    };
+
+    /// <summary>The title the template gives the summary: the formal one, the short one or the executive one.</summary>
+    public static string SummaryTitle(CVTemplate template, CvLabels labels) => template switch
+    {
+        CVTemplate.Modern or CVTemplate.Minimalist => labels.Profile,
+        CVTemplate.Executive => labels.ExecutiveSummary,
+        _ => labels.Summary
     };
 
     /// <summary>
@@ -152,17 +167,20 @@ public partial class DocumentRenderer
     public string RenderHtml(GeneratedCV cv)
     {
         var template = TemplateCache.GetOrAdd(_templatePath, File.ReadAllText);
-        var skillCategories = BuildSkillCategories(cv.Skills);
+        var partials = PartialsCache.GetOrAdd(_partialsFolder, LoadPartials);
+        var labels = CvLabels.For(cv.Language);
+        var skillCategories = BuildSkillCategories(cv.Skills, labels);
+        var header = cv.Header ?? new CvHeader();
 
         var data = new
         {
-            FullName = cv.Header?.FullName ?? "",
-            Email = cv.Header?.Email ?? "",
-            Phone = cv.Header?.Phone ?? "",
-            Location = cv.Header?.Location ?? "",
-            LinkedIn = cv.Header?.LinkedIn ?? "",
-            GitHub = cv.Header?.GitHub ?? "",
-            Sections = ResolveSectionOrder(cv.SectionOrder, _defaultSectionOrder).Select(key => new
+            Lang = labels.Language,
+            StyleClasses = StyleClasses(cv),
+            Labels = labels,
+            SummaryTitle = SummaryTitle(_template, labels),
+            FullName = header.FullName ?? "",
+            ContactItems = ContactItems(header),
+            Sections = ResolveSectionOrder(cv.SectionOrder, DefaultSectionOrder(_template)).Select(key => new
             {
                 IsSummary = key == DocumentConstants.SectionSummaryKey,
                 IsEducation = key == DocumentConstants.SectionEducationKey,
@@ -172,8 +190,19 @@ public partial class DocumentRenderer
             }).ToList(),
             HasSummary = !string.IsNullOrEmpty(cv.Summary),
             Summary = cv.Summary ?? "",
-            Education = cv.Education ?? new List<Education>(),
-            Experience = cv.Experience ?? new List<Experience>(),
+            Education = (cv.Education ?? new List<Education>()).Select(e => new
+            {
+                Place = JoinPresent(", ", e.Institution, e.Location),
+                e.Degree,
+                GraduationDate = labels.FormatDate(e.GraduationDate)
+            }).ToList(),
+            Experience = (cv.Experience ?? new List<Experience>()).Select(e => new
+            {
+                e.Role,
+                CompanyLine = JoinPresent(", ", e.Company, e.Location),
+                DateRange = labels.DateRange(e.StartDate, e.EndDate),
+                Bullets = e.Bullets ?? new List<string>()
+            }).ToList(),
             HasSkills = skillCategories.Any(),
             SkillCategories = skillCategories,
             HasProjects = cv.Projects != null && cv.Projects.Any(),
@@ -188,7 +217,7 @@ public partial class DocumentRenderer
             }).ToList()
         };
 
-        return Stubble.Render(template, data);
+        return Stubble.Render(template, data, partials);
     }
 
     public byte[] RenderDocx(GeneratedCV cv)
@@ -205,8 +234,9 @@ public partial class DocumentRenderer
             AddHeader(body, cv.Header);
 
             // The DOCX has one layout, so without a chosen order it uses Harvard's
+            var labels = CvLabels.For(cv.Language);
             foreach (var section in ResolveSectionOrder(cv.SectionOrder, DocumentConstants.HarvardSectionOrder))
-                AddSection(body, cv, section);
+                AddSection(body, cv, section, labels);
 
             // The schema requires the section properties to be the last child of the body
             body.AppendChild(new SectionProperties(
@@ -278,7 +308,45 @@ public partial class DocumentRenderer
         }
     }
 
-    private List<object> BuildSkillCategories(List<string>? skills)
+    /// <summary>Every partial of the templates folder, by file name without the extension.</summary>
+    private static Dictionary<string, string> LoadPartials(string folder) =>
+        Directory.Exists(folder)
+            ? Directory.GetFiles(folder, "*.html").ToDictionary(f => Path.GetFileNameWithoutExtension(f), File.ReadAllText)
+            : new Dictionary<string, string>();
+
+    /// <summary>Classes for the accent and font pairing, only for known keys, so nothing a request sends reaches the CSS.</summary>
+    private static string StyleClasses(GeneratedCV cv)
+    {
+        var classes = new List<string>();
+        if (cv.Accent != ApiConstants.StyleDefault && ApiConstants.Accents.Contains(cv.Accent))
+            classes.Add(DocumentConstants.AccentClassPrefix + cv.Accent);
+        if (cv.Fonts != ApiConstants.StyleDefault && ApiConstants.FontPairings.Contains(cv.Fonts))
+            classes.Add(DocumentConstants.FontsClassPrefix + cv.Fonts);
+        return string.Join(" ", classes);
+    }
+
+    private static List<object> ContactItems(CvHeader header)
+    {
+        var items = new List<object>();
+        void Add(string? text, bool mail = false, bool web = false)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+            items.Add(new { Text = text.Trim(), IsMail = mail, IsWeb = web, IsPlain = !mail && !web });
+        }
+
+        Add(header.Email, mail: true);
+        Add(header.Phone);
+        Add(header.Location);
+        Add(header.LinkedIn, web: true);
+        Add(header.GitHub, web: true);
+        return items;
+    }
+
+    /// <summary>Joins the parts that have text, so a missing location leaves no stray comma.</summary>
+    private static string JoinPresent(string separator, params string?[] parts) =>
+        string.Join(separator, parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+
+    private static List<object> BuildSkillCategories(List<string>? skills, CvLabels labels)
     {
         var categories = new List<object>();
         if (skills == null || !skills.Any()) return categories;
@@ -295,11 +363,11 @@ public partial class DocumentRenderer
         }
 
         if (technical.Any())
-            categories.Add(new { CategoryName = DocumentConstants.CategoryTechnical, CategoryItems = string.Join(", ", technical) });
+            categories.Add(new { CategoryName = labels.Technical, CategoryItems = string.Join(", ", technical) });
         if (languages.Any())
-            categories.Add(new { CategoryName = DocumentConstants.CategoryLanguages, CategoryItems = string.Join(", ", languages) });
+            categories.Add(new { CategoryName = labels.ProgrammingLanguages, CategoryItems = string.Join(", ", languages) });
         if (softSkills.Any())
-            categories.Add(new { CategoryName = DocumentConstants.CategorySoftSkills, CategoryItems = string.Join(", ", softSkills) });
+            categories.Add(new { CategoryName = labels.SoftSkills, CategoryItems = string.Join(", ", softSkills) });
 
         return categories;
     }
@@ -332,32 +400,32 @@ public partial class DocumentRenderer
         body.AppendChild(new Paragraph());
     }
 
-    private void AddSection(Body body, GeneratedCV cv, string section)
+    private void AddSection(Body body, GeneratedCV cv, string section, CvLabels labels)
     {
         switch (section)
         {
             case DocumentConstants.SectionSummaryKey when !string.IsNullOrEmpty(cv.Summary):
-                AddSectionTitle(body, DocumentConstants.SectionSummary);
+                AddSectionTitle(body, labels.Summary);
                 AddParagraph(body, cv.Summary);
                 break;
             case DocumentConstants.SectionEducationKey:
-                AddSectionTitle(body, DocumentConstants.SectionEducation);
+                AddSectionTitle(body, labels.Education);
                 foreach (var edu in cv.Education ?? new List<Education>())
-                    AddEducation(body, edu);
+                    AddEducation(body, edu, labels);
                 break;
             case DocumentConstants.SectionExperienceKey:
-                AddSectionTitle(body, DocumentConstants.SectionExperience);
+                AddSectionTitle(body, labels.Experience);
                 foreach (var exp in cv.Experience ?? new List<Experience>())
-                    AddExperience(body, exp);
+                    AddExperience(body, exp, labels);
                 break;
             case DocumentConstants.SectionSkillsKey when cv.Skills?.Any() == true:
-                AddSectionTitle(body, DocumentConstants.SectionSkills);
+                AddSectionTitle(body, labels.Skills);
                 AddSkills(body, cv.Skills);
                 break;
             case DocumentConstants.SectionProjectsKey when cv.Projects?.Any() == true:
-                AddSectionTitle(body, DocumentConstants.SectionProjects);
+                AddSectionTitle(body, labels.Projects);
                 foreach (var project in cv.Projects)
-                    AddProject(body, project);
+                    AddProject(body, project, labels);
                 break;
         }
     }
@@ -369,7 +437,7 @@ public partial class DocumentRenderer
             new ParagraphBorders(new BottomBorder { Val = BorderValues.Single, Size = DocumentConstants.SectionBorderSize }));
         var run = para.AppendChild(new Run());
         run.AppendChild(new RunProperties(new Bold(), new FontSize { Val = DocumentConstants.FontSizeSection }));
-        run.AppendChild(new Text(title));
+        run.AppendChild(new Text(title.ToUpperInvariant()));
     }
 
     private void AddParagraph(Body body, string text)
@@ -377,16 +445,16 @@ public partial class DocumentRenderer
         body.AppendChild(new Paragraph()).AppendChild(new Run()).AppendChild(new Text(text));
     }
 
-    private void AddEducation(Body body, Education edu)
+    private void AddEducation(Body body, Education edu, CvLabels labels)
     {
         var para = body.AppendChild(new Paragraph());
         var r1 = para.AppendChild(new Run());
         r1.AppendChild(new RunProperties(new Bold()));
-        r1.AppendChild(new Text($"{edu.Institution}, {edu.Location}"));
-        para.AppendChild(new Run()).AppendChild(new Text($"{DocumentConstants.DateGap}{edu.GraduationDate}"));
+        r1.AppendChild(new Text(JoinPresent(", ", edu.Institution, edu.Location)));
+        para.AppendChild(new Run()).AppendChild(new Text($"{DocumentConstants.DateGap}{labels.FormatDate(edu.GraduationDate)}"));
 
         var details = edu.Degree ?? "";
-        if (!string.IsNullOrWhiteSpace(edu.GPA)) details += DocumentConstants.DetailSeparator + DocumentConstants.GpaLabel + edu.GPA;
+        if (!string.IsNullOrWhiteSpace(edu.GPA)) details += DocumentConstants.DetailSeparator + labels.Gpa + edu.GPA;
         if (!string.IsNullOrWhiteSpace(edu.Honors)) details += DocumentConstants.DetailSeparator + edu.Honors;
 
         var detPara = body.AppendChild(new Paragraph());
@@ -395,18 +463,18 @@ public partial class DocumentRenderer
         r3.AppendChild(new Text(details));
     }
 
-    private void AddExperience(Body body, Experience exp)
+    private void AddExperience(Body body, Experience exp, CvLabels labels)
     {
         var para = body.AppendChild(new Paragraph());
         var r1 = para.AppendChild(new Run());
         r1.AppendChild(new RunProperties(new Bold()));
         r1.AppendChild(new Text(exp.Role ?? ""));
-        para.AppendChild(new Run()).AppendChild(new Text($"{DocumentConstants.DateGap}{exp.StartDate}{DocumentConstants.DateRangeSeparator}{exp.EndDate}"));
+        para.AppendChild(new Run()).AppendChild(new Text($"{DocumentConstants.DateGap}{labels.DateRange(exp.StartDate, exp.EndDate)}"));
 
         var sub = body.AppendChild(new Paragraph());
         var r3 = sub.AppendChild(new Run());
         r3.AppendChild(new RunProperties(new Italic()));
-        r3.AppendChild(new Text($"{exp.Company}, {exp.Location}"));
+        r3.AppendChild(new Text(JoinPresent(", ", exp.Company, exp.Location)));
 
         foreach (var bullet in exp.Bullets ?? new List<string>())
         {
@@ -424,7 +492,7 @@ public partial class DocumentRenderer
             .AppendChild(new Text(string.Join($" {DocumentConstants.BulletSymbol} ", skills)));
     }
 
-    private void AddProject(Body body, Project project)
+    private void AddProject(Body body, Project project, CvLabels labels)
     {
         var para = body.AppendChild(new Paragraph());
         var r = para.AppendChild(new Run());
@@ -441,7 +509,7 @@ public partial class DocumentRenderer
             var tp = body.AppendChild(new Paragraph());
             var tr = tp.AppendChild(new Run());
             tr.AppendChild(new RunProperties(new Italic()));
-            tr.AppendChild(new Text($"{DocumentConstants.TechnologiesLabel}{string.Join(", ", project.Technologies)}"));
+            tr.AppendChild(new Text($"{labels.Technologies}{string.Join(", ", project.Technologies)}"));
         }
     }
 

@@ -64,7 +64,13 @@
                                                            Disabled="_loading" />
                                     <TemplateSelector Value="@_settings.Template"
                                                       ValueChanged="SetTemplate"
+                                                      Thumbnails="_thumbnails"
                                                       Disabled="_loading" />
+                                    <StyleOptions Accent="@_settings.Accent"
+                                                  AccentChanged="SetAccent"
+                                                  Fonts="@_settings.Fonts"
+                                                  FontsChanged="SetFonts"
+                                                  Disabled="_loading" />
                                 </div>
                             }
                             else
@@ -81,6 +87,11 @@
                                             <PageOptions AllowTwoPages="_settings.AllowTwoPages"
                                                          AllowTwoPagesChanged="SetAllowTwoPages"
                                                          Disabled="_loading" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <LanguageOptions Value="@_settings.Language"
+                                                             ValueChanged="SetLanguage"
+                                                             Disabled="_loading" />
                                         </div>
                                     </div>
                                 </div>
@@ -175,6 +186,9 @@ else
     private CVTemplate _resultTemplate;
     private bool _resultTwoPages;
     private HashSet<string> _staleFormats = new();
+
+    // UX-10: each template rendered with the sample profile in the chosen style, for the template picker
+    private Dictionary<string, string> _thumbnails = new();
     private string? _jdError;
     private string? _formatError;
     private bool _focusJd;
@@ -211,6 +225,8 @@ else
         _history = await Store.GetHistoryAsync();
         _myProfile = await Store.LoadMyProfileAsync();
         if (_myProfile == null) _settings.ProfileSource = UiConstants.ProfileSourceDemo;
+
+        await RefreshThumbnailsAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -294,6 +310,27 @@ else
         await Store.SaveSettingsAsync(_settings);
     }
 
+    private async Task SetAccent(string accent)
+    {
+        _settings.Accent = accent;
+        await Store.SaveSettingsAsync(_settings);
+        await RefreshThumbnailsAsync();
+    }
+
+    private async Task SetFonts(string fonts)
+    {
+        _settings.Fonts = fonts;
+        await Store.SaveSettingsAsync(_settings);
+        await RefreshThumbnailsAsync();
+    }
+
+    private async Task SetLanguage(string language)
+    {
+        _settings.Language = language;
+        await Store.SaveSettingsAsync(_settings);
+        await RefreshThumbnailsAsync();
+    }
+
     private async Task SetAllowTwoPages(bool value)
     {
         _settings.AllowTwoPages = value;
@@ -363,7 +400,10 @@ else
                 Formats = SelectedFormats(),
                 Template = TemplateEnum(),
                 AllowTwoPages = _settings.AllowTwoPages,
-                ProfileId = _profileId
+                ProfileId = _profileId,
+                Language = _settings.Language,
+                Accent = _settings.Accent,
+                Fonts = _settings.Fonts
             };
 
             var (documents, analysis) = ActiveProfile is { } profile
@@ -384,7 +424,10 @@ else
                 Formats = SelectedFormats(),
                 AllowTwoPages = _settings.AllowTwoPages,
                 ProfileSource = _settings.ProfileSource,
-                ProfileId = _profileId
+                ProfileId = _profileId,
+                Language = _settings.Language,
+                Accent = _settings.Accent,
+                Fonts = _settings.Fonts
             });
         }
         catch (ArgumentException ex)
@@ -432,6 +475,9 @@ else
         if (entry.AllowTwoPages is { } twoPages) _settings.AllowTwoPages = twoPages;
         if (entry.Formats is { Count: > 0 } formats)
             _settings.SelectedFormats = _settings.SelectedFormats.Keys.ToDictionary(k => k, k => formats.Contains(k));
+        if (entry.Language is { } language && ApiConstants.Languages.Contains(language)) _settings.Language = language;
+        if (entry.Accent is { } accent && ApiConstants.Accents.Contains(accent)) _settings.Accent = accent;
+        if (entry.Fonts is { } fonts && ApiConstants.FontPairings.Contains(fonts)) _settings.Fonts = fonts;
 
         var note = RestoreProfile(entry);
         await Store.SaveSettingsAsync(_settings);
@@ -474,7 +520,11 @@ else
         _settings.SelectedFormats = defaults.SelectedFormats;
         _settings.Template = defaults.Template;
         _settings.AllowTwoPages = defaults.AllowTwoPages;
+        _settings.Language = defaults.Language;
+        _settings.Accent = defaults.Accent;
+        _settings.Fonts = defaults.Fonts;
         await Store.SaveSettingsAsync(_settings);
+        await RefreshThumbnailsAsync();
 
         _analysis = null;
         _documents = new();
@@ -493,6 +543,27 @@ else
     #endregion
 
     #region Helpers
+
+    private async Task RefreshThumbnailsAsync()
+    {
+        try
+        {
+            var thumbnails = new Dictionary<string, string>();
+            foreach (var option in TemplateSelector.Templates)
+            {
+                var template = Enum.Parse<CVTemplate>(option.Key, ignoreCase: true);
+                thumbnails[option.Key] = await CvService.RenderTemplateSampleAsync(
+                    template, _settings.Accent, _settings.Fonts, _settings.Language);
+            }
+            _thumbnails = thumbnails;
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException)
+        {
+            // The picker still works without thumbnails; the cards show their names
+            Logger.LogWarning(ex, "Could not render the template thumbnails");
+            _thumbnails = new();
+        }
+    }
 
     /// <summary>Renders one document of the edited CV and says when an edited PDF runs past the page limit.</summary>
     private async Task<byte[]> RenderEditedAsync(string format)

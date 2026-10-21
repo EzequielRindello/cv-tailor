@@ -77,7 +77,9 @@ public enum CVTemplate
 {
     Harvard,
     Modern,
-    Minimalist
+    Minimalist,
+    Compact,
+    Executive
 }
 
 public class GenerateRequest
@@ -87,6 +89,9 @@ public class GenerateRequest
     public CVTemplate Template { get; set; } = CVTemplate.Harvard;
     public bool AllowTwoPages { get; set; } = false;
     public string ProfileId { get; set; } = ApiConstants.DefaultProfileId;
+    public string Language { get; set; } = ApiConstants.LanguageEnglish;
+    public string Accent { get; set; } = ApiConstants.StyleDefault;
+    public string Fonts { get; set; } = ApiConstants.StyleDefault;
 }
 
 public class AnalysisResult

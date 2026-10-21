@@ -50,7 +50,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | UX-07 | Empty, error and toast states | E2 Redesign | P1 | S | Done |
 | UX-08 | Accessibility (WCAG AA, keyboard reorder) | E2 Redesign | P1 | M | Done |
 | UX-09 | Responsive pass | E2 Redesign | P1 | M | Done |
-| UX-10 | CV template visual polish | E2 Redesign | P2 | M | Todo |
+| UX-10 | CV template visual polish | E2 Redesign | P2 | M | Done |
 | PROF-01 | In-browser profile editor | E3 Your profile | P1 | L | Done |
 | PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | Done |
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
@@ -69,8 +69,8 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | EDIT-01 | Inline editing in the workspace | E5 Editing | P2 | L | Done |
 | EDIT-02 | Live HTML preview, documents on download | E5 Editing | P2 | M | Done |
 | EDIT-03 | Cover letter generator | E5 Editing | P2 | M | Todo |
-| EDIT-04 | CV output language (EN/ES) | E5 Editing | P2 | M | Todo |
-| EDIT-05 | More templates | E5 Editing | P3 | M | Todo |
+| EDIT-04 | CV output language (EN/ES) | E5 Editing | P2 | M | Done |
+| EDIT-05 | More templates | E5 Editing | P3 | M | Done |
 | EDIT-06 | Plain-text / Markdown export | E5 Editing | P3 | S | Done |
 | APP-01 | Application tracker | E6 Workflow | P2 | M | Done |
 | APP-02 | Re-open a past generation | E6 Workflow | P2 | S | Done |
@@ -163,6 +163,12 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 | F20 | Seniority: "Staff ..." titles are not recognized (only the phrase "staff engineer" is), "II", "internship" and "early career" are not keywords, and the first level word in the text wins ("lead the design" reads as lead). The parser agrees with the title level in 46% of posts. | Fixed with MATCH-09 (91% agreement) |
 | F21 | The single-letter skill `c` matches "Washington D.C." in pay-range text. | Fixed with MATCH-07 |
 | F22 | `KeywordAnalyzer` keeps its own `TechWords` list, apart from the dictionary, and classifies single JD words with it: "next" (as in "the next generation") is still listed as a technical keyword in the keywords tab, because the alias `next` still normalizes to Next.js. | Fixed in M3.2 (MATCH-07 follow-up): technical keywords are the dictionary skills the job description names (phrases such as "machine learning" included), `KeywordAnalyzerConstants.TechWords` is gone, and the words of a skill are no longer repeated as industry keywords |
+
+### Findings during M4
+
+| # | Finding | Status |
+|---|---|---|
+| F23 | `BrowserStore` let a `TaskCanceledException` from JS interop escape `Home.OnInitializedAsync` when the circuit went away during the first storage reads (a reload, a closed tab, or hot reload while the app runs from the IDE). | Fixed: reads give the default and writes and removals do nothing when the circuit is gone (`JSDisconnectedException`, `TaskCanceledException`); other script errors still surface. `BrowserStoreTests` |
 
 ### System hardening (between M3 and M3.2)
 
@@ -472,14 +478,21 @@ Verify: TEST-07 axe check + keyboard-only manual pass.
 Verify: E2E at 390px and 768px.
 
 ### UX-10: CV template polish
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+**Status:** Done · **Priority:** P2 · **Effort:** M
 
-- [ ] Shared typographic rhythm across Harvard, Modern and Minimalist
-- [ ] Optional accent color and font pairing per template (kept ATS-safe)
-- [ ] Real thumbnails generated from each template for the template picker
+- [x] Shared typographic rhythm across Harvard, Modern and Minimalist
+- [x] Optional accent color and font pairing per template (kept ATS-safe)
+- [x] Real thumbnails generated from each template for the template picker
 
 Files: `Templates/*.html`, `TemplateSelector.razor`
 Verify: TEST-04 still passes for every template.
+
+Done notes:
+- `Templates/partials/`: `base-styles` (one body size and one spacing step as CSS variables, every margin a multiple of the step; the accent and font classes; the shared element styles), `contact`, one partial per section, and `sections` (the ordered loop). Every template includes them and only sets its header, its values of the scale and its details; Modern places the same section partials in its two columns. `DocumentRenderer` loads the partials once (`PartialsCache`). The markup is now the same everywhere (`cv-section`, `cv-entry`, `h2.cv-section-title`), which also fixed stray separators ("Acme, " with no location, "a@b.com •  • ").
+- Minimalist was tightened (line height and section spacing): measured over the 95 profile x JD combinations in one-page mode, the measured fit (MATCH-08) now trims 5 of them by one bullet each, where it trimmed 57, by 2 or 3 bullets and usually the project. Harvard, Modern, Compact and Executive need no trim at all (Executive did, 21 of 95, until its body size and spacing were brought onto the same scale).
+- Accent (navy, teal, burgundy, forest, slate) and fonts (classic serif, clean sans, mixed) are classes from a fixed list (`ApiConstants.Accents`, `FontPairings`; anything else is a 400, and the renderer ignores unknown keys), so nothing a request sends reaches the CSS. Accents only color titles, rules and markers, and are all dark; the text stays dark. Fonts are limited to what the PDF container ships (`fonts-liberation`: Times, Arial and Courier metrics), so the PDF looks the same locally and on Render. "Template's own" keeps each template as designed.
+- Thumbnails: `CVGeneratorService.RenderTemplateSampleAsync` renders each template with the made-up senior sample profile in the chosen accent, fonts and language (cached); the picker shows it scaled down in a sandboxed iframe with no scripts. They follow every style change. The old hand-drawn SVGs are gone.
+- Tests: `LanguageAndStyleTests` (classes only for known keys, every class the UI offers is defined in the shared styles, every template uses the partials), `StyleAndTemplatePickerTests` (bUnit: five cards with a real thumbnail each, picker without thumbnails, accent, fonts and language report their keys, every value the service accepts is offered), `StyleOptionsApiTests` (a sample for every template follows the style), E2E `StyleAndLanguageTests` (thumbnails, an accent restyles them, choices are remembered).
 
 ---
 
@@ -735,18 +748,29 @@ Files: new `Helpers/CoverLetterGenerator.cs`, `Templates/cover-letter-template.h
 Verify: invariant test that every fact in the letter comes from the profile.
 
 ### EDIT-04: CV output language
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+**Status:** Done · **Priority:** P2 · **Effort:** M
 
-- [ ] English or Spanish section headings, dates and summary phrasing
+- [x] English or Spanish section headings, dates and summary phrasing
 
 Verify: document tests for both languages.
 
-### EDIT-05: More templates
-**Status:** Todo · **Priority:** P3 · **Effort:** M
+Done notes:
+- `GenerateRequest.Language` (`en` or `es`, `ApiConstants.Languages`; anything else is a 400) is kept on the CV (`GeneratedCV.Language`), so the preview, the PDF, the DOCX, the text export and an edited CV's downloads all follow it.
+- `Features/Documents/CvLabels.cs` holds the words a CV prints around the profile's content: section titles (each template picks the formal, short or executive summary title), skill categories, "GPA"/"Promedio", "Technologies"/"Tecnologías", and dates. English keeps the profile's dates as written; Spanish rewrites the formats the date parser knows ("Jan 2020" is "ene. 2020", "Present" is "Actualidad") and leaves anything else ("Spring 2019") alone. The HTML gets `lang="es"`.
+- The summary is phrased in Spanish ("... con 6+ años de experiencia, con foco en Go, Kafka y PostgreSQL", "y" becomes "e" before an /i/ sound). Role titles stay as they are (tech titles are usually English in Spanish CVs too, and a translated title would have to pick a grammatical gender). The "proven track record" sentence is left out in Spanish, because it quotes a bullet and the profile's text is never translated.
+- The UI option is in step 3 next to the page options, and is remembered with the other settings and in the history (APP-02 restores it).
+- Tests: `CvLabelsTests`, `SpanishSummaryTests` (unit), `LanguageAndStyleTests` (HTML of every template in both languages, DOCX and text in Spanish, a Spanish PDF), `StyleOptionsApiTests` (a Spanish request, unknown values refused), E2E `A_spanish_executive_cv_has_spanish_titles_in_the_preview`.
 
-- [ ] "Compact" and "Executive" templates on a shared partial
+### EDIT-05: More templates
+**Status:** Done · **Priority:** P3 · **Effort:** M
+
+- [x] "Compact" and "Executive" templates on a shared partial
 
 Verify: TEST-04 across new templates.
+
+Done notes:
+- Compact (`CVTemplate.Compact`): dense single column (9pt, a smaller spacing step, name and contact on one band, skills right after the experience) for a long history on one page. Executive (`CVTemplate.Executive`): serif, a large name over an accent rule, uppercase spaced titles, the profile set off by an accent bar. No small capitals: synthesized small caps broke the PDF text layer that an ATS reads.
+- Both are built from the shared partials (UX-10) and get every TEST-04 check through `Enum.GetValues<CVTemplate>()`: valid PDF, page count over the whole corpus, every bullet and title in the extracted text, reading order, DOCX, HTML without Mustache tags. `DocumentSupport.ExpectedTitles` now derives the titles from each template's order and labels, in either language.
 
 ### EDIT-06: Plain-text / Markdown export
 **Status:** Done · **Priority:** P3 · **Effort:** S

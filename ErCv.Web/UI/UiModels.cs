@@ -7,6 +7,12 @@ public class AppSettings
     public string Template { get; set; } = UiConstants.TemplateHarvard;
     public Dictionary<string, bool> SelectedFormats { get; set; } = new() { [ApiConstants.FormatPdf] = true, [ApiConstants.FormatDocx] = false };
     public bool AllowTwoPages { get; set; }
+
+    // EDIT-04 and UX-10: the CV's language and look
+    public string Language { get; set; } = ApiConstants.LanguageEnglish;
+    public string Accent { get; set; } = ApiConstants.StyleDefault;
+    public string Fonts { get; set; } = ApiConstants.StyleDefault;
+
     /// <summary><see cref="UiConstants.ProfileSourceDemo"/> or <see cref="UiConstants.ProfileSourceMine"/> (PROF-01).</summary>
     public string ProfileSource { get; set; } = UiConstants.ProfileSourceDemo;
 }
@@ -27,6 +33,9 @@ public class HistoryEntry
     /// <summary>"demo", "mine" or "imported" (see <see cref="UiConstants"/>). An imported profile is not kept, so it cannot be restored.</summary>
     public string? ProfileSource { get; set; }
     public string? ProfileId { get; set; }
+    public string? Language { get; set; }
+    public string? Accent { get; set; }
+    public string? Fonts { get; set; }
 
     // APP-01: the application this CV was made for. Entries saved before the tracker read as "Saved" with no notes.
     public string Company { get; set; } = string.Empty;

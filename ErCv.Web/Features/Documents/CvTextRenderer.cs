@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text;
 using ErCv.Web.Models;
 
@@ -39,13 +38,14 @@ public static class CvTextRenderer
     private static string Render(GeneratedCV cv, bool markdown)
     {
         var text = new StringBuilder();
+        var labels = CvLabels.For(cv.Language);
         string Esc(string? value) => markdown ? EscapeMarkdown(value ?? "") : value ?? "";
         string Broken(string line) => markdown ? line + MarkdownLineBreak : line;
 
         void Section(string title)
         {
             text.AppendLine();
-            text.AppendLine(markdown ? MarkdownSection + TitleCase(title) : title);
+            text.AppendLine(markdown ? MarkdownSection + title : title.ToUpperInvariant());
         }
 
         var header = cv.Header ?? new Header();
@@ -58,7 +58,7 @@ public static class CvTextRenderer
         void WriteSummary()
         {
             if (string.IsNullOrWhiteSpace(cv.Summary)) return;
-            Section(DocumentConstants.SectionSummary);
+            Section(labels.Summary);
             text.AppendLine(Esc(cv.Summary));
         }
 
@@ -66,14 +66,14 @@ public static class CvTextRenderer
         {
             var education = cv.Education ?? new List<Education>();
             if (!education.Any()) return;
-            Section(DocumentConstants.SectionEducation);
+            Section(labels.Education);
             foreach (var edu in education)
             {
                 if (markdown) text.AppendLine();
                 var place = Join(", ", Esc(edu.Institution), Esc(edu.Location));
-                text.AppendLine(Broken(Join(DocumentConstants.DetailSeparator, markdown ? Bold(place) : place, Esc(edu.GraduationDate))));
+                text.AppendLine(Broken(Join(DocumentConstants.DetailSeparator, markdown ? Bold(place) : place, Esc(labels.FormatDate(edu.GraduationDate)))));
 
-                var gpa = string.IsNullOrWhiteSpace(edu.GPA) ? "" : DocumentConstants.GpaLabel + Esc(edu.GPA);
+                var gpa = string.IsNullOrWhiteSpace(edu.GPA) ? "" : labels.Gpa + Esc(edu.GPA);
                 var details = Join(DocumentConstants.DetailSeparator, Esc(edu.Degree), gpa, Esc(edu.Honors));
                 if (details.Length > 0) text.AppendLine(details);
             }
@@ -83,10 +83,10 @@ public static class CvTextRenderer
         {
             var experience = cv.Experience ?? new List<Experience>();
             if (!experience.Any()) return;
-            Section(DocumentConstants.SectionExperience);
+            Section(labels.Experience);
             foreach (var exp in experience)
             {
-                var dates = Join(DocumentConstants.DateRangeSeparator, Esc(exp.StartDate), Esc(exp.EndDate));
+                var dates = Esc(labels.DateRange(exp.StartDate, exp.EndDate));
                 if (markdown)
                 {
                     text.AppendLine();
@@ -108,14 +108,14 @@ public static class CvTextRenderer
         void WriteSkills()
         {
             if (cv.Skills?.Any() != true) return;
-            Section(DocumentConstants.SectionSkills);
+            Section(labels.Skills);
             text.AppendLine(string.Join(", ", cv.Skills.Select(Esc)));
         }
 
         void WriteProjects()
         {
             if (cv.Projects?.Any() != true) return;
-            Section(DocumentConstants.SectionProjects);
+            Section(labels.Projects);
             foreach (var project in cv.Projects)
             {
                 if (markdown) text.AppendLine();
@@ -124,7 +124,7 @@ public static class CvTextRenderer
                 if (!string.IsNullOrWhiteSpace(project.Description)) text.AppendLine(Broken(Esc(project.Description)));
                 if (project.Technologies?.Any() == true)
                 {
-                    var technologies = DocumentConstants.TechnologiesLabel + string.Join(", ", project.Technologies.Select(Esc));
+                    var technologies = labels.Technologies + string.Join(", ", project.Technologies.Select(Esc));
                     text.AppendLine(markdown ? Italic(technologies) : technologies);
                 }
             }
@@ -153,9 +153,6 @@ public static class CvTextRenderer
     private static string Bold(string text) => text.Length == 0 ? text : $"**{text}**";
 
     private static string Italic(string text) => text.Length == 0 ? text : $"*{text}*";
-
-    private static string TitleCase(string title) =>
-        CultureInfo.InvariantCulture.TextInfo.ToTitleCase(title.ToLowerInvariant());
 
     private static string EscapeMarkdown(string text)
     {

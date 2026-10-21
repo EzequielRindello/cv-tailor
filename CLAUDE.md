@@ -9,7 +9,7 @@ Roadmap, versioning and PR naming live in `features.md`. Architecture overview: 
 
 - Build: `dotnet build er-cv-generator.sln` (must stay at 0 warnings)
 - Fast tests: `dotnet test ErCv.Tests --filter "Category=Component|Category=Unit"` (seconds)
-- Full suite without browsers: `dotnet test ErCv.Tests --filter "Category!=E2E"` (about 5 to 6 min, PDF tests start Chrome)
+- Full suite without browsers: `dotnet test ErCv.Tests --filter "Category!=E2E"` (about 7 min, PDF tests start Chrome)
 - Browser tests: `dotnet test ErCv.E2E` (uses an installed Chrome or Edge, nothing is downloaded)
 - Corpus tool: `dotnet run --project ErCv.Collector -- refresh | report | samples | check` (`samples` re-picks the app samples offline, run it after changing the parser or `Data/skills.json`)
 - Style fixes the tooling can apply: `dotnet format style er-cv-generator.sln --diagnostics IDE0005 IDE0161`
@@ -32,7 +32,8 @@ ErCv.Web/
   UI/               Browser-side state helpers for Blazor (BrowserStore, ToastService, UiConstants)
   Components/       Razor components: Pages/, Shared/, Layout/
   Data/             Content files only (JSON). No C# here.
-  Templates/        CV HTML templates (Mustache)
+  Templates/        CV HTML templates (Mustache), one per CVTemplate
+    partials/       Shared partials every template includes: base styles (rhythm, accents, fonts), sections
 ErCv.Tests/         Mirrors ErCv.Web: Features/<Name>/, UI/, Components/, Api/, Documents/, plus Support/ (builders)
 ErCv.Collector/     Offline CLI for the job-post corpus (flat, small)
 ErCv.E2E/           Playwright browser tests
@@ -97,8 +98,8 @@ Constants classes longer than about 50 lines use topic regions instead (`Scoring
 - Lookup data (HashSets, dictionaries, keyword lists) is `static readonly`, built once. Never allocate it inside a
   method or a loop.
 - `JsonSerializerOptions` is a `static readonly` field, never `new` per call.
-- Nothing that ships with the app (templates, data files) is read from disk per request: cache it
-  (`DocumentRenderer.TemplateCache`). Restart the app after editing a template.
+- Nothing that ships with the app (templates, partials, data files) is read from disk per request: cache it
+  (`DocumentRenderer.TemplateCache`, `PartialsCache`). Restart the app after editing a template or a partial.
 - Render a CV's HTML once and reuse it for the preview and the PDF.
 - Fuzzy or term matching against the CV is the expensive part of analysis: compute it once per word and reuse it.
 
@@ -112,6 +113,8 @@ Constants classes longer than about 50 lines use topic regions instead (`Scoring
 - Error responses go through `CVGeneratorService.Problem`: the client gets a message written for it, never
   `ex.Message` of an unexpected exception. Log the exception instead.
 - CV templates use `{{ }}` only (HTML-escaped). Never `{{{ }}}`. Links are written as `https://{{Link}}`.
+  Nothing from a request reaches template CSS: accents and fonts are classes picked from a fixed list
+  (`ApiConstants.Accents`, `FontPairings`), and partials must never contain `{{`/`}}` outside Mustache tags.
 - The CV preview is an `<iframe srcdoc>` with `sandbox` and without `allow-scripts`. Keep it that way.
 - PDF rendering goes through `DocumentRenderer.RenderPdfAsync`, which caps concurrent Chrome pages
   (`DocumentConstants.MaxConcurrentPdfRenders`). The UI path is not rate limited, so this cap is what protects

@@ -68,7 +68,7 @@ public class EditingTests : E2ETestBase
         await Page.Locator("#section-up-experience").ClickAsync();
 
         // The frame reloads on the change, so this waits for the new order instead of reading it once
-        var titles = Page.FrameLocator("iframe[title='CV Preview']").Locator(".section-title");
+        var titles = Page.FrameLocator("iframe[title='CV Preview']").Locator(".cv-section-title");
         await Assertions.Expect(titles).ToContainTextAsync(new[]
         {
             new Regex("^Experience$", RegexOptions.IgnoreCase), new Regex("^Education$", RegexOptions.IgnoreCase)

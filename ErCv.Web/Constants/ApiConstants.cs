@@ -23,6 +23,29 @@ public static class ApiConstants
 
     #endregion
 
+    #region Document Style
+
+    // EDIT-04: the language of the CV (headings, dates, summary). The profile's own text is never translated.
+    public const string LanguageEnglish = "en";
+    public const string LanguageSpanish = "es";
+    public static readonly string[] Languages = { LanguageEnglish, LanguageSpanish };
+
+    // UX-10: an accent color and a font pairing, as keys of classes in Templates/partials/base-styles.html.
+    // "default" keeps the template's own look.
+    public const string StyleDefault = "default";
+    public const string AccentNavy = "navy";
+    public const string AccentTeal = "teal";
+    public const string AccentBurgundy = "burgundy";
+    public const string AccentForest = "forest";
+    public const string AccentSlate = "slate";
+    public const string FontsClassic = "classic";
+    public const string FontsClean = "clean";
+    public const string FontsMixed = "mixed";
+    public static readonly string[] Accents = { StyleDefault, AccentNavy, AccentTeal, AccentBurgundy, AccentForest, AccentSlate };
+    public static readonly string[] FontPairings = { StyleDefault, FontsClassic, FontsClean, FontsMixed };
+
+    #endregion
+
     #region Profiles
 
     // The creator's own profile (PROF-06); what the API uses when a request names no profile

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="{{Lang}}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{FullName}} - Resume</title>
+    <style>
+        @page { size: letter; margin: 0.45in 0.55in 0.45in 0.55in; }
+
+{{> base-styles}}
+
+        /* ─── Compact: dense single column for a long history on one page ─── */
+        :root {
+            --cv-text: #111111;
+            --cv-muted: #444444;
+            --cv-accent: #1f3a5f;
+            --cv-font-body: Arial, Helvetica, Liberation Sans, sans-serif;
+            --cv-font-heading: Arial, Helvetica, Liberation Sans, sans-serif;
+            --cv-contact-sep: "  |  ";
+            --cv-fs-body: 9pt;
+            --cv-fs-small: 8.5pt;
+            --cv-fs-section: 9.5pt;
+            --cv-fs-name: 16pt;
+            --cv-lh: 1.2;
+            --cv-step: 1.5pt;
+        }
+
+        /* Name and contact share one band to save the vertical space a centered header takes */
+        .cv-header {
+            align-items: baseline;
+            border-bottom: 1pt solid var(--cv-accent);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2pt 12pt;
+            justify-content: space-between;
+            padding-bottom: calc(var(--cv-step) * 2);
+        }
+
+        .cv-name { font-weight: bold; }
+        .cv-contact { color: var(--cv-muted); white-space: pre-wrap; }
+
+        .cv-section-title { letter-spacing: 0.6pt; text-transform: uppercase; }
+        .cv-entry-sub { display: inline; margin-top: 0; }
+        .cv-bullets { margin-left: 12pt; }
+    </style>
+</head>
+<body class="{{StyleClasses}}">
+    <header class="cv-header">
+        <h1 class="cv-name">{{FullName}}</h1>
+        <div class="cv-contact">{{> contact}}</div>
+    </header>
+
+{{> sections}}
+</body>
+</html>

@@ -3011,12 +3011,13 @@ body:not(:has(#samples)) .app-try-demo {
 
 /* ===== TemplateSelector.css ===== */
 .template-options {
-  display: flex;
+  display: grid;
   gap: var(--spacing-sm);
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
 }
 
 @media (max-width: 576px) {
-  .template-options { flex-direction: column; }
+  .template-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 .template-card {
@@ -3048,19 +3049,106 @@ body:not(:has(#samples)) .app-try-demo {
   cursor: not-allowed;
 }
 
+/* UX-10: a real render of the template (a Letter page, 816 x 1056 CSS px) scaled down to the card */
 .template-preview {
-  width: 60px;
-  height: 80px;
-  margin: 0 auto var(--spacing-sm);
+  --thumb-width: 96px;
+  background: #ffffff;
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-sm);
-  overflow: hidden;
   box-shadow: var(--shadow-sm);
+  height: calc(var(--thumb-width) * 11 / 8.5);
+  margin: 0 auto var(--spacing-sm);
+  overflow: hidden;
+  position: relative;
+  width: var(--thumb-width);
 }
 
-.template-preview svg {
-  width: 100%;
-  height: 100%;
+.template-preview iframe {
+  border: 0;
+  height: 1056px;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transform: scale(calc(96 / 816));
+  transform-origin: 0 0;
+  width: 816px;
+}
+
+/* ===== StyleOptions (UX-10) ===== */
+.accent-options,
+.font-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.accent-swatch,
+.font-option {
+  align-items: center;
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.accent-swatch.selected,
+.font-option.selected {
+  background: var(--color-bg-selected);
+  border-color: var(--color-primary-400);
+}
+
+.accent-swatch.disabled,
+.font-option.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.accent-swatch:has(input:focus-visible),
+.font-option:has(input:focus-visible) {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.accent-dot {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  display: inline-block;
+  flex: none;
+  height: 14px;
+  width: 14px;
+}
+
+/* "Template's own": a split dot, since each template has a different color */
+.accent-dot-default {
+  background: conic-gradient(#1d4ed8 0 25%, #7a1f2b 0 50%, #1a1a1a 0 75%, #8a8a8a 0);
+}
+
+.accent-name,
+.font-option-name {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.font-option {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0;
+}
+
+.font-option-desc {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.style-options-note {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  margin: var(--spacing-sm) 0 0;
 }
 
 .template-name {

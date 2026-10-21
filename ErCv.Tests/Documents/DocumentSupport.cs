@@ -42,38 +42,43 @@ public static class DocumentSupport
 
     public static int BulletCount(GeneratedCV cv) => cv.Experience.Sum(e => e.Bullets.Count);
 
-    /// <summary>Titles the template prints for the sections this CV actually has, in template reading order.</summary>
+    /// <summary>
+    /// Titles the template prints for the sections this CV actually has, in its reading order: the CV's order or the
+    /// template's own, in the CV's language. Modern reads its left column (skills, education) first.
+    /// </summary>
     public static List<string> ExpectedTitles(GeneratedCV cv, CVTemplate template)
     {
-        var hasSummary = !string.IsNullOrEmpty(cv.Summary);
-        var hasSkills = cv.Skills.Any();
-        var hasProjects = cv.Projects.Any();
+        var labels = CvLabels.For(cv.Language);
+        var order = DocumentRenderer.ResolveSectionOrder(cv.SectionOrder, DocumentRenderer.DefaultSectionOrder(template));
+        if (template == CVTemplate.Modern)
+            order = order.Where(LeftColumn.Contains).Concat(order.Where(k => !LeftColumn.Contains(k))).ToList();
 
         var titles = new List<string>();
-        switch (template)
+        foreach (var key in order)
         {
-            case CVTemplate.Minimalist:
-                if (hasSummary) titles.Add("Profile");
-                titles.Add("Experience");
-                titles.Add("Education");
-                if (hasSkills) titles.Add("Skills");
-                break;
-            case CVTemplate.Modern:
-                if (hasSkills) titles.Add("Skills");
-                titles.Add("Education");
-                if (hasSummary) titles.Add("Profile");
-                titles.Add("Experience");
-                break;
-            default:
-                if (hasSummary) titles.Add("Professional Summary");
-                titles.Add("Education");
-                titles.Add("Experience");
-                if (hasSkills) titles.Add("Skills");
-                break;
+            switch (key)
+            {
+                case DocumentConstants.SectionSummaryKey when !string.IsNullOrEmpty(cv.Summary):
+                    titles.Add(DocumentRenderer.SummaryTitle(template, labels));
+                    break;
+                case DocumentConstants.SectionEducationKey:
+                    titles.Add(labels.Education);
+                    break;
+                case DocumentConstants.SectionExperienceKey:
+                    titles.Add(labels.Experience);
+                    break;
+                case DocumentConstants.SectionSkillsKey when cv.Skills.Any():
+                    titles.Add(labels.Skills);
+                    break;
+                case DocumentConstants.SectionProjectsKey when cv.Projects.Any():
+                    titles.Add(labels.Projects);
+                    break;
+            }
         }
-        if (hasProjects) titles.Add("Projects");
         return titles;
     }
+
+    private static readonly string[] LeftColumn = { DocumentConstants.SectionSkillsKey, DocumentConstants.SectionEducationKey };
 
     /// <summary>Lowercase letters and digits only, so line wraps, entities and punctuation do not matter.</summary>
     public static string Squash(string text) =>

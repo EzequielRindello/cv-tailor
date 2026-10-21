@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ErCv.Web.Constants;
 using ErCv.Web.Models;
 using Microsoft.JSInterop;
 
@@ -49,6 +50,11 @@ public class BrowserStore
         foreach (var (key, value) in defaults.SelectedFormats)
             loaded.SelectedFormats.TryAdd(key, value);
 
+        // Settings saved before these options existed, or edited by hand, fall back to the defaults
+        if (!ApiConstants.Languages.Contains(loaded.Language)) loaded.Language = defaults.Language;
+        if (!ApiConstants.Accents.Contains(loaded.Accent)) loaded.Accent = defaults.Accent;
+        if (!ApiConstants.FontPairings.Contains(loaded.Fonts)) loaded.Fonts = defaults.Fonts;
+
         return loaded;
     }
 
@@ -59,8 +65,7 @@ public class BrowserStore
 
     public Task SaveMyProfileAsync(CVMaster profile) => WriteAsync(ProfileKey, profile);
 
-    public async Task ClearMyProfileAsync() =>
-        await _js.InvokeVoidAsync(UiConstants.JsRemoveItem, ProfileKey);
+    public Task ClearMyProfileAsync() => RemoveAsync(ProfileKey);
 
     public async Task<List<HistoryEntry>> GetHistoryAsync() =>
         await ReadAsync<List<HistoryEntry>>(HistoryKey) ?? new();
@@ -80,7 +85,10 @@ public class BrowserStore
             Formats = options?.Formats,
             AllowTwoPages = options?.AllowTwoPages,
             ProfileSource = options?.ProfileSource,
-            ProfileId = options?.ProfileId
+            ProfileId = options?.ProfileId,
+            Language = options?.Language,
+            Accent = options?.Accent,
+            Fonts = options?.Fonts
         };
 
         var updated = (await GetHistoryAsync()).Prepend(entry).Take(MaxHistoryEntries).ToList();
@@ -108,8 +116,7 @@ public class BrowserStore
         return updated;
     }
 
-    public async Task ClearHistoryAsync() =>
-        await _js.InvokeVoidAsync(UiConstants.JsRemoveItem, HistoryKey);
+    public Task ClearHistoryAsync() => RemoveAsync(HistoryKey);
 
     #endregion
 
@@ -137,10 +144,37 @@ public class BrowserStore
         {
             return default;
         }
+        catch (Exception ex) when (IsCircuitGone(ex))
+        {
+            return default;
+        }
     }
 
-    private async Task WriteAsync<T>(string key, T value) =>
-        await _js.InvokeVoidAsync(UiConstants.JsSetItem, key, JsonSerializer.Serialize(value, JsonOptions));
+    private async Task WriteAsync<T>(string key, T value)
+    {
+        try
+        {
+            await _js.InvokeVoidAsync(UiConstants.JsSetItem, key, JsonSerializer.Serialize(value, JsonOptions));
+        }
+        catch (Exception ex) when (IsCircuitGone(ex))
+        {
+        }
+    }
+
+    private async Task RemoveAsync(string key)
+    {
+        try
+        {
+            await _js.InvokeVoidAsync(UiConstants.JsRemoveItem, key);
+        }
+        catch (Exception ex) when (IsCircuitGone(ex))
+        {
+        }
+    }
+
+    // The tab was reloaded or closed (or hot reload restarted the circuit) while a call was on its way: the browser
+    // will never answer, and there is no page left to show an error on, so storage just gives the default.
+    private static bool IsCircuitGone(Exception ex) => ex is JSDisconnectedException or TaskCanceledException;
 
     #endregion
 }

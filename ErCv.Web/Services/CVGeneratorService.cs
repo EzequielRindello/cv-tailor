@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using ErCv.Web.Constants;
 using ErCv.Web.Features.Analysis;
@@ -20,6 +21,10 @@ public class CVGeneratorService
     private static readonly string AllowedFormatsText = string.Join(", ", SupportedFormats);
 
     private static readonly JsonSerializerOptions ProfileReadOptions = new() { PropertyNameCaseInsensitive = true };
+
+    // UX-10 thumbnails: the sample CV per language and its HTML per look, built once (a few dozen small strings)
+    private static readonly ConcurrentDictionary<string, Task<GeneratedCV>> SampleCvCache = new();
+    private static readonly ConcurrentDictionary<string, string> SampleHtmlCache = new();
 
     #endregion
 
@@ -206,6 +211,23 @@ public class CVGeneratorService
         return (pdf, DocumentRenderer.CountPages(pdf));
     }
 
+    /// <summary>
+    /// UX-10: a template as it really prints, filled with the made-up senior sample profile, for the template
+    /// picker's thumbnails. It follows the chosen accent, fonts and language, so the picker shows the actual look.
+    /// </summary>
+    public async Task<string> RenderTemplateSampleAsync(CVTemplate template, string accent, string fonts, string language)
+    {
+        ValidateStyle(language, accent, fonts);
+
+        var key = $"{template}|{accent}|{fonts}|{language}";
+        if (SampleHtmlCache.TryGetValue(key, out var cached)) return cached;
+
+        var sample = CvCloner.Clone(await SampleCvCache.GetOrAdd(language, SampleCvAsync));
+        sample.Accent = accent;
+        sample.Fonts = fonts;
+        return SampleHtmlCache.GetOrAdd(key, _ => DocumentRenderer.ForTemplate(_templatesFolder, template).RenderHtml(sample));
+    }
+
     public IActionResult GetProfiles()
     {
         try
@@ -247,7 +269,10 @@ public class CVGeneratorService
         var missingSkills   = _missingSkillsAnalyzer.Analyze(cvMaster, requirements);
 
         await ReportAsync(progress, GenerationStage.Selecting);
-        var (selectedCV, explanation) = _selector.SelectWithExplanation(cvMaster, requirements, request.AllowTwoPages);
+        var (selectedCV, explanation) = _selector.SelectWithExplanation(
+            cvMaster, requirements, request.AllowTwoPages, request.Language);
+        selectedCV.Accent = request.Accent;
+        selectedCV.Fonts = request.Fonts;
 
         // The analysis reads the CV after the measured page fit, which can trim more than the selection did
         await ReportAsync(progress, GenerationStage.Rendering);
@@ -375,6 +400,24 @@ public class CVGeneratorService
             throw new ArgumentException(ApiConstants.ErrorFormatsRequired);
 
         ValidateFormats(request.Formats);
+        ValidateStyle(request.Language, request.Accent, request.Fonts);
+    }
+
+    private static void ValidateStyle(string? language, string? accent, string? fonts)
+    {
+        if (!ApiConstants.Languages.Contains(language))
+            throw new ArgumentException($"Unsupported language: {language}. Allowed: {string.Join(", ", ApiConstants.Languages)}.");
+        if (!ApiConstants.Accents.Contains(accent))
+            throw new ArgumentException($"Unsupported accent: {accent}. Allowed: {string.Join(", ", ApiConstants.Accents)}.");
+        if (!ApiConstants.FontPairings.Contains(fonts))
+            throw new ArgumentException($"Unsupported fonts: {fonts}. Allowed: {string.Join(", ", ApiConstants.FontPairings)}.");
+    }
+
+    // The sample profile with no job description: what a thumbnail needs is a realistic amount of content
+    private async Task<GeneratedCV> SampleCvAsync(string language)
+    {
+        var master = await LoadCVMasterAsync(ApiConstants.SeniorSampleProfileId);
+        return _selector.SelectAndAdaptCV(master, new JobRequirements(), allowTwoPages: false, language);
     }
 
     private void ValidateProfile(CVMaster? profile)

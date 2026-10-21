@@ -1,0 +1,12 @@
+{{#HasProjects}}
+<section class="cv-section cv-section-projects">
+    <h2 class="cv-section-title">{{Labels.Projects}}</h2>
+    {{#Projects}}
+    <div class="cv-entry">
+        <div class="cv-project-title">{{Name}}{{#Link}}<span class="cv-project-link"> · <a href="https://{{Link}}">{{Link}}</a></span>{{/Link}}</div>
+        {{#Description}}<div class="cv-project-desc">{{Description}}</div>{{/Description}}
+        {{#Technologies}}<div class="cv-project-tech">{{Labels.Technologies}}{{Technologies}}</div>{{/Technologies}}
+    </div>
+    {{/Projects}}
+</section>
+{{/HasProjects}}

@@ -42,6 +42,8 @@ public static class UiConstants
     public const string TemplateHarvard = "harvard";
     public const string TemplateModern = "modern";
     public const string TemplateMinimalist = "minimalist";
+    public const string TemplateCompact = "compact";
+    public const string TemplateExecutive = "executive";
 
     #endregion
 }

@@ -41,8 +41,8 @@ public class CvTextRendererTests
 
         var order = new[]
         {
-            "TEST USER", DocumentConstants.SectionSummary, DocumentConstants.SectionEducation,
-            DocumentConstants.SectionExperience, DocumentConstants.SectionSkills, DocumentConstants.SectionProjects
+            "TEST USER", CvLabels.English.Summary.ToUpperInvariant(), CvLabels.English.Education.ToUpperInvariant(),
+            CvLabels.English.Experience.ToUpperInvariant(), CvLabels.English.Skills.ToUpperInvariant(), CvLabels.English.Projects.ToUpperInvariant()
         };
         var cursor = 0;
         foreach (var item in order)
@@ -102,10 +102,10 @@ public class CvTextRendererTests
 
         var text = CvTextRenderer.ToPlainText(cv);
 
-        Assert.DoesNotContain(DocumentConstants.SectionSummary, text);
-        Assert.DoesNotContain(DocumentConstants.SectionEducation, text);
-        Assert.DoesNotContain(DocumentConstants.SectionSkills, text);
-        Assert.DoesNotContain(DocumentConstants.SectionProjects, text);
+        Assert.DoesNotContain(CvLabels.English.Summary.ToUpperInvariant(), text);
+        Assert.DoesNotContain(CvLabels.English.Education.ToUpperInvariant(), text);
+        Assert.DoesNotContain(CvLabels.English.Skills.ToUpperInvariant(), text);
+        Assert.DoesNotContain(CvLabels.English.Projects.ToUpperInvariant(), text);
     }
 
     [Fact]
