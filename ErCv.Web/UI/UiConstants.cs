@@ -7,6 +7,7 @@ public static class UiConstants
 
     // Functions of window.cvApp in wwwroot/js/app.js
     public const string JsDownloadFile = "cvApp.downloadFile";
+    public const string JsCopyText = "cvApp.copyText";
     public const string JsFocusElement = "cvApp.focusElement";
     public const string JsRevealElement = "cvApp.revealElement";
     public const string JsGetItem = "cvApp.getItem";

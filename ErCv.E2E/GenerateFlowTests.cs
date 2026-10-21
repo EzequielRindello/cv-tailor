@@ -141,6 +141,22 @@ public class GenerateFlowTests : E2ETestBase
     }
 
     [Fact]
+    public async Task Toasts_appear_at_the_top_right_below_the_header()
+    {
+        await GenerateAsync();
+
+        var toast = Page.Locator(".app-toast").Filter(new() { HasText = "CV ready" });
+        await Assertions.Expect(toast).ToBeVisibleAsync();
+
+        var box = (await toast.BoundingBoxAsync())!;
+        var header = (await Page.Locator("#app-header").BoundingBoxAsync())!;
+        var viewport = Page.ViewportSize!;
+        Assert.True(box.Y >= header.Y + header.Height, "the toast overlaps the header");
+        Assert.True(box.Y < viewport.Height / 3, "the toast is not at the top");
+        Assert.True(viewport.Width - (box.X + box.Width) < 40, "the toast is not at the right edge");
+    }
+
+    [Fact]
     public async Task Progress_stages_are_shown_in_order_while_generating()
     {
         await OpenHomeAsync();

@@ -9,7 +9,7 @@ Roadmap, versioning and PR naming live in `features.md`. Architecture overview: 
 
 - Build: `dotnet build er-cv-generator.sln` (must stay at 0 warnings)
 - Fast tests: `dotnet test ErCv.Tests --filter "Category=Component|Category=Unit"` (seconds)
-- Full suite without browsers: `dotnet test ErCv.Tests --filter "Category!=E2E"` (about 3 to 4 min, PDF tests start Chrome)
+- Full suite without browsers: `dotnet test ErCv.Tests --filter "Category!=E2E"` (about 5 to 6 min, PDF tests start Chrome)
 - Browser tests: `dotnet test ErCv.E2E` (uses an installed Chrome or Edge, nothing is downloaded)
 - Corpus tool: `dotnet run --project ErCv.Collector -- refresh | report | samples | check` (`samples` re-picks the app samples offline, run it after changing the parser or `Data/skills.json`)
 - Style fixes the tooling can apply: `dotnet format style er-cv-generator.sln --diagnostics IDE0005 IDE0161`

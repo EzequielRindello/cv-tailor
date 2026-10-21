@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Text;
+using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -11,7 +13,7 @@ using CvHeader = ErCv.Web.Models.Header;
 
 namespace ErCv.Web.Features.Documents;
 
-public class DocumentRenderer
+public partial class DocumentRenderer
 {
     #region Constants
 
@@ -24,6 +26,11 @@ public class DocumentRenderer
     // The Stubble renderer is thread safe and caches parsed templates, so one instance serves every request.
     private static readonly ConcurrentDictionary<string, string> TemplateCache = new();
     private static readonly StubbleVisitorRenderer Stubble = new StubbleBuilder().Build();
+
+    // Every page object of a PDF carries "/Type /Page" ("/Pages" is the page tree, so a letter may not follow).
+    // Chromium writes these dictionaries uncompressed, so counting them is enough and needs no PDF library.
+    [GeneratedRegex(@"/Type\s*/Page(?![A-Za-z])")]
+    private static partial Regex PageObject();
 
     private static readonly SemaphoreSlim BrowserInitSemaphore = new(1, 1);
     private static readonly SemaphoreSlim PdfRenderSlots =
@@ -90,6 +97,9 @@ public class DocumentRenderer
             PdfRenderSlots.Release();
         }
     }
+
+    /// <summary>Number of pages in a PDF produced by <see cref="RenderPdfAsync(string)"/> (MATCH-08 page fit).</summary>
+    public static int CountPages(byte[] pdf) => PageObject().Count(Encoding.Latin1.GetString(pdf));
 
     public static async Task ShutdownAsync()
     {
@@ -328,8 +338,8 @@ public class DocumentRenderer
         para.AppendChild(new Run()).AppendChild(new Text($"{DocumentConstants.DateGap}{edu.GraduationDate}"));
 
         var details = edu.Degree ?? "";
-        if (!string.IsNullOrWhiteSpace(edu.GPA)) details += $" | GPA: {edu.GPA}";
-        if (!string.IsNullOrWhiteSpace(edu.Honors)) details += $" | {edu.Honors}";
+        if (!string.IsNullOrWhiteSpace(edu.GPA)) details += DocumentConstants.DetailSeparator + DocumentConstants.GpaLabel + edu.GPA;
+        if (!string.IsNullOrWhiteSpace(edu.Honors)) details += DocumentConstants.DetailSeparator + edu.Honors;
 
         var detPara = body.AppendChild(new Paragraph());
         var r3 = detPara.AppendChild(new Run());
@@ -343,7 +353,7 @@ public class DocumentRenderer
         var r1 = para.AppendChild(new Run());
         r1.AppendChild(new RunProperties(new Bold()));
         r1.AppendChild(new Text(exp.Role ?? ""));
-        para.AppendChild(new Run()).AppendChild(new Text($"{DocumentConstants.DateGap}{exp.StartDate} – {exp.EndDate}"));
+        para.AppendChild(new Run()).AppendChild(new Text($"{DocumentConstants.DateGap}{exp.StartDate}{DocumentConstants.DateRangeSeparator}{exp.EndDate}"));
 
         var sub = body.AppendChild(new Paragraph());
         var r3 = sub.AppendChild(new Run());
@@ -372,7 +382,7 @@ public class DocumentRenderer
         var r = para.AppendChild(new Run());
         r.AppendChild(new RunProperties(new Bold()));
         var title = project.Name ?? "";
-        if (!string.IsNullOrWhiteSpace(project.Link)) title += $" | {project.Link}";
+        if (!string.IsNullOrWhiteSpace(project.Link)) title += DocumentConstants.DetailSeparator + project.Link;
         r.AppendChild(new Text(title));
 
         if (!string.IsNullOrEmpty(project.Description))

@@ -55,6 +55,9 @@ public class ToastService
 
     private void Show(string text, ToastKind kind, string? actionLabel = null, Func<Task>? action = null)
     {
+        // The same message again (a tracker field saved after another) replaces the one on screen instead of stacking
+        _toasts.RemoveAll(t => t.Text == text && t.Kind == kind);
+
         var toast = new ToastMessage(Guid.NewGuid(), text, kind, actionLabel, action);
         _toasts.Add(toast);
         Changed?.Invoke();

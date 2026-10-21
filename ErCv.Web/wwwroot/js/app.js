@@ -17,6 +17,16 @@ window.cvApp = {
         URL.revokeObjectURL(url);
     },
 
+    // False when the browser refuses (no permission, insecure context), so the caller can say so
+    copyText: async (text) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } catch {
+            return false;
+        }
+    },
+
     getItem: (key) => {
         try { return localStorage.getItem(key); } catch { return null; }
     },

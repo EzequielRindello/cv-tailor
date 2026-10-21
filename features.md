@@ -64,14 +64,14 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | MATCH-05 | JD highlighter | E4 Matching | P1 | M | Done |
 | MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Todo |
 | MATCH-07 | Skill/alias dictionary as data file, tuned on real posts | E4 Matching | P1 | M | Done |
-| MATCH-08 | Page fit measured on the rendered PDF | E4 Matching | P1 | M | Todo |
+| MATCH-08 | Page fit measured on the rendered PDF | E4 Matching | P1 | M | Done |
 | MATCH-09 | Seniority detection from the title and wording | E4 Matching | P1 | S | Done |
 | EDIT-01 | Inline editing in the workspace | E5 Editing | P2 | L | Todo |
 | EDIT-02 | Live HTML preview, documents on download | E5 Editing | P2 | M | Todo |
 | EDIT-03 | Cover letter generator | E5 Editing | P2 | M | Todo |
 | EDIT-04 | CV output language (EN/ES) | E5 Editing | P2 | M | Todo |
 | EDIT-05 | More templates | E5 Editing | P3 | M | Todo |
-| EDIT-06 | Plain-text / Markdown export | E5 Editing | P3 | S | Todo |
+| EDIT-06 | Plain-text / Markdown export | E5 Editing | P3 | S | Done |
 | APP-01 | Application tracker | E6 Workflow | P2 | M | Done |
 | APP-02 | Re-open a past generation | E6 Workflow | P2 | S | Done |
 | APP-03 | Sample JD gallery | E6 Workflow | P0 | S | Done |
@@ -132,7 +132,7 @@ Found during the roadmap review. Each one is covered by a feature below.
 | F3 | "Most recent role" sorts `EndDate` strings lexically, so `"May 2020"` ranks above `"Dec 2023"`. | `Helpers/MatchScoreCalculator.cs:67`, `Helpers/SummaryGenerator.cs:59` | MATCH-03 (fixed) |
 | F4 | `ContainsTerm` copied 3 times, seniority map duplicated, year parsing duplicated. | `RelevanceScorer`, `MissingSkillsAnalyzer`, `KeywordAnalyzer`, `MatchScoreConstants`, `SummaryGenerator` | ENG-02 (fixed) |
 | F5 | Generated CV shares `Header`/`Education` references with the master; page constraint mutates in place (caller clones as a workaround). | `Helpers/CVSelector.cs:59`, `Helpers/PageConstraintHelper.cs`, `Components/Pages/Home.razor:300` | ENG-02 (fixed) |
-| F6 | Page fit is estimated by character count, not measured; a "1-page" CV can spill over. | `Helpers/PageConstraintHelper.cs` | MATCH-08, TEST-04 |
+| F6 | Page fit is estimated by character count, not measured; a "1-page" CV can spill over. | `Helpers/PageConstraintHelper.cs` | MATCH-08 (fixed) |
 | F7 | Generate auto-downloads files before the user sees the preview. | `Components/Pages/Home.razor:268` | UX-04 |
 | F8 | 500 responses include `ex.Message`; logging uses `Console.WriteLine`. | `Services/CVGeneratorService.cs:63`, helpers | ENG-03 (fixed) |
 | F9 | Mixed namespaces (`ErCvApi.*` and `ErCv.Web.*`); helpers built with `new` instead of DI. | Whole project | Namespaces fixed in the system hardening (H8); DI is ENG-01 |
@@ -444,6 +444,13 @@ Verify: manual check plus E2E that the indicator appears and disappears.
 
 Verify: E2E for empty JD and no format selected.
 
+Follow-up (during M4, owner's request):
+- Toasts sit at the top right, below the header (`--header-height`), slide in from the right, and have no colored left border: a card with the icon in a soft tinted circle per kind.
+- More actions confirm with a toast: CV ready, job description pasted with the shortcut, start over, tracker entry updated, removed from history, history cleared, and on the profile page: base profile loaded, profile cleared, imported, export and blank template downloads (with a retry on failure), and save blocked by validation errors (with the count). Picking a template, format or page mode has no toast: the selection shows on screen.
+- The profile page's inline status line ("Saved in this browser", "Imported...", "Profile cleared") is replaced by the toast with the same text, so the message is not shown and announced twice.
+- The same message again (a tracker field saved after another) replaces the toast on screen instead of stacking.
+- Tests: `ToastServiceTests` (unit), E2E `Toasts_appear_at_the_top_right_below_the_header`; the existing E2E that wait for "Imported" and "Saved in this browser" now find the toast.
+
 ### UX-08: Accessibility
 **Status:** Done (keyboard-only manual pass still welcome) · **Priority:** P1 · **Effort:** M
 
@@ -647,12 +654,19 @@ Done notes:
 - F22, found while closing this item, fixed in the same milestone: the keywords tab takes its technical keywords from the dictionary (`KeywordAnalyzerTests`).
 
 ### MATCH-08: Page fit measured on the rendered PDF
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** Done · **Priority:** P1 · **Effort:** M
 
-- [ ] After rendering, count PDF pages (or measure DOM height via Puppeteer); trim and re-render until it fits (F6)
-- [ ] Character estimate kept only as a first pass
+- [x] After rendering, count PDF pages (or measure DOM height via Puppeteer); trim and re-render until it fits (F6)
+- [x] Character estimate kept only as a first pass
 
 Verify: TEST-04 page count assertion over the whole corpus.
+
+Done notes:
+- `PageConstraintHelper.FitMeasuredAsync` renders the CV and counts the real pages (`DocumentRenderer.CountPages`, the page objects of the PDF Chrome wrote). If it spills over it trims in the same order as the estimate (one step at a time: last bullet of the longest experience, projects, oldest experience, last skill) and binary searches the number of steps, so a spill costs about 4 or 5 renders. A CV that already fits costs nothing extra: the measured PDF is the one returned. The estimate and the measured fit share one trim step (`TrimOneStep`).
+- `CVGeneratorService` fits right after selection, then runs the keyword and ATS analysis, the explanation (`CVSelector.FollowFinalCv`), the preview and the DOCX on the fitted CV, so every output shows the same CV. Regenerate goes through the same path. Without a PDF in the request there is nothing to measure and the estimate stands.
+- Measured over 5 profiles x 17 JDs (the 9 hand-written ones and one real post per role family) x 3 templates x 2 page modes: only Minimalist in one-page mode spilled over (57 of 570). It loses 2 or 3 bullets, and usually the project, to fit. Harvard and Modern already fit with the estimate. Tightening Minimalist's spacing (UX-10) would keep more content.
+- Tests: `PdfTests.Page_count_respects_the_selected_mode` now covers every template (the skipped Minimalist case is gone) over the whole matrix including the corpus; `Page_counter_agrees_with_a_pdf_reader` and `Page_counter_counts_every_page_of_a_long_pdf` check the counter against PdfPig; `PageConstraintHelperTests` (fake renderer: no extra render when it fits, smallest trim, few renders, two-page mode, nothing fits); `PageFitTests` (service: one-page PDF, preview, DOCX and explanation show the fitted CV, and the measured fit trims what the estimate keeps).
+- The suite without browsers takes about 5 to 6 minutes now (the page count runs over the corpus, about 0.4 s per PDF).
 
 ### MATCH-09: Seniority detection
 **Status:** Done · **Priority:** P1 · **Effort:** S
@@ -720,11 +734,16 @@ Verify: document tests for both languages.
 Verify: TEST-04 across new templates.
 
 ### EDIT-06: Plain-text / Markdown export
-**Status:** Todo · **Priority:** P3 · **Effort:** S
+**Status:** Done · **Priority:** P3 · **Effort:** S
 
-- [ ] Copy-to-clipboard and `.md`/`.txt` download for ATS paste-in fields
+- [x] Copy-to-clipboard and `.md`/`.txt` download for ATS paste-in fields
 
 Verify: unit test of the text renderer.
+
+Done notes:
+- `Features/Documents/CvTextRenderer.cs` writes the CV as plain text or Markdown: same sections and order as the DOCX, nothing that is not in the CV, missing fields leave no stray separator, Markdown escapes the characters it would read as formatting (`C#`, `*nix`). The DOCX now shares its separators and labels (`DocumentConstants.DetailSeparator`, `DateRangeSeparator`, `GpaLabel`).
+- `Components/Shared/TextExport.razor` sits in the preview header (`CVPreview` takes an `Actions` fragment): "Copy text" (plain text, `cvApp.copyText`; a refused clipboard points to the .txt), ".md" and ".txt". Built in the circuit from the generated CV, so nothing is stored in the session or added to the API.
+- Tests: `CvTextRendererTests` (unit: order, contact line, separators, empty sections, Markdown headings and escaping, every bullet and skill of every fixture CV over every JD), `TextExportTests` (bUnit: clipboard text, refused copy, both downloads, disabled while regenerating).
 
 ---
 

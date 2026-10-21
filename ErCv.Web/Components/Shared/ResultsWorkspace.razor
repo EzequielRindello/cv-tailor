@@ -96,7 +96,11 @@ else
 
         <div class="details-layout" data-pane="@_pane">
             <div class="details-preview-panel">
-                <CVPreview Html="@Analysis.PreviewHtml" />
+                <CVPreview Html="@Analysis.PreviewHtml">
+                    <Actions>
+                        <TextExport Cv="Analysis.GeneratedCV" Disabled="Loading" />
+                    </Actions>
+                </CVPreview>
             </div>
 
             <div class="details-analysis-panel">

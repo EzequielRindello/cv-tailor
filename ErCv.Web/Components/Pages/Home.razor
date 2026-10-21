@@ -239,6 +239,7 @@ else
     {
         if (_loading || _view != ViewGenerate) return;
         _jobDescription = text;
+        Toasts.Info("Job description pasted");
         StateHasChanged();
     });
 
@@ -301,7 +302,7 @@ else
         {
             using var stream = new MemoryStream(bytes);
             using var reference = new DotNetStreamReference(stream);
-            await JS.InvokeVoidAsync(UiConstants.JsDownloadFile, CvService.BuildFileName(format), reference);
+            await JS.InvokeVoidAsync(UiConstants.JsDownloadFile, BuildFileName(format), reference);
             Toasts.Success($"Download started: {format.ToUpperInvariant()}");
         }
         catch (Exception ex) when (ex is JSException or InvalidOperationException)
@@ -352,6 +353,7 @@ else
             _documents = documents;
             _analysis = analysis;
             _focusResults = true;
+            Toasts.Success("CV ready");
             _announcement = $"CV ready. Match score {analysis.MatchScore.Overall} percent. ATS score {analysis.ATSScore.Overall} out of {ATSConstants.MaxScore}.";
             _history = await Store.AddToHistoryAsync(_jobDescription, analysis.MatchScore.Overall, TemplateLabel(), new HistoryEntry
             {
@@ -436,14 +438,23 @@ else
         await GenerateAsync();
     }
 
-    private Task SaveHistoryEntry(HistoryEntry entry) => Store.UpdateHistoryEntryAsync(entry);
+    private async Task SaveHistoryEntry(HistoryEntry entry)
+    {
+        await Store.UpdateHistoryEntryAsync(entry);
+        Toasts.Success("Application updated");
+    }
 
-    private async Task DeleteHistoryEntry(long id) => _history = await Store.RemoveFromHistoryAsync(id);
+    private async Task DeleteHistoryEntry(long id)
+    {
+        _history = await Store.RemoveFromHistoryAsync(id);
+        Toasts.Success("Removed from history");
+    }
 
     private async Task ClearHistory()
     {
         await Store.ClearHistoryAsync();
         _history = new();
+        Toasts.Success("History cleared");
     }
 
     private async Task BackToGenerate()
@@ -471,6 +482,7 @@ else
         _view = ViewGenerate;
         _jdError = null;
         _formatError = null;
+        Toasts.Info("Started over");
         await JS.InvokeVoidAsync(UiConstants.JsScrollToTop);
     }
 

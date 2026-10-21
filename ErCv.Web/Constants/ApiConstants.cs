@@ -40,6 +40,10 @@ public static class ApiConstants
     public const string FormatPdf = "pdf";
     public const string FormatDocx = "docx";
 
+    // Text exports (EDIT-06) are built in the browser session from the generated CV, not stored like the documents
+    public const string FormatMarkdown = "md";
+    public const string FormatText = "txt";
+
     public const string ContentTypePdf = "application/pdf";
     public const string ContentTypeDocx = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 

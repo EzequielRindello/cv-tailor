@@ -1,8 +1,11 @@
 using System.Collections.Concurrent;
 using ErCv.Tests.Fixtures;
+using ErCv.Web.Features.Documents;
+using ErCv.Web.Features.Selection;
 using ErCv.Web.Models;
 using UglyToad.PdfPig;
 using static ErCv.Tests.Documents.DocumentSupport;
+using static ErCv.Tests.Support.Build;
 
 namespace ErCv.Tests.Documents;
 
@@ -12,21 +15,20 @@ public class PdfTests
 {
     public static TheoryData<string, string, CVTemplate, bool> Cases => ProfileJdTemplatePages();
 
+    // MATCH-08: the page count is measured, so it holds for every template and every real post too.
     public static TheoryData<string, string, CVTemplate, bool> PageCountCases =>
-        Filter((t, two) => !(t == CVTemplate.Minimalist && !two));
-
-    public static TheoryData<string, string, CVTemplate, bool> MinimalistOnePageCases =>
-        Filter((t, two) => t == CVTemplate.Minimalist && !two);
+        Filter((_, _) => true, FixtureLoader.AllJdNames);
 
     // The Modern template is two columns, so its linear reading order is not meaningful for an ATS check.
     public static TheoryData<string, string, CVTemplate, bool> ReadingOrderCases =>
         Filter((t, _) => t != CVTemplate.Modern);
 
-    private static TheoryData<string, string, CVTemplate, bool> Filter(Func<CVTemplate, bool, bool> keep)
+    private static TheoryData<string, string, CVTemplate, bool> Filter(
+        Func<CVTemplate, bool, bool> keep, IEnumerable<string>? jds = null)
     {
         var data = new TheoryData<string, string, CVTemplate, bool>();
         foreach (var profile in FixtureLoader.ProfileIds)
-        foreach (var jd in FixtureLoader.JdNames)
+        foreach (var jd in jds ?? FixtureLoader.JdNames)
         foreach (var template in Enum.GetValues<CVTemplate>())
         foreach (var twoPages in new[] { false, true })
             if (keep(template, twoPages)) data.Add(profile, jd, template, twoPages);
@@ -36,12 +38,15 @@ public class PdfTests
     // Rendering dominates the run time, so each combination is rendered once and shared by the tests.
     private static readonly ConcurrentDictionary<string, Task<(byte[], GeneratedCV)>> Cache = new();
 
+    // Same path as the service: selection, then the page fit measured on the rendered PDF.
     private static Task<(byte[] Pdf, GeneratedCV Cv)> RenderAsync(
         string profile, string jd, CVTemplate template, bool twoPages) =>
         Cache.GetOrAdd($"{profile}|{jd}|{template}|{twoPages}", async _ =>
         {
-            var cv = Generate(profile, jd, twoPages);
-            return (await Renderer(template).RenderPdfAsync(cv), cv);
+            var renderer = Renderer(template);
+            var (cv, pdf) = await new PageConstraintHelper().FitMeasuredAsync(
+                Generate(profile, jd, twoPages), twoPages, renderer.RenderPdfAsync, DocumentRenderer.CountPages);
+            return (pdf, cv);
         });
 
     private static string ExtractedText(byte[] pdf)
@@ -88,11 +93,28 @@ public class PdfTests
     public Task Page_count_respects_the_selected_mode(string profile, string jd, CVTemplate template, bool twoPages) =>
         AssertPageCount(profile, jd, template, twoPages);
 
-    // F6: page fit is estimated by character count, not measured. Minimalist lays out taller than the estimate.
-    [Theory(Skip = "MATCH-08: Minimalist 1-page output spills onto a second page (F6)")]
-    [MemberData(nameof(MinimalistOnePageCases))]
-    public Task Minimalist_one_page_mode_stays_on_one_page(string profile, string jd, CVTemplate template, bool twoPages) =>
-        AssertPageCount(profile, jd, template, twoPages);
+    [Fact]
+    public async Task Page_counter_counts_every_page_of_a_long_pdf()
+    {
+        var bullets = Enumerable.Range(0, 8).Select(i => $"Bullet {i} " + string.Join(" ", Enumerable.Repeat("delivered", 25))).ToArray();
+        var cv = Generated(Enumerable.Range(0, 8).Select(i => Exp(role: $"Role {i}", bullets: bullets)).ToArray());
+
+        var pdf = await Renderer(CVTemplate.Harvard).RenderPdfAsync(cv);
+
+        using var doc = PdfDocument.Open(pdf);
+        Assert.True(doc.NumberOfPages > 2);
+        Assert.Equal(doc.NumberOfPages, DocumentRenderer.CountPages(pdf));
+    }
+
+    [Theory]
+    [MemberData(nameof(Cases))]
+    public async Task Page_counter_agrees_with_a_pdf_reader(string profile, string jd, CVTemplate template, bool twoPages)
+    {
+        var (pdf, _) = await RenderAsync(profile, jd, template, twoPages);
+
+        using var doc = PdfDocument.Open(pdf);
+        Assert.Equal(doc.NumberOfPages, DocumentRenderer.CountPages(pdf));
+    }
 
     // F16: the Modern grid was wider than the printable area (38% + 62% + gap), so Chromium clipped the end of
     // long lines and the text layer lost characters. Covered for every template.

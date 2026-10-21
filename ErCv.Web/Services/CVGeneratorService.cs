@@ -33,6 +33,7 @@ public class CVGeneratorService
     private readonly ATSChecker _atsChecker;
     private readonly ProfileValidator _profileValidator = new();
     private readonly JdHighlighter _jdHighlighter = new();
+    private readonly PageConstraintHelper _pageConstraint = new();
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<CVGeneratorService> _logger;
     private readonly string _harvardTemplatePath;
@@ -214,7 +215,7 @@ public class CVGeneratorService
     /// <summary>Loads a stored profile so the visitor can export it (PROF-02).</summary>
     public Task<CVMaster> GetProfileAsync(string profileId) => LoadCVMasterAsync(profileId);
 
-    public string BuildFileName(string format) =>
+    public static string BuildFileName(string format) =>
         ApiConstants.FileNamePrefix + DateTime.Now.ToString(ApiConstants.FileNameDateFormat) + "." + format;
 
     #endregion
@@ -234,17 +235,17 @@ public class CVGeneratorService
         var missingSkills   = _missingSkillsAnalyzer.Analyze(cvMaster, requirements);
 
         await ReportAsync(progress, GenerationStage.Selecting);
-        var (generatedCV, explanation) = _selector.SelectWithExplanation(cvMaster, requirements, request.AllowTwoPages);
-        var keywordAnalysis = _keywordAnalyzer.Analyze(request.JobDescription, generatedCV);
+        var (selectedCV, explanation) = _selector.SelectWithExplanation(cvMaster, requirements, request.AllowTwoPages);
 
+        // The analysis reads the CV after the measured page fit, which can trim more than the selection did
         await ReportAsync(progress, GenerationStage.Rendering);
+        var renderer = new DocumentRenderer(ResolveTemplatePath(request.Template));
+        var (generatedCV, previewHtml, documents) =
+            await RenderDocumentsAsync(request.Formats, renderer, selectedCV, request.AllowTwoPages);
+        explanation = CVSelector.FollowFinalCv(explanation, generatedCV);
+
+        var keywordAnalysis = _keywordAnalyzer.Analyze(request.JobDescription, generatedCV);
         var atsScore        = _atsChecker.Check(generatedCV, requirements, request.Template);
-
-        var templatePath = ResolveTemplatePath(request.Template);
-        var renderer = new DocumentRenderer(templatePath);
-
-        var previewHtml = renderer.RenderHtml(generatedCV);
-        var documents = await RenderDocumentsAsync(request.Formats, renderer, generatedCV, previewHtml);
 
         var analysis = new AnalysisResult
         {
@@ -287,17 +288,20 @@ public class CVGeneratorService
             }
         }
 
-        cv = new PageConstraintHelper().EnforcePageConstraint(cv, request.AllowTwoPages);
+        cv = _pageConstraint.EnforcePageConstraint(cv, request.AllowTwoPages);
 
         var renderer = new DocumentRenderer(ResolveTemplatePath(request.Template));
-        var previewHtml = renderer.RenderHtml(cv);
-        var documents = await RenderDocumentsAsync(request.Formats, renderer, cv, previewHtml);
+        var (_, previewHtml, documents) = await RenderDocumentsAsync(request.Formats, renderer, cv, request.AllowTwoPages);
 
         return (documents, previewHtml);
     }
 
-    private async Task<Dictionary<string, byte[]>> RenderDocumentsAsync(
-        IEnumerable<string> formats, DocumentRenderer renderer, GeneratedCV cv, string html)
+    /// <summary>
+    /// Renders the requested documents. With a PDF, the page count is measured on the real PDF and the CV trimmed
+    /// further if it spills over (MATCH-08), so the preview, the PDF and the DOCX all show the fitted CV.
+    /// </summary>
+    private async Task<(GeneratedCV Cv, string Html, Dictionary<string, byte[]> Documents)> RenderDocumentsAsync(
+        IEnumerable<string> formats, DocumentRenderer renderer, GeneratedCV cv, bool allowTwoPages)
     {
         var docs = new Dictionary<string, byte[]>();
         var normalized = formats
@@ -305,13 +309,31 @@ public class CVGeneratorService
             .Select(f => f.Trim().ToLowerInvariant())
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
+        string html;
         if (normalized.Contains(ApiConstants.FormatPdf))
-            docs[ApiConstants.FormatPdf] = await renderer.RenderPdfAsync(html);
+        {
+            (cv, var fitted) = await _pageConstraint.FitMeasuredAsync(
+                cv,
+                allowTwoPages,
+                async candidate =>
+                {
+                    var candidateHtml = renderer.RenderHtml(candidate);
+                    return (Html: candidateHtml, Pdf: await renderer.RenderPdfAsync(candidateHtml));
+                },
+                rendered => DocumentRenderer.CountPages(rendered.Pdf));
+
+            html = fitted.Html;
+            docs[ApiConstants.FormatPdf] = fitted.Pdf;
+        }
+        else
+        {
+            html = renderer.RenderHtml(cv);
+        }
 
         if (normalized.Contains(ApiConstants.FormatDocx))
             docs[ApiConstants.FormatDocx] = renderer.RenderDocx(cv);
 
-        return docs;
+        return (cv, html, docs);
     }
 
     private string ResolveTemplatePath(CVTemplate template) => template switch

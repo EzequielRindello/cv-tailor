@@ -128,6 +128,10 @@ public class CVSelector
         return (generatedCV, BuildExplanation(generatedCV, selected.Select(x => x.Explanation)));
     }
 
+    /// <summary>The measured page fit (MATCH-08) can trim after selection; this narrows the explanation to the final CV.</summary>
+    public static SelectionExplanation FollowFinalCv(SelectionExplanation explanation, GeneratedCV finalCv) =>
+        BuildExplanation(finalCv, explanation.Experiences);
+
     #endregion
 
     #region Private Methods

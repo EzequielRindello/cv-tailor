@@ -24,6 +24,9 @@ public static class DocumentConstants
     public const uint SectionBorderSize = 6;             // eighths of a point
     public const string DateGap = "     ";
     public const string TechnologiesLabel = "Technologies: ";
+    public const string GpaLabel = "GPA: ";
+    public const string DetailSeparator = " | ";
+    public const string DateRangeSeparator = " – ";
 
     #endregion
 

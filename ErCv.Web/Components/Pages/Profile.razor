@@ -3,6 +3,7 @@
 @inject BrowserStore Store
 @inject IJSRuntime JS
 @inject ToastService Toasts
+@inject ILogger<Profile> Logger
 
 <PageTitle>My profile - CV Generator</PageTitle>
 
@@ -195,7 +196,6 @@
                             @onclick="CheckHealth">
                         <i class="bi bi-heart-pulse" aria-hidden="true"></i> Check profile health
                     </button>
-                    <span class="profile-saved" role="status">@_status</span>
                 </div>
                 @if (_health != null)
                 {
@@ -225,7 +225,6 @@
     private List<HealthFinding>? _health;
     private bool _loaded;
     private bool _revealHealth;
-    private string _status = string.Empty;
 
     #endregion
 
@@ -255,14 +254,18 @@
 
     private async Task SaveAsync()
     {
-        _status = string.Empty;
         var issues = Validator.Validate(_profile).Issues;
         _errors = issues.GroupBy(i => i.Path).ToDictionary(g => g.Key, g => g.First().Message);
-        if (_errors.Count > 0) return;
+        if (_errors.Count > 0)
+        {
+            Toasts.Error(_errors.Count == 1
+                ? "Not saved: 1 field needs fixing"
+                : $"Not saved: {_errors.Count} fields need fixing");
+            return;
+        }
 
         await Store.SaveMyProfileAsync(_profile);
-        _status = "Saved in this browser.";
-        Toasts.Success("Profile saved");
+        Toasts.Success("Saved in this browser");
     }
 
     private void CheckHealth()
@@ -276,7 +279,7 @@
         _profile = await CvService.GetProfileAsync(profileId);
         Normalize(_profile);
         _errors = new();
-        _status = string.Empty;
+        Toasts.Info("Profile loaded in the editor. Save it to keep it.");
     }
 
     private async Task ClearAsync()
@@ -284,7 +287,7 @@
         await Store.ClearMyProfileAsync();
         _profile = Blank();
         _errors = new();
-        _status = "Profile cleared.";
+        Toasts.Success("Profile cleared");
     }
 
     private void ImportProfile(CVMaster imported)
@@ -292,7 +295,7 @@
         Normalize(imported);
         _profile = imported;
         _errors = new();
-        _status = "Imported. Review it and save.";
+        Toasts.Success("Imported. Review it and save.");
     }
 
     private Task ExportAsync() => DownloadAsync(ExportFileName, ProfileJson.Serialize(_profile));
@@ -348,9 +351,18 @@
 
     private async Task DownloadAsync(string fileName, string text)
     {
-        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(text));
-        using var reference = new DotNetStreamReference(stream);
-        await JS.InvokeVoidAsync(UiConstants.JsDownloadFile, fileName, reference);
+        try
+        {
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(text));
+            using var reference = new DotNetStreamReference(stream);
+            await JS.InvokeVoidAsync(UiConstants.JsDownloadFile, fileName, reference);
+            Toasts.Success($"Download started: {fileName}");
+        }
+        catch (Exception ex) when (ex is JSException or InvalidOperationException)
+        {
+            Logger.LogError(ex, "Error downloading {FileName}", fileName);
+            Toasts.Error($"Could not download {fileName}", "Retry", () => DownloadAsync(fileName, text));
+        }
     }
 
     #endregion
