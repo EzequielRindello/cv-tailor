@@ -74,18 +74,28 @@ public class SummaryGeneratorTests
         Assert.StartsWith("Senior ", Summary(cv, Req()));
     }
 
-    // H10: the summary and the selector share one tech-role list, so a consultant role counts as tech years here too
+    // H10: the summary and the selector share one tech-role list, and a broad word like "specialist" is not on it
     [Fact]
-    public void Years_of_experience_count_every_role_the_selector_treats_as_tech()
+    public void Years_of_experience_do_not_count_a_specialist_role_as_tech()
     {
         var cv = Master(new[]
         {
             Exp(role: "Software Engineer", start: $"Jan {Year(3)}"),
-            Exp(role: "IT Consultant", start: $"Jan {Year(6)}", end: $"Jan {Year(3)}"),
-            Exp(role: "Barista", start: $"Jan {Year(12)}", end: $"Jan {Year(6)}")
+            Exp(role: "Certification Specialist", start: $"Jan {Year(6)}", end: $"Jan {Year(3)}")
         });
 
-        Assert.Contains("with 6+ years of experience", Summary(cv, Req()));
+        Assert.Contains("with 3+ years of experience", Summary(cv, Req()));
+    }
+
+    [Fact]
+    public void Specializing_in_continues_the_first_sentence()
+    {
+        var cv = Master(new[] { Exp(role: "Backend Engineer", start: $"Jan {Year(4)}") });
+
+        var s = Summary(cv, Req(skills: new[] { "go" }), new[] { "go" });
+
+        Assert.Contains("with 4+ years of experience, specializing in go.", s);
+        Assert.DoesNotContain(". specializing", s);
     }
 
     [Fact]

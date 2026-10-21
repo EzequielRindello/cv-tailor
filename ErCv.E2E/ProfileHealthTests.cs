@@ -63,5 +63,8 @@ public class ProfileHealthTests : E2ETestBase
         await Page.Locator("#profile-health-check").ClickAsync();
 
         await Assertions.Expect(Page.Locator("#profile-health [data-rule]")).ToHaveCountAsync(4);
+        // The button takes you to the card: it is scrolled into view and holds the focus
+        await Assertions.Expect(Page.Locator("#profile-health")).ToBeInViewportAsync();
+        await Assertions.Expect(Page.Locator("#profile-health")).ToBeFocusedAsync();
     }
 }

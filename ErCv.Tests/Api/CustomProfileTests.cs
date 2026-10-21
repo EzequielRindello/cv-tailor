@@ -13,7 +13,7 @@ public class CustomProfileTests
     public static TheoryData<string, string> Matrix()
     {
         var data = new TheoryData<string, string>();
-        foreach (var profile in new[] { "cv-master", "cv-master-senior", "cv-master-junior" })
+        foreach (var profile in new[] { FixtureLoader.DemoProfileId, "cv-master", "cv-master-senior", "cv-master-junior" })
         foreach (var jd in FixtureLoader.JdNames.Where(n => n != "empty")) // an empty JD is rejected up front
             data.Add(profile, jd);
         return data;
@@ -64,7 +64,7 @@ public class CustomProfileTests
     public async Task Custom_profile_matches_the_stored_profile_with_the_same_content()
     {
         using var app = new ApiApp();
-        var master = FixtureLoader.LoadProfile("cv-master");
+        var master = FixtureLoader.LoadProfile(FixtureLoader.DemoProfileId);
 
         var (_, custom) = await Build(app, Request("backend-go-kafka"), master);
         var (_, stored) = await app.InScopeAsync(sp => ((CVGeneratorService)sp.GetService(typeof(CVGeneratorService))!)

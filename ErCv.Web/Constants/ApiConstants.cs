@@ -22,7 +22,10 @@ public static class ApiConstants
 
     #region Profiles
 
+    // The creator's own profile (PROF-06); what the API uses when a request names no profile
     public const string DefaultProfileId = "cv-master";
+    // A made-up senior profile, the UI's first choice, so a visitor sees what a full CV looks like
+    public const string SeniorSampleProfileId = "cv-master-senior";
     public const string ProfileFilePattern = "cv-master*.json";
     public const string ProfileIdPrefix = "cv-master-";
     public const string DefaultProfileName = "Default";

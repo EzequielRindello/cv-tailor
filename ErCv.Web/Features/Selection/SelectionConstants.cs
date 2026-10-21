@@ -7,14 +7,14 @@ public static class SelectionConstants
 
     /// <summary>
     /// A role whose title holds one of these is a tech role: the selector keeps its full score for a technical job
-    /// description and the summary counts its years. One list, so both agree on what a tech role is.
+    /// description and the summary counts its years. One list, so both agree on what a tech role is. Broad words
+    /// such as "specialist" or "consultant" are left out: "Certification Specialist" is not a tech role.
     /// </summary>
     public static readonly string[] TechRoleKeywords =
     {
         "developer", "engineer", "software", "programmer", "architect",
         "devops", "sre", "data", "backend", "frontend", "fullstack",
-        "full stack", "full-stack", "tech", "cloud", "platform", "analyst",
-        "consultant", "specialist"
+        "full stack", "full-stack", "tech", "cloud", "platform"
     };
 
     #endregion

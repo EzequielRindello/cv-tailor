@@ -56,13 +56,12 @@
                             else if (_step == StepProfile)
                             {
                                 <div class="form-section form-section-primary">
-                                    <ProfileSourceSwitcher Value="@_settings.ProfileSource"
+                                    <ProfileSourceSwitcher Profiles="_profiles"
+                                                           @bind-ProfileId="_profileId"
+                                                           Value="@_settings.ProfileSource"
                                                            ValueChanged="SetProfileSource"
                                                            HasMine="_myProfile != null"
                                                            Disabled="_loading" />
-                                    <ProfileSelector Profiles="_profiles"
-                                                     @bind-Value="_profileId"
-                                                     Disabled="@(_loading || ActiveProfile != null)" />
                                     <TemplateSelector Value="@_settings.Template"
                                                       ValueChanged="SetTemplate"
                                                       Disabled="_loading" />
@@ -153,7 +152,7 @@ else
     private string _view = ViewGenerate;
     private int _step = StepJobDescription;
     private string _jobDescription = string.Empty;
-    private string _profileId = ApiConstants.DefaultProfileId;
+    private string _profileId = ApiConstants.SeniorSampleProfileId;
     private CVMaster? _myProfile;
     private List<ProfileInfo> _profiles = new() { new(ApiConstants.DefaultProfileId, ApiConstants.DefaultProfileName) };
     private AppSettings _settings = new();
@@ -479,7 +478,7 @@ else
 
     #region Helpers
 
-    /// <summary>The profile sent with the request: the saved "My profile" if selected. Null means a stored demo profile.</summary>
+    /// <summary>The profile sent with the request: the saved "My profile" if selected. Null means the stored profile chosen in step 2.</summary>
     private CVMaster? ActiveProfile => _settings.ProfileSource == UiConstants.ProfileSourceMine ? _myProfile : null;
 
     private void RequireJobDescription()
@@ -497,7 +496,7 @@ else
 
     private string TemplateLabel() => TemplateEnum().ToString();
 
-    /// <summary>Returns a message when the profile the entry used is gone and the demo profile is used instead.</summary>
+    /// <summary>Returns a message when the profile the entry used is gone and a stored profile is used instead.</summary>
     private string? RestoreProfile(HistoryEntry entry)
     {
         if (entry.ProfileSource == null) return null;
@@ -514,8 +513,8 @@ else
         _settings.ProfileSource = UiConstants.ProfileSourceDemo;
         return entry.ProfileSource switch
         {
-            UiConstants.ProfileSourceImported => "The imported profile was not kept, so the demo profile was used.",
-            UiConstants.ProfileSourceMine => "Your saved profile was not found, so the demo profile was used.",
+            UiConstants.ProfileSourceImported => "The imported profile was not kept, so a sample profile was used.",
+            UiConstants.ProfileSourceMine => "Your saved profile was not found, so a sample profile was used.",
             _ => null
         };
     }

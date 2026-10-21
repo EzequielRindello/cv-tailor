@@ -26,12 +26,28 @@ public class ProfileValidatorTests
         Validator.Validate(profile).Issues.Select(i => i.Path).ToArray();
 
     [Theory]
+    [InlineData("demo")]
     [InlineData("cv-master")]
     [InlineData("cv-master-senior")]
     [InlineData("cv-master-junior")]
     public void Shipped_profiles_are_valid(string id)
     {
         Assert.True(Validator.Validate(FixtureLoader.LoadProfile(id)).IsValid);
+    }
+
+    // Every profile the app ships (the senior sample and the creator's) parses and validates
+    [Fact]
+    public void Every_stored_profile_in_the_app_is_valid()
+    {
+        var files = Directory.GetFiles(Path.Combine(FixtureLoader.RepoRoot(), "ErCv.Web", "Data"), "cv-master*.json");
+
+        Assert.Equal(2, files.Length);
+        Assert.All(files, f =>
+        {
+            var (profile, issues) = ProfileJson.Parse(File.ReadAllText(f));
+            Assert.Empty(issues);
+            Assert.True(Validator.Validate(profile!).IsValid, f);
+        });
     }
 
     [Fact]

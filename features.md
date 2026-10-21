@@ -55,7 +55,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | Done |
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
 | PROF-04 | Profile health check | E3 Your profile | P2 | M | Done |
-| PROF-06 | The owner's real profile as the demo | E3 Your profile | P1 | S | Todo |
+| PROF-06 | The owner's real profile as the demo | E3 Your profile | P1 | S | Done |
 | PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Todo |
 | MATCH-01 | Fix fuzzy-match false positives | E4 Matching | P0 | S | Done |
 | MATCH-02 | Word-boundary ATS keyword density | E4 Matching | P0 | S | Done |
@@ -179,7 +179,7 @@ A review of the C# code before M3.2, branch `feature/system-hardening`. No behav
 | H7 | Security: no security headers or HSTS; `UseExceptionHandler("/Error")` pointed at a page that did not exist; the container ran as root with Chrome `--no-sandbox`. | Fixed: headers, HSTS, error page, non-root user |
 | H8 | Structure: the whole domain sat in `Helpers/`, constants in `Data/Constants/Helpers/`, namespaces did not match folders. | Fixed: `Features/<Feature>/`, namespaces = folders, file-scoped |
 | H9 | Magic numbers and repeated literals (scoring weights, limits, profile ids, JS interop names, template keys) inline across helpers and components. | Fixed: named constants, hosting values in `appsettings.json` |
-| H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Fixed with MATCH-07: one list, `SelectionConstants.TechRoleKeywords` (the union, so the summary now also counts analyst, consultant and specialist roles as tech years) |
+| H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Fixed with MATCH-07: one list, `SelectionConstants.TechRoleKeywords`, the summary's stricter one plus nothing broad: the selector no longer treats analyst, consultant or specialist roles as tech (a union was tried first and made "Certification Specialist" count as tech years in the real demo profile) |
 | H11 | Swashbuckle 6.5.0 is old (Development only). | Open: ENG-06 (M5) replaces it |
 
 ### Open items after M3
@@ -515,17 +515,28 @@ Notes: `ProfileHealthChecker.Check` returns `HealthFinding(rule, path, message)`
 Verify: `ProfileHealthCheckerTests` (one group per rule); `ProfileHealthTests` E2E (checklist on `/profile` shows warnings and the CV still generates; step 3 has no checklist).
 
 ### PROF-06: The owner's real profile as the demo
-**Status:** Todo · **Priority:** P1 · **Effort:** S
+**Status:** Done · **Priority:** P1 · **Effort:** S
 
 Why: the demo profile is a made-up person (Alex Rivera). The portfolio is stronger if the demo is the owner's own, real CV.
 
-- [ ] The owner provides the profile (JSON, or typed in the `/profile` editor) and it replaces `Data/cv-master.json` as the demo profile
-- [ ] Tests and fixtures that assert on "Rivera" or on its bullets are updated to the new demo, or keep a small fixture copy of the old one so edge cases stay covered
-- [ ] The step 2 choice stays "Demo profile / My profile / Create my profile"; "Create my profile" opens the `/profile` editor (import, export and the blank template live there, not in the composer)
+- [x] The owner provides the profile (JSON, or typed in the `/profile` editor) and it replaces `Data/cv-master.json` as the demo profile
+- [x] Tests and fixtures that assert on "Rivera" or on its bullets are updated to the new demo, or keep a small fixture copy of the old one so edge cases stay covered
+- [x] The step 2 choice stays "Demo profile / My profile / Create my profile"; "Create my profile" opens the `/profile` editor (import, export and the blank template live there, not in the composer)
 
 Notes: waiting for the owner to upload their profile. Do not invent it. Check the personal data in it (phone, email) before committing it to a public repo.
 
 Verify: the E2E suite and the document matrices pass on the new demo profile.
+
+Done notes:
+- `Data/cv-master.json` is now Ezequiel Rindello's profile, built from the owner's CV (`ezequiel-rindello-cv.pdf`, October 2026) and portfolio site; nothing was added that those do not say. Internal ticket numbers were left out. The phone is left empty on purpose (public repo); the email, LinkedIn and GitHub are the ones the portfolio already publishes.
+- The work at Primero Systems is three entries, one per project (Chamber Mate, KOORUS, LabLink 360), same role and dates: the selector shows at most 3 bullets per experience, so one entry showed only 3 development bullets and filled the page with the non-tech jobs. The earlier non-tech jobs stay in the profile (a profile is a superset; the selector penalizes them for technical posts).
+- Step 2 now reads "Senior sample profile / Creator's profile / My profile / Create my profile". The senior sample (`Data/cv-master-senior.json`, the earlier made-up demo Alex Rivera) is the first choice and the default, so a first visit shows what a full senior CV looks like; the owner's profile is "Creator's profile". The radios replace the old "CV Profile" dropdown (`ProfileSelector`, removed). The API still defaults to the creator's profile when a request names none. The profile page can start from either one.
+- The phone in the creator's profile is the placeholder "55555" (the owner's choice, so the real number stays out of the public repo). It is shorter than the ATS check's minimum, so that CV shows the "phone" ATS issue.
+- Alex Rivera stays as the `cv-master` test fixture with its edge cases; the real profile joins every profile matrix as `FixtureLoader.DemoProfileId`, read from `ErCv.Web/Data` (document, PDF, invariant, explanation, highlighter, validator and round-trip tests). E2E assertions now look for "Rindello".
+- Fixed on the way: the summary read "...years of experience. specializing in ..."; "specializing in" now continues the first sentence (`SummaryGeneratorTests`).
+- The profile health check flags most bullets for having no number: the source CV has none, and the profile does not invent them.
+- Profile page (`/profile`), found while doing this: every comma-separated field (skills used, technologies, courses, the skills groups) was always red with the word "Error", because `ProfileTagField` passed the literal text `"Error"` instead of its `Error` parameter. Fixed, with a component test. Empty-item messages now say which item ("Skill 3 is empty. Remove the extra comma."), and the problem summary above the form lists each problem and where it is ("Experience 1, start date: ...") instead of only a count.
+- Profile page layout: one toolbar for "Start from", the JSON file and clearing; section hints; entries with their role and company under the title; icon buttons to remove a bullet; dashed "Add experience" buttons; wider gutters; a save bar that stays at the bottom of the screen while the form scrolls, "Check profile health" scrolls to the health card and moves focus to it (`cvApp.revealElement`), and the destructive buttons (Clear my profile, Remove) are a red outline without the soft red fill that looked muddy in dark mode.
 
 ### PROF-05: Import from an existing resume
 **Status:** Todo · **Priority:** P3 · **Effort:** L
@@ -621,7 +632,7 @@ Done notes:
 - F19: the word after "N years of" counts only when it is one of the dictionary's text forms ("3 years of go" still gives Go).
 - New skills: the 15 in the list above plus generative AI, RAG, prompt engineering, fine-tuning, embeddings, LangGraph, MLflow, CUDA, JAX, ClickHouse, NoSQL, Parquet, data warehouse, ELT, A/B testing, threat modeling, SIEM, penetration testing, Istio, Envoy, Gradle, JVM, Jetpack Compose, SwiftUI, DNS, CDN, SLOs, concurrency, data structures, algorithms, API design, design systems, GitOps, infrastructure as code, WebRTC. 417 skills (397 before).
 - Review of the unused skills: duplicates merged (`bigquery`, `oauth` and `gitlab` were listed twice; `cpp`, `css3`, `solid`, `ember.js`, `express.js`, `rails`, `argocd`, `newrelic`, `websocket`, `oauth2`, `ddd`, `xunit.net`, `subversion`, `apache spark`, `apache airflow`, `apache flink`, `oidc`, `vault`, `maui`, `site reliability` and `plsql` are now aliases of one skill), FaunaDB dropped (the service shut down), the rest kept. Aliases that would drop a cloud platform ("AWS Lambda" normalizing to plain `lambda`) are not allowed, so a profile listing "AWS Lambda" still counts for a job asking for AWS (`SkillDictionaryTests`).
-- H10 fixed here: the selector and the summary share `SelectionConstants.TechRoleKeywords`.
+- H10 fixed here: the selector and the summary share `SelectionConstants.TechRoleKeywords` (without analyst, consultant and specialist).
 - Before/after on the 194 posts (`corpus/report.md`): next.js 77 posts to 3, go 69 to 48, end-to-end 49 to 0, foundation 31 to 0, solid 31 to 0, less 20 to 0, c 13 to 8, javascript 35 to 31, https 7 to 0, words after "N years of" (professional 15, building 12, ...) to none. The new top skills are python, observability, AI agents, machine learning and distributed systems. The "ordinary English" table now lists concepts that are normally lowercase (observability, on-call, system design), which are real skills.
 - Tests: `SkillDictionaryTests` (file well formed, one test per alias and per text form, profile-only skills, cloud platforms), new cases in `SkillNormalizerTests` and `JobDescriptionParserTests` with sentences from the corpus posts, `CorpusTests` (every parsed skill is in the dictionary, Next.js only where a post names it).
 - Left out on purpose (still in the report's watch list): bare "agents" (support agents, "teams and their agents"; AI agents and agentic are in), vendor and model names (Claude, Copilot, Gemini, Salesforce) and concepts such as scalability and experimentation.

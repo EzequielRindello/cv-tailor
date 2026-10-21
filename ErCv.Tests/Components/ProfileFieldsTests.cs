@@ -53,6 +53,20 @@ public class ProfileFieldsTests : BunitContext
         Assert.Equal(new[] { "Go", "SQL" }, values);
     }
 
+    // The tag field passed the literal text "Error" down, so every skills field showed as invalid with that word
+    [Fact]
+    public void Tag_field_is_valid_unless_it_is_given_an_error()
+    {
+        var cut = Render<ProfileTagField>(p => p.Add(c => c.Id, "t").Add(c => c.Label, "Skills used").Add(c => c.Values, new List<string> { "C#" }));
+
+        Assert.Empty(cut.FindAll(".is-invalid"));
+        Assert.Empty(cut.FindAll(".profile-field-error"));
+
+        cut.Render(p => p.Add(c => c.Error, "Skill 2 is empty."));
+
+        Assert.Equal("Skill 2 is empty.", cut.Find("#t-err").TextContent);
+    }
+
     [Fact]
     public void List_field_adds_edits_and_removes_items()
     {

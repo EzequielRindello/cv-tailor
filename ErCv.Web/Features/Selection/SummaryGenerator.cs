@@ -86,9 +86,11 @@ public partial class SummaryGenerator
 
         if (!keyTechSkills.Any()) keyTechSkills = topSkills.Take(FallbackTopSkills).ToList();
 
+        // One sentence: "specializing in" continues the opening clause, it does not start a sentence of its own
         var parts = new List<string>();
-        parts.Add($"{candidateTitle} with {yearsOfExperience}+ years of experience");
-        if (keyTechSkills.Any()) parts.Add($"specializing in {FormatSkillsList(keyTechSkills)}");
+        parts.Add(keyTechSkills.Any()
+            ? $"{candidateTitle} with {yearsOfExperience}+ years of experience, specializing in {FormatSkillsList(keyTechSkills)}"
+            : $"{candidateTitle} with {yearsOfExperience}+ years of experience");
 
         var achievement = ExtractTopAchievement(selectedExperiences);
         if (!string.IsNullOrEmpty(achievement)) parts.Add($"Proven track record of {achievement}");

@@ -8,6 +8,7 @@ public static class UiConstants
     // Functions of window.cvApp in wwwroot/js/app.js
     public const string JsDownloadFile = "cvApp.downloadFile";
     public const string JsFocusElement = "cvApp.focusElement";
+    public const string JsRevealElement = "cvApp.revealElement";
     public const string JsGetItem = "cvApp.getItem";
     public const string JsSetItem = "cvApp.setItem";
     public const string JsRemoveItem = "cvApp.removeItem";
@@ -24,6 +25,13 @@ public static class UiConstants
     public const string ProfileSourceDemo = "demo";
     public const string ProfileSourceMine = "mine";
     public const string ProfileSourceImported = "imported";
+
+    // Labels of the stored profiles in step 2 and on the profile page; other stored profiles use their file name
+    public const string SeniorSampleProfileLabel = "Senior sample profile";
+    public const string CreatorProfileLabel = "Creator's profile";
+
+    // The health check card: rendered by ProfileHealthCard, scrolled to by the profile page's check button
+    public const string ProfileHealthCardId = "profile-health";
 
     #endregion
 

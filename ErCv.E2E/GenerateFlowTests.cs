@@ -28,6 +28,26 @@ public class GenerateFlowTests : E2ETestBase
         await Assertions.Expect(Page.Locator(".missing-skills-card")).ToBeVisibleAsync();
     }
 
+    // PROF-06: the senior sample is the first choice and the default; the creator's real profile is the second
+    [Fact]
+    public async Task The_senior_sample_is_the_default_and_the_creators_profile_can_be_chosen()
+    {
+        await OpenHomeAsync();
+        await PickSampleAsync("Backend");
+        await NextAsync();
+
+        var choices = Page.Locator(".profile-source input[type=radio]");
+        await Assertions.Expect(choices.First).ToHaveIdAsync("source-cv-master-senior");
+        await Assertions.Expect(choices.First).ToBeCheckedAsync();
+
+        await Page.Locator("label[for='source-demo']").ClickAsync();
+        await NextAsync();
+        await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "Word" }), true);
+        await Button("Generate CV").ClickAsync();
+
+        await Assertions.Expect(PreviewBody).ToContainTextAsync("Rindello");
+    }
+
     // APP-05: the samples are real posts, so the picker says whose they are, when they were posted and links back
     [Fact]
     public async Task Picking_a_sample_shows_where_and_when_it_was_posted_with_a_link_to_the_original()

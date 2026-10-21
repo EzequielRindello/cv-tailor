@@ -23,25 +23,52 @@
     {
         <div class="card main-card">
             <div class="card-body form-card-body">
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-use-demo"
-                            @onclick="UseDemoAsync">Start from the demo profile</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-clear"
-                            @onclick="ClearAsync">Clear my profile</button>
+                <div class="profile-toolbar">
+                    <div class="profile-toolbar-group">
+                        <span class="profile-toolbar-label">Start from</span>
+                        <div class="profile-toolbar-buttons">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-use-senior"
+                                    @onclick="() => StartFromAsync(ApiConstants.SeniorSampleProfileId)">
+                                <i class="bi bi-person-badge" aria-hidden="true"></i> @UiConstants.SeniorSampleProfileLabel
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-use-demo"
+                                    @onclick="() => StartFromAsync(ApiConstants.DefaultProfileId)">
+                                <i class="bi bi-person" aria-hidden="true"></i> @UiConstants.CreatorProfileLabel
+                            </button>
+                        </div>
+                    </div>
+                    <ProfileTools Disabled="false" OnImport="ImportProfile"
+                                  OnExport="ExportAsync" OnTemplate="TemplateAsync" />
+                    <button type="button" class="btn btn-outline-danger btn-sm profile-toolbar-clear" id="profile-clear"
+                            @onclick="ClearAsync">
+                        <i class="bi bi-trash" aria-hidden="true"></i> Clear my profile
+                    </button>
                 </div>
-                <ProfileTools Disabled="false" OnImport="ImportProfile"
-                              OnExport="ExportAsync" OnTemplate="TemplateAsync" />
 
                 @if (_errors.Count > 0)
                 {
-                    <div class="profile-tools-errors mb-3" role="alert" id="profile-errors">
-                        Fix @_errors.Count @(_errors.Count == 1 ? "problem" : "problems") before saving.
+                    <div class="profile-errors" role="alert" id="profile-errors">
+                        <p class="profile-errors-title">
+                            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                            Fix @_errors.Count @(_errors.Count == 1 ? "problem" : "problems") before saving:
+                        </p>
+                        <ul>
+                            @foreach (var (path, message) in _errors.Take(MaxErrorsListed))
+                            {
+                                <li><strong>@Where(path)</strong>: @message</li>
+                            }
+                        </ul>
+                        @if (_errors.Count > MaxErrorsListed)
+                        {
+                            <p class="mb-0">And @(_errors.Count - MaxErrorsListed) more, marked in red below.</p>
+                        }
                     </div>
                 }
 
                 <section class="profile-section" aria-labelledby="sec-header">
                     <h2 id="sec-header">Header</h2>
-                    <div class="row g-2">
+                    <p class="profile-section-hint">How a recruiter reaches you. Name and email are required.</p>
+                    <div class="row g-3">
                         <div class="col-md-6"><ProfileField Id="p-fullName" Label="Full name" Value="@_profile.Header.FullName" ValueChanged="v => _profile.Header.FullName = v" Error="@Err("header.fullName")" /></div>
                         <div class="col-md-6"><ProfileField Id="p-email" Label="Email" Value="@_profile.Header.Email" ValueChanged="v => _profile.Header.Email = v" Error="@Err("header.email")" /></div>
                         <div class="col-md-6"><ProfileField Id="p-phone" Label="Phone" Value="@_profile.Header.Phone" ValueChanged="v => _profile.Header.Phone = v" /></div>
@@ -53,6 +80,7 @@
 
                 <section class="profile-section" aria-labelledby="sec-experience">
                     <h2 id="sec-experience">Experience</h2>
+                    <p class="profile-section-hint">Every role you might show. For each job the generator picks the most relevant ones and their best bullets.</p>
                     @if (Err("experience") is { } noExperience)
                     {
                         <div class="profile-field-error" id="experience-err">@noExperience</div>
@@ -63,11 +91,14 @@
                         var x = _profile.Experience[ei];
                         <div class="profile-entry" @key="x">
                             <div class="profile-entry-head">
-                                <h3>Experience @(ei + 1)</h3>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="@($"Remove experience {ei + 1}")"
-                                        @onclick="() => _profile.Experience.RemoveAt(ei)">Remove</button>
+                                <div>
+                                    <h3>Experience @(ei + 1)</h3>
+                                    <p class="profile-entry-summary">@Summary(x.Role, x.Company)</p>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger btn-sm profile-remove" aria-label="@($"Remove experience {ei + 1}")"
+                                        @onclick="() => _profile.Experience.RemoveAt(ei)"><i class="bi bi-trash" aria-hidden="true"></i> Remove</button>
                             </div>
-                            <div class="row g-2">
+                            <div class="row g-3">
                                 <div class="col-md-6"><ProfileField Id="@($"exp-{ei}-role")" Label="Role" Value="@x.Role" ValueChanged="v => x.Role = v" Error="@Err($"experience[{ei}].role")" /></div>
                                 <div class="col-md-6"><ProfileField Id="@($"exp-{ei}-company")" Label="Company" Value="@x.Company" ValueChanged="v => x.Company = v" Error="@Err($"experience[{ei}].company")" /></div>
                                 <div class="col-md-4"><ProfileField Id="@($"exp-{ei}-location")" Label="Location" Value="@x.Location" ValueChanged="v => x.Location = v" /></div>
@@ -80,8 +111,8 @@
                                              Error="@FirstErr($"experience[{ei}].skills[")" />
                         </div>
                     }
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="exp-add"
-                            @onclick="() => _profile.Experience.Add(new Experience())">Add experience</button>
+                    <button type="button" class="btn profile-add-entry" id="exp-add"
+                            @onclick="() => _profile.Experience.Add(new Experience())"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add experience</button>
                 </section>
 
                 <section class="profile-section" aria-labelledby="sec-education">
@@ -92,11 +123,14 @@
                         var e = _profile.Education[ei];
                         <div class="profile-entry" @key="e">
                             <div class="profile-entry-head">
-                                <h3>Education @(ei + 1)</h3>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="@($"Remove education {ei + 1}")"
-                                        @onclick="() => _profile.Education.RemoveAt(ei)">Remove</button>
+                                <div>
+                                    <h3>Education @(ei + 1)</h3>
+                                    <p class="profile-entry-summary">@Summary(e.Degree, e.Institution)</p>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger btn-sm profile-remove" aria-label="@($"Remove education {ei + 1}")"
+                                        @onclick="() => _profile.Education.RemoveAt(ei)"><i class="bi bi-trash" aria-hidden="true"></i> Remove</button>
                             </div>
-                            <div class="row g-2">
+                            <div class="row g-3">
                                 <div class="col-md-6"><ProfileField Id="@($"edu-{ei}-degree")" Label="Degree" Value="@e.Degree" ValueChanged="v => e.Degree = v" Error="@Err($"education[{ei}].degree")" /></div>
                                 <div class="col-md-6"><ProfileField Id="@($"edu-{ei}-institution")" Label="Institution" Value="@e.Institution" ValueChanged="v => e.Institution = v" Error="@Err($"education[{ei}].institution")" /></div>
                                 <div class="col-md-4"><ProfileField Id="@($"edu-{ei}-location")" Label="Location" Value="@e.Location" ValueChanged="v => e.Location = v" /></div>
@@ -107,13 +141,14 @@
                             </div>
                         </div>
                     }
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="edu-add"
-                            @onclick="() => _profile.Education.Add(new Education())">Add education</button>
+                    <button type="button" class="btn profile-add-entry" id="edu-add"
+                            @onclick="() => _profile.Education.Add(new Education())"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add education</button>
                 </section>
 
                 <section class="profile-section" aria-labelledby="sec-skills">
                     <h2 id="sec-skills">Skills</h2>
-                    <div class="row g-2">
+                    <p class="profile-section-hint">Comma separated, grouped as on the CV.</p>
+                    <div class="row g-3">
                         <div class="col-md-6"><ProfileTagField Id="sk-languages" Label="Languages" Values="_profile.Skills.Languages" /></div>
                         <div class="col-md-6"><ProfileTagField Id="sk-frameworks" Label="Frameworks" Values="_profile.Skills.Frameworks" /></div>
                         <div class="col-md-6"><ProfileTagField Id="sk-databases" Label="Databases" Values="_profile.Skills.Databases" /></div>
@@ -131,11 +166,14 @@
                         var p = _profile.Projects[pi];
                         <div class="profile-entry" @key="p">
                             <div class="profile-entry-head">
-                                <h3>Project @(pi + 1)</h3>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="@($"Remove project {pi + 1}")"
-                                        @onclick="() => _profile.Projects.RemoveAt(pi)">Remove</button>
+                                <div>
+                                    <h3>Project @(pi + 1)</h3>
+                                    <p class="profile-entry-summary">@Summary(p.Name, null)</p>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger btn-sm profile-remove" aria-label="@($"Remove project {pi + 1}")"
+                                        @onclick="() => _profile.Projects.RemoveAt(pi)"><i class="bi bi-trash" aria-hidden="true"></i> Remove</button>
                             </div>
-                            <div class="row g-2">
+                            <div class="row g-3">
                                 <div class="col-md-6"><ProfileField Id="@($"prj-{pi}-name")" Label="Name" Value="@p.Name" ValueChanged="v => p.Name = v" Error="@Err($"projects[{pi}].name")" /></div>
                                 <div class="col-md-6"><ProfileField Id="@($"prj-{pi}-link")" Label="Link" Value="@p.Link" ValueChanged="v => p.Link = v" /></div>
                                 <div class="col-12"><ProfileField Id="@($"prj-{pi}-description")" Label="Description" Multiline="true" Value="@p.Description" ValueChanged="v => p.Description = v" /></div>
@@ -145,14 +183,18 @@
                                               ErrorFor="HighlightErrors(pi)" />
                         </div>
                     }
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="prj-add"
-                            @onclick="() => _profile.Projects.Add(new Project())">Add project</button>
+                    <button type="button" class="btn profile-add-entry" id="prj-add"
+                            @onclick="() => _profile.Projects.Add(new Project())"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add project</button>
                 </section>
 
                 <div class="profile-save-bar">
-                    <button type="button" class="btn btn-primary" id="profile-save" @onclick="SaveAsync">Save profile</button>
+                    <button type="button" class="btn btn-primary" id="profile-save" @onclick="SaveAsync">
+                        <i class="bi bi-check2" aria-hidden="true"></i> Save profile
+                    </button>
                     <button type="button" class="btn btn-outline-secondary" id="profile-health-check"
-                            @onclick="() => _health = ProfileHealthChecker.Check(_profile)">Check profile health</button>
+                            @onclick="CheckHealth">
+                        <i class="bi bi-heart-pulse" aria-hidden="true"></i> Check profile health
+                    </button>
                     <span class="profile-saved" role="status">@_status</span>
                 </div>
                 @if (_health != null)
@@ -169,6 +211,8 @@
 
     private const string ExportFileName = "cv-profile.json";
     private const string TemplateFileName = "cv-profile-template.json";
+    private const int MaxErrorsListed = 6;
+    private const string NewEntryLabel = "New entry";
 
     private static readonly ProfileValidator Validator = new();
 
@@ -180,6 +224,7 @@
     private Dictionary<string, string> _errors = new();
     private List<HealthFinding>? _health;
     private bool _loaded;
+    private bool _revealHealth;
     private string _status = string.Empty;
 
     #endregion
@@ -188,6 +233,13 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // The card exists only after the render that follows the check, so it is scrolled to here
+        if (_revealHealth)
+        {
+            _revealHealth = false;
+            await JS.InvokeVoidAsync(UiConstants.JsRevealElement, UiConstants.ProfileHealthCardId);
+        }
+
         if (!firstRender) return;
 
         // localStorage is only reachable once the circuit is up
@@ -213,9 +265,15 @@
         Toasts.Success("Profile saved");
     }
 
-    private async Task UseDemoAsync()
+    private void CheckHealth()
     {
-        _profile = await CvService.GetProfileAsync(ApiConstants.DefaultProfileId);
+        _health = ProfileHealthChecker.Check(_profile);
+        _revealHealth = true;
+    }
+
+    private async Task StartFromAsync(string profileId)
+    {
+        _profile = await CvService.GetProfileAsync(profileId);
         Normalize(_profile);
         _errors = new();
         _status = string.Empty;
@@ -263,6 +321,23 @@
     }
 
     private string? Err(string path) => _errors.TryGetValue(path, out var m) ? m : null;
+
+    private static string Summary(string? title, string? place)
+    {
+        var text = string.Join(" · ", new[] { title, place }.Where(t => !string.IsNullOrWhiteSpace(t)));
+        return text.Length > 0 ? text : NewEntryLabel;
+    }
+
+    /// <summary>"experience[1].startDate" as a reader would say it: "Experience 2, start date".</summary>
+    private static string Where(string path)
+    {
+        var match = ProfilePath().Match(path);
+        if (!match.Success) return path;
+        var section = char.ToUpperInvariant(match.Groups[1].Value[0]) + match.Groups[1].Value[1..];
+        var entry = match.Groups[2].Success ? $" {int.Parse(match.Groups[2].Value) + 1}" : "";
+        var field = match.Groups[3].Success ? $", {CamelCaseBoundary().Replace(match.Groups[3].Value, " ").ToLowerInvariant()}" : "";
+        return section + entry + field;
+    }
 
     private Func<int, string?> BulletErrors(int experience) => b => Err($"experience[{experience}].bullets[{b}]");
 

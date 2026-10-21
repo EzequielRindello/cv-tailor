@@ -1,16 +1,16 @@
 
-<div class="mb-4 profile-tools">
-    <label class="form-label form-label-custom" for="profile-import">Your profile</label>
-    <div class="d-flex flex-wrap gap-2">
+<div class="profile-toolbar-group profile-tools">
+    <label class="profile-toolbar-label" for="profile-import">JSON file</label>
+    <div class="profile-toolbar-buttons">
         <label class="btn btn-outline-secondary btn-sm mb-0 @(Disabled ? "disabled" : "")">
-            Import JSON
+            <i class="bi bi-upload" aria-hidden="true"></i> Import
             <InputFile id="profile-import" class="visually-hidden" accept=".json,application/json"
                        disabled="@Disabled" OnChange="ImportAsync" />
         </label>
         <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-export"
-                disabled="@Disabled" @onclick="OnExport">Export JSON</button>
+                disabled="@Disabled" @onclick="OnExport"><i class="bi bi-download" aria-hidden="true"></i> Export</button>
         <button type="button" class="btn btn-outline-secondary btn-sm" id="profile-template"
-                disabled="@Disabled" @onclick="OnTemplate">Blank template</button>
+                disabled="@Disabled" @onclick="OnTemplate"><i class="bi bi-file-earmark" aria-hidden="true"></i> Blank template</button>
     </div>
 
     @if (_issues.Count > 0)
