@@ -62,7 +62,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | MATCH-03 | Shared date parser + correct "most recent role" | E4 Matching | P0 | M | Done |
 | MATCH-04 | Explainability: "why this was chosen" | E4 Matching | P1 | M | Done |
 | MATCH-05 | JD highlighter | E4 Matching | P1 | M | Done |
-| MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Todo (M5.1) |
+| MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Done |
 | MATCH-07 | Skill/alias dictionary as data file, tuned on real posts | E4 Matching | P1 | M | Done |
 | MATCH-08 | Page fit measured on the rendered PDF | E4 Matching | P1 | M | Done |
 | MATCH-09 | Seniority detection from the title and wording | E4 Matching | P1 | S | Done |
@@ -94,7 +94,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | OPS-03 | README rewrite for portfolio | E9 DevOps | P1 | M | Done |
 | OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Done |
 | OPS-05 | Privacy note | E9 DevOps | P2 | S | Done |
-| OPS-06 | Deploy to Render + live demo link | E9 DevOps | P1 | M | Todo |
+| OPS-06 | Deploy to Render + live demo link | E9 DevOps | P1 | M | Todo (M5.2) |
 
 ---
 
@@ -179,7 +179,7 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 | # | Finding | Status |
 |---|---|---|
 | F24 | The match card never showed `MatchScore.LowMatchWarning`: the API returns it, the Blazor UI dropped it (only the red "Weak Match" badge was left). Its text also had an em dash. | Fixed with TEST-06: shown under the breakdown, text without the em dash. `ScoreCardsTests` |
-| F25 | Required vs nice-to-have does not follow the job post's sections: in TC-01 "GitOps" (listed under "Nice to have") is reported as a required missing skill and "RabbitMQ" (under "Requirements") as nice to have. | Open: MATCH-06 (M5.1) |
+| F25 | Required vs nice-to-have does not follow the job post's sections: in TC-01 "GitOps" (listed under "Nice to have") is reported as a required missing skill and "RabbitMQ" (under "Requirements") as nice to have. | Fixed with MATCH-06 (M5.1): GitOps is nice to have, RabbitMQ required. `MissingSkillsAnalyzerTests.Tc01_follows_the_sections_of_the_post` |
 | F27 | The app's samples are mostly "Staff" posts (the picker takes the newest post per role family) while the default profile is senior, so the first try of the demo gives a weak match on 5 of 6 samples (Backend 52, Frontend 50, Full stack 38, Data 48, DevOps 61, Junior 36 with the senior sample). The scores are right; the first impression is not. | Fixed (owner's choice: senior posts, then the best match): `SamplePicker` prefers posts at the demo profile's level (senior), then posts with at least 6 parsed skills (a 1-skill post was a trivial 100% match), then the post the demo profile (`cv-master-senior`) matches best. Now Full stack 83, Frontend 66, DevOps 64, Data 57, Junior 54, Backend 46: the corpus has no senior backend post this profile fits (the picker takes one when a refresh brings it). `CollectorPartsTests` (level, skill floor, best match) |
 | F29 | The summary's role type matched its signals as substrings: "ui" (frontend) matched keywords such as "build" and "guide", so the backend fixture read "Senior Full Stack Developer" and a Datadog backend post "Senior Frontend Developer". | Fixed: whole-term matching (`SkillNormalizer.ContainsTerm`, as F1 and F13). 12 snapshots changed, all in the summary: the backend posts now read "Backend Developer". Left open: one mention of Kotlin makes the Airbnb Payments post read "Mobile Developer" (the signal lists, not the matching). `SummaryGeneratorTests.Role_signals_match_whole_terms_only` |
 | F28 | Text depended on the server's culture. The ATS density issue used `{0:P0}`: "12%" on Windows (en-US) and "12 %" on Linux, where .NET runs with the invariant culture, so the first CI run of the M5 merge failed 44 snapshots, and the Render container would have shown "12 %". `{0:N0}` in the job description length error and the character counter would print "100.000" under a German or Spanish culture. | Fixed in `fix/culture-independent-text` (no version change): the ATS gets a whole percent rounded half to even (the "P0" rounding), the counts are formatted with the invariant culture, the ATS messages lost their em dashes. `GenerationSnapshotTests.Generation_does_not_depend_on_the_culture` generates every case under the invariant, es-AR, de-DE and fr-FR cultures against the same snapshots; `ATSCheckerTests` and `HardeningTests` pin the two messages |
@@ -227,7 +227,7 @@ Nothing in M5 is blocked; every item is Done except ENG-04 (Won't do, the reason
 |---|---|---|
 | First public deploy, live demo link, cold-start timing with the warm-up, limits checked on the real instance | Needs the Render service. | OPS-06 (M5.2) |
 | The coverage step and the snapshots have not run on GitHub's Linux runner yet | They were checked locally with the CI commands in Release, and the snapshots with LF and CRLF job descriptions. | Ran on the M5 merge: the snapshots failed on the culture (F28), fixed in its own PR |
-| F25: required and nice-to-have skills do not follow the post's sections | It changes scoring. | MATCH-06 (M5.1) |
+| F25: required and nice-to-have skills do not follow the post's sections | It changes scoring. | Fixed with MATCH-06 (M5.1) |
 | F27: most samples are Staff posts, a weak match for the default senior profile | A picker or demo rule, reviewed on its own. | Fixed after M5 (see F27); Backend stays weak until the corpus has a senior backend post the demo profile fits |
 | The summary's role signals: one mention of Kotlin reads as a mobile role (F29) | Tuning the signal lists changes many summaries. | New item (not scheduled) |
 | The M4 open items (add back what the selection left out, scores after edits, company name in the cover letter) | Unchanged in M5. | New items (not scheduled) |
@@ -700,12 +700,19 @@ Files: `Helpers/JdHighlighter.cs`, `Models/JdHighlightModels.cs`, `Components/Sh
 Verify: `JdHighlighterTests` (lossless split over profiles x corpus, whole tokens, locations, markup stays text); `JdHighlightCardTests` (bUnit: HTML-encoded output, selection, labels); E2E `Job_tab_highlights_skills_and_shows_where_one_appears_in_the_cv` and the axe scan of the Job tab.
 
 ### MATCH-06: Required vs nice-to-have from JD sections
-**Status:** Todo (M5.1) · **Priority:** P2 · **Effort:** M
+**Status:** Done (M5.1) · **Priority:** P2 · **Effort:** M
 
-- [ ] Parser detects sections ("Requirements", "Must have", "Nice to have", "Bonus", "Preferred")
-- [ ] Missing-skills split uses the JD section instead of a fixed list
+- [x] Parser detects sections ("Requirements", "Must have", "Nice to have", "Bonus", "Preferred")
+- [x] Missing-skills split uses the JD section instead of a fixed list
 
 Verify: unit tests with corpus JDs.
+
+Notes: `JobRequirements.NiceToHaveSkills` (a subset of `TechnicalSkills`) is filled by `JobDescriptionParser`, and `MissingSkillsAnalyzer` splits by it; the fixed list of "nice to have" technologies (`MissingSkillsConstants.NiceToHaveKeywords`, which made Kubernetes, Kafka or Redis optional in every post) is gone. A skill is nice to have when every mention of it is in an optional part of the post; one mention anywhere else makes it required, and a post that marks nothing requires every skill. Optional parts, with the cues (`JobDescriptionConstants.OptionalCues`) taken from the headings of the 194 corpus posts:
+- the lines under a heading with a cue ("Nice to have", "Bonus points for", "Preferred qualifications", "Desired:", "While it's not required, it's an added plus if you also have:", "Se valorará:") up to the next heading. A heading is a line without a bullet that ends with ":" or has at most 12 words and does not end with "." or "!". A line that names a skill is not a heading ("Kafka" alone on a line does not close the section), except the company's own sections ("About MongoDB", "Why Notion?"), which would otherwise keep the company blurb inside "Nice to have";
+- a line whose lead-in has a cue ("- Bonus: Go, Java or Rust; Kafka at scale", "- Nice to have: ...");
+- a sentence with a cue ("Experience with Typescript or Rust is a plus"); a cue in parentheses covers only the parentheses ("you read code (we use a lot of TypeScript), cloud (GCP a plus)" keeps TypeScript required), and "ideally" / "preferably" cover only what follows ("AWS, GCP or Azure, ideally including access logs" keeps the clouds required).
+
+On the corpus, 82 of 194 posts mark some skill optional (282 of 1832 skills). Known misses, left as they are: a cue at the end of a comma list covers the whole sentence ("Python or similar, React or similar, something to do with big data is a bonus" makes Python and React optional), "(AWS required, GCP and Azure are a plus)" makes AWS optional too, and a post that names its whole requirements list "Desirable skills" (one Cloudflare post) has no required skill. Skills named only in the company blurb ("at the intersection of robotics, machine learning") are still extracted and are now required (the fixed list used to hide some of them): that is the parser's skill extraction, not this split. 48 generation snapshots changed, only in `missingSkills` (no score, selection or summary changed); the corpus report and the samples are unchanged. The "more required skills" suggestion lost its em dash. Tests: `JobDescriptionParserTests` (headings from real posts, sentences, parentheses, forward cues, lead-ins, a real Notion post, nice-to-have is a subset of the skills on every corpus post), `MissingSkillsAnalyzerTests` (TC-01, no fixed list).
 
 ### MATCH-07: Skill dictionary as data, tuned on real posts
 **Status:** Done · **Priority:** P1 · **Effort:** M

@@ -31,6 +31,10 @@ public record BulletEdit(string Original, string Edited);
 public class JobRequirements
 {
     public List<string> TechnicalSkills { get; set; } = new();
+
+    /// <summary>The technical skills the post only asks for as optional (MATCH-06): a subset of <see cref="TechnicalSkills"/>.</summary>
+    public List<string> NiceToHaveSkills { get; set; } = new();
+
     public List<string> Keywords { get; set; } = new();
     public string SeniorityLevel { get; set; } = string.Empty;
     public List<string> RequiredExperience { get; set; } = new();

@@ -13,23 +13,24 @@
     "requiredMissing": [
       "python",
       "aws",
+      "spark",
+      "airflow",
+      "snowflake",
       "redshift"
     ],
     "niceToHaveMissing": [
-      "kafka",
-      "spark",
-      "airflow",
-      "snowflake"
+      "kafka"
     ],
     "suggestions": [
       "Add 'python' to cv-master.json if you have experience with this technology",
       "Add 'aws' to cv-master.json if you have experience with this technology",
-      "Add 'redshift' to cv-master.json if you have experience with this technology",
+      "Add 'spark' to cv-master.json if you have experience with this technology",
+      "Add 'airflow' to cv-master.json if you have experience with this technology",
+      "Add 'snowflake' to cv-master.json if you have experience with this technology",
       "Mention 'kafka' in relevant project bullet points if you have used it",
-      "Mention 'spark' in relevant project bullet points if you have used it",
-      "Mention 'airflow' in relevant project bullet points if you have used it"
+      "There are 1 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 17
+    "potentialScoreIncrease": 33
   },
   "keywordAnalysis": {
     "technicalKeywords": [

@@ -11,18 +11,17 @@
   },
   "missingSkills": {
     "requiredMissing": [
+      "grpc",
       "distributed systems",
       "event-driven"
     ],
-    "niceToHaveMissing": [
-      "grpc"
-    ],
+    "niceToHaveMissing": [],
     "suggestions": [
+      "Add 'grpc' to cv-master.json if you have experience with this technology",
       "Add 'distributed systems' to cv-master.json if you have experience with this technology",
-      "Add 'event-driven' to cv-master.json if you have experience with this technology",
-      "Mention 'grpc' in relevant project bullet points if you have used it"
+      "Add 'event-driven' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 7
+    "potentialScoreIncrease": 11
   },
   "keywordAnalysis": {
     "technicalKeywords": [

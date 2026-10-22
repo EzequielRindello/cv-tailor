@@ -12,23 +12,23 @@
   "missingSkills": {
     "requiredMissing": [
       "swift",
-      "react native",
       "android",
       "ios",
       "swiftui"
     ],
     "niceToHaveMissing": [
-      "llm"
+      "llm",
+      "react native"
     ],
     "suggestions": [
       "Add 'swift' to cv-master.json if you have experience with this technology",
-      "Add 'react native' to cv-master.json if you have experience with this technology",
       "Add 'android' to cv-master.json if you have experience with this technology",
       "Add 'ios' to cv-master.json if you have experience with this technology",
       "Add 'swiftui' to cv-master.json if you have experience with this technology",
-      "Mention 'llm' in relevant project bullet points if you have used it"
+      "Mention 'llm' in relevant project bullet points if you have used it",
+      "Mention 'react native' in relevant project bullet points if you have used it"
     ],
-    "potentialScoreIncrease": 28
+    "potentialScoreIncrease": 22
   },
   "keywordAnalysis": {
     "technicalKeywords": [

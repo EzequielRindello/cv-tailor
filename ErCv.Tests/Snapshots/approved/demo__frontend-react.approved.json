@@ -11,26 +11,26 @@
   },
   "missingSkills": {
     "requiredMissing": [
-      "next.js",
       "accessibility",
-      "node.js",
+      "graphql",
       "e2e testing",
       "jest",
       "cypress"
     ],
     "niceToHaveMissing": [
-      "graphql"
+      "next.js",
+      "node.js"
     ],
     "suggestions": [
-      "Add 'next.js' to cv-master.json if you have experience with this technology",
       "Add 'accessibility' to cv-master.json if you have experience with this technology",
-      "Add 'node.js' to cv-master.json if you have experience with this technology",
+      "Add 'graphql' to cv-master.json if you have experience with this technology",
       "Add 'e2e testing' to cv-master.json if you have experience with this technology",
       "Add 'jest' to cv-master.json if you have experience with this technology",
-      "Mention 'graphql' in relevant project bullet points if you have used it",
-      "There are 1 more required skills — review the full JSON"
+      "Add 'cypress' to cv-master.json if you have experience with this technology",
+      "Mention 'next.js' in relevant project bullet points if you have used it",
+      "Mention 'node.js' in relevant project bullet points if you have used it"
     ],
-    "potentialScoreIncrease": 27
+    "potentialScoreIncrease": 23
   },
   "keywordAnalysis": {
     "technicalKeywords": [

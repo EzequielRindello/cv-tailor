@@ -22,28 +22,7 @@ public static class MissingSkillsConstants
         "Mention '{0}' in relevant project bullet points if you have used it";
 
     public const string ExtraRequiredSuggestionTemplate =
-        "There are {0} more required skills — review the full JSON";
-
-    #endregion
-
-    #region Keyword Lists
-
-    public static readonly string[] NiceToHaveKeywords =
-    {
-        "kubernetes", "k8s", "helm", "terraform", "ansible", "pulumi",
-        "argocd", "flux", "spinnaker", "nomad", "openshift",
-        "kafka", "rabbitmq", "elasticsearch", "opensearch", "redis",
-        "cassandra", "dynamodb", "neo4j", "clickhouse", "snowflake",
-        "databricks", "spark", "flink", "dbt", "airflow",
-        "graphql", "grpc", "event sourcing", "cqrs", "ddd",
-        "hexagonal architecture", "clean architecture",
-        "prometheus", "grafana", "datadog", "newrelic", "sentry",
-        "opentelemetry", "jaeger", "splunk",
-        "tensorflow", "pytorch", "scikit-learn", "machine learning",
-        "llm", "langchain", "vertex ai", "sagemaker",
-        "vault", "hashicorp vault", "zero trust", "sso", "saml", "oidc",
-        "istio", "envoy", "consul", "linkerd",
-    };
+        "There are {0} more required skills: review the full JSON";
 
     #endregion
 }

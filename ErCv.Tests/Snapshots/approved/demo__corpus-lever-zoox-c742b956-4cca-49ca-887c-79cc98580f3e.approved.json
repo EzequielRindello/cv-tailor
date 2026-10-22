@@ -10,14 +10,14 @@
     "lowMatchWarning": null
   },
   "missingSkills": {
-    "requiredMissing": [],
-    "niceToHaveMissing": [
+    "requiredMissing": [
       "machine learning"
     ],
+    "niceToHaveMissing": [],
     "suggestions": [
-      "Mention 'machine learning' in relevant project bullet points if you have used it"
+      "Add 'machine learning' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 0
+    "potentialScoreIncrease": 25
   },
   "keywordAnalysis": {
     "technicalKeywords": [

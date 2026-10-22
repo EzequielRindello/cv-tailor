@@ -12,30 +12,24 @@
   "missingSkills": {
     "requiredMissing": [
       "go",
-      "observability",
-      "on-call",
-      "api design",
-      "distributed systems",
-      "event-driven"
-    ],
-    "niceToHaveMissing": [
       "redis",
       "kafka",
       "kubernetes",
-      "grpc"
+      "observability",
+      "on-call",
+      "grpc",
+      "api design"
     ],
+    "niceToHaveMissing": [],
     "suggestions": [
       "Add 'go' to cv-master.json if you have experience with this technology",
+      "Add 'redis' to cv-master.json if you have experience with this technology",
+      "Add 'kafka' to cv-master.json if you have experience with this technology",
+      "Add 'kubernetes' to cv-master.json if you have experience with this technology",
       "Add 'observability' to cv-master.json if you have experience with this technology",
-      "Add 'on-call' to cv-master.json if you have experience with this technology",
-      "Add 'api design' to cv-master.json if you have experience with this technology",
-      "Add 'distributed systems' to cv-master.json if you have experience with this technology",
-      "Mention 'redis' in relevant project bullet points if you have used it",
-      "Mention 'kafka' in relevant project bullet points if you have used it",
-      "Mention 'kubernetes' in relevant project bullet points if you have used it",
-      "There are 1 more required skills — review the full JSON"
+      "There are 5 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 21
+    "potentialScoreIncrease": 36
   },
   "keywordAnalysis": {
     "technicalKeywords": [

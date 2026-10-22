@@ -14,24 +14,25 @@
       "swift",
       "observability",
       "system design",
-      "react native",
       "android",
       "ios",
       "swiftui"
     ],
     "niceToHaveMissing": [
-      "llm"
+      "llm",
+      "react native"
     ],
     "suggestions": [
       "Add 'swift' to cv-master.json if you have experience with this technology",
       "Add 'observability' to cv-master.json if you have experience with this technology",
       "Add 'system design' to cv-master.json if you have experience with this technology",
-      "Add 'react native' to cv-master.json if you have experience with this technology",
       "Add 'android' to cv-master.json if you have experience with this technology",
+      "Add 'ios' to cv-master.json if you have experience with this technology",
       "Mention 'llm' in relevant project bullet points if you have used it",
-      "There are 2 more required skills — review the full JSON"
+      "Mention 'react native' in relevant project bullet points if you have used it",
+      "There are 1 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 39
+    "potentialScoreIncrease": 33
   },
   "keywordAnalysis": {
     "technicalKeywords": [

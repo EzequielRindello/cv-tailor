@@ -12,31 +12,24 @@
   "missingSkills": {
     "requiredMissing": [
       "bash",
-      "infrastructure as code",
-      "observability",
-      "incident response",
-      "linux",
-      "devops",
-      "sre"
-    ],
-    "niceToHaveMissing": [
       "kubernetes",
       "terraform",
+      "infrastructure as code",
+      "observability",
       "prometheus",
-      "grafana"
+      "grafana",
+      "incident response"
     ],
+    "niceToHaveMissing": [],
     "suggestions": [
       "Add 'bash' to cv-master.json if you have experience with this technology",
+      "Add 'kubernetes' to cv-master.json if you have experience with this technology",
+      "Add 'terraform' to cv-master.json if you have experience with this technology",
       "Add 'infrastructure as code' to cv-master.json if you have experience with this technology",
       "Add 'observability' to cv-master.json if you have experience with this technology",
-      "Add 'incident response' to cv-master.json if you have experience with this technology",
-      "Add 'linux' to cv-master.json if you have experience with this technology",
-      "Mention 'kubernetes' in relevant project bullet points if you have used it",
-      "Mention 'terraform' in relevant project bullet points if you have used it",
-      "Mention 'prometheus' in relevant project bullet points if you have used it",
-      "There are 2 more required skills — review the full JSON"
+      "There are 6 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 21
+    "potentialScoreIncrease": 32
   },
   "keywordAnalysis": {
     "technicalKeywords": [

@@ -12,21 +12,20 @@
   "missingSkills": {
     "requiredMissing": [
       "s3",
-      "redshift"
-    ],
-    "niceToHaveMissing": [
       "spark",
       "airflow",
-      "snowflake"
+      "snowflake",
+      "redshift"
     ],
+    "niceToHaveMissing": [],
     "suggestions": [
       "Add 's3' to cv-master.json if you have experience with this technology",
-      "Add 'redshift' to cv-master.json if you have experience with this technology",
-      "Mention 'spark' in relevant project bullet points if you have used it",
-      "Mention 'airflow' in relevant project bullet points if you have used it",
-      "Mention 'snowflake' in relevant project bullet points if you have used it"
+      "Add 'spark' to cv-master.json if you have experience with this technology",
+      "Add 'airflow' to cv-master.json if you have experience with this technology",
+      "Add 'snowflake' to cv-master.json if you have experience with this technology",
+      "Add 'redshift' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 11
+    "potentialScoreIncrease": 28
   },
   "keywordAnalysis": {
     "technicalKeywords": [

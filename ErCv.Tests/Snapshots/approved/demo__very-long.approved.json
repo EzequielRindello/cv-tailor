@@ -16,25 +16,20 @@
       "go",
       "spring",
       "spring boot",
-      "aws"
-    ],
-    "niceToHaveMissing": [
       "redis",
       "kafka",
-      "kubernetes"
+      "aws"
     ],
+    "niceToHaveMissing": [],
     "suggestions": [
       "Add 'java' to cv-master.json if you have experience with this technology",
       "Add 'python' to cv-master.json if you have experience with this technology",
       "Add 'go' to cv-master.json if you have experience with this technology",
       "Add 'spring' to cv-master.json if you have experience with this technology",
       "Add 'spring boot' to cv-master.json if you have experience with this technology",
-      "Mention 'redis' in relevant project bullet points if you have used it",
-      "Mention 'kafka' in relevant project bullet points if you have used it",
-      "Mention 'kubernetes' in relevant project bullet points if you have used it",
-      "There are 1 more required skills — review the full JSON"
+      "There are 4 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 30
+    "potentialScoreIncrease": 40
   },
   "keywordAnalysis": {
     "technicalKeywords": [

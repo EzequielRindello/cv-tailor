@@ -14,30 +14,22 @@
       "python",
       "bash",
       "aws",
-      "ci/cd",
-      "infrastructure as code",
-      "observability",
-      "incident response",
-      "linux"
-    ],
-    "niceToHaveMissing": [
       "kubernetes",
+      "ci/cd",
       "terraform",
-      "prometheus",
-      "grafana"
+      "infrastructure as code",
+      "observability"
     ],
+    "niceToHaveMissing": [],
     "suggestions": [
       "Add 'python' to cv-master.json if you have experience with this technology",
       "Add 'bash' to cv-master.json if you have experience with this technology",
       "Add 'aws' to cv-master.json if you have experience with this technology",
+      "Add 'kubernetes' to cv-master.json if you have experience with this technology",
       "Add 'ci/cd' to cv-master.json if you have experience with this technology",
-      "Add 'infrastructure as code' to cv-master.json if you have experience with this technology",
-      "Mention 'kubernetes' in relevant project bullet points if you have used it",
-      "Mention 'terraform' in relevant project bullet points if you have used it",
-      "Mention 'prometheus' in relevant project bullet points if you have used it",
-      "There are 5 more required skills — review the full JSON"
+      "There are 9 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 29
+    "potentialScoreIncrease": 40
   },
   "keywordAnalysis": {
     "technicalKeywords": [

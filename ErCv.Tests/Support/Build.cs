@@ -24,9 +24,11 @@ public static class Build
     public static JobRequirements Req(
         string[]? skills = null,
         string[]? keywords = null,
-        string seniority = "mid-level") => new()
+        string seniority = "mid-level",
+        string[]? niceToHave = null) => new()
     {
         TechnicalSkills = (skills ?? Array.Empty<string>()).ToList(),
+        NiceToHaveSkills = (niceToHave ?? Array.Empty<string>()).ToList(),
         Keywords = (keywords ?? Array.Empty<string>()).ToList(),
         SeniorityLevel = seniority
     };

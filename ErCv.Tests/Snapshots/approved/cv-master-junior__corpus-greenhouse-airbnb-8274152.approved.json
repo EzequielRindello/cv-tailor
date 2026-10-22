@@ -14,20 +14,21 @@
       "java",
       "go",
       "kotlin",
-      "on-call",
+      "on-call"
+    ],
+    "niceToHaveMissing": [
       "distributed systems",
       "a/b testing"
     ],
-    "niceToHaveMissing": [],
     "suggestions": [
       "Add 'java' to cv-master.json if you have experience with this technology",
       "Add 'go' to cv-master.json if you have experience with this technology",
       "Add 'kotlin' to cv-master.json if you have experience with this technology",
       "Add 'on-call' to cv-master.json if you have experience with this technology",
-      "Add 'distributed systems' to cv-master.json if you have experience with this technology",
-      "There are 1 more required skills — review the full JSON"
+      "Mention 'distributed systems' in relevant project bullet points if you have used it",
+      "Mention 'a/b testing' in relevant project bullet points if you have used it"
     ],
-    "potentialScoreIncrease": 38
+    "potentialScoreIncrease": 25
   },
   "keywordAnalysis": {
     "technicalKeywords": [

@@ -14,21 +14,20 @@
       "next.js",
       "ci/cd",
       "observability",
+      "graphql",
+      "grpc",
       "system design"
     ],
-    "niceToHaveMissing": [
-      "graphql",
-      "grpc"
-    ],
+    "niceToHaveMissing": [],
     "suggestions": [
       "Add 'next.js' to cv-master.json if you have experience with this technology",
       "Add 'ci/cd' to cv-master.json if you have experience with this technology",
       "Add 'observability' to cv-master.json if you have experience with this technology",
-      "Add 'system design' to cv-master.json if you have experience with this technology",
-      "Mention 'graphql' in relevant project bullet points if you have used it",
-      "Mention 'grpc' in relevant project bullet points if you have used it"
+      "Add 'graphql' to cv-master.json if you have experience with this technology",
+      "Add 'grpc' to cv-master.json if you have experience with this technology",
+      "There are 1 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 20
+    "potentialScoreIncrease": 30
   },
   "keywordAnalysis": {
     "technicalKeywords": [

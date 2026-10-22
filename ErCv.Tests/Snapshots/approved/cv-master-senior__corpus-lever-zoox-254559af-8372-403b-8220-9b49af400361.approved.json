@@ -13,18 +13,17 @@
     "requiredMissing": [
       "rust",
       "c++",
-      "algorithms"
-    ],
-    "niceToHaveMissing": [
+      "algorithms",
       "machine learning"
     ],
+    "niceToHaveMissing": [],
     "suggestions": [
       "Add 'rust' to cv-master.json if you have experience with this technology",
       "Add 'c++' to cv-master.json if you have experience with this technology",
       "Add 'algorithms' to cv-master.json if you have experience with this technology",
-      "Mention 'machine learning' in relevant project bullet points if you have used it"
+      "Add 'machine learning' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 30
+    "potentialScoreIncrease": 40
   },
   "keywordAnalysis": {
     "technicalKeywords": [

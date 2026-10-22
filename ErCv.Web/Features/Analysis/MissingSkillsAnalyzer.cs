@@ -6,13 +6,6 @@ namespace ErCv.Web.Features.Analysis;
 
 public class MissingSkillsAnalyzer
 {
-    #region Constants
-
-    private static readonly HashSet<string> NiceToHaveKeywords =
-        new(MissingSkillsConstants.NiceToHaveKeywords, StringComparer.OrdinalIgnoreCase);
-
-    #endregion
-
     #region Public Methods
 
     public MissingSkillsAnalysis Analyze(CVMaster cv, JobRequirements requirements)
@@ -21,6 +14,8 @@ public class MissingSkillsAnalyzer
 
         var allBulletsText = BulletsText(cv);
 
+        // Required or nice to have is what the post says (MATCH-06), not a fixed list of technologies
+        var niceToHave = new HashSet<string>(requirements.NiceToHaveSkills, StringComparer.OrdinalIgnoreCase);
         var requiredMissing = new List<string>();
         var niceToHaveMissing = new List<string>();
 
@@ -28,8 +23,7 @@ public class MissingSkillsAnalyzer
         {
             if (!IsInProfile(skill, allCVSkills, allBulletsText))
             {
-                if (NiceToHaveKeywords.Contains(skill) ||
-                    SkillNormalizer.MatchesAny(skill, NiceToHaveKeywords))
+                if (niceToHave.Contains(skill))
                     niceToHaveMissing.Add(skill);
                 else
                     requiredMissing.Add(skill);

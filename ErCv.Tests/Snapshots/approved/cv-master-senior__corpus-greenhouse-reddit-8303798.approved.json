@@ -10,14 +10,14 @@
     "lowMatchWarning": null
   },
   "missingSkills": {
-    "requiredMissing": [],
-    "niceToHaveMissing": [
+    "requiredMissing": [
       "grpc"
     ],
+    "niceToHaveMissing": [],
     "suggestions": [
-      "Mention 'grpc' in relevant project bullet points if you have used it"
+      "Add 'grpc' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 0
+    "potentialScoreIncrease": 5
   },
   "keywordAnalysis": {
     "technicalKeywords": [

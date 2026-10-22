@@ -10,14 +10,14 @@
     "lowMatchWarning": null
   },
   "missingSkills": {
-    "requiredMissing": [],
-    "niceToHaveMissing": [
+    "requiredMissing": [
       "llm"
     ],
+    "niceToHaveMissing": [],
     "suggestions": [
-      "Mention 'llm' in relevant project bullet points if you have used it"
+      "Add 'llm' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 0
+    "potentialScoreIncrease": 17
   },
   "keywordAnalysis": {
     "technicalKeywords": [

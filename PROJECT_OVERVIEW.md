@@ -28,7 +28,7 @@ Target users: job seekers, mainly software engineers, who adapt one master CV to
 
 ```
 POST /api/cv/generate (the Blazor UI calls the same service method in-process)
-  jobDescription      -> JobDescriptionParser   -> JobRequirements (skills, keywords, seniority, years)
+  jobDescription      -> JobDescriptionParser   -> JobRequirements (skills, nice-to-have, keywords, seniority, years)
   profile + reqs      -> MatchScoreCalculator    -> match score (skills 50%, keywords 30%, seniority 20%)
   profile + reqs      -> MissingSkillsAnalyzer   -> required / nice-to-have skills the profile lacks
   profile + reqs      -> CVSelector              -> GeneratedCV + the reasons for each choice
@@ -195,6 +195,5 @@ the suite with line coverage of `Features/` and `Services/` (gate 95%), the brow
 
 ## Open items
 
-Tracked in `features.md`: the "Open items after" sections and the findings tables. The main ones: the parser does
-not split required and nice-to-have skills by the post's sections (MATCH-06, F25, planned for M5.1), scores are not
+Tracked in `features.md`: the "Open items after" sections and the findings tables. The main ones: scores are not
 recomputed after edits, the cover letter has no company name, and the first public deploy is M5.2 (OPS-06).

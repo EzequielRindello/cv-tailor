@@ -11,7 +11,7 @@
   },
   "missingSkills": {
     "requiredMissing": [
-      "gcp",
+      "kubernetes",
       "observability",
       "slo",
       "on-call",
@@ -19,16 +19,16 @@
       "sre"
     ],
     "niceToHaveMissing": [
-      "kubernetes"
+      "gcp"
     ],
     "suggestions": [
-      "Add 'gcp' to cv-master.json if you have experience with this technology",
+      "Add 'kubernetes' to cv-master.json if you have experience with this technology",
       "Add 'observability' to cv-master.json if you have experience with this technology",
       "Add 'slo' to cv-master.json if you have experience with this technology",
       "Add 'on-call' to cv-master.json if you have experience with this technology",
       "Add 'incident response' to cv-master.json if you have experience with this technology",
-      "Mention 'kubernetes' in relevant project bullet points if you have used it",
-      "There are 1 more required skills — review the full JSON"
+      "Mention 'gcp' in relevant project bullet points if you have used it",
+      "There are 1 more required skills: review the full JSON"
     ],
     "potentialScoreIncrease": 38
   },

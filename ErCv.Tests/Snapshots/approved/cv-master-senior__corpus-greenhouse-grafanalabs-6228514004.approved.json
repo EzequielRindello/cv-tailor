@@ -11,17 +11,18 @@
   },
   "missingSkills": {
     "requiredMissing": [
-      "distributed systems",
       "data structures",
       "algorithms"
     ],
-    "niceToHaveMissing": [],
-    "suggestions": [
-      "Add 'distributed systems' to cv-master.json if you have experience with this technology",
-      "Add 'data structures' to cv-master.json if you have experience with this technology",
-      "Add 'algorithms' to cv-master.json if you have experience with this technology"
+    "niceToHaveMissing": [
+      "distributed systems"
     ],
-    "potentialScoreIncrease": 15
+    "suggestions": [
+      "Add 'data structures' to cv-master.json if you have experience with this technology",
+      "Add 'algorithms' to cv-master.json if you have experience with this technology",
+      "Mention 'distributed systems' in relevant project bullet points if you have used it"
+    ],
+    "potentialScoreIncrease": 10
   },
   "keywordAnalysis": {
     "technicalKeywords": [

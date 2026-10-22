@@ -66,10 +66,12 @@ public class JobDescriptionParser
             };
 
         var normalizedText = jobDescription.ToLower();
+        var skills = FindTechnicalSkills(jobDescription);
 
         return new JobRequirements
         {
-            TechnicalSkills = ExtractTechnicalSkills(jobDescription),
+            TechnicalSkills = skills.Select(s => s.Name).ToList(),
+            NiceToHaveSkills = NiceToHaveSkills(jobDescription, skills),
             Keywords = ExtractKeywords(normalizedText),
             SeniorityLevel = ExtractSeniorityLevel(normalizedText),
             RequiredExperience = ExtractRequiredExperience(normalizedText)
@@ -81,21 +83,122 @@ public class JobDescriptionParser
     #region Private Methods
 
     // Searched in the original text: some text forms only count capitalized ("Go", not "go ahead")
-    private List<string> ExtractTechnicalSkills(string text)
+    private static List<SkillMentions> FindTechnicalSkills(string text)
     {
         var found = SkillDictionary.All
-            .Where(skill => SkillNormalizer.FindSkill(text, skill).Any())
-            .Select(skill => skill.Name)
+            .Select(skill => new SkillMentions(skill.Name, SkillNormalizer.FindSkill(text, skill).Select(h => h.Start).ToList()))
+            .Where(s => s.At.Count > 0)
             .ToList();
 
         // "5 years of go" names a skill even in lowercase, but only a word the dictionary knows ("5 years of building" does not)
         foreach (Match match in JobDescriptionConstants.YearsWithTech().Matches(text))
         {
             var skill = SkillDictionary.FindByTextForm(match.Groups[2].Value.TrimEnd('.'));
-            if (skill != null && !found.Contains(skill.Name)) found.Add(skill.Name);
+            if (skill == null) continue;
+            var at = match.Groups[2].Index;
+            if (found.Find(s => s.Name == skill.Name) is { } known) known.At.Add(at);
+            else found.Add(new SkillMentions(skill.Name, new List<int> { at }));
         }
         return found;
     }
+
+    /// <summary>The skills whose every mention is in an optional part of the post (see <see cref="OptionalSpans"/>).</summary>
+    private static List<string> NiceToHaveSkills(string text, List<SkillMentions> skills)
+    {
+        var optional = OptionalSpans(text, skills.SelectMany(s => s.At).ToList());
+        return skills
+            .Where(s => s.At.All(at => optional.Any(span => at >= span.Start && at < span.End)))
+            .Select(s => s.Name)
+            .ToList();
+    }
+
+    /// <summary>
+    /// The parts of the post that ask for something optional: the lines under a heading with an optional cue, up to
+    /// the next heading, and elsewhere the lines, sentences or asides that carry one (see <see cref="OptionalParts"/>).
+    /// A line that names a skill is a heading only when it opens a section about the company ("About MongoDB"),
+    /// so "Kafka" alone on a line does not close a section.
+    /// </summary>
+    private static List<(int Start, int End)> OptionalSpans(string text, List<int> skillsAt)
+    {
+        var spans = new List<(int Start, int End)>();
+        var underOptionalHeading = false;
+        var lineStart = 0;
+        foreach (var line in text.Split('\n'))
+        {
+            var lineEnd = lineStart + line.Length;
+            var namesSkill = skillsAt.Any(at => at >= lineStart && at < lineEnd);
+
+            var trimmed = line.Trim();
+            if (IsHeading(trimmed) && (!namesSkill || StartsWithAny(trimmed, JobDescriptionConstants.CompanyHeadingPrefixes)))
+                underOptionalHeading = HasOptionalCue(line);
+            else if (underOptionalHeading)
+                spans.Add((lineStart, lineEnd));
+            else
+                spans.AddRange(OptionalParts(line, lineStart));
+
+            lineStart = lineEnd + 1;
+        }
+        return spans;
+    }
+
+    private static bool IsHeading(string line) =>
+        line.Length > 0
+        && !JobDescriptionConstants.BulletLine().IsMatch(line)
+        && (line[^1] == JobDescriptionConstants.HeadingEnd
+            || (!JobDescriptionConstants.SentenceEndChars.Contains(line[^1]) && IsShort(line)));
+
+    /// <summary>
+    /// The optional parts of a line outside a nice-to-have section. A lead-in with a cue ("Bonus: Go, Java or Rust;
+    /// object storage at scale") covers the whole line. Otherwise each sentence: a cue covers the sentence ("Typescript
+    /// or Rust is a plus"), a forward cue only what follows it ("AWS, GCP or Azure, ideally including access logs"), and
+    /// a cue inside parentheses only the parentheses ("read code (we use a lot of TypeScript), cloud (GCP a plus)").
+    /// </summary>
+    private static IEnumerable<(int Start, int End)> OptionalParts(string line, int lineStart)
+    {
+        var leadIn = JobDescriptionConstants.BulletLine().Replace(line.Trim(), "").Split(JobDescriptionConstants.HeadingEnd, 2);
+        if (leadIn.Length == 2 && IsShort(leadIn[0]) && HasOptionalCue(leadIn[0]))
+        {
+            yield return (lineStart, lineStart + line.Length);
+            yield break;
+        }
+
+        var start = 0;
+        foreach (var end in JobDescriptionConstants.SentenceBreak().Matches(line).Select(m => m.Index).Append(line.Length))
+        {
+            var sentence = line[start..end];
+            var asides = JobDescriptionConstants.Parenthetical().Matches(sentence);
+            // Blanked to the same length, so an offset in it is an offset in the sentence
+            var outside = JobDescriptionConstants.Parenthetical().Replace(sentence, a => new string(' ', a.Length));
+
+            if (ContainsAny(outside, JobDescriptionConstants.OptionalCues))
+                yield return (lineStart + start, lineStart + end);
+            else if (FirstForwardCue(outside) is var cue and >= 0)
+                yield return (lineStart + start + cue, lineStart + end);
+
+            foreach (Match aside in asides.Where(a => HasOptionalCue(a.Value)))
+                yield return (lineStart + start + aside.Index, lineStart + start + aside.Index + aside.Length);
+            start = end;
+        }
+    }
+
+    private static int FirstForwardCue(string text) =>
+        JobDescriptionConstants.ForwardOptionalCues
+            .Select(cue => text.IndexOf(cue, StringComparison.OrdinalIgnoreCase))
+            .Where(at => at >= 0)
+            .DefaultIfEmpty(-1)
+            .Min();
+
+    private static bool HasOptionalCue(string text) =>
+        ContainsAny(text, JobDescriptionConstants.OptionalCues) || ContainsAny(text, JobDescriptionConstants.ForwardOptionalCues);
+
+    private static bool ContainsAny(string text, string[] cues) =>
+        cues.Any(cue => text.Contains(cue, StringComparison.OrdinalIgnoreCase));
+
+    private static bool StartsWithAny(string text, string[] prefixes) =>
+        prefixes.Any(prefix => text.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+
+    private static bool IsShort(string text) =>
+        text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length <= JobDescriptionConstants.MaxHeadingWords;
 
     private List<string> ExtractKeywords(string text) =>
         JobDescriptionConstants.WordSplit().Split(text)
@@ -175,6 +278,13 @@ public class JobDescriptionParser
     }
 
     private static string Alternation(IEnumerable<string> words) => $"(?:{string.Join("|", words.Select(Regex.Escape))})";
+
+    #endregion
+
+    #region Nested Types
+
+    /// <summary>A skill the post names and where (character offsets in the job description).</summary>
+    private sealed record SkillMentions(string Name, List<int> At);
 
     #endregion
 }

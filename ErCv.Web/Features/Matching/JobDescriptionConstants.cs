@@ -120,4 +120,42 @@ public static partial class JobDescriptionConstants
     };
 
     #endregion
+
+    #region Sections
+
+    // A line without a bullet that names no skill is a section heading when it ends with ':' or is this short
+    // and does not end like a sentence ("Why Discord?" is a heading)
+    public const int MaxHeadingWords = 12;
+    public const char HeadingEnd = ':';
+    public const string SentenceEndChars = ".!";
+
+    /// <summary>Headings of the company's own sections, which name a skill when the company is one ("About MongoDB").</summary>
+    public static readonly string[] CompanyHeadingPrefixes = { "about ", "why ", "life at ", "acerca de ", "sobre " };
+
+    /// <summary>
+    /// Words that mark something the post does not require. Under a heading with one of them ("Nice to have",
+    /// "Bonus points", "Preferred qualifications") every skill is optional until the next heading; a sentence with
+    /// one ("Kafka is a plus") makes its own skills optional. Taken from the headings of the job-post corpus.
+    /// </summary>
+    public static readonly string[] OptionalCues =
+    {
+        "nice to have", "nice-to-have", "bonus", "preferred", "desired", "desirable", "a plus", "added plus",
+        "not required", "stand out", "helpful", "even better", "good to have", "great to have",
+        "deseable", "valorable", "se valora", "un plus"
+    };
+
+    /// <summary>Cues that make optional only what follows them: in "AWS or GCP, ideally including access logs" the clouds stay required.</summary>
+    public static readonly string[] ForwardOptionalCues = { "ideally", "preferably", "idealmente", "preferentemente" };
+
+    public const string SentenceBreakPattern = @"(?<=[.!?;])\s+";
+
+    public const string ParentheticalPattern = @"\([^()]*\)";
+
+    [GeneratedRegex(SentenceBreakPattern)]
+    public static partial Regex SentenceBreak();
+
+    [GeneratedRegex(ParentheticalPattern)]
+    public static partial Regex Parenthetical();
+
+    #endregion
 }

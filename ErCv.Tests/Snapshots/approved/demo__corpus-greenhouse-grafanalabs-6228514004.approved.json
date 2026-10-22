@@ -14,24 +14,24 @@
       "python",
       "go",
       "observability",
-      "distributed systems",
+      "grafana",
       "data structures",
       "algorithms",
       "agile"
     ],
     "niceToHaveMissing": [
       "kubernetes",
-      "grafana"
+      "distributed systems"
     ],
     "suggestions": [
       "Add 'python' to cv-master.json if you have experience with this technology",
       "Add 'go' to cv-master.json if you have experience with this technology",
       "Add 'observability' to cv-master.json if you have experience with this technology",
-      "Add 'distributed systems' to cv-master.json if you have experience with this technology",
+      "Add 'grafana' to cv-master.json if you have experience with this technology",
       "Add 'data structures' to cv-master.json if you have experience with this technology",
       "Mention 'kubernetes' in relevant project bullet points if you have used it",
-      "Mention 'grafana' in relevant project bullet points if you have used it",
-      "There are 2 more required skills — review the full JSON"
+      "Mention 'distributed systems' in relevant project bullet points if you have used it",
+      "There are 2 more required skills: review the full JSON"
     ],
     "potentialScoreIncrease": 35
   },

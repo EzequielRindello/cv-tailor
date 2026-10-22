@@ -1,4 +1,6 @@
+using ErCv.Tests.Fixtures;
 using ErCv.Web.Features.Analysis;
+using ErCv.Web.Features.Matching;
 using static ErCv.Tests.Support.Build;
 
 namespace ErCv.Tests.Features.Analysis;
@@ -30,23 +32,38 @@ public class MissingSkillsAnalyzerTests
     }
 
     [Fact]
-    public void Missing_skills_split_into_required_and_nice_to_have()
+    public void Missing_skills_split_by_what_the_post_marks_optional()
     {
         var cv = Master(languages: new[] { "python" });
 
-        var r = _analyzer.Analyze(cv, Req(skills: new[] { "haskell", "kubernetes", "terraform" }));
+        var r = _analyzer.Analyze(cv, Req(skills: new[] { "haskell", "kubernetes", "terraform" }, niceToHave: new[] { "terraform" }));
 
-        Assert.Equal(new[] { "haskell" }, r.RequiredMissing);
-        Assert.Equal(new[] { "kubernetes", "terraform" }, r.NiceToHaveMissing);
+        Assert.Equal(new[] { "haskell", "kubernetes" }, r.RequiredMissing);
+        Assert.Equal(new[] { "terraform" }, r.NiceToHaveMissing);
     }
 
-    // "rust" used to match the nice-to-have entry "zero trust" through substring matching (F1).
+    // MATCH-06: Kubernetes used to be nice to have in every post, from a fixed list of technologies
     [Fact]
-    public void Rust_is_required_not_nice_to_have()
+    public void A_skill_the_post_does_not_mark_optional_is_required()
     {
-        var r = _analyzer.Analyze(Master(languages: new[] { "python" }), Req(skills: new[] { "rust" }));
+        var r = _analyzer.Analyze(Master(languages: new[] { "python" }), Req(skills: new[] { "kubernetes", "kafka" }));
 
-        Assert.Equal(new[] { "rust" }, r.RequiredMissing);
+        Assert.Equal(new[] { "kubernetes", "kafka" }, r.RequiredMissing);
+        Assert.Empty(r.NiceToHaveMissing);
+    }
+
+    // F25: in TC-01 GitOps is under "Nice to have" and RabbitMQ under "Requirements"
+    [Fact]
+    public void Tc01_follows_the_sections_of_the_post()
+    {
+        var requirements = new JobDescriptionParser().Parse(FixtureLoader.LoadJd("legacy/tc-01"));
+
+        var r = _analyzer.Analyze(Master(languages: new[] { "python" }), requirements);
+
+        Assert.Contains("rabbitmq", r.RequiredMissing);
+        Assert.Contains("gitops", r.NiceToHaveMissing);
+        Assert.DoesNotContain("gitops", r.RequiredMissing);
+        Assert.DoesNotContain("rabbitmq", r.NiceToHaveMissing);
     }
 
     [Fact]

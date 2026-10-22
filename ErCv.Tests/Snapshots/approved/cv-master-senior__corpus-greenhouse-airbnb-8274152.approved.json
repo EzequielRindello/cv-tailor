@@ -11,15 +11,16 @@
   },
   "missingSkills": {
     "requiredMissing": [
-      "kotlin",
+      "kotlin"
+    ],
+    "niceToHaveMissing": [
       "distributed systems"
     ],
-    "niceToHaveMissing": [],
     "suggestions": [
       "Add 'kotlin' to cv-master.json if you have experience with this technology",
-      "Add 'distributed systems' to cv-master.json if you have experience with this technology"
+      "Mention 'distributed systems' in relevant project bullet points if you have used it"
     ],
-    "potentialScoreIncrease": 12
+    "potentialScoreIncrease": 6
   },
   "keywordAnalysis": {
     "technicalKeywords": [

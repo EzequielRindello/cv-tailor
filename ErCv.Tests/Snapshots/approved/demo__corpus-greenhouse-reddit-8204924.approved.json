@@ -14,17 +14,16 @@
       "python",
       "ruby",
       "go",
-      "rust"
-    ],
-    "niceToHaveMissing": [
+      "rust",
       "machine learning"
     ],
+    "niceToHaveMissing": [],
     "suggestions": [
       "Add 'python' to cv-master.json if you have experience with this technology",
       "Add 'ruby' to cv-master.json if you have experience with this technology",
       "Add 'go' to cv-master.json if you have experience with this technology",
       "Add 'rust' to cv-master.json if you have experience with this technology",
-      "Mention 'machine learning' in relevant project bullet points if you have used it"
+      "Add 'machine learning' to cv-master.json if you have experience with this technology"
     ],
     "potentialScoreIncrease": 40
   },

@@ -257,4 +257,111 @@ public class JobDescriptionParserTests
     {
         Assert.Contains("c", _parser.Parse("Experience with C, Linux and Bash").TechnicalSkills);
     }
+
+    // MATCH-06: required or nice to have comes from the post, not from a fixed list of technologies
+
+    [Fact]
+    public void Skills_under_a_nice_to_have_heading_are_optional_until_the_next_heading()
+    {
+        var r = _parser.Parse(
+            "Requirements:\n- Python and Kubernetes\n\nNice to have:\n- Experience with Kafka or Redis\n\nWhat we offer\n- A Terraform budget");
+
+        Assert.Equal(new[] { "kafka", "redis" }, r.NiceToHaveSkills.OrderBy(s => s));
+        Assert.Contains("kubernetes", r.TechnicalSkills);
+        Assert.Contains("terraform", r.TechnicalSkills);
+    }
+
+    [Theory]
+    [InlineData("Bonus points:")]
+    [InlineData("Bonus Points For")]
+    [InlineData("Preferred qualifications")]
+    [InlineData("Nice to have (but not required):")]
+    [InlineData("Desired:")]
+    [InlineData("Ways to Stand Out")]
+    [InlineData("While it's not required, it's an added plus if you also have:")]
+    [InlineData("Se valorará:")]
+    public void Headings_from_real_posts_open_an_optional_section(string heading)
+    {
+        var r = _parser.Parse($"Requirements\n- Python\n\n{heading}\n- Kafka\r\n");
+
+        Assert.Equal(new[] { "kafka" }, r.NiceToHaveSkills);
+    }
+
+    [Fact]
+    public void A_sentence_that_says_so_makes_its_own_skills_optional()
+    {
+        var r = _parser.Parse("- You are proficient in Python and SQL. Experience with Typescript or Rust is a plus.");
+
+        Assert.Equal(new[] { "rust", "typescript" }, r.NiceToHaveSkills.OrderBy(s => s));
+    }
+
+    [Fact]
+    public void A_cue_inside_parentheses_covers_only_the_parentheses()
+    {
+        var r = _parser.Parse("- You can read code (we use a lot of TypeScript), you know cloud environments (GCP a plus)");
+
+        Assert.Equal(new[] { "gcp" }, r.NiceToHaveSkills);
+    }
+
+    [Theory]
+    [InlineData("- Hands-on experience with AWS, GCP, or Azure, ideally including identity and access logs.", new string[0])]
+    [InlineData("- Knowledge of containerized applications, ideally with Kubernetes.", new[] { "kubernetes" })]
+    public void A_forward_cue_covers_only_what_follows_it(string jd, string[] expected)
+    {
+        Assert.Equal(expected, _parser.Parse(jd).NiceToHaveSkills);
+    }
+
+    [Fact]
+    public void A_lead_in_with_a_cue_covers_the_whole_line()
+    {
+        var r = _parser.Parse("Requirements\n- Python\n- Bonus: experience with Go or Rust; with Kafka at scale");
+
+        Assert.Equal(new[] { "go", "kafka", "rust" }, r.NiceToHaveSkills.OrderBy(s => s));
+    }
+
+    [Fact]
+    public void A_skill_also_asked_for_outside_the_optional_parts_is_required()
+    {
+        var r = _parser.Parse("Requirements:\n- Kafka in production\n\nNice to have:\n- Kafka Streams and Redis");
+
+        Assert.Equal(new[] { "redis" }, r.NiceToHaveSkills);
+    }
+
+    [Fact]
+    public void A_line_with_only_a_skill_does_not_close_the_section_but_the_company_heading_does()
+    {
+        var r = _parser.Parse("Nice to have\nKafka\nRedis\n\nAbout MongoDB\nMongoDB Atlas runs on AWS and Azure.");
+
+        Assert.Equal(new[] { "kafka", "redis" }, r.NiceToHaveSkills.OrderBy(s => s));
+        Assert.Contains("aws", r.TechnicalSkills);
+    }
+
+    [Fact]
+    public void A_post_without_optional_parts_requires_every_skill()
+    {
+        var r = _parser.Parse(FixtureLoader.LoadJd("backend-go-kafka"));
+
+        Assert.NotEmpty(r.TechnicalSkills);
+        Assert.Empty(r.NiceToHaveSkills);
+    }
+
+    [Fact]
+    public void A_real_post_with_a_nice_to_haves_section()
+    {
+        // Notion, mobile intern: languages under "Qualifications", the stack under "Nice to Haves:"
+        var r = _parser.Parse(FixtureLoader.LoadJd("corpus/ashby-notion-2b587e66-deac-421a-a824-9415ba78b5a7"));
+
+        Assert.Equal(new[] { "jetpack compose", "postgresql", "react" }, r.NiceToHaveSkills.OrderBy(s => s));
+        Assert.Contains("kotlin", r.TechnicalSkills);
+        Assert.Contains("swift", r.TechnicalSkills);
+    }
+
+    [Theory]
+    [MemberData(nameof(FixtureLoader.CorpusPostingIds), MemberType = typeof(FixtureLoader))]
+    public void Nice_to_have_skills_are_skills_of_the_post(string id)
+    {
+        var r = _parser.Parse(FixtureLoader.LoadJd(FixtureLoader.CorpusPrefix + id));
+
+        Assert.Empty(r.NiceToHaveSkills.Except(r.TechnicalSkills));
+    }
 }
