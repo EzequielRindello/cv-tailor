@@ -6,14 +6,15 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>ErCv.Web</RootNamespace>
 		<!-- One version per milestone, see "Versioning" in features.md. Shown in the app footer. -->
-		<Version>2.0.5</Version>
+		<Version>2.0.6</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
 		<PackageReference Include="PuppeteerSharp" Version="19.0.0" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.18.2" />
 		<PackageReference Include="Stubble.Core" Version="1.10.8" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
 
 	<ItemGroup>

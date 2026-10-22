@@ -38,6 +38,13 @@ jobs:
       - name: Check
         run: dotnet run --project ErCv.Collector --configuration Release -- check
 
+      # TEST-08 snapshots cover one real post per role family: new posts get one, dropped posts lose theirs.
+      # The PR shows them next to the corpus change for review.
+      - name: Snapshots
+        env:
+          ERCV_SNAPSHOTS: approve
+        run: dotnet test ErCv.Tests --configuration Release --filter "Category=Snapshot"
+
       # A person reviews every change: the job only opens a PR, it never pushes to master.
       - name: Open a pull request
         env:
@@ -52,7 +59,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "$branch"
-          git add corpus ErCv.Web/Data/sample-jobs.json
+          git add corpus ErCv.Web/Data/sample-jobs.json ErCv.Tests/Snapshots/approved
           git commit -m "chore: refresh job post corpus"
           git push --force origin "$branch"
 

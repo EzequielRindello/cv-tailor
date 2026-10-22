@@ -1,0 +1,57 @@
+@page "/privacy"
+@inject ErCvOptions Options
+
+<PageTitle>Privacy - CV Generator</PageTitle>
+
+@* OPS-05. Every statement here is checked against the code: update this page when what is stored or sent changes. *@
+<div class="container app-shell py-4 py-lg-5 privacy-page">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="privacy-page-title">Privacy</h1>
+        <a class="btn btn-outline-secondary btn-sm" href="/">Back to the generator</a>
+    </div>
+    <p class="privacy-page-intro">
+        There is no account and no database. Your data lives in your own browser, and the server only holds it in
+        memory while it builds your CV.
+    </p>
+
+    <section class="card main-card" aria-labelledby="privacy-browser">
+        <div class="card-body form-card-body">
+            <h2 class="privacy-section-title" id="privacy-browser">Saved in your browser</h2>
+            <ul>
+                <li>Your settings: template, formats, page mode, language, accent, fonts and theme.</li>
+                <li>Your generation history, up to 50 entries, with each job description and the application details you add.</li>
+                <li>The profile you save on <a href="/profile">My profile</a>.</li>
+            </ul>
+            <p>
+                They stay in this browser's local storage and no other device sees them. Remove them with
+                <strong>Clear</strong> in the history, <strong>Clear my profile</strong> on My profile, or by clearing
+                this site's data in your browser.
+            </p>
+        </div>
+    </section>
+
+    <section class="card main-card mt-3" aria-labelledby="privacy-server">
+        <div class="card-body form-card-body">
+            <h2 class="privacy-section-title" id="privacy-server">What the server sees</h2>
+            <ul>
+                <li>When you generate a CV, the job description and the profile are sent to the server to build it.</li>
+                <li>While this page is open, the server keeps the generated CV in memory so you can edit and download it. It is gone when you close the page.</li>
+                <li>Through the API, the generated files stay in a server-side session for up to @Options.Session.IdleTimeoutMinutes minutes of inactivity, so they can be downloaded.</li>
+                <li>Nothing is written to disk or to a database.</li>
+                <li>Error logs hold technical details only (for example a date the parser could not read), never your whole CV or the job description.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="card main-card mt-3" aria-labelledby="privacy-third-parties">
+        <div class="card-body form-card-body">
+            <h2 class="privacy-section-title" id="privacy-third-parties">No tracking</h2>
+            <ul>
+                <li>No analytics and no ads. Fonts, styles and scripts are served by the app itself.</li>
+                <li>Cookies: only the ones the app needs to work (the session and the anti-forgery cookie).</li>
+                <li>The hosting provider may keep standard access logs (IP address, time and page requested).</li>
+                <li>The sample job descriptions are public job posts, each linked to the original.</li>
+            </ul>
+        </div>
+    </section>
+</div>

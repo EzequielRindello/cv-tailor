@@ -1,0 +1,355 @@
+{
+  "matchScore": {
+    "overall": 67,
+    "skillsMatched": 11,
+    "totalSkills": 17,
+    "keywordsMatched": 7,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "yellow",
+    "lowMatchWarning": null
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "infrastructure as code",
+      "incident response",
+      "linux",
+      "devops",
+      "sre"
+    ],
+    "niceToHaveMissing": [],
+    "suggestions": [
+      "Add 'infrastructure as code' to cv-master.json if you have experience with this technology",
+      "Add 'incident response' to cv-master.json if you have experience with this technology",
+      "Add 'linux' to cv-master.json if you have experience with this technology",
+      "Add 'devops' to cv-master.json if you have experience with this technology",
+      "Add 'sre' to cv-master.json if you have experience with this technology"
+    ],
+    "potentialScoreIncrease": 15
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "devops",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "terraform",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "kubernetes",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "docker",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "infrastructure as code",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "ci/cd",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "github actions",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "github",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "prometheus",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "grafana",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "sre",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "aws",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "linux",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "bash",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "python",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "softSkillKeywords": [],
+    "industryKeywords": [
+      {
+        "word": "engineer",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "cloud",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "platform",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "manage",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "workloads",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "pipelines",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "improve",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "monitoring",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "requirements",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "years",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "presentInCV": [
+      "devops",
+      "terraform",
+      "kubernetes",
+      "docker",
+      "ci/cd",
+      "github actions",
+      "github",
+      "prometheus",
+      "grafana",
+      "aws",
+      "bash",
+      "python",
+      "observability",
+      "engineer",
+      "years"
+    ],
+    "missingFromCV": [
+      "infrastructure as code",
+      "sre",
+      "linux",
+      "incident response"
+    ],
+    "keywordDensity": 0.76,
+    "suggestions": [
+      "Add \"infrastructure as code\" to the skills section or bullets if you have used it",
+      "Add \"sre\" to the skills section or bullets if you have used it",
+      "Add \"linux\" to the skills section or bullets if you have used it",
+      "Add \"incident response\" to the skills section or bullets if you have used it"
+    ]
+  },
+  "atsScore": {
+    "overall": 100,
+    "issues": [],
+    "recommendations": [
+      "Your CV is fully optimized for ATS"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior DevOps Engineer with 9+ years of experience, specializing in Docker, Python, AWS, GitHub, and Kubernetes. Proven track record of cutting deployment incidents by 72%. Strong team collaboration skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Implemented automated canary deployments with GitHub Actions and ArgoCD cutting deployment incidents by 72%",
+          "Built observability dashboards in Grafana + Prometheus reducing mean time to detection (MTTD) for production incidents from 18 min to 4 min"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Developed a dynamic pricing recommendation engine using Python and scikit-learn increasing host revenue by an average of 22%",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s",
+          "Reduced CI/CD pipeline duration from 28 minutes to 9 minutes by parallelizing test suites and optimizing Docker layer caching"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Twilio",
+        "location": "San Francisco, CA",
+        "startDate": "Jul 2017",
+        "endDate": "May 2019",
+        "bullets": [
+          "Designed and implemented a webhook retry mechanism with exponential backoff reducing message delivery failures by 44%",
+          "Created internal developer tooling in Python that automated repetitive QA workflows saving the team 15 hours/week",
+          "Built REST APIs following OpenAPI spec with full Swagger documentation adopted by 3,000+ external developers"
+        ],
+        "skills": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "Ruby",
+          "Rails",
+          "MySQL",
+          "REST API",
+          "Swagger",
+          "OpenAPI",
+          "Microservices",
+          "Docker",
+          "SQL",
+          "AWS"
+        ]
+      }
+    ],
+    "skills": [
+      "Docker",
+      "Python",
+      "AWS",
+      "GitHub",
+      "Kubernetes",
+      "GitHub Actions",
+      "Grafana",
+      "Prometheus",
+      "CI/CD",
+      "Bash",
+      "Terraform",
+      "REST API Design",
+      "TypeScript",
+      "Java",
+      "Microservices"
+    ],
+    "projects": [
+      {
+        "name": "OpenMQ — Open Source Message Queue",
+        "description": "Built a lightweight distributed message queue in Go inspired by Kafka. Supports pub/sub, consumer groups, and at-least-once delivery. Used by 3 open source projects with 800+ GitHub stars.",
+        "technologies": [
+          "Go",
+          "gRPC",
+          "Docker",
+          "Kubernetes"
+        ],
+        "highlights": [
+          "Achieved 95K messages/second throughput on a 3-node cluster in benchmarks",
+          "Implemented Raft consensus for leader election ensuring zero message loss during failover",
+          "Published detailed architecture docs and attracted 12 external contributors"
+        ],
+        "link": "github.com/alexrivera-dev/openmq"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

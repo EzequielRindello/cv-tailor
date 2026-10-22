@@ -1,0 +1,15 @@
+iOS Software Engineer
+
+We are looking for an iOS engineer to build native mobile experiences.
+
+Requirements:
+- 3+ years iOS development experience
+- Proficiency in Swift and Objective-C
+- Experience with UIKit and SwiftUI
+- Xcode and Instruments proficiency
+- Knowledge of iOS SDK, Core Data, and push notifications
+- Experience with CocoaPods or Swift Package Manager
+
+Nice to have:
+- Experience with React Native
+- Backend API integration experience

@@ -3,6 +3,7 @@ using ErCv.Web.Components.Shared;
 using ErCv.Web.Features.Documents;
 using ErCv.Web.Features.Editing;
 using ErCv.Web.Models;
+using Microsoft.AspNetCore.Components.Web;
 using static ErCv.Tests.Support.Build;
 
 namespace ErCv.Tests.Components;
@@ -99,6 +100,33 @@ public class CvEditorTests : BunitContext
 
         Assert.Empty(cut.FindAll("#bullet-edit-0-0"));
         Assert.Equal("Built the billing API", _draft.Build().Experience[0].Bullets[0]);
+    }
+
+    [Fact]
+    public void Moving_a_bullet_keeps_which_bullets_are_left_out()
+    {
+        var cut = Render();
+        cut.Find("#bullet-0-1").Change(false);
+
+        cut.FindAll("button[aria-label='Move bullet up']")[1].Click();
+
+        var bullets = _draft.Experiences[0].Bullets;
+        Assert.Equal(new[] { "Cut latency by 40%", "Built the billing API" }, bullets.Select(b => b.Text));
+        Assert.Equal(new[] { false, true }, bullets.Select(b => b.IsIncluded));
+        Assert.Equal(new[] { "Built the billing API" }, _draft.Build().Experience[0].Bullets);
+        Assert.Equal(2, _changes);
+    }
+
+    [Fact]
+    public void Alt_and_an_arrow_key_move_a_bullet_and_a_plain_arrow_does_not()
+    {
+        var cut = Render();
+
+        cut.FindAll(".bullet-row")[0].KeyDown(new KeyboardEventArgs { Key = "ArrowDown" });
+        Assert.Equal("Built the billing API", _draft.Build().Experience[0].Bullets[0]);
+
+        cut.FindAll(".bullet-row")[0].KeyDown(new KeyboardEventArgs { Key = "ArrowDown", AltKey = true });
+        Assert.Equal(new[] { "Cut latency by 40%", "Built the billing API" }, _draft.Build().Experience[0].Bullets);
     }
 
     [Fact]

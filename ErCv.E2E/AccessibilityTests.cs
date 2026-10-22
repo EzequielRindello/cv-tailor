@@ -125,12 +125,25 @@ public class AccessibilityTests : E2ETestBase
         await AssertNoSeriousViolationsAsync("bullet editor");
     }
 
+    // OPS-05
+    [Fact]
+    public async Task The_footer_opens_the_privacy_page_and_it_has_no_serious_violations()
+    {
+        await OpenHomeAsync();
+        await Page.Locator(".app-footer").GetByRole(AriaRole.Link, new() { Name = "Privacy" }).ClickAsync();
+
+        await Assertions.Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Privacy", Level = 1 })).ToBeVisibleAsync();
+        await Assertions.Expect(Page).ToHaveURLAsync(new System.Text.RegularExpressions.Regex("/privacy$"));
+        await AssertNoSeriousViolationsAsync("privacy page");
+    }
+
     [Fact]
     public async Task Toasts_have_no_serious_violations()
     {
         await GenerateAsync();
         await Button("Download DOCX").ClickAsync();
-        await Assertions.Expect(Page.Locator(".app-toast")).ToBeVisibleAsync();
+        // "CV ready" is usually still on screen, so a bare ".app-toast" can match two toasts (strict mode)
+        await Assertions.Expect(Page.Locator(".app-toast").Filter(new() { HasText = "Download started" })).ToBeVisibleAsync();
         await AssertNoSeriousViolationsAsync("download toast");
     }
 }

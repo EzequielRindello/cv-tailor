@@ -37,10 +37,10 @@ public class CVGeneratorService
     private readonly MissingSkillsAnalyzer _missingSkillsAnalyzer;
     private readonly KeywordAnalyzer _keywordAnalyzer;
     private readonly ATSChecker _atsChecker;
-    private readonly ProfileValidator _profileValidator = new();
-    private readonly JdHighlighter _jdHighlighter = new();
-    private readonly PageConstraintHelper _pageConstraint = new();
-    private readonly CoverLetterGenerator _coverLetterGenerator = new();
+    private readonly ProfileValidator _profileValidator;
+    private readonly JdHighlighter _jdHighlighter;
+    private readonly PageConstraintHelper _pageConstraint;
+    private readonly CoverLetterGenerator _coverLetterGenerator;
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<CVGeneratorService> _logger;
     private readonly string _templatesFolder;
@@ -49,16 +49,32 @@ public class CVGeneratorService
 
     #region Constructors
 
-    public CVGeneratorService(IWebHostEnvironment env, ILoggerFactory loggerFactory)
+    public CVGeneratorService(
+        IWebHostEnvironment env,
+        ILogger<CVGeneratorService> logger,
+        JobDescriptionParser parser,
+        CVSelector selector,
+        MatchScoreCalculator matchScoreCalc,
+        MissingSkillsAnalyzer missingSkillsAnalyzer,
+        KeywordAnalyzer keywordAnalyzer,
+        ATSChecker atsChecker,
+        ProfileValidator profileValidator,
+        JdHighlighter jdHighlighter,
+        PageConstraintHelper pageConstraint,
+        CoverLetterGenerator coverLetterGenerator)
     {
         _env = env;
-        _logger = loggerFactory.CreateLogger<CVGeneratorService>();
-        _parser = new JobDescriptionParser();
-        _selector = new CVSelector(loggerFactory);
-        _matchScoreCalc = new MatchScoreCalculator();
-        _missingSkillsAnalyzer = new MissingSkillsAnalyzer();
-        _keywordAnalyzer = new KeywordAnalyzer();
-        _atsChecker = new ATSChecker();
+        _logger = logger;
+        _parser = parser;
+        _selector = selector;
+        _matchScoreCalc = matchScoreCalc;
+        _missingSkillsAnalyzer = missingSkillsAnalyzer;
+        _keywordAnalyzer = keywordAnalyzer;
+        _atsChecker = atsChecker;
+        _profileValidator = profileValidator;
+        _jdHighlighter = jdHighlighter;
+        _pageConstraint = pageConstraint;
+        _coverLetterGenerator = coverLetterGenerator;
         _templatesFolder = Path.Combine(_env.ContentRootPath, TemplatePaths.TemplatesFolder);
     }
 
@@ -269,7 +285,12 @@ public class CVGeneratorService
     }
 
     public IActionResult Health() =>
-        new OkObjectResult(new { status = ApiConstants.StatusHealthy, timestamp = DateTime.UtcNow });
+        new OkObjectResult(new
+        {
+            status = ApiConstants.StatusHealthy,
+            timestamp = DateTime.UtcNow,
+            pdfEngine = DocumentRenderer.PdfEngineStatus
+        });
 
     /// <summary>Loads a stored profile so the visitor can export it (PROF-02).</summary>
     public Task<CVMaster> GetProfileAsync(string profileId) => LoadCVMasterAsync(profileId);

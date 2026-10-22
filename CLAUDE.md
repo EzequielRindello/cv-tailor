@@ -11,6 +11,10 @@ Roadmap, versioning and PR naming live in `features.md`. Architecture overview: 
 - Fast tests: `dotnet test ErCv.Tests --filter "Category=Component|Category=Unit"` (seconds)
 - Full suite without browsers: `dotnet test ErCv.Tests --filter "Category!=E2E"` (about 7 min, PDF tests start Chrome)
 - Browser tests: `dotnet test ErCv.E2E` (uses an installed Chrome or Edge, nothing is downloaded)
+- Snapshots (TEST-08): `dotnet test ErCv.Tests --filter Category=Snapshot`; after an intended change, review the
+  `.received.json` files and approve with `ERCV_SNAPSHOTS=approve` set (also drops snapshots no case uses)
+- Coverage (TEST-10): add `--settings ErCv.Tests/coverage.runsettings --collect:"XPlat Code Coverage"` to a test run,
+  then `python .github/scripts/coverage_summary.py <coverage.cobertura.xml> --min 95` (CI does both)
 - Corpus tool: `dotnet run --project ErCv.Collector -- refresh | report | samples | check` (`samples` re-picks the app samples offline, run it after changing the parser or `Data/skills.json`)
 - Style fixes the tooling can apply: `dotnet format style er-cv-generator.sln --diagnostics IDE0005 IDE0161`
 
@@ -26,6 +30,8 @@ ErCv.Web/
     Selection/      Choosing experiences, bullets, skills, projects and the summary; page fit
     Profiles/       Validating, checking and (de)serializing the visitor's profile; date parsing
     Documents/      HTML, PDF and DOCX rendering
+    Editing/        The editable copy of a generated CV behind the workspace editor (CvDraft)
+    CoverLetters/   The cover letter: fixed sentences plus facts from the CV
   Constants/        Only constants used across features (ApiConstants, TemplatePaths)
   Configuration/    Options bound from appsettings.json and app-wide middleware (security headers)
   Models/           Plain data classes and records shared across layers
@@ -34,7 +40,8 @@ ErCv.Web/
   Data/             Content files only (JSON). No C# here.
   Templates/        CV HTML templates (Mustache), one per CVTemplate
     partials/       Shared partials every template includes: base styles (rhythm, accents, fonts), sections
-ErCv.Tests/         Mirrors ErCv.Web: Features/<Name>/, UI/, Components/, Api/, Documents/, plus Support/ (builders)
+ErCv.Tests/         Mirrors ErCv.Web: Features/<Name>/, UI/, Components/, Api/, Documents/, plus Support/ (builders,
+                    snapshot helper) and Snapshots/ (approved generation snapshots)
 ErCv.Collector/     Offline CLI for the job-post corpus (flat, small)
 ErCv.E2E/           Playwright browser tests
 ```
@@ -133,6 +140,8 @@ Constants classes longer than about 50 lines use topic regions instead (`Scoring
 - Unit tests: `[Trait("Category", "Unit")]`. API tests: `[Trait("Category", "Api")]` plus
   `[Collection("Documents")]` (they share the headless Chrome with the PDF tests).
 - Builders for test data are in `ErCv.Tests/Support/Build.cs`.
+- A change to selection, scoring or parsing changes the generation snapshots (`Category=Snapshot`): review the diff
+  and approve it in the same change. Tests that depend on today's date pin it with `DateParser.PinNow`.
 
 ## Writing
 

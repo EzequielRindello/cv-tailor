@@ -1,0 +1,340 @@
+{
+  "matchScore": {
+    "overall": 26,
+    "skillsMatched": 0,
+    "totalSkills": 4,
+    "keywordsMatched": 6,
+    "totalKeywords": 15,
+    "seniorityMatch": false,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "distributed systems",
+      "ai agents",
+      "openai"
+    ],
+    "niceToHaveMissing": [],
+    "suggestions": [
+      "Add 'distributed systems' to cv-master.json if you have experience with this technology",
+      "Add 'ai agents' to cv-master.json if you have experience with this technology",
+      "Add 'openai' to cv-master.json if you have experience with this technology"
+    ],
+    "potentialScoreIncrease": 38
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "openai",
+        "frequency": 6,
+        "presentInCV": true
+      },
+      {
+        "word": "observability",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "distributed systems",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "ai agents",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "leadership",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "reliable",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "adaptability",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "mentoring",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "relationship",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "product",
+        "frequency": 15,
+        "presentInCV": false
+      },
+      {
+        "word": "technical",
+        "frequency": 11,
+        "presentInCV": false
+      },
+      {
+        "word": "software",
+        "frequency": 7,
+        "presentInCV": true
+      },
+      {
+        "word": "design",
+        "frequency": 7,
+        "presentInCV": true
+      },
+      {
+        "word": "across",
+        "frequency": 7,
+        "presentInCV": true
+      },
+      {
+        "word": "development",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "developer",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "powered",
+        "frequency": 4,
+        "presentInCV": true
+      },
+      {
+        "word": "workflows",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "direction",
+        "frequency": 4,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "openai",
+      "observability",
+      "software",
+      "engineer",
+      "full",
+      "stack",
+      "next",
+      "powered",
+      "frontend",
+      "user",
+      "design",
+      "across",
+      "system",
+      "developers",
+      "senior",
+      "strategy",
+      "improving",
+      "problem",
+      "delivery",
+      "track"
+    ],
+    "missingFromCV": [
+      "distributed systems",
+      "ai agents",
+      "leadership",
+      "reliable",
+      "adaptability",
+      "mentoring",
+      "relationship"
+    ],
+    "keywordDensity": 0.22,
+    "suggestions": [
+      "Add \"distributed systems\" to the skills section or bullets if you have used it",
+      "Add \"ai agents\" to the skills section or bullets if you have used it",
+      "Mention \"leadership\" in a bullet point to reflect this skill",
+      "Mention \"reliable\" in a bullet point to reflect this skill",
+      "Mention \"adaptability\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 80,
+    "issues": [
+      {
+        "severity": "High",
+        "issue": "Low keyword density (25%) — ATS may reject the CV",
+        "fix": "Include more keywords from the job description in bullets and skills section"
+      }
+    ],
+    "recommendations": [
+      "1 improvement point(s) detected:",
+      "• Low keyword density (25%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior DevOps Engineer with 9+ years of experience, specializing in REST API Design, Docker, TypeScript, and Python. Proven track record of improving backward compatibility and reducing breaking changes by 90%. Strong problem-solving skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Built a distributed rate-limiting system using Redis and Lua scripts handling 500K+ requests/second across 12 global regions",
+          "Designed and enforced API versioning strategy across 15+ internal microservices improving backward compatibility and reducing breaking changes by 90%",
+          "Built observability dashboards in Grafana + Prometheus reducing mean time to detection (MTTD) for production incidents from 18 min to 4 min"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Developed a dynamic pricing recommendation engine using Python and scikit-learn increasing host revenue by an average of 22%",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s",
+          "Refactored the search ranking service (Java + Elasticsearch) improving relevance scores by 31% based on user engagement metrics"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Twilio",
+        "location": "San Francisco, CA",
+        "startDate": "Jul 2017",
+        "endDate": "May 2019",
+        "bullets": [
+          "Designed and implemented a webhook retry mechanism with exponential backoff reducing message delivery failures by 44%",
+          "Built REST APIs following OpenAPI spec with full Swagger documentation adopted by 3,000+ external developers",
+          "Optimized SQL queries and added strategic indexes on MySQL databases reducing average query time from 340ms to 45ms"
+        ],
+        "skills": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "Ruby",
+          "Rails",
+          "MySQL",
+          "REST API",
+          "Swagger",
+          "OpenAPI",
+          "Microservices",
+          "Docker",
+          "SQL",
+          "AWS"
+        ]
+      }
+    ],
+    "skills": [
+      "REST API Design",
+      "Docker",
+      "TypeScript",
+      "Python",
+      "Java",
+      "AWS",
+      "Microservices",
+      "Go",
+      "JavaScript",
+      "SQL",
+      "Ruby",
+      "Node.js",
+      "React",
+      "Spring Boot",
+      "Rails"
+    ],
+    "projects": [
+      {
+        "name": "Querywise — AI-powered SQL Assistant",
+        "description": "Full-stack web app that translates natural language questions into SQL queries using OpenAI API. Built with Next.js, FastAPI, and PostgreSQL. Supports schema introspection and query explanation.",
+        "technologies": [
+          "Next.js",
+          "TypeScript",
+          "FastAPI",
+          "Python",
+          "PostgreSQL",
+          "OpenAI API"
+        ],
+        "highlights": [
+          "Generates accurate SQL for 91% of natural language queries in internal testing",
+          "Built schema-aware prompt engineering reducing hallucinated column names by 78%",
+          "Deployed on Railway with zero-downtime deploys and automated integration tests"
+        ],
+        "link": "github.com/alexrivera-dev/querywise"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

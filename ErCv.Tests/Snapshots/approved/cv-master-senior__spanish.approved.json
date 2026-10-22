@@ -1,0 +1,290 @@
+{
+  "matchScore": {
+    "overall": 76,
+    "skillsMatched": 7,
+    "totalSkills": 7,
+    "keywordsMatched": 2,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "yellow",
+    "lowMatchWarning": null
+  },
+  "missingSkills": {
+    "requiredMissing": [],
+    "niceToHaveMissing": [],
+    "suggestions": [],
+    "potentialScoreIncrease": 0
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "node.js",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "typescript",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "postgresql",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "aws",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "rest",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "docker",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "ci/cd",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "softSkillKeywords": [],
+    "industryKeywords": [
+      {
+        "word": "ingeniero",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "backend",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "experiencia",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "software",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "senior",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "buscamos",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "diseñar",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "mantener",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "servicios",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "trabajarás",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "node.js",
+      "typescript",
+      "postgresql",
+      "aws",
+      "rest",
+      "docker",
+      "ci/cd",
+      "software",
+      "senior",
+      "apis"
+    ],
+    "missingFromCV": [],
+    "keywordDensity": 1,
+    "suggestions": []
+  },
+  "atsScore": {
+    "overall": 100,
+    "issues": [],
+    "recommendations": [
+      "Your CV is fully optimized for ATS"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior Full Stack Developer with 9+ years of experience, specializing in REST API Design, Docker, TypeScript, AWS, and Node.js. Proven track record of reducing frontend network requests by 60%. Strong team collaboration skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Redesigned the merchant onboarding API (Node.js + TypeScript) reducing integration time from 3 weeks to 4 days for enterprise clients",
+          "Led a team of 6 engineers through a zero-downtime migration from PostgreSQL 12 to 14, reducing query latency by 38%"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Built and maintained React + TypeScript frontend features for the host dashboard serving 4M+ active hosts worldwide",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s",
+          "Reduced CI/CD pipeline duration from 28 minutes to 9 minutes by parallelizing test suites and optimizing Docker layer caching"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Twilio",
+        "location": "San Francisco, CA",
+        "startDate": "Jul 2017",
+        "endDate": "May 2019",
+        "bullets": [
+          "Designed and implemented a webhook retry mechanism with exponential backoff reducing message delivery failures by 44%",
+          "Built REST APIs following OpenAPI spec with full Swagger documentation adopted by 3,000+ external developers",
+          "Optimized SQL queries and added strategic indexes on MySQL databases reducing average query time from 340ms to 45ms"
+        ],
+        "skills": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "Ruby",
+          "Rails",
+          "MySQL",
+          "REST API",
+          "Swagger",
+          "OpenAPI",
+          "Microservices",
+          "Docker",
+          "SQL",
+          "AWS"
+        ]
+      }
+    ],
+    "skills": [
+      "REST API Design",
+      "Docker",
+      "TypeScript",
+      "AWS",
+      "Node.js",
+      "PostgreSQL",
+      "CI/CD",
+      "Python",
+      "Java",
+      "Microservices",
+      "Go",
+      "JavaScript",
+      "SQL",
+      "Ruby",
+      "React"
+    ],
+    "projects": [
+      {
+        "name": "Querywise — AI-powered SQL Assistant",
+        "description": "Full-stack web app that translates natural language questions into SQL queries using OpenAI API. Built with Next.js, FastAPI, and PostgreSQL. Supports schema introspection and query explanation.",
+        "technologies": [
+          "Next.js",
+          "TypeScript",
+          "FastAPI",
+          "Python",
+          "PostgreSQL",
+          "OpenAI API"
+        ],
+        "highlights": [
+          "Generates accurate SQL for 91% of natural language queries in internal testing",
+          "Built schema-aware prompt engineering reducing hallucinated column names by 78%",
+          "Deployed on Railway with zero-downtime deploys and automated integration tests"
+        ],
+        "link": "github.com/alexrivera-dev/querywise"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

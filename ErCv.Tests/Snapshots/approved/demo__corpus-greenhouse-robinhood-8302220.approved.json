@@ -1,0 +1,387 @@
+{
+  "matchScore": {
+    "overall": 23,
+    "skillsMatched": 1,
+    "totalSkills": 9,
+    "keywordsMatched": 5,
+    "totalKeywords": 15,
+    "seniorityMatch": false,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "swift",
+      "observability",
+      "system design",
+      "react native",
+      "android",
+      "ios",
+      "swiftui"
+    ],
+    "niceToHaveMissing": [
+      "llm"
+    ],
+    "suggestions": [
+      "Add 'swift' to cv-master.json if you have experience with this technology",
+      "Add 'observability' to cv-master.json if you have experience with this technology",
+      "Add 'system design' to cv-master.json if you have experience with this technology",
+      "Add 'react native' to cv-master.json if you have experience with this technology",
+      "Add 'android' to cv-master.json if you have experience with this technology",
+      "Mention 'llm' in relevant project bullet points if you have used it",
+      "There are 2 more required skills — review the full JSON"
+    ],
+    "potentialScoreIncrease": 39
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "ios",
+        "frequency": 9,
+        "presentInCV": false
+      },
+      {
+        "word": "android",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "observability",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "system design",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "swift",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "swiftui",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "react",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "react native",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "llm",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "planning",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "communication",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "mentoring",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "ownership",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "trading",
+        "frequency": 14,
+        "presentInCV": false
+      },
+      {
+        "word": "technical",
+        "frequency": 10,
+        "presentInCV": false
+      },
+      {
+        "word": "experience",
+        "frequency": 9,
+        "presentInCV": true
+      },
+      {
+        "word": "mobile",
+        "frequency": 8,
+        "presentInCV": true
+      },
+      {
+        "word": "engineers",
+        "frequency": 7,
+        "presentInCV": false
+      },
+      {
+        "word": "tools",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "building",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "robinhood",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "product",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "finance",
+        "frequency": 5,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "react",
+      "core",
+      "platform",
+      "mobile",
+      "real",
+      "time",
+      "data",
+      "complex",
+      "backend",
+      "features",
+      "across",
+      "experience",
+      "feature",
+      "integration",
+      "code",
+      "level",
+      "organizations",
+      "years",
+      "delivery",
+      "server"
+    ],
+    "missingFromCV": [
+      "ios",
+      "android",
+      "observability",
+      "system design",
+      "swift",
+      "swiftui",
+      "react native",
+      "llm",
+      "planning",
+      "communication",
+      "mentoring",
+      "ownership"
+    ],
+    "keywordDensity": 0.08,
+    "suggestions": [
+      "Add \"ios\" to the skills section or bullets if you have used it",
+      "Add \"android\" to the skills section or bullets if you have used it",
+      "Add \"observability\" to the skills section or bullets if you have used it",
+      "Add \"system design\" to the skills section or bullets if you have used it",
+      "Add \"swift\" to the skills section or bullets if you have used it",
+      "Mention \"planning\" in a bullet point to reflect this skill",
+      "Mention \"communication\" in a bullet point to reflect this skill",
+      "Mention \"mentoring\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 70,
+    "issues": [
+      {
+        "severity": "High",
+        "issue": "Low keyword density (11%) — ATS may reject the CV",
+        "fix": "Include more keywords from the job description in bullets and skills section"
+      },
+      {
+        "severity": "Medium",
+        "issue": "No quantifiable achievements detected (numbers, percentages)",
+        "fix": "Add metrics to bullets: 'Reduced X by 30%', 'Handled N requests/day'"
+      },
+      {
+        "severity": "Low",
+        "issue": "Phone format may not be parsed correctly by some ATS systems",
+        "fix": "Use format: +1 (234) 567-8900 or +54 9 341 279-3916"
+      }
+    ],
+    "recommendations": [
+      "3 improvement point(s) detected:",
+      "• Phone format may not be parsed correctly by some ATS systems → Use format: +1 (234) 567-8900 or +54 9 341 279-3916",
+      "• Low keyword density (11%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section",
+      "• No quantifiable achievements detected (numbers, percentages) → Add metrics to bullets: 'Reduced X by 30%', 'Handled N requests/day'"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Ezequiel Rindello",
+      "email": "rindelloezequiel@gmail.com",
+      "phone": "55555",
+      "location": "Rosario, Argentina",
+      "linkedIn": "linkedin.com/in/ezequiel-rindello",
+      "gitHub": "github.com/EzequielRindello"
+    },
+    "summary": "Junior Mobile Developer with 1+ years of experience, specializing in React and React Router.",
+    "education": [
+      {
+        "degree": "B.S. Software Development (In Progress)",
+        "institution": "Brigham Young University - Idaho",
+        "location": "Rexburg, Idaho, USA",
+        "graduationDate": "Present",
+        "gpa": "",
+        "relevantCourses": [
+          "Object-Oriented Programming",
+          "Web Development",
+          "Database Management",
+          "Software Engineering Principles",
+          "Web Services"
+        ],
+        "honors": "Completed certificates: Software Development, Web Development, Web and Computer Programming"
+      },
+      {
+        "degree": "PathwayConnect Certificate",
+        "institution": "BYU-Pathway Worldwide",
+        "location": "USA (Remote)",
+        "graduationDate": "Apr 2022",
+        "gpa": "",
+        "relevantCourses": [],
+        "honors": "Advanced English proficiency (C1)"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · Chamber Mate",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Build production features on Chamber Mate, a multi-tenant SaaS platform (ASP.NET Core, React, PostgreSQL) for chambers of commerce and membership organizations, shipping tickets end to end from schema to UI across 13+ backend subsystems",
+          "Built an event discount code and promo registration system with redemption tracking, checkout integration, and discount propagation to invoices and sales orders",
+          "Delivered a configurable Member Portal Resources module with tenant-level settings, dynamic menus, and full CRUD across the REST API and the React frontend"
+        ],
+        "skills": [
+          "C#",
+          ".NET",
+          "ASP.NET Core",
+          "EF Core",
+          "PostgreSQL",
+          "React",
+          "JavaScript",
+          "REST API",
+          "OAuth",
+          "Git",
+          "Bitbucket",
+          "Jira"
+        ]
+      },
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · KOORUS",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Develop and maintain KOORUS, a multi-tenant React 19 + Vite SPA on .NET 9 and PostgreSQL with time tracking, task tracking, billing, forms, AI, and admin modules",
+          "Architected complex KOORUS UI flows with Context + useReducer, workspace-scoped state, and lazy-loaded feature areas",
+          "Built Kanban-style task boards, time-tracking dashboards, and real-time notifications with SignalR"
+        ],
+        "skills": [
+          "React",
+          "JavaScript",
+          "Vite",
+          ".NET",
+          "PostgreSQL",
+          "SignalR",
+          "REST API"
+        ]
+      },
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · LabLink 360",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Work from proof of concept to production on AutoCommunicator, a Windows data acquisition system for laboratory instruments built for Thermo Fisher Scientific",
+          "Built WPF/MVVM client and background Worker services that capture instrument data over TCP, serial ports, and file drop, queued in an encrypted local SQLite store for reliable delivery",
+          "Contribute to the backend pipeline that stores raw uploads in object storage (MinIO/S3) and imports them through a parser engine into SQL Server, configured from a React frontend"
+        ],
+        "skills": [
+          "C#",
+          ".NET",
+          "WPF",
+          "MVVM",
+          "SQLite",
+          "SQL Server",
+          "S3",
+          "React"
+        ]
+      }
+    ],
+    "skills": [
+      "React",
+      "React Router",
+      ".NET",
+      "C#",
+      "JavaScript",
+      "PostgreSQL",
+      "REST API Design",
+      "SQL",
+      "ASP.NET Core",
+      "EF Core",
+      "SignalR",
+      "WPF",
+      "SQL Server",
+      "SQLite",
+      "Git"
+    ],
+    "projects": [
+      {
+        "name": "Temple Trips (TT)",
+        "description": "Multi-tenant church administration platform for units, members, activities, and temple trip registrations, with tenant-aware authorization end to end.",
+        "technologies": [
+          ".NET",
+          "ASP.NET Core",
+          "EF Core",
+          "PostgreSQL",
+          "JWT",
+          "FluentValidation",
+          "React",
+          "React Router",
+          "Axios",
+          "Bootstrap"
+        ],
+        "highlights": [
+          "Tenant-aware query filters and middleware-based authorization: JWT auth, tenant hydration, area active-state validation, and permission checks",
+          "Domain services keep controllers thin across units, members, activities, temple trips, users, permissions, and SysAdmin area management",
+          "Handles operational edge cases: protected system roles, soft deletes, trip capacity, duplicate registration prevention, and XLSX export of registrations"
+        ],
+        "link": "github.com/EzequielRindello/temple-trips-er"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

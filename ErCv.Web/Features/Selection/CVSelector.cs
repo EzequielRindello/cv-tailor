@@ -60,11 +60,17 @@ public class CVSelector
 
     #region Constructors
 
-    public CVSelector(ILoggerFactory? loggerFactory = null)
+    /// <summary>Builds its own parts without logging, for callers outside the container (the collector, tests).</summary>
+    public CVSelector()
+        : this(new RelevanceScorer(), new PageConstraintHelper(), new SummaryGenerator())
     {
-        _scorer = new RelevanceScorer(loggerFactory?.CreateLogger<RelevanceScorer>());
-        _pageConstraint = new PageConstraintHelper();
-        _summaryGenerator = new SummaryGenerator(loggerFactory?.CreateLogger<SummaryGenerator>());
+    }
+
+    public CVSelector(RelevanceScorer scorer, PageConstraintHelper pageConstraint, SummaryGenerator summaryGenerator)
+    {
+        _scorer = scorer;
+        _pageConstraint = pageConstraint;
+        _summaryGenerator = summaryGenerator;
     }
 
     #endregion

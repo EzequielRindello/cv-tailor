@@ -1,0 +1,338 @@
+{
+  "matchScore": {
+    "overall": 37,
+    "skillsMatched": 3,
+    "totalSkills": 9,
+    "keywordsMatched": 2,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "s3",
+      "redshift"
+    ],
+    "niceToHaveMissing": [
+      "spark",
+      "airflow",
+      "snowflake"
+    ],
+    "suggestions": [
+      "Add 's3' to cv-master.json if you have experience with this technology",
+      "Add 'redshift' to cv-master.json if you have experience with this technology",
+      "Mention 'spark' in relevant project bullet points if you have used it",
+      "Mention 'airflow' in relevant project bullet points if you have used it",
+      "Mention 'snowflake' in relevant project bullet points if you have used it"
+    ],
+    "potentialScoreIncrease": 11
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "python",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "sql",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "spark",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "airflow",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "aws",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "snowflake",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "s3",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "redshift",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "kafka",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "reliable",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "pipelines",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "engineer",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "batch",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "streaming",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "model",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "tested",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "requirements",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "years",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "engineering",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "experience",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "presentInCV": [
+      "python",
+      "sql",
+      "aws",
+      "kafka",
+      "data",
+      "engineer",
+      "years",
+      "experience"
+    ],
+    "missingFromCV": [
+      "spark",
+      "airflow",
+      "snowflake",
+      "s3",
+      "redshift",
+      "reliable"
+    ],
+    "keywordDensity": 0.4,
+    "suggestions": [
+      "Add \"spark\" to the skills section or bullets if you have used it",
+      "Add \"airflow\" to the skills section or bullets if you have used it",
+      "Add \"snowflake\" to the skills section or bullets if you have used it",
+      "Add \"s3\" to the skills section or bullets if you have used it",
+      "Add \"redshift\" to the skills section or bullets if you have used it",
+      "Mention \"reliable\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 90,
+    "issues": [
+      {
+        "severity": "Medium",
+        "issue": "Medium keyword density (44%) — could be improved",
+        "fix": "Add 2–3 more keywords from the job description to improve ATS ranking"
+      }
+    ],
+    "recommendations": [
+      "1 improvement point(s) detected:",
+      "• Medium keyword density (44%) — could be improved → Add 2–3 more keywords from the job description to improve ATS ranking"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior Data Engineer with 9+ years of experience, specializing in Python, AWS, and SQL. Proven track record of improving backward compatibility and reducing breaking changes by 90%. Strong team collaboration skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Built a distributed rate-limiting system using Redis and Lua scripts handling 500K+ requests/second across 12 global regions",
+          "Designed and enforced API versioning strategy across 15+ internal microservices improving backward compatibility and reducing breaking changes by 90%"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Twilio",
+        "location": "San Francisco, CA",
+        "startDate": "Jul 2017",
+        "endDate": "May 2019",
+        "bullets": [
+          "Designed and implemented a webhook retry mechanism with exponential backoff reducing message delivery failures by 44%",
+          "Created internal developer tooling in Python that automated repetitive QA workflows saving the team 15 hours/week",
+          "Optimized SQL queries and added strategic indexes on MySQL databases reducing average query time from 340ms to 45ms"
+        ],
+        "skills": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "Ruby",
+          "Rails",
+          "MySQL",
+          "REST API",
+          "Swagger",
+          "OpenAPI",
+          "Microservices",
+          "Docker",
+          "SQL",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Developed a dynamic pricing recommendation engine using Python and scikit-learn increasing host revenue by an average of 22%",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s",
+          "Refactored the search ranking service (Java + Elasticsearch) improving relevance scores by 31% based on user engagement metrics"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      }
+    ],
+    "skills": [
+      "Python",
+      "AWS",
+      "SQL",
+      "REST API Design",
+      "Docker",
+      "TypeScript",
+      "Java",
+      "Microservices",
+      "Go",
+      "JavaScript",
+      "Ruby",
+      "Node.js",
+      "React",
+      "Spring Boot",
+      "Rails"
+    ],
+    "projects": [
+      {
+        "name": "Querywise — AI-powered SQL Assistant",
+        "description": "Full-stack web app that translates natural language questions into SQL queries using OpenAI API. Built with Next.js, FastAPI, and PostgreSQL. Supports schema introspection and query explanation.",
+        "technologies": [
+          "Next.js",
+          "TypeScript",
+          "FastAPI",
+          "Python",
+          "PostgreSQL",
+          "OpenAI API"
+        ],
+        "highlights": [
+          "Generates accurate SQL for 91% of natural language queries in internal testing",
+          "Built schema-aware prompt engineering reducing hallucinated column names by 78%",
+          "Deployed on Railway with zero-downtime deploys and automated integration tests"
+        ],
+        "link": "github.com/alexrivera-dev/querywise"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

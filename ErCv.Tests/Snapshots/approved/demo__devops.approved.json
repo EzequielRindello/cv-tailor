@@ -1,0 +1,387 @@
+{
+  "matchScore": {
+    "overall": 26,
+    "skillsMatched": 3,
+    "totalSkills": 17,
+    "keywordsMatched": 1,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "python",
+      "bash",
+      "aws",
+      "ci/cd",
+      "infrastructure as code",
+      "observability",
+      "incident response",
+      "linux"
+    ],
+    "niceToHaveMissing": [
+      "kubernetes",
+      "terraform",
+      "prometheus",
+      "grafana"
+    ],
+    "suggestions": [
+      "Add 'python' to cv-master.json if you have experience with this technology",
+      "Add 'bash' to cv-master.json if you have experience with this technology",
+      "Add 'aws' to cv-master.json if you have experience with this technology",
+      "Add 'ci/cd' to cv-master.json if you have experience with this technology",
+      "Add 'infrastructure as code' to cv-master.json if you have experience with this technology",
+      "Mention 'kubernetes' in relevant project bullet points if you have used it",
+      "Mention 'terraform' in relevant project bullet points if you have used it",
+      "Mention 'prometheus' in relevant project bullet points if you have used it",
+      "There are 5 more required skills — review the full JSON"
+    ],
+    "potentialScoreIncrease": 29
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "devops",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "terraform",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "kubernetes",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "docker",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "infrastructure as code",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "ci/cd",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "github actions",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "github",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "prometheus",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "grafana",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "sre",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "aws",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "linux",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "bash",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "python",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [],
+    "industryKeywords": [
+      {
+        "word": "engineer",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "cloud",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "platform",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "manage",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "workloads",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "pipelines",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "improve",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "monitoring",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "requirements",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "years",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "presentInCV": [
+      "devops",
+      "docker",
+      "github actions",
+      "github",
+      "engineer",
+      "platform",
+      "years"
+    ],
+    "missingFromCV": [
+      "terraform",
+      "kubernetes",
+      "infrastructure as code",
+      "ci/cd",
+      "prometheus",
+      "grafana",
+      "sre",
+      "aws",
+      "linux",
+      "bash",
+      "python",
+      "incident response",
+      "observability"
+    ],
+    "keywordDensity": 0.24,
+    "suggestions": [
+      "Add \"terraform\" to the skills section or bullets if you have used it",
+      "Add \"kubernetes\" to the skills section or bullets if you have used it",
+      "Add \"infrastructure as code\" to the skills section or bullets if you have used it",
+      "Add \"ci/cd\" to the skills section or bullets if you have used it",
+      "Add \"prometheus\" to the skills section or bullets if you have used it"
+    ]
+  },
+  "atsScore": {
+    "overall": 70,
+    "issues": [
+      {
+        "severity": "High",
+        "issue": "Low keyword density (12%) — ATS may reject the CV",
+        "fix": "Include more keywords from the job description in bullets and skills section"
+      },
+      {
+        "severity": "Medium",
+        "issue": "No quantifiable achievements detected (numbers, percentages)",
+        "fix": "Add metrics to bullets: 'Reduced X by 30%', 'Handled N requests/day'"
+      },
+      {
+        "severity": "Low",
+        "issue": "Phone format may not be parsed correctly by some ATS systems",
+        "fix": "Use format: +1 (234) 567-8900 or +54 9 341 279-3916"
+      }
+    ],
+    "recommendations": [
+      "3 improvement point(s) detected:",
+      "• Phone format may not be parsed correctly by some ATS systems → Use format: +1 (234) 567-8900 or +54 9 341 279-3916",
+      "• Low keyword density (12%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section",
+      "• No quantifiable achievements detected (numbers, percentages) → Add metrics to bullets: 'Reduced X by 30%', 'Handled N requests/day'"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Ezequiel Rindello",
+      "email": "rindelloezequiel@gmail.com",
+      "phone": "55555",
+      "location": "Rosario, Argentina",
+      "linkedIn": "linkedin.com/in/ezequiel-rindello",
+      "gitHub": "github.com/EzequielRindello"
+    },
+    "summary": "Junior DevOps Engineer with 1+ years of experience, specializing in GitHub, Docker, and GitHub Copilot.",
+    "education": [
+      {
+        "degree": "B.S. Software Development (In Progress)",
+        "institution": "Brigham Young University - Idaho",
+        "location": "Rexburg, Idaho, USA",
+        "graduationDate": "Present",
+        "gpa": "",
+        "relevantCourses": [
+          "Object-Oriented Programming",
+          "Web Development",
+          "Database Management",
+          "Software Engineering Principles",
+          "Web Services"
+        ],
+        "honors": "Completed certificates: Software Development, Web Development, Web and Computer Programming"
+      },
+      {
+        "degree": "PathwayConnect Certificate",
+        "institution": "BYU-Pathway Worldwide",
+        "location": "USA (Remote)",
+        "graduationDate": "Apr 2022",
+        "gpa": "",
+        "relevantCourses": [],
+        "honors": "Advanced English proficiency (C1)"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · Chamber Mate",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Built an event discount code and promo registration system with redemption tracking, checkout integration, and discount propagation to invoices and sales orders",
+          "Designed and implemented an Attendee Cap Group feature from database schema to UI, enforcing capacity limits and sold-out status across the full registration flow",
+          "Led the design of a reusable social media publishing integration (Facebook, Instagram) with per-platform OAuth 2.0, automatic token refresh, and a scheduled publishing engine with retry logic"
+        ],
+        "skills": [
+          "C#",
+          ".NET",
+          "ASP.NET Core",
+          "EF Core",
+          "PostgreSQL",
+          "React",
+          "JavaScript",
+          "REST API",
+          "OAuth",
+          "Git",
+          "Bitbucket",
+          "Jira"
+        ]
+      },
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · KOORUS",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Develop and maintain KOORUS, a multi-tenant React 19 + Vite SPA on .NET 9 and PostgreSQL with time tracking, task tracking, billing, forms, AI, and admin modules",
+          "Architected complex KOORUS UI flows with Context + useReducer, workspace-scoped state, and lazy-loaded feature areas",
+          "Built Kanban-style task boards, time-tracking dashboards, and real-time notifications with SignalR"
+        ],
+        "skills": [
+          "React",
+          "JavaScript",
+          "Vite",
+          ".NET",
+          "PostgreSQL",
+          "SignalR",
+          "REST API"
+        ]
+      },
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · LabLink 360",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Work from proof of concept to production on AutoCommunicator, a Windows data acquisition system for laboratory instruments built for Thermo Fisher Scientific",
+          "Built WPF/MVVM client and background Worker services that capture instrument data over TCP, serial ports, and file drop, queued in an encrypted local SQLite store for reliable delivery",
+          "Contribute to the backend pipeline that stores raw uploads in object storage (MinIO/S3) and imports them through a parser engine into SQL Server, configured from a React frontend"
+        ],
+        "skills": [
+          "C#",
+          ".NET",
+          "WPF",
+          "MVVM",
+          "SQLite",
+          "SQL Server",
+          "S3",
+          "React"
+        ]
+      }
+    ],
+    "skills": [
+      "GitHub",
+      "Docker",
+      "GitHub Copilot",
+      ".NET",
+      "React",
+      "React Router",
+      "C#",
+      "JavaScript",
+      "PostgreSQL",
+      "REST API Design",
+      "SQL",
+      "ASP.NET Core",
+      "EF Core",
+      "SignalR",
+      "WPF"
+    ],
+    "projects": [
+      {
+        "name": "ER CV Generator",
+        "description": "Resume generator that tailors a CV to a job description without inventing content. ASP.NET Core monolith (.NET 10) with a Blazor Server UI and a REST API, shipped as one Docker service.",
+        "technologies": [
+          ".NET",
+          "ASP.NET Core",
+          "Blazor",
+          "PuppeteerSharp",
+          "OpenXML",
+          "Docker",
+          "xUnit",
+          "Playwright",
+          "GitHub Actions"
+        ],
+        "highlights": [
+          "Rule-based relevance scoring (skills 50%, keywords 30%, seniority 20%) that selects and reorders real experience and never fabricates content",
+          "Skill dictionary and job-post parser tuned on a dated corpus of 194 real job posts, reading the posted seniority level correctly in 91% of them",
+          "PDF rendering with PuppeteerSharp and DOCX with OpenXML, with page-fit enforcement for one- or two-page CVs",
+          "7,500+ automated test cases (unit, API, PDF and DOCX documents) plus Playwright end-to-end tests run in GitHub Actions CI"
+        ],
+        "link": "github.com/EzequielRindello/er-cv-generator"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

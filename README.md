@@ -1,224 +1,158 @@
 # ER CV Generator
 
 [![CI](https://github.com/EzequielRindello/er-cv-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/EzequielRindello/er-cv-generator/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-98%25-brightgreen)](features.md#test-10-coverage)
+[![.NET 10](https://img.shields.io/badge/.NET-10-512bd4)](https://dotnet.microsoft.com/)
 
-ASP.NET Core monolith (.NET 10) that generates ATS-optimized, tailored resumes from a job description. The UI is Blazor Server and the REST API lives in the same project, so the whole app ships as a single deploy. It never fabricates content: it selects, reorders, and summarizes what's already in `cv-master.json`.
+**Tailored to every job. Nothing invented.** Paste a job description and get a CV built only from your real
+experience: the app picks the roles, bullets, skills and projects that match the post, writes a summary from your own
+profile, scores the result, explains every choice, and exports PDF, DOCX, Markdown or plain text, with a cover letter
+if you want one.
+
+It is a single ASP.NET Core 10 app (Blazor Server UI and REST API in one deploy) with no database and no account.
+Your profile and history stay in your browser.
+
+![The results workspace: CV preview next to the match score](docs/screenshots/workspace.png)
+
+> Live demo: coming with the first deploy (M5.1).
 
 ---
 
-## Run locally
+## What it does
+
+- **Reads the job post.** A skill dictionary tuned on about 200 real posts (`Data/skills.json`) finds the skills,
+  keywords, seniority and years asked for, and ignores ordinary English that looks like a skill ("the next
+  generation" is not Next.js).
+- **Selects, never writes.** Roles, bullets, skills and projects are ranked against the post and the best ones are
+  kept. The summary is built from the profile's own title and years. Invariant tests check, for every profile and post,
+  that every fact in the output exists in the profile.
+- **Fits the page for real.** One or two pages, measured on the rendered PDF, not estimated.
+- **Explains itself.** Why each item was chosen, a match score with its breakdown, missing skills, keyword coverage,
+  an ATS check with fixes, and the job post with every skill highlighted and linked to where it appears in the CV.
+- **Lets you finish it.** Edit the CV with a live preview: leave bullets out, rewrite or reorder them, move sections.
+  Five templates, six accents, four font pairings, English or Spanish headings.
+- **Tracks applications.** The last 50 CVs stay in your browser with their status, company and notes.
+
+| Compose | Edit with a live preview | The post, highlighted (dark mode) |
+|---|---|---|
+| ![Composer](docs/screenshots/composer.png) | ![Editor](docs/screenshots/editor.png) | ![Job post tab](docs/screenshots/job-post-dark.png) |
+
+---
+
+## How matching works
+
+1. **Parse.** `JobDescriptionParser` finds the dictionary skills (with aliases such as `k8s` for Kubernetes), the
+   keywords, the seniority (from the title, or from the wording when the title names no level) and "N years of X"
+   requirements.
+2. **Score the match.** Skills count 50%, keywords 30% and seniority 20%. Under 40% the CV is flagged as a weak fit.
+3. **Rank.** `RelevanceScorer` scores each role by matching skills, keywords, recency and seniority; `CVSelector`
+   keeps the top roles and, inside each, the bullets with the most matching skills, metrics and strong verbs.
+4. **Fit.** The selection starts from a character estimate, then the PDF is rendered and trimmed until its page count
+   fits.
+5. **Analyze.** Keywords, ATS rules and the highlighted post are computed on the final CV, so what you see is what
+   you download.
+
+Every weight and threshold is a named constant. There is no model in the loop: the same input gives the same CV.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    UI["Blazor Server UI"] --> S
+    API["REST API /api/cv/*"] --> S
+    S["CVGeneratorService<br/>validation, orchestration"] --> M["Matching<br/>parser, skill dictionary"]
+    S --> SEL["Selection<br/>ranking, summary, page fit"]
+    S --> A["Analysis<br/>match, ATS, keywords, gaps"]
+    S --> D["Documents<br/>HTML, PDF, DOCX, text"]
+    S --> CL["Cover letters"]
+    D --> CH["Headless Chrome<br/>(PuppeteerSharp)"]
+    UI --> LS[("Browser localStorage<br/>profile, history, settings")]
+```
+
+The UI calls the service in-process; the API serves other clients. The domain lives in `ErCv.Web/Features/<Name>/`,
+one folder per feature. [`PROJECT_OVERVIEW.md`](PROJECT_OVERVIEW.md) has the request flow, the project structure,
+the data shapes and the design decisions; [`CLAUDE.md`](CLAUDE.md) has the coding conventions.
+
+---
+
+## Testing strategy
+
+About 14,800 tests, most of them run over every profile and job post (hand-written cases plus one real post per role
+family from the corpus).
+
+| Layer | What it proves |
+|---|---|
+| Unit | each parser, scorer, selector and renderer on its own |
+| Invariants | the product promise: nothing invented, order and limits respected |
+| Documents | valid DOCX, PDF text and page count for every template |
+| API | endpoints, validation, limits, sessions, rate limit |
+| Snapshots | the generated CV and every score, as approved JSON: a scoring change is a diff to review |
+| Components | bUnit tests of the editor, selectors, score cards and history |
+| Browser | Playwright: the whole flow, downloads, editing, mobile widths, axe accessibility scans in light and dark |
+
+CI runs everything on each push and PR, with line coverage of the domain and service (the job fails under 95%), plus
+the browser tests and the Docker build.
 
 ```
-dotnet run --project ErCv.Web      # or: dotnet watch --project ErCv.Web   (hot reload while editing UI)
+dotnet test ErCv.Tests --filter "Category=Component|Category=Unit"   # seconds
+dotnet test ErCv.Tests --filter "Category!=E2E"                      # the full suite, about 7 minutes (PDF page counts)
+dotnet test ErCv.Tests --filter Category=Snapshot                    # approve a change with ERCV_SNAPSHOTS=approve
+dotnet test ErCv.E2E                                                 # browser tests, uses an installed Chrome or Edge
 ```
 
-The app serves the UI at `/` and the API at `/api/cv/*` on `http://localhost:5000` (override with the `PORT` env var). PDF export needs Chrome/Chromium: locally PuppeteerSharp downloads it on first use, or set `PUPPETEER_EXECUTABLE_PATH` to an installed Chrome/Chromium.
+The README screenshots come from the running app:
+`ERCV_SCREENSHOTS=docs/screenshots dotnet test ErCv.E2E --filter Category=Screenshots`.
 
-With Docker (same image Render builds):
+---
+
+## Run it
+
+```
+dotnet run --project ErCv.Web          # http://localhost:5000, or set PORT
+```
+
+PDF export needs Chrome: set `PUPPETEER_EXECUTABLE_PATH` to an installed Chrome, or PuppeteerSharp downloads one on
+first use. With Docker (the image Render builds, Chrome included):
 
 ```
 docker build -t er-cv-generator .
 docker run --rm -m 512m -e PORT=10000 -p 10000:10000 er-cv-generator
 ```
 
-## Deploy (Render)
+In Development the OpenAPI document is at `/openapi/v1.json` and its reference page at `/scalar`.
 
-One Docker web service, defined in `render.yaml` (`Dockerfile` at the repo root):
+**Deploy:** one Docker web service on Render, defined in `render.yaml`, health check at `/api/cv/health`. The first
+public deploy is milestone M5.1.
 
-- Multi-stage build on the .NET 10 SDK, runtime image installs Google Chrome (Ubuntu's chromium package is a snap stub) and sets `PUPPETEER_EXECUTABLE_PATH`.
-- Binds to the `PORT` Render provides; health check at `/api/cv/health`.
-- Forwarded headers are enabled so the rate limiter sees the real client IP behind Render's proxy.
-- Memory: with the container capped at 512 MB (the free plan limit), 6 concurrent PDF generations peaked around 250 MiB. Move to Starter if that ever stops being enough.
-
----
-
-## Blazor UI
-
-- `Components/Pages/Home.razor`: single page with the generate and details views.
-- `Components/Shared/*.razor`: one component per UI piece (selectors, history, cards, bullet editor, preview).
-- `UI/BrowserStore.cs`: template/format settings and generation history (top 10) persisted in the visitor's `localStorage` via JS interop.
-- The page calls `CVGeneratorService` in-process (`BuildCvAsync` / `RebuildCvAsync`); the `/api/cv/*` controller endpoints are unchanged.
-- Generated files are streamed to the browser through `wwwroot/js/app.js`.
-- Keyboard shortcuts: `Ctrl/Cmd+Enter` generate, `Ctrl/Cmd+Shift+V` paste into the job description.
-- CV preview renders the template HTML in an iframe (`srcdoc`).
-- Bootstrap 5.3.2 and Bootstrap Icons 1.13.1 are vendored under `wwwroot/lib` (no CDN at runtime).
-
-### Restyling the UI
-
-Markup and style are separate, so a redesign does not touch the C# logic:
-
-- **Look and feel**: `wwwroot/css/site.css`. The first block holds the design tokens as CSS variables (`--color-*`, `--spacing-*`, `--radius-*`, `--shadow-*`). Changing those restyles most of the app at once.
-- **Markup**: each `.razor` file in `Components/Shared` is plain HTML plus `@code` for its parameters. Edit the HTML and class names freely; keep the `@onclick`/`@bind` bindings.
-- **Layout and page flow**: `Components/Layout/MainLayout.razor` and `Components/Pages/Home.razor`.
-- **Per-component CSS (optional)**: add `Foo.razor.css` next to `Foo.razor`; Blazor scopes it to that component automatically (CSS isolation), which is the closest equivalent to CSS modules.
-- **Bootstrap**: override its variables in `site.css` (`:root { --bs-primary: ...; }`) or swap `wwwroot/lib/bootstrap` for another theme build.
-- **Workflow**: run `dotnet watch --project ErCv.Web` and edit `.razor`/`.css` files; the browser updates on save.
-- **CV templates** (the generated PDF/DOCX) are separate from the app UI: `ErCv.Web/Templates/*.html`.
-
----
-
-## Architecture
-
-```
-POST /api/cv/generate
-  JobDescription (string) → JobDescriptionParser → JobRequirements
-  JobRequirements + CVMaster → RelevanceScorer → scored experiences
-  scored experiences → CVSelector → GeneratedCV (top 3 exp, top 3 bullets each, top 15 skills)
-  CVMaster + requirements → SummaryGenerator → professional summary
-  GeneratedCV → PageConstraintHelper → 1 or 2 pages: character estimate, then measured on the rendered PDF
-  GeneratedCV → DocumentRenderer → PDF (PuppeteerSharp) + DOCX (OpenXML), in English or Spanish
-  GeneratedCV + requirements → CoverLetterGenerator → cover letter (when includeCoverLetter is set)
-  GeneratedCV + requirements → [MatchScoreCalculator, MissingSkillsAnalyzer, KeywordAnalyzer, ATSChecker] → AnalysisResult
-  → returns { generatedCV, files[], matchScore, missingSkills, keywordAnalysis, atsScore, previewHtml, coverLetter }
-
-POST /api/cv/regenerate
-  GeneratedCV + BulletSelections (user-edited) → PageConstraintHelper → DocumentRenderer
-  → returns { files[] }
-
-GET /api/cv/download/{pdf|docx}
-  → returns file from session
-```
-
----
-
-## Project Structure
-
-```
-er-cv-generator/
-├── ErCv.Web/
-│   ├── Api/CVController.cs                  # POST /generate, /regenerate, GET /download/:format (no logic, calls the service)
-│   ├── Services/CVGeneratorService.cs       # orchestrates full flow, validates requests, owns the session
-│   ├── Features/                            # the domain, one folder per feature; each feature keeps its own *Constants.cs
-│   │   ├── Matching/                        # JobDescriptionParser, SkillNormalizer, SampleJobDescriptions, JobDescriptionConstants
-│   │   ├── Analysis/                        # MatchScoreCalculator, MissingSkillsAnalyzer, KeywordAnalyzer, ATSChecker, JdHighlighter
-│   │   ├── Selection/                       # CVSelector, RelevanceScorer, SummaryGenerator, PageConstraintHelper, CvCloner
-│   │   ├── Profiles/                        # ProfileValidator, ProfileHealthChecker, ProfileJson, DateParser
-│   │   └── Documents/                       # DocumentRenderer (Mustache HTML, PDF via PuppeteerSharp, DOCX via OpenXML)
-│   ├── Constants/                           # cross-cutting only: ApiConstants (limits, messages, formats), TemplatePaths
-│   ├── Configuration/                       # ErCvOptions (the "ErCv" section of appsettings.json), SecurityHeaders
-│   ├── Models/                              # CVMaster, GeneratedCV, request and analysis models
-│   ├── Templates/                           # harvard, minimalist, compact, executive (single-column) and modern (two-column), the cover letter, and partials/ they share
-│   ├── Data/                                # content only: cv-master.json (demo profile), sample-jobs.json (embedded samples)
-│   ├── Components/                          # Blazor Server UI (App, Routes, Layout, Pages/Home, Profile, Error, Shared/*)
-│   ├── UI/                                  # BrowserStore (localStorage), ToastService, ApplicationTracker, UiConstants, UI models
-│   ├── wwwroot/                             # css/site.css, js/app.js, lib/ (Bootstrap 5.3.2 + Icons 1.13.1, vendored)
-│   └── Program.cs                           # Blazor + API + rate limiter + security headers + forwarded headers, binds to PORT
-├── ErCv.Tests/                              # xUnit: Features (unit, mirrors ErCv.Web/Features), UI, Components (bUnit), Invariants, Documents, Api, Collector, Fixtures
-├── ErCv.Collector/                          # console tool that keeps corpus/ fresh (not part of the web app)
-├── corpus/                                  # real job posts, one JSON per post, plus report.md (see corpus/README.md)
-├── .github/workflows/ci.yml                 # restore, build, test, Docker image build
-├── Dockerfile                               # build + runtime image with Chromium
-└── render.yaml                              # Render web service (Docker)
-```
-
----
-
-## Key Data Shapes
-
-```jsonc
-// cv-master.json: the only file to customize
-{
-  "header": { "fullName", "email", "phone", "location", "linkedin", "github" },
-  "education": [{ "degree", "institution", "location", "graduationDate", "gpa", "honors" }],
-  "experience": [{
-    "role": "Junior Software Developer",
-    "company": "Acme Corp",
-    "location": "Remote",
-    "startDate": "Jun 2024",
-    "endDate": "Present",             // use "Present" for current role
-    "bullets": ["Did X resulting in Y%..."],
-    "skills": ["React", "PostgreSQL"] // used for relevance scoring, so be complete
-  }],
-  "skills": {
-    "languages": [], "frameworks": [], "databases": [],
-    "tools": [], "cloud": [], "practices": []
-  },
-  "projects": [{ "name", "description", "technologies": [], "highlights": [], "link" }]
-}
-
-// POST /api/cv/generate: request
-{
-  "jobDescription": "...",
-  "formats": ["pdf", "docx"],
-  "template": "Harvard",
-  "allowTwoPages": false,
-  "profileId": "cv-master",
-  "language": "en",                  // "en" or "es": headings, dates and summary
-  "accent": "default",               // default, navy, teal, burgundy, forest, slate
-  "fonts": "default",                // default, classic, clean, mixed
-  "includeCoverLetter": false
-}
-
-// POST /api/cv/generate: response
-{
-  "success": true,
-  "files": [{ "format", "filename", "size" }],
-  "generatedCV": { "header", "summary", "education", "experience", "skills", "projects" },
-  "matchScore": { "overall", "skillsMatched", "totalSkills", "keywordsMatched", "seniorityMatch", "colorClass" },
-  "missingSkills": { "requiredMissing": [], "niceToHaveMissing": [], "suggestions": [], "potentialScoreIncrease" },
-  "keywordAnalysis": { "technicalKeywords": [], "softSkillKeywords": [], "presentInCV": [], "missingFromCV": [] },
-  "atsScore": { "overall", "issues": [{ "severity", "issue", "fix" }], "recommendations": [], "colorClass" },
-  "previewHtml": "<html>...rendered cv...</html>",
-  "coverLetter": "plain text of the letter, or null"
-}
-
-// POST /api/cv/regenerate: request
-{
-  "generatedCV": { ... },             // full GeneratedCV object from generate response
-  "bulletSelections": { "exp0": [0,2], "exp1": [1] }, // indices of selected bullets per experience
-  "formats": ["pdf"],
-  "template": "Harvard",
-  "allowTwoPages": false
-}
-```
-
----
-
-## Version
-
-Current version: **2.0.5** (M4 Output). Each milestone of the roadmap ships as one version, see [Versioning in `features.md`](features.md#versioning).
+**Your own profile:** open *My profile*, start from a sample or import a JSON file, and save it. It stays in your
+browser.
 
 ---
 
 ## Job-post corpus
 
-`corpus/` holds real, recent software job posts from the public Greenhouse, Lever, Ashby and Workable job-board APIs, dated and linked back to the original. The sample job descriptions in the UI and the parser and scoring tests use them. Refresh it by hand and review the diff in a PR:
+`corpus/` holds real software job posts from the public Greenhouse, Lever, Ashby and Workable job-board APIs, dated
+and linked to the original. They feed the samples in the UI, the tests and `corpus/report.md` (skill trends, parser
+gaps). A refresh is run by hand and reviewed as a PR:
 
 ```
-dotnet run --project ErCv.Collector -- refresh     # drops posts older than 90 days or closed, adds new ones; idempotent
-dotnet run --project ErCv.Collector -- report      # corpus/report.md: skill trends, parser gaps, seniority wording
+dotnet run --project ErCv.Collector -- refresh | report | samples | check
 ```
 
-Sources, terms, limits and how to remove a post: [`corpus/README.md`](corpus/README.md).
+Sources, terms and how to remove a post: [`corpus/README.md`](corpus/README.md).
 
 ---
 
-## Tests
+## Privacy
 
-```
-dotnet test                                      # everything, about 2 minutes (PDF tests render with headless Chrome)
-dotnet test --filter Category=Unit               # helpers only, under a second
-dotnet test --filter Category=Invariant          # the product promise: output only contains what the master profile says
-dotnet test --filter Category=Api                # WebApplicationFactory integration tests
-dotnet test --filter Category=Documents          # DOCX, PDF and HTML preview
-dotnet test --filter "Category!=E2E"             # everything except the browser tests
-dotnet test ErCv.E2E                             # browser tests only (Playwright), about 1 minute
-```
-
-The browser tests (`ErCv.E2E`) start the web app on a free port and drive it with Playwright: generate flow, downloads, editing with the live preview, cover letter, templates and styles, persistence, keyboard shortcuts, 360 / 390 / 768px viewports and an axe accessibility scan in light and dark. They use a browser that is already installed (Chrome, then Edge) and download nothing. Set `E2E_BROWSER_CHANNEL` to pick another one, or `E2E_BASE_URL` to test an app that is already running.
-
-PDF tests use the Chromium that PuppeteerSharp downloads on first use; set `PUPPETEER_EXECUTABLE_PATH` to use an installed Chrome instead (CI does). Page fit is measured on the rendered PDF (`MATCH-08` in `features.md`), so every template stays within its page limit.
+No account, no database, no analytics. Your profile, history and settings stay in your browser; the server holds a
+CV in memory only while it builds it. The details are on the app's Privacy page (`/privacy`).
 
 ---
 
-## Testing Scripts (legacy, replaced by `dotnet test`)
+## Roadmap and version
 
-- `node testing/test-runner-2.0.1.js`
-- `node testing/test-runner-2.0.1.js --tc TC-01`
-- `node testing/test-runner-2.0.1.js --profile cv-master`
-- `PROFILE_ID=cv-master node testing/test-runner-2.0.1.js`
-
-The runner now supports profile override via CLI or env:
-- CLI flag: `--profile`
-- Env var: `PROFILE_ID`
-- Default: `cv-master`
+Current version: **2.0.6** (M5 Polish & presentation). Each milestone ships as one version; the roadmap, the findings and the
+reasoning behind each decision are in [`features.md`](features.md).

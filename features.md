@@ -36,11 +36,11 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | TEST-03 | Invariant tests (no fabrication, ordering, bounds) | E1 Tests | P0 | M | Done |
 | TEST-04 | Document tests (DOCX structure, PDF pages + text extraction) | E1 Tests | P0 | M | Done |
 | TEST-05 | API integration tests (WebApplicationFactory) | E1 Tests | P0 | M | Done |
-| TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | In progress |
+| TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | Done |
 | TEST-07 | End-to-end tests (Playwright) | E1 Tests | P1 | L | Done |
-| TEST-08 | Golden snapshot tests for generation output | E1 Tests | P2 | S | Todo |
-| TEST-09 | Retire the Node scripts in `testing/` | E1 Tests | P2 | S | Todo |
-| TEST-10 | Coverage report and target | E1 Tests | P2 | S | Todo |
+| TEST-08 | Golden snapshot tests for generation output | E1 Tests | P2 | S | Done |
+| TEST-09 | Retire the Node scripts in `testing/` | E1 Tests | P2 | S | Done |
+| TEST-10 | Coverage report and target | E1 Tests | P2 | S | Done |
 | UX-01 | Design system: tokens, fonts, dark mode | E2 Redesign | P0 | M | Done |
 | UX-02 | New app shell and editorial hero | E2 Redesign | P0 | M | Done |
 | UX-03 | Guided 3-step composer | E2 Redesign | P0 | M | Done |
@@ -83,17 +83,18 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | AI-03 | Bullet rewrite suggestions (user accepts) | E7 AI | P3 | M | Parked |
 | AI-04 | Cover letter polish | E7 AI | P3 | S | Parked |
 | AI-05 | Cost guardrails and caching | E7 AI | P3 | S | Parked |
-| ENG-01 | DI for helpers + single namespace root | E8 Engineering | P2 | M | Todo |
+| ENG-01 | DI for helpers + single namespace root | E8 Engineering | P2 | M | Done |
 | ENG-02 | Consolidate duplicated logic, immutable selection | E8 Engineering | P0 | M | Done |
 | ENG-03 | ILogger + ProblemDetails (no leaked exceptions) | E8 Engineering | P0 | S | Done |
-| ENG-04 | Options pattern for scoring weights | E8 Engineering | P3 | S | Todo |
-| ENG-05 | Chromium readiness in health check + warm-up | E8 Engineering | P2 | S | Todo |
-| ENG-06 | Modern OpenAPI (built-in + Scalar) | E8 Engineering | P3 | S | Todo |
+| ENG-04 | Options pattern for scoring weights | E8 Engineering | P3 | S | Won't do |
+| ENG-05 | Chromium readiness in health check + warm-up | E8 Engineering | P2 | S | Done |
+| ENG-06 | Modern OpenAPI (built-in + Scalar) | E8 Engineering | P3 | S | Done |
 | OPS-01 | GitHub Actions CI | E9 DevOps | P0 | M | Done |
-| OPS-02 | Dependabot | E9 DevOps | P2 | S | Todo |
-| OPS-03 | README rewrite for portfolio | E9 DevOps | P1 | M | Todo |
-| OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Todo |
-| OPS-05 | Privacy note | E9 DevOps | P2 | S | Todo |
+| OPS-02 | Dependabot | E9 DevOps | P2 | S | Done |
+| OPS-03 | README rewrite for portfolio | E9 DevOps | P1 | M | Done |
+| OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Done |
+| OPS-05 | Privacy note | E9 DevOps | P2 | S | Done |
+| OPS-06 | Deploy to Render + live demo link | E9 DevOps | P1 | M | Todo |
 
 ---
 
@@ -104,7 +105,8 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 3. **M3 Your data** (v2.0.4, released): PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
 3.2. **M3.2 Real-post fixes** (v2.0.4.1, released): MATCH-07, MATCH-09, APP-06, PROF-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
 4. **M4 Output** (v2.0.5, released): EDIT-01 to EDIT-06, MATCH-08, UX-10.
-5. **M5 Polish & presentation** (v2.0.6): OPS-02 to OPS-05, ENG-01, ENG-04, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10.
+5. **M5 Polish & presentation** (v2.0.6, released): OPS-02 to OPS-05, ENG-01, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10. ENG-04 was dropped (Won't do, see the item). Nothing in M5 waits on M6.
+5.1. **M5.1 Deploy** (v2.0.6.1): OPS-06. The first public deploy, and the live demo link the README gets with it.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05.
 
 ### Versioning
@@ -118,6 +120,7 @@ One milestone is one version: `2.0.<N+1>` for milestone `M<N>`. The version befo
 2. Updates "Current version" in `README.md`.
 3. Marks the milestone as `released` in the list above and checks that every item in it is `Done` in the dashboard.
 4. Updates the "Open items after" section: what was left to a later milestone, and which one owns it.
+5. Updates the coverage badge in `README.md` with the number in the CI job summary (TEST-10).
 
 ---
 
@@ -135,8 +138,8 @@ Found during the roadmap review. Each one is covered by a feature below.
 | F6 | Page fit is estimated by character count, not measured; a "1-page" CV can spill over. | `Helpers/PageConstraintHelper.cs` | MATCH-08 (fixed) |
 | F7 | Generate auto-downloads files before the user sees the preview. | `Components/Pages/Home.razor:268` | UX-04 |
 | F8 | 500 responses include `ex.Message`; logging uses `Console.WriteLine`. | `Services/CVGeneratorService.cs:63`, helpers | ENG-03 (fixed) |
-| F9 | Mixed namespaces (`ErCvApi.*` and `ErCv.Web.*`); helpers built with `new` instead of DI. | Whole project | Namespaces fixed in the system hardening (H8); DI is ENG-01 |
-| F10 | Docs drift: legacy FIX-002 says low match is below 30%, code uses below 40%. Node runner expectations depend on a fixture in `testing/`. | `Helpers/MatchScoreCalculator.cs:43`, `testing/` | OPS-04, TEST-09 |
+| F9 | Mixed namespaces (`ErCvApi.*` and `ErCv.Web.*`); helpers built with `new` instead of DI. | Whole project | Namespaces fixed in the system hardening (H8); DI fixed with ENG-01 (M5) |
+| F10 | Docs drift: legacy FIX-002 says low match is below 30%, code uses below 40%. Node runner expectations depend on a fixture in `testing/`. | `Helpers/MatchScoreCalculator.cs:43`, `testing/` | OPS-04, TEST-09 (fixed in M5: the docs say 40%, `testing/` is gone) |
 | F11 | Bullet reordering is drag-only, not keyboard accessible. | `Components/Shared/BulletEditor.razor` | UX-08 |
 
 ### New findings (from TEST-02 to TEST-05)
@@ -170,6 +173,15 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 |---|---|---|
 | F23 | `BrowserStore` let a `TaskCanceledException` from JS interop escape `Home.OnInitializedAsync` when the circuit went away during the first storage reads (a reload, a closed tab, or hot reload while the app runs from the IDE). | Fixed: reads give the default and writes and removals do nothing when the circuit is gone (`JSDisconnectedException`, `TaskCanceledException`); other script errors still surface. `BrowserStoreTests` |
 
+### Findings during M5
+
+| # | Finding | Status |
+|---|---|---|
+| F24 | The match card never showed `MatchScore.LowMatchWarning`: the API returns it, the Blazor UI dropped it (only the red "Weak Match" badge was left). Its text also had an em dash. | Fixed with TEST-06: shown under the breakdown, text without the em dash. `ScoreCardsTests` |
+| F25 | Required vs nice-to-have does not follow the job post's sections: in TC-01 "GitOps" (listed under "Nice to have") is reported as a required missing skill and "RabbitMQ" (under "Requirements") as nice to have. | Open: MATCH-06 (not scheduled) |
+| F27 | The app's samples are mostly "Staff" posts (the picker takes the newest post per role family) while the default profile is senior, so the first try of the demo gives a weak match on 5 of 6 samples (Backend 52, Frontend 50, Full stack 38, Data 48, DevOps 61, Junior 36 with the senior sample). The scores are right; the first impression is not. | Open: new item, a picker rule that prefers senior posts or a demo profile per sample (not scheduled) |
+| F26 | E2E `Toasts_have_no_serious_violations` failed now and then: "CV ready" is usually still on screen when the download toast appears, so the bare `.app-toast` locator matched two toasts (Playwright strict mode). It passed only when the assertion ran before the second toast was added. | Fixed: the test waits for the "Download started" toast |
+
 ### System hardening (between M3 and M3.2)
 
 A review of the C# code before M3.2, branch `feature/system-hardening`. No behavior change: every existing test passes (tests were only moved and renamed to the new namespaces), and the corpus report regenerates byte for byte. No version bump (not a milestone). The conventions it set are in `CLAUDE.md`.
@@ -186,7 +198,20 @@ A review of the C# code before M3.2, branch `feature/system-hardening`. No behav
 | H8 | Structure: the whole domain sat in `Helpers/`, constants in `Data/Constants/Helpers/`, namespaces did not match folders. | Fixed: `Features/<Feature>/`, namespaces = folders, file-scoped |
 | H9 | Magic numbers and repeated literals (scoring weights, limits, profile ids, JS interop names, template keys) inline across helpers and components. | Fixed: named constants, hosting values in `appsettings.json` |
 | H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Fixed with MATCH-07: one list, `SelectionConstants.TechRoleKeywords`, the summary's stricter one plus nothing broad: the selector no longer treats analyst, consultant or specialist roles as tech (a union was tried first and made "Certification Specialist" count as tech years in the real demo profile) |
-| H11 | Swashbuckle 6.5.0 is old (Development only). | Open: ENG-06 (M5) replaces it |
+| H11 | Swashbuckle 6.5.0 is old (Development only). | Fixed with ENG-06 (M5): built-in OpenAPI + Scalar |
+
+### Open items after M5
+
+Nothing in M5 is blocked; every item is Done except ENG-04 (Won't do, the reason is in the item). Left for later:
+
+| Item | Why it is not in M5 | Owner |
+|---|---|---|
+| First public deploy, live demo link, cold-start timing with the warm-up, limits checked on the real instance | Needs the Render service. | OPS-06 (M5.1) |
+| The coverage step and the snapshots have not run on GitHub's Linux runner yet | They were checked locally with the CI commands in Release, and the snapshots with LF and CRLF job descriptions. | First CI run of the M5 PR |
+| F25: required and nice-to-have skills do not follow the post's sections | It changes scoring. | MATCH-06 (not scheduled) |
+| F27: most samples are Staff posts, a weak match for the default senior profile | A picker or demo rule, reviewed on its own. | New item (not scheduled) |
+| The M4 open items (add back what the selection left out, scores after edits, company name in the cover letter) | Unchanged in M5. | New items (not scheduled) |
+| Optional AI | Out of this pass by the owner's decision. | M6 |
 
 ### Open items after M4
 
@@ -198,8 +223,8 @@ Nothing in M4 is blocked. Found while building it, not scheduled yet (each would
 | Match, ATS and keyword scores are not recomputed after edits | The edit loop renders HTML only; the analysis would have to run again per change. | New item (not scheduled) |
 | The cover letter has a generic salutation and no company name (the parser does not read the company), and its text cannot be edited, only the CV it quotes | A company field (the tracker has one) and letter editing are their own features. | New item (not scheduled) |
 | Spanish keeps role titles as written and leaves out the summary's achievement sentence | Translating profile text is out of scope by design (the app never rewrites the profile). | By design |
-| The suite without browsers takes about 7 minutes (five templates over the corpus) | The page count over the whole corpus is what proves MATCH-08. | TEST-10 (M5) can look at splitting it |
-| TEST-08 snapshots over `FixtureLoader.CorpusJdNames` | Snapshots are not built yet. | TEST-08 (M5) |
+| The suite without browsers takes about 7 minutes (five templates over the corpus) | The page count over the whole corpus is what proves MATCH-08. | Looked at in TEST-10 (M5): kept, see its notes |
+| TEST-08 snapshots over `FixtureLoader.CorpusJdNames` | Snapshots are not built yet. | Done in TEST-08 (M5) |
 
 ### Open items after M3.2
 
@@ -317,18 +342,20 @@ Files: `ErCv.Tests/Api/*`
 Verify: tests pass with `WebApplicationFactory<Program>`.
 
 ### TEST-06: Blazor component tests (bUnit)
-**Status:** In progress (`bunit` 2.12.5 added in M3 with the JD highlighter tests; the checklist below is still to do, M5) · **Priority:** P1 · **Effort:** M
+**Status:** Done (M5) · **Priority:** P1 · **Effort:** M
 
-- [ ] BulletEditor: at least 1 bullet always selected, reorder updates selections, emitted selections map is correct
-- [ ] Template, format and page selectors emit the right values and respect `Disabled`
-- [ ] HistoryPanel: load, delete, clear
-- [ ] Score cards render every color state and the low-match warning
+- [x] CvEditor (it replaced BulletEditor in M4): at least 1 bullet always selected, reorder keeps which bullets are left out, the draft it builds is correct
+- [x] Template, format and page selectors emit the right values and respect `Disabled`
+- [x] HistoryPanel: load, delete, clear
+- [x] Score cards render every color state and the low-match warning
+
+Notes: `bunit` 2.12.5 came in M3. M5 added `ScoreCardsTests` (match and ATS cards in green, yellow and red, the fallback tone, the breakdown, ATS issues and all-clear, the gauge clamp), `OptionSelectorsTests` (format, page and template selectors, with and without `Disabled`), and new cases in `HistoryPanelTests` (re-open, delete, clear, disabled) and `CvEditorTests` (move a bullet, Alt+arrow keys). The low-match warning was never shown by the Blazor UI (F24), so the match card now shows it.
 
 Files: `ErCv.Tests/Components/*`
-Verify: tests pass.
+Verify: `dotnet test ErCv.Tests --filter Category=Component`.
 
 ### TEST-07: End-to-end tests (Playwright)
-**Status:** Done (26 tests passing locally; the CI job has not run on GitHub yet) · **Priority:** P1 · **Effort:** L
+**Status:** Done (26 tests; the CI job runs on GitHub and is green, first checked on the M4 merge, PR #14) · **Priority:** P1 · **Effort:** L
 
 - [x] Paste a sample JD, generate, preview visible, scores visible
 - [x] Download PDF and DOCX; files are non-empty and valid (PDF header, DOCX is a zip with `word/document.xml`)
@@ -344,28 +371,36 @@ Files: `ErCv.E2E/*` (`AppFixture` starts the app on a free port and launches an 
 Verify: `dotnet test ErCv.E2E`; runs in CI as its own job.
 
 ### TEST-08: Golden snapshot tests
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done (M5) · **Priority:** P2 · **Effort:** S
 
-- [ ] Approved `GeneratedCV` + scores JSON per corpus JD
-- [ ] Scoring changes show up as a reviewable diff instead of silent drift
-- [ ] Snapshots also cover the real posts from the APP-05 corpus (`FixtureLoader.CorpusJdNames`)
+- [x] Approved `GeneratedCV` + scores JSON per corpus JD
+- [x] Scoring changes show up as a reviewable diff instead of silent drift
+- [x] Snapshots also cover the real posts from the APP-05 corpus (`FixtureLoader.CorpusJdNames`)
 
-Verify: snapshot tests pass; intentional changes are re-approved.
+Notes: no library. `ErCv.Tests/Snapshots/GenerationSnapshotTests` runs the real service (DOCX only, Harvard, one page, so the selection before the measured PDF fit) for every profile x job description (the hand-written ones plus one real post per role family: 95 cases, about 2 seconds) and compares the match score, missing skills, keyword analysis, ATS score and generated CV with `Snapshots/approved/*.approved.json`. A difference writes a `.received.json` next to it (git ignores it) and the failure shows the first differing lines. `ERCV_SNAPSHOTS=approve` accepts every current output and deletes the snapshots no case uses; `Every_approved_snapshot_belongs_to_a_current_case` catches the leftovers otherwise. The corpus refresh workflow approves the snapshots after a refresh, so the PR shows them next to the new posts. "Present" roles and recency used `DateTime.Now`, which would have changed the snapshots with the calendar: `DateParser.Now` can now be pinned for one async flow (`DateParser.PinNow`, an `AsyncLocal`, so tests running in parallel are not affected), and `RelevanceScorer` reads it too. Job descriptions are compared with LF line endings (git checks the fixtures out with CRLF on Windows); the output was checked to be the same either way.
+
+Verify: `dotnet test ErCv.Tests --filter Category=Snapshot`; `SnapshotTests` (the helper fails on a change and on a missing file), `DateParserTests` (the pin).
 
 ### TEST-09: Retire the Node scripts
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done (M5) · **Priority:** P2 · **Effort:** S
 
-- [ ] Port the cases from `test-runner-2.0.1.js`, `bug-regression-2.0.2.js` and `security-hardening-2.0.3.js` into TEST-02/05/08
-- [ ] Delete `testing/` and update README
+- [x] Port the cases from `test-runner-2.0.1.js`, `bug-regression-2.0.2.js` and `security-hardening-2.0.3.js` into TEST-02/05/08
+- [x] Delete `testing/` and update README
+
+Notes: TC-01 to TC-07 run end to end through the API in `ErCv.Tests/Api/LegacyScenarioTests.cs`, with the runner's job descriptions (`Fixtures/jds/legacy/`, kept out of `JdNames` so the corpus matrices do not grow) and the profile they were written for (the senior sample). Every assertion is the runner's except three match floors, written against the 2.0.1 parser: TC-01 and TC-06 asked for 75 (now 72 and 70), TC-05 for 70 (now 69). Since MATCH-07 the dictionary also recognizes "distributed systems", "gitops" and "devops", which the profile does not list as skills, so fewer of the job's skills are matched; the floors are 70 and 65, with the reason in the test. `bug-regression-2.0.2.js` was already covered except one case, now `CvApiTests.Regenerate_rejects_unsupported_formats_with_400`; `security-hardening-2.0.3.js` is `CvApiTests.Rate_limit_answers_429_after_60_requests_per_minute`. Running the scenarios also found F25.
 
 Verify: every old TC-xx has a matching .NET test.
 
 ### TEST-10: Coverage
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done (M5) · **Priority:** P2 · **Effort:** S
 
-- [ ] coverlet report generated in CI
-- [ ] 80% or more line coverage on `Helpers/` and `Services/`
-- [ ] Coverage badge in README
+- [x] coverlet report generated in CI
+- [x] 80% or more line coverage on `Helpers/` and `Services/` (now `Features/` and `Services/`; the gate is 95%, see below)
+- [x] Coverage badge in README
+
+Notes: `coverlet.collector` 10.1.0 in `ErCv.Tests`, configured by `ErCv.Tests/coverage.runsettings` (the `ErCv.Web` assembly only, generated code excluded). `.github/scripts/coverage_summary.py` (standard library Python) reads the cobertura report, counts each line once per file and prints the coverage per feature folder and for `Services/`; CI writes the table to the job summary and fails under 95%. First measure, in Release as CI builds it (full suite without browsers): 98.2% (Analysis 95.8, CoverLetters 100, Documents 98.3, Editing 100, Matching 100, Profiles 100, Selection 100, Services 95.0). The gate is 95%, not the 80% this item asked for: at 98% an 80% gate would let a whole feature lose its tests (Selection is a fifth of the measured lines) without failing, while 95% still leaves about 80 lines of room for an untested guard or log line. The test step runs `ErCv.Tests` only (the browser project has no collector), and the trx logger copies the report, so two identical files exist. The README badge is a static number: the release steps below update it from the CI summary. Components and `UI/` are not in the target (bUnit and the E2E tests cover them). The suite without browsers still takes about 7 minutes: the time is the PDF page count over the corpus (MATCH-08), which is the proof of the page fit, so it is not split.
+
+Verify: the `Coverage` step of `ci.yml`.
 
 ---
 
@@ -948,12 +983,14 @@ Verify: tests with a fake client; TEST-03 invariants still hold.
 ## E8. Engineering quality
 
 ### ENG-01: DI + single namespace root
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+**Status:** Done · **Priority:** P2 · **Effort:** M
 
-- [ ] Helpers registered in DI; interfaces only where tests need seams
-- [ ] All code under `ErCv.Web.*` (F9)
+- [x] Helpers registered in DI; interfaces only where tests need seams
+- [x] All code under `ErCv.Web.*` (F9)
 
-Verify: build + all tests pass.
+Notes: the twelve instance classes of the domain (parser, selector and its parts, the analyzers, highlighter, profile validator, cover letter generator) are singletons registered in `Program.cs`: none keeps per-request state. `CVGeneratorService` (scoped, as before) and `CVSelector` take their parts through the constructor, and the loggers reach `RelevanceScorer` and `SummaryGenerator` through DI instead of an `ILoggerFactory` handed down. No interfaces: no test needed a seam, the tests build the real classes with `new` (`CVSelector()` builds its own parts) and the collector does the same. Static helpers (`SkillNormalizer`, `DateParser`, `ProfileHealthChecker`, `CvTextRenderer`...) stay static: they are pure functions with nothing to inject. `DocumentRenderer` stays a factory per template. The namespace half was already done in the system hardening (H8).
+
+Verify: `ServiceRegistrationTests` (each domain class is one shared instance, the service is built per scope); the container validates every registration at startup in Development, which every API test runs.
 
 ### ENG-02: Consolidate duplicated logic
 **Status:** Done · **Priority:** P0 · **Effort:** M
@@ -977,22 +1014,30 @@ Notes: `CVGeneratorService` takes `ILoggerFactory` and hands loggers to `CVSelec
 Verify: TEST-05 asserts 500 bodies contain no exception details.
 
 ### ENG-04: Options pattern for weights
-**Status:** Todo · **Priority:** P3 · **Effort:** S
+**Status:** Won't do (decided in M5) · **Priority:** P3 · **Effort:** S
 
-- [ ] Scoring weights and limits configurable via `appsettings.json`
+- ~~Scoring weights and limits configurable via `appsettings.json`~~
+
+Why not: `CLAUDE.md` keeps the values that tune the CV logic as constants and only the values an operator tunes per deployment (rate limit, session timeout) as settings. The weights are proven by the invariant tests, the corpus report and (TEST-08) the snapshots, all of which read the constants: a weight changed in `appsettings.json` on the server would change every score with none of those tests seeing it. There is no operator who needs to tune them, and a weight change is a code change reviewed with its diff.
 
 ### ENG-05: Chromium readiness + warm-up
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done · **Priority:** P2 · **Effort:** S
 
-- [ ] Health check reports PDF engine readiness
-- [ ] Browser launched at startup in the background to cut cold-start time on Render
+- [x] Health check reports PDF engine readiness
+- [x] Browser launched at startup in the background to cut cold-start time on Render
 
-Verify: TEST-05 health response; manual cold-start timing.
+Notes: `GET /api/cv/health` adds `pdfEngine`: `ready`, `starting` (not launched yet, or launching) or `unavailable` (the last launch failed, or Chrome was closed). It still answers 200 in every state, so Render's health check does not take the instance out while Chrome starts. `Features/Documents/PdfEngineWarmUp` (a hosted service) launches the shared Chrome in the background at startup and only logs a failure. A failed launch is no longer cached: before, a faulted launch task was kept and every later PDF failed until a restart; now the next PDF launches again. API tests turn the warm-up off (`ApiApp`), so only the tests that render a PDF start Chrome. Cold-start timing is measured on the first deploy (OPS-06).
+
+Verify: `CvApiTests` (health field, ready after the warm-up), `PdfEngineTests` (a failed launch reports unavailable, the next PDF relaunches).
 
 ### ENG-06: Modern OpenAPI
-**Status:** Todo · **Priority:** P3 · **Effort:** S
+**Status:** Done · **Priority:** P3 · **Effort:** S
 
-- [ ] Replace Swashbuckle 6.5 with built-in `MapOpenApi` + Scalar UI (or update Swashbuckle)
+- [x] Replace Swashbuckle 6.5 with built-in `MapOpenApi` + Scalar UI (or update Swashbuckle)
+
+Notes: `Microsoft.AspNetCore.OpenApi` 10.0.13 and `Scalar.AspNetCore` 2.18.2 replace `Swashbuckle.AspNetCore` 6.5.0 (H11). Development only, as before: the document is at `/openapi/v1.json` and the reference page at `/scalar`. Paths keep the declared controller name (`/api/CV/...`); routing ignores case, so `/api/cv/...` keeps working.
+
+Verify: `CvApiTests.OpenApi_document_and_its_reference_page_are_served_in_development`.
 
 ---
 
@@ -1003,7 +1048,7 @@ Verify: TEST-05 health response; manual cold-start timing.
 
 - [x] On push and PR: restore, build, unit + integration tests (coverage arrives with TEST-10)
 - [x] Docker image build
-- [x] E2E job (Playwright) in `ci.yml`, separate from the unit job (first run on GitHub pending)
+- [x] E2E job (Playwright) in `ci.yml`, separate from the unit job (green on GitHub since PR #14)
 - [x] Status badge in README
 
 Notes: `.github/workflows/ci.yml` runs the same commands that pass locally (restore, build and test in Release). PDF tests use the Chrome preinstalled on the runner through `PUPPETEER_EXECUTABLE_PATH`. Verified on PR #7: build and test (3389 passed, 6 skipped, about 2 minutes) and the Docker image build both green.
@@ -1011,25 +1056,43 @@ Notes: `.github/workflows/ci.yml` runs the same commands that pass locally (rest
 Verify: green run on a PR.
 
 ### OPS-02: Dependabot
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done · **Priority:** P2 · **Effort:** S
 
-- [ ] NuGet, GitHub Actions and Docker ecosystems
+- [x] NuGet, GitHub Actions and Docker ecosystems
+
+Notes: `.github/dependabot.yml`, weekly, one grouped PR per ecosystem (NuGet covers every project of the solution). Each PR runs `ci.yml`.
 
 ### OPS-03: README rewrite
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** Done (M5) · **Priority:** P1 · **Effort:** M
 
-- [ ] Hero screenshot / GIF, live demo link, badges (CI, coverage, .NET 10)
-- [ ] Architecture diagram, "How matching works", testing strategy section
+- [x] Hero screenshot / GIF, badges (CI, coverage, .NET 10). The live demo link moved to OPS-06 (M5.1): there is no deploy yet.
+- [x] Architecture diagram, "How matching works", testing strategy section
+
+Notes: the README is now the short tour (what it does, how matching works, a Mermaid architecture diagram, the testing strategy, how to run it); the technical reference moved to `PROJECT_OVERVIEW.md`. Four screenshots in `docs/screenshots/` come from the running app: `ScreenshotTests` in `ErCv.E2E` takes them when `ERCV_SCREENSHOTS` names the folder, and does nothing otherwise, so they can be retaken at each release. They use the DevOps sample, the one the default profile matches best (see F27).
 
 ### OPS-04: PROJECT_OVERVIEW refresh
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done (M5) · **Priority:** P2 · **Effort:** S
 
-- [ ] Fix the drift (F10) and document the new features
+- [x] Fix the drift (F10) and document the new features
+
+Notes: rewritten as the technical reference: request flow (with what `/regenerate` and `/health` return now), project structure with every feature folder, design decisions, UI and restyling, data shapes, testing layers, security and hosting, open items. The old "Possible improvements" list was mostly done (DI, tests, date parsing, cover letter) and is replaced by a pointer to the open items here. `CLAUDE.md` now lists the `Editing` and `CoverLetters` feature folders.
 
 ### OPS-05: Privacy note
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done (M5) · **Priority:** P2 · **Effort:** S
 
-- [ ] Page or footer note: no CV data stored server-side; session files expire after 10 minutes; custom profiles live only in the browser
+- [x] Page or footer note: no CV data stored server-side; session files expire after 10 minutes; custom profiles live only in the browser
+
+Notes: a `/privacy` page, linked from the footer. The old footer said "We don't store your data", which was not exact: the server keeps the generated CV in memory while the page is open, and API sessions keep the files for the configured idle time. The page says what stays in the browser (settings, history of up to 50 entries with the job descriptions, My profile) and how to remove it, what the server sees and for how long (the timeout is read from `ErCvOptions`, now registered in DI), that logs hold technical details only, and that there is no analytics or third-party request. Each statement was checked against the code; the page says to update it when that changes.
+
+Verify: `PrivacyTests` (bUnit: the configured timeout, the footer link), E2E `The_footer_opens_the_privacy_page_and_it_has_no_serious_violations` (it found the in-text link too faint in dark mode, fixed with the app's link color).
+
+### OPS-06: Deploy to Render + live demo link
+**Status:** Todo (M5.1) · **Priority:** P1 · **Effort:** M
+
+- [ ] First deploy from `render.yaml` (Docker, free plan), health check green
+- [ ] Cold-start timing with and without the PDF warm-up (ENG-05)
+- [ ] Live demo link and badge in the README (moved from OPS-03)
+- [ ] Rate limit, security headers and the 413 body limit checked on the deployed instance (TestServer does not enforce the body limit)
 
 ---
 

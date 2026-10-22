@@ -156,4 +156,37 @@ public class DateParserTests
     {
         Assert.Equal(0, DateParser.YearsOfExperience(new (string?, string?)[] { ("Jan 2022", "Jan 2020") }));
     }
+
+    [Fact]
+    public void Present_is_measured_from_the_pinned_date_until_the_pin_is_disposed()
+    {
+        var present = new (string?, string?)[] { ("Jan 2020", "Present") };
+
+        using (DateParser.PinNow(new DateTime(2025, 1, 15)))
+        {
+            Assert.Equal(new DateTime(2025, 1, 15), DateParser.Now);
+            Assert.Equal(5, DateParser.YearsOfExperience(present));
+        }
+
+        Assert.Equal(DateTime.Now.Date, DateParser.Now.Date);
+    }
+
+    [Fact]
+    public async Task A_pin_reaches_the_work_it_starts_but_not_unrelated_work()
+    {
+        using var _ = DateParser.PinNow(new DateTime(2000, 1, 1));
+
+        var started = await Task.Run(() => DateParser.Now);
+        // Work that does not inherit this test's context, as a test running in parallel would not
+        var unrelated = ExecutionContextFree(() => DateParser.Now);
+
+        Assert.Equal(2000, started.Year);
+        Assert.Equal(DateTime.Now.Year, unrelated.Year);
+    }
+
+    private static DateTime ExecutionContextFree(Func<DateTime> read)
+    {
+        using var suppressed = ExecutionContext.SuppressFlow();
+        return Task.Run(read).GetAwaiter().GetResult();
+    }
 }

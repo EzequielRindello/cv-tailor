@@ -39,13 +39,21 @@ jobs:
       - name: Build
         run: dotnet build er-cv-generator.sln --no-restore --configuration Release
 
-      # Unit, invariant, document (DOCX, PDF, HTML) and API integration tests. The browser tests run in their own job.
+      # Unit, invariant, document (DOCX, PDF, HTML), snapshot and API integration tests, with line coverage (TEST-10).
+      # Only ErCv.Tests: the browser tests run in their own job and have no coverage collector.
       - name: Test
         run: >
-          dotnet test er-cv-generator.sln --no-build --configuration Release
+          dotnet test ErCv.Tests/ErCv.Tests.csproj --no-build --configuration Release
           --filter "Category!=E2E"
+          --settings ErCv.Tests/coverage.runsettings
+          --collect:"XPlat Code Coverage"
           --logger "trx;LogFileName=test-results.trx"
           --results-directory test-results
+
+      # Fails the job under 95% line coverage of Features/ and Services/ (98% when set), and writes the table to the
+      # job summary. Two copies of the report exist (the trx logger copies it); they are identical.
+      - name: Coverage
+        run: python3 .github/scripts/coverage_summary.py "$(find test-results -name coverage.cobertura.xml | head -n 1)" --min 95
 
       - name: Upload test results
         if: always()
@@ -101,4 +109,3 @@ jobs:
       - name: Build image
         run: docker build --tag er-cv-generator:ci .
 
-  # Coverage (TEST-10) is added to this workflow when that ticket lands.

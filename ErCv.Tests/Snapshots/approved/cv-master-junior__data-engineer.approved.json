@@ -1,0 +1,283 @@
+{
+  "matchScore": {
+    "overall": 34,
+    "skillsMatched": 3,
+    "totalSkills": 9,
+    "keywordsMatched": 1,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "s3",
+      "redshift"
+    ],
+    "niceToHaveMissing": [
+      "kafka",
+      "spark",
+      "airflow",
+      "snowflake"
+    ],
+    "suggestions": [
+      "Add 's3' to cv-master.json if you have experience with this technology",
+      "Add 'redshift' to cv-master.json if you have experience with this technology",
+      "Mention 'kafka' in relevant project bullet points if you have used it",
+      "Mention 'spark' in relevant project bullet points if you have used it",
+      "Mention 'airflow' in relevant project bullet points if you have used it"
+    ],
+    "potentialScoreIncrease": 11
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "python",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "sql",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "spark",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "airflow",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "aws",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "snowflake",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "s3",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "redshift",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "kafka",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "reliable",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "pipelines",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "engineer",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "batch",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "streaming",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "model",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "tested",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "requirements",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "years",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "engineering",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "experience",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "presentInCV": [
+      "python",
+      "sql",
+      "aws",
+      "data",
+      "engineer",
+      "years",
+      "engineering",
+      "experience"
+    ],
+    "missingFromCV": [
+      "spark",
+      "airflow",
+      "snowflake",
+      "s3",
+      "redshift",
+      "kafka",
+      "reliable"
+    ],
+    "keywordDensity": 0.3,
+    "suggestions": [
+      "Add \"spark\" to the skills section or bullets if you have used it",
+      "Add \"airflow\" to the skills section or bullets if you have used it",
+      "Add \"snowflake\" to the skills section or bullets if you have used it",
+      "Add \"s3\" to the skills section or bullets if you have used it",
+      "Add \"redshift\" to the skills section or bullets if you have used it",
+      "Mention \"reliable\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 80,
+    "issues": [
+      {
+        "severity": "High",
+        "issue": "Low keyword density (33%) — ATS may reject the CV",
+        "fix": "Include more keywords from the job description in bullets and skills section"
+      }
+    ],
+    "recommendations": [
+      "1 improvement point(s) detected:",
+      "• Low keyword density (33%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Sam Carter",
+      "email": "sam.carter@email.com",
+      "phone": "+1 (512) 555-0147",
+      "location": "Austin, TX",
+      "linkedIn": "linkedin.com/in/sam-carter-dev",
+      "gitHub": "github.com/samcarter-dev"
+    },
+    "summary": "Junior Data Engineer with 2+ years of experience, specializing in Python, SQL, and AWS.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of Texas at Austin",
+        "location": "Austin, TX",
+        "graduationDate": "May 2024",
+        "gpa": "3.5",
+        "relevantCourses": [
+          "Data Structures",
+          "Web Development",
+          "Databases"
+        ],
+        "honors": ""
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Engineer",
+        "company": "BrightApps",
+        "location": "Austin, TX",
+        "startDate": "Jul 2024",
+        "endDate": "Present",
+        "bullets": [
+          "Built REST endpoints in Node.js and Express serving a React dashboard used by 300 internal users",
+          "Wrote Jest unit tests that raised coverage of the billing module from 40% to 75%",
+          "Fixed 25+ production bugs and shipped fixes through a GitHub Actions CI pipeline"
+        ],
+        "skills": [
+          "Node.js",
+          "Express",
+          "React",
+          "Jest",
+          "GitHub Actions"
+        ]
+      },
+      {
+        "role": "Software Engineering Intern",
+        "company": "CloudNest",
+        "location": "Remote",
+        "startDate": "Jun 2023",
+        "endDate": "Aug 2023",
+        "bullets": [
+          "Developed a internal tool in Python and Flask that automated weekly report generation",
+          "Added PostgreSQL queries and indexes that cut report time from 40s to 6s"
+        ],
+        "skills": [
+          "Python",
+          "Flask",
+          "PostgreSQL"
+        ]
+      }
+    ],
+    "skills": [
+      "Python",
+      "SQL",
+      "AWS",
+      "React",
+      "Express",
+      "Flask",
+      "PostgreSQL",
+      "Jest",
+      "JavaScript",
+      "TypeScript",
+      "MongoDB",
+      "Git",
+      "Docker",
+      "Agile",
+      "Code Review"
+    ],
+    "projects": [
+      {
+        "name": "Budget Tracker",
+        "description": "Full-stack expense tracker with charts and CSV export",
+        "technologies": [
+          "React",
+          "Node.js",
+          "MongoDB"
+        ],
+        "highlights": [
+          "Deployed on AWS with 100+ monthly users"
+        ],
+        "link": "github.com/samcarter-dev/budget-tracker"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

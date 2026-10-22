@@ -1,0 +1,337 @@
+{
+  "matchScore": {
+    "overall": 66,
+    "skillsMatched": 6,
+    "totalSkills": 8,
+    "keywordsMatched": 5,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "yellow",
+    "lowMatchWarning": null
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "kotlin",
+      "distributed systems"
+    ],
+    "niceToHaveMissing": [],
+    "suggestions": [
+      "Add 'kotlin' to cv-master.json if you have experience with this technology",
+      "Add 'distributed systems' to cv-master.json if you have experience with this technology"
+    ],
+    "potentialScoreIncrease": 12
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "on-call",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "java",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "kotlin",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "python",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "go",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "sql",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "distributed systems",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "a/b testing",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "remote",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "reliable",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "communication",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "airbnb",
+        "frequency": 15,
+        "presentInCV": false
+      },
+      {
+        "word": "experience",
+        "frequency": 7,
+        "presentInCV": true
+      },
+      {
+        "word": "insurance",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "services",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "technical",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "process",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "hosts",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "across",
+        "frequency": 4,
+        "presentInCV": true
+      },
+      {
+        "word": "backend",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "product",
+        "frequency": 4,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "on-call",
+      "java",
+      "python",
+      "go",
+      "sql",
+      "a/b testing",
+      "software",
+      "engineer",
+      "across",
+      "platform",
+      "host",
+      "global",
+      "metrics",
+      "rate",
+      "design",
+      "service",
+      "within",
+      "experiments",
+      "infrastructure",
+      "regions"
+    ],
+    "missingFromCV": [
+      "kotlin",
+      "distributed systems",
+      "remote",
+      "reliable",
+      "communication"
+    ],
+    "keywordDensity": 0.55,
+    "suggestions": [
+      "Add \"kotlin\" to the skills section or bullets if you have used it",
+      "Add \"distributed systems\" to the skills section or bullets if you have used it",
+      "Mention \"remote\" in a bullet point to reflect this skill",
+      "Mention \"reliable\" in a bullet point to reflect this skill",
+      "Mention \"communication\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 100,
+    "issues": [],
+    "recommendations": [
+      "Your CV is fully optimized for ATS"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior Frontend Developer with 9+ years of experience, specializing in Python, Java, Go, SQL, and A/B Testing. Proven track record of improving backward compatibility and reducing breaking changes by 90%.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Developed a dynamic pricing recommendation engine using Python and scikit-learn increasing host revenue by an average of 22%",
+          "Implemented A/B testing infrastructure integrated with Mixpanel supporting 50+ concurrent experiments across the platform",
+          "Refactored the search ranking service (Java + Elasticsearch) improving relevance scores by 31% based on user engagement metrics"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      },
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Built a distributed rate-limiting system using Redis and Lua scripts handling 500K+ requests/second across 12 global regions",
+          "Designed and enforced API versioning strategy across 15+ internal microservices improving backward compatibility and reducing breaking changes by 90%"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Twilio",
+        "location": "San Francisco, CA",
+        "startDate": "Jul 2017",
+        "endDate": "May 2019",
+        "bullets": [
+          "Built core features for Twilio's SMS and voice API platform using Java and Spring Boot serving 1B+ API calls/month",
+          "Optimized SQL queries and added strategic indexes on MySQL databases reducing average query time from 340ms to 45ms",
+          "Participated in on-call rotation, resolving 95% of P1 incidents within SLA and writing detailed post-mortems"
+        ],
+        "skills": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "Ruby",
+          "Rails",
+          "MySQL",
+          "REST API",
+          "Swagger",
+          "OpenAPI",
+          "Microservices",
+          "Docker",
+          "SQL",
+          "AWS"
+        ]
+      }
+    ],
+    "skills": [
+      "Python",
+      "Java",
+      "Go",
+      "SQL",
+      "A/B Testing",
+      "On-call",
+      "REST API Design",
+      "Docker",
+      "TypeScript",
+      "AWS",
+      "Microservices",
+      "JavaScript",
+      "Ruby",
+      "Node.js",
+      "React"
+    ],
+    "projects": [
+      {
+        "name": "OpenMQ — Open Source Message Queue",
+        "description": "Built a lightweight distributed message queue in Go inspired by Kafka. Supports pub/sub, consumer groups, and at-least-once delivery. Used by 3 open source projects with 800+ GitHub stars.",
+        "technologies": [
+          "Go",
+          "gRPC",
+          "Docker",
+          "Kubernetes"
+        ],
+        "highlights": [
+          "Achieved 95K messages/second throughput on a 3-node cluster in benchmarks",
+          "Implemented Raft consensus for leader election ensuring zero message loss during failover",
+          "Published detailed architecture docs and attracted 12 external contributors"
+        ],
+        "link": "github.com/alexrivera-dev/openmq"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

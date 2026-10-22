@@ -2340,6 +2340,12 @@ body:not(:has(#samples)) .app-try-demo {
   margin: 0;
 }
 
+/* Underlined, so the link does not rely on color alone inside the sentence */
+.app-footer a {
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+}
+
 .app-footer-version {
   font-family: var(--font-family-mono);
   margin-top: var(--spacing-xs) !important;
@@ -2703,6 +2709,23 @@ body:not(:has(#samples)) .app-try-demo {
 .match-badge.green  { background: var(--color-success); }
 .match-badge.yellow { background: var(--color-warning); }
 .match-badge.red    { background: var(--color-error); }
+
+/* MatchScore.LowMatchWarning: shown below the breakdown when the overall score is under the low-match threshold */
+.match-low-warning {
+  align-items: flex-start;
+  background: var(--color-warning-soft);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  display: flex;
+  font-size: var(--font-size-sm);
+  gap: var(--spacing-xs);
+  margin: var(--spacing-md) 0 0;
+  padding: var(--spacing-sm);
+}
+
+.match-low-warning i {
+  color: var(--color-warning);
+}
 
 .match-breakdown {
   display: flex;
@@ -3248,6 +3271,40 @@ body:not(:has(#samples)) .app-try-demo {
 .profile-page-intro {
   color: var(--color-text-secondary);
   margin-bottom: var(--spacing-lg);
+}
+
+/* OPS-05 privacy page: the same page frame as My profile */
+.privacy-page-title {
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+.privacy-page-intro {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.privacy-section-title {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.privacy-page ul {
+  margin-bottom: var(--spacing-sm);
+  padding-left: var(--spacing-lg);
+}
+
+.privacy-page .main-card a {
+  color: var(--color-text-link);
+}
+
+.privacy-page li + li {
+  margin-top: var(--spacing-xs);
+}
+
+.privacy-page .main-card p:last-child,
+.privacy-page .main-card ul:last-child {
+  margin-bottom: 0;
 }
 
 /* The save bar is sticky, which an overflow: hidden card would cancel */

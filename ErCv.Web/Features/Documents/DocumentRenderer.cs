@@ -43,7 +43,6 @@ public partial class DocumentRenderer
     #region Fields
 
     private static Task<IBrowser>? _sharedBrowserTask;
-    private static bool _chromiumReady;
     private static string? _downloadedExecutablePath;
 
     private readonly string _templatePath;
@@ -63,7 +62,25 @@ public partial class DocumentRenderer
 
     #endregion
 
+    #region Properties
+
+    /// <summary>Whether Chrome is up for PDFs (ENG-05): ready, starting (not launched yet or launching) or unavailable.</summary>
+    public static string PdfEngineStatus => _sharedBrowserTask switch
+    {
+        null => DocumentConstants.PdfEngineStarting,
+        { IsCompletedSuccessfully: true } launched => launched.Result.IsClosed
+            ? DocumentConstants.PdfEngineUnavailable
+            : DocumentConstants.PdfEngineReady,
+        { IsCompleted: true } => DocumentConstants.PdfEngineUnavailable,
+        _ => DocumentConstants.PdfEngineStarting
+    };
+
+    #endregion
+
     #region Public Methods
+
+    /// <summary>Launches the shared Chrome ahead of the first PDF, so a cold start does not pay for it (ENG-05).</summary>
+    public static Task WarmUpAsync() => GetSharedBrowserAsync();
 
     /// <summary>The renderer for a template: its file in <paramref name="templatesFolder"/> and the order it prints sections in.</summary>
     public static DocumentRenderer ForTemplate(string templatesFolder, CVTemplate template)
@@ -330,9 +347,10 @@ public partial class DocumentRenderer
 
     private static async Task<IBrowser> GetSharedBrowserAsync()
     {
-        if (_sharedBrowserTask != null)
+        var current = _sharedBrowserTask;
+        if (current is { IsFaulted: false, IsCanceled: false })
         {
-            var existing = await _sharedBrowserTask;
+            var existing = await current;
             if (!existing.IsClosed)
                 return existing;
         }
@@ -340,16 +358,31 @@ public partial class DocumentRenderer
         await BrowserInitSemaphore.WaitAsync();
         try
         {
-            if (_sharedBrowserTask != null)
+            current = _sharedBrowserTask;
+            if (current is { IsFaulted: false, IsCanceled: false })
             {
-                var cached = await _sharedBrowserTask;
+                var cached = await current;
                 if (!cached.IsClosed)
                     return cached;
             }
 
-            var executablePath = Environment.GetEnvironmentVariable(DocumentConstants.ExecutablePathVariable);
+            // A failed launch is not kept: if Chrome was not ready at warm-up, the next PDF tries again
+            _sharedBrowserTask = LaunchBrowserAsync();
+            return await _sharedBrowserTask;
+        }
+        finally
+        {
+            BrowserInitSemaphore.Release();
+        }
+    }
 
-            if (string.IsNullOrWhiteSpace(executablePath) && !_chromiumReady)
+    private static async Task<IBrowser> LaunchBrowserAsync()
+    {
+        var executablePath = Environment.GetEnvironmentVariable(DocumentConstants.ExecutablePathVariable);
+
+        if (string.IsNullOrWhiteSpace(executablePath))
+        {
+            if (_downloadedExecutablePath == null)
             {
                 var cachePath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -357,25 +390,17 @@ public partial class DocumentRenderer
                 var browserFetcher = new BrowserFetcher(new BrowserFetcherOptions { Path = cachePath });
                 var installed = await browserFetcher.DownloadAsync();
                 _downloadedExecutablePath = installed.GetExecutablePath();
-                _chromiumReady = true;
             }
 
-            if (string.IsNullOrWhiteSpace(executablePath))
-                executablePath = _downloadedExecutablePath;
-
-            _sharedBrowserTask = Puppeteer.LaunchAsync(new LaunchOptions
-            {
-                Headless = true,
-                ExecutablePath = string.IsNullOrWhiteSpace(executablePath) ? null : executablePath,
-                Args = DocumentConstants.ChromiumArgs
-            });
-
-            return await _sharedBrowserTask;
+            executablePath = _downloadedExecutablePath;
         }
-        finally
+
+        return await Puppeteer.LaunchAsync(new LaunchOptions
         {
-            BrowserInitSemaphore.Release();
-        }
+            Headless = true,
+            ExecutablePath = string.IsNullOrWhiteSpace(executablePath) ? null : executablePath,
+            Args = DocumentConstants.ChromiumArgs
+        });
     }
 
     /// <summary>Every partial of the templates folder, by file name without the extension.</summary>

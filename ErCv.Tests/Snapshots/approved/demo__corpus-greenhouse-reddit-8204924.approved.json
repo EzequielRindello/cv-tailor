@@ -1,0 +1,363 @@
+{
+  "matchScore": {
+    "overall": 5,
+    "skillsMatched": 0,
+    "totalSkills": 5,
+    "keywordsMatched": 1,
+    "totalKeywords": 15,
+    "seniorityMatch": false,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "python",
+      "ruby",
+      "go",
+      "rust"
+    ],
+    "niceToHaveMissing": [
+      "machine learning"
+    ],
+    "suggestions": [
+      "Add 'python' to cv-master.json if you have experience with this technology",
+      "Add 'ruby' to cv-master.json if you have experience with this technology",
+      "Add 'go' to cv-master.json if you have experience with this technology",
+      "Add 'rust' to cv-master.json if you have experience with this technology",
+      "Mention 'machine learning' in relevant project bullet points if you have used it"
+    ],
+    "potentialScoreIncrease": 40
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "machine learning",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "go",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "python",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "rust",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "ruby",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "remote",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "proactive",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "planning",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "coaching",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "independent",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "information",
+        "frequency": 10,
+        "presentInCV": false
+      },
+      {
+        "word": "reddit",
+        "frequency": 9,
+        "presentInCV": false
+      },
+      {
+        "word": "technical",
+        "frequency": 7,
+        "presentInCV": false
+      },
+      {
+        "word": "product",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "development",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "experience",
+        "frequency": 5,
+        "presentInCV": true
+      },
+      {
+        "word": "benefits",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "personal",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "engineer",
+        "frequency": 3,
+        "presentInCV": true
+      },
+      {
+        "word": "safety",
+        "frequency": 3,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "machine learning",
+      "backend",
+      "engineer",
+      "built",
+      "platform",
+      "across",
+      "data",
+      "contribute",
+      "full",
+      "design",
+      "code",
+      "developer",
+      "years",
+      "software",
+      "experience",
+      "complex",
+      "workspace",
+      "time",
+      "units",
+      "state"
+    ],
+    "missingFromCV": [
+      "go",
+      "python",
+      "rust",
+      "ruby",
+      "remote",
+      "proactive",
+      "planning",
+      "coaching",
+      "independent"
+    ],
+    "keywordDensity": 0.1,
+    "suggestions": [
+      "Add \"go\" to the skills section or bullets if you have used it",
+      "Add \"python\" to the skills section or bullets if you have used it",
+      "Add \"rust\" to the skills section or bullets if you have used it",
+      "Add \"ruby\" to the skills section or bullets if you have used it",
+      "Mention \"remote\" in a bullet point to reflect this skill",
+      "Mention \"proactive\" in a bullet point to reflect this skill",
+      "Mention \"planning\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 70,
+    "issues": [
+      {
+        "severity": "High",
+        "issue": "Low keyword density (0%) — ATS may reject the CV",
+        "fix": "Include more keywords from the job description in bullets and skills section"
+      },
+      {
+        "severity": "Medium",
+        "issue": "No quantifiable achievements detected (numbers, percentages)",
+        "fix": "Add metrics to bullets: 'Reduced X by 30%', 'Handled N requests/day'"
+      },
+      {
+        "severity": "Low",
+        "issue": "Phone format may not be parsed correctly by some ATS systems",
+        "fix": "Use format: +1 (234) 567-8900 or +54 9 341 279-3916"
+      }
+    ],
+    "recommendations": [
+      "3 improvement point(s) detected:",
+      "• Phone format may not be parsed correctly by some ATS systems → Use format: +1 (234) 567-8900 or +54 9 341 279-3916",
+      "• Low keyword density (0%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section",
+      "• No quantifiable achievements detected (numbers, percentages) → Add metrics to bullets: 'Reduced X by 30%', 'Handled N requests/day'"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Ezequiel Rindello",
+      "email": "rindelloezequiel@gmail.com",
+      "phone": "55555",
+      "location": "Rosario, Argentina",
+      "linkedIn": "linkedin.com/in/ezequiel-rindello",
+      "gitHub": "github.com/EzequielRindello"
+    },
+    "summary": "Junior ML Engineer with 1+ years of experience, specializing in .NET, React, React Router, and C#.",
+    "education": [
+      {
+        "degree": "B.S. Software Development (In Progress)",
+        "institution": "Brigham Young University - Idaho",
+        "location": "Rexburg, Idaho, USA",
+        "graduationDate": "Present",
+        "gpa": "",
+        "relevantCourses": [
+          "Object-Oriented Programming",
+          "Web Development",
+          "Database Management",
+          "Software Engineering Principles",
+          "Web Services"
+        ],
+        "honors": "Completed certificates: Software Development, Web Development, Web and Computer Programming"
+      },
+      {
+        "degree": "PathwayConnect Certificate",
+        "institution": "BYU-Pathway Worldwide",
+        "location": "USA (Remote)",
+        "graduationDate": "Apr 2022",
+        "gpa": "",
+        "relevantCourses": [],
+        "honors": "Advanced English proficiency (C1)"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · Chamber Mate",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Built an event discount code and promo registration system with redemption tracking, checkout integration, and discount propagation to invoices and sales orders",
+          "Designed and implemented an Attendee Cap Group feature from database schema to UI, enforcing capacity limits and sold-out status across the full registration flow",
+          "Led the design of a reusable social media publishing integration (Facebook, Instagram) with per-platform OAuth 2.0, automatic token refresh, and a scheduled publishing engine with retry logic"
+        ],
+        "skills": [
+          "C#",
+          ".NET",
+          "ASP.NET Core",
+          "EF Core",
+          "PostgreSQL",
+          "React",
+          "JavaScript",
+          "REST API",
+          "OAuth",
+          "Git",
+          "Bitbucket",
+          "Jira"
+        ]
+      },
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · KOORUS",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Develop and maintain KOORUS, a multi-tenant React 19 + Vite SPA on .NET 9 and PostgreSQL with time tracking, task tracking, billing, forms, AI, and admin modules",
+          "Architected complex KOORUS UI flows with Context + useReducer, workspace-scoped state, and lazy-loaded feature areas",
+          "Built Kanban-style task boards, time-tracking dashboards, and real-time notifications with SignalR"
+        ],
+        "skills": [
+          "React",
+          "JavaScript",
+          "Vite",
+          ".NET",
+          "PostgreSQL",
+          "SignalR",
+          "REST API"
+        ]
+      },
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · LabLink 360",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Work from proof of concept to production on AutoCommunicator, a Windows data acquisition system for laboratory instruments built for Thermo Fisher Scientific",
+          "Built WPF/MVVM client and background Worker services that capture instrument data over TCP, serial ports, and file drop, queued in an encrypted local SQLite store for reliable delivery",
+          "Contribute to the backend pipeline that stores raw uploads in object storage (MinIO/S3) and imports them through a parser engine into SQL Server, configured from a React frontend"
+        ],
+        "skills": [
+          "C#",
+          ".NET",
+          "WPF",
+          "MVVM",
+          "SQLite",
+          "SQL Server",
+          "S3",
+          "React"
+        ]
+      }
+    ],
+    "skills": [
+      ".NET",
+      "React",
+      "React Router",
+      "C#",
+      "JavaScript",
+      "PostgreSQL",
+      "REST API Design",
+      "SQL",
+      "ASP.NET Core",
+      "EF Core",
+      "SignalR",
+      "WPF",
+      "SQL Server",
+      "SQLite",
+      "Git"
+    ],
+    "projects": [
+      {
+        "name": "Temple Trips (TT)",
+        "description": "Multi-tenant church administration platform for units, members, activities, and temple trip registrations, with tenant-aware authorization end to end.",
+        "technologies": [
+          ".NET",
+          "ASP.NET Core",
+          "EF Core",
+          "PostgreSQL",
+          "JWT",
+          "FluentValidation",
+          "React",
+          "React Router",
+          "Axios",
+          "Bootstrap"
+        ],
+        "highlights": [
+          "Tenant-aware query filters and middleware-based authorization: JWT auth, tenant hydration, area active-state validation, and permission checks",
+          "Domain services keep controllers thin across units, members, activities, temple trips, users, permissions, and SysAdmin area management",
+          "Handles operational edge cases: protected system roles, soft deletes, trip capacity, duplicate registration prevention, and XLSX export of registrations"
+        ],
+        "link": "github.com/EzequielRindello/temple-trips-er"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

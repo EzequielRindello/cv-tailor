@@ -1,10 +1,16 @@
 using System.Threading.RateLimiting;
 using ErCv.Web.Components;
 using ErCv.Web.Configuration;
+using ErCv.Web.Features.Analysis;
+using ErCv.Web.Features.CoverLetters;
 using ErCv.Web.Features.Documents;
+using ErCv.Web.Features.Matching;
+using ErCv.Web.Features.Profiles;
+using ErCv.Web.Features.Selection;
 using ErCv.Web.Services;
 using ErCv.Web.UI;
 using Microsoft.AspNetCore.HttpOverrides;
+using Scalar.AspNetCore;
 
 const string ApiRateLimitPolicy = "api";
 const string PortVariable = "PORT";
@@ -12,6 +18,7 @@ const string ErrorPath = "/Error";
 
 var builder = WebApplication.CreateBuilder(args);
 var settings = ErCvOptions.Load(builder.Configuration);
+builder.Services.AddSingleton(settings);
 
 // Render injects the port to bind to
 var port = Environment.GetEnvironmentVariable(PortVariable);
@@ -27,8 +34,7 @@ builder.Services.AddControllers()
             new System.Text.Json.Serialization.JsonStringEnumConverter()
         );
     });
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 builder.Services.AddAuthorization();
 builder.Services.AddRateLimiter(options =>
 {
@@ -62,9 +68,23 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
+// ENG-01. The domain classes keep no per-request state, so one instance of each serves every request.
+builder.Services.AddSingleton<JobDescriptionParser>();
+builder.Services.AddSingleton<RelevanceScorer>();
+builder.Services.AddSingleton<SummaryGenerator>();
+builder.Services.AddSingleton<PageConstraintHelper>();
+builder.Services.AddSingleton<CVSelector>();
+builder.Services.AddSingleton<MatchScoreCalculator>();
+builder.Services.AddSingleton<MissingSkillsAnalyzer>();
+builder.Services.AddSingleton<KeywordAnalyzer>();
+builder.Services.AddSingleton<ATSChecker>();
+builder.Services.AddSingleton<JdHighlighter>();
+builder.Services.AddSingleton<ProfileValidator>();
+builder.Services.AddSingleton<CoverLetterGenerator>();
 builder.Services.AddScoped<CVGeneratorService>();
 builder.Services.AddScoped<BrowserStore>();
 builder.Services.AddScoped<ToastService>();
+builder.Services.AddHostedService<PdfEngineWarmUp>();
 
 var app = builder.Build();
 
@@ -72,8 +92,9 @@ app.UseForwardedHeaders();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // The OpenAPI document at /openapi/v1.json and its Scalar UI at /scalar, both Development only
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 else
 {

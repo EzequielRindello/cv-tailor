@@ -62,6 +62,14 @@
             <span><i class="stack-dot keywords"></i>Keywords <strong>@Math.Round(keywordPts)/@keywordMax</strong></span>
             <span><i class="stack-dot seniority"></i>Seniority <strong>@Math.Round(seniorityPts)/@seniorityMax</strong></span>
         </div>
+
+        @if (!string.IsNullOrEmpty(Data.LowMatchWarning))
+        {
+            <p class="match-low-warning">
+                <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                @Data.LowMatchWarning
+            </p>
+        }
     </div>
 </div>
 

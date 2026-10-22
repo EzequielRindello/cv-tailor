@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 using ErCv.Tests.Fixtures;
+using ErCv.Web.Features.Documents;
 
 namespace ErCv.Tests.Api;
 
@@ -9,6 +11,9 @@ namespace ErCv.Tests.Api;
 [Trait("Category", "Api")]
 public class CvApiTests
 {
+    private static readonly TimeSpan WarmUpTimeout = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan WarmUpPollInterval = TimeSpan.FromMilliseconds(200);
+
     [Fact]
     public async Task Generate_returns_200_with_files_scores_and_preview()
     {
@@ -328,6 +333,22 @@ public class CvApiTests
             (await download.Content.ReadAsByteArrayAsync()).Length);
     }
 
+    // TEST-09: from the retired testing/bug-regression-2.0.2.js (BUG-402)
+    [Fact]
+    public async Task Regenerate_rejects_unsupported_formats_with_400()
+    {
+        using var app = new ApiApp();
+        var generate = await ApiApp.JsonAsync(await app.PostAsync("/api/cv/generate", ApiApp.GenerateBody()));
+
+        var response = await app.PostAsync("/api/cv/regenerate", new Dictionary<string, object?>
+        {
+            ["generatedCV"] = generate.GetProperty("generatedCV"),
+            ["formats"] = new[] { "zip" }
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     [Fact]
     public async Task Regenerate_rejects_missing_formats_with_400()
     {
@@ -404,6 +425,39 @@ public class CvApiTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("healthy", json.GetProperty("status").GetString());
         Assert.True(DateTime.TryParse(json.GetProperty("timestamp").GetString(), out _));
+        Assert.Contains(json.GetProperty("pdfEngine").GetString(), new[] { "ready", "starting", "unavailable" });
+    }
+
+    [Fact]
+    public async Task Health_reports_the_pdf_engine_ready_after_the_startup_warm_up()
+    {
+        // With the shared Chrome closed first, only this host's warm-up can make it ready
+        await DocumentRenderer.ShutdownAsync();
+        using var app = new ApiApp(warmUpPdfEngine: true);
+
+        var waited = Stopwatch.StartNew();
+        while (DocumentRenderer.PdfEngineStatus != "ready" && waited.Elapsed < WarmUpTimeout)
+            await Task.Delay(WarmUpPollInterval);
+
+        var json = await ApiApp.JsonAsync(await app.Client.GetAsync("/api/cv/health"));
+        Assert.Equal("ready", json.GetProperty("pdfEngine").GetString());
+    }
+
+    [Fact]
+    public async Task OpenApi_document_and_its_reference_page_are_served_in_development()
+    {
+        using var app = new ApiApp();
+
+        var document = await app.Client.GetAsync("/openapi/v1.json");
+        var reference = await app.Client.GetAsync("/scalar");
+
+        Assert.Equal(HttpStatusCode.OK, document.StatusCode);
+        // Paths keep the controller name as declared ([controller] is "CV"); routing itself ignores case
+        var paths = (await ApiApp.JsonAsync(document)).GetProperty("paths");
+        Assert.True(paths.TryGetProperty("/api/CV/generate", out _));
+        Assert.True(paths.TryGetProperty("/api/CV/health", out _));
+        Assert.Equal(HttpStatusCode.OK, reference.StatusCode);
+        Assert.Equal("text/html", reference.Content.Headers.ContentType?.MediaType);
     }
 
     [Fact]

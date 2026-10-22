@@ -25,7 +25,7 @@ public static class MatchScoreConstants
     // Below this overall score the CV is flagged as a poor fit for the job
     public const int LowMatchThreshold = 40;
     public const string LowMatchWarning =
-        "Low match detected — this JD may not align with your profile. The generated CV may not be competitive.";
+        "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive.";
 
     #endregion
 

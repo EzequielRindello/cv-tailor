@@ -1,0 +1,285 @@
+{
+  "matchScore": {
+    "overall": 38,
+    "skillsMatched": 4,
+    "totalSkills": 11,
+    "keywordsMatched": 2,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "next.js",
+      "css",
+      "accessibility",
+      "e2e testing",
+      "cypress"
+    ],
+    "niceToHaveMissing": [
+      "graphql"
+    ],
+    "suggestions": [
+      "Add 'next.js' to cv-master.json if you have experience with this technology",
+      "Add 'css' to cv-master.json if you have experience with this technology",
+      "Add 'accessibility' to cv-master.json if you have experience with this technology",
+      "Add 'e2e testing' to cv-master.json if you have experience with this technology",
+      "Add 'cypress' to cv-master.json if you have experience with this technology",
+      "Mention 'graphql' in relevant project bullet points if you have used it"
+    ],
+    "potentialScoreIncrease": 23
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "react",
+        "frequency": 3,
+        "presentInCV": true
+      },
+      {
+        "word": "typescript",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "graphql",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "e2e testing",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "css",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "accessibility",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "jest",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "cypress",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "git",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "next.js",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "node.js",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "softSkillKeywords": [],
+    "industryKeywords": [
+      {
+        "word": "frontend",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "engineer",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "product",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "accessible",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "redux",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "write",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "component",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "collaborate",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "closely",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "designers",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "react",
+      "typescript",
+      "jest",
+      "git",
+      "node.js",
+      "engineer",
+      "years"
+    ],
+    "missingFromCV": [
+      "graphql",
+      "e2e testing",
+      "css",
+      "accessibility",
+      "cypress",
+      "next.js"
+    ],
+    "keywordDensity": 0.45,
+    "suggestions": [
+      "Add \"graphql\" to the skills section or bullets if you have used it",
+      "Add \"e2e testing\" to the skills section or bullets if you have used it",
+      "Add \"css\" to the skills section or bullets if you have used it",
+      "Add \"accessibility\" to the skills section or bullets if you have used it",
+      "Add \"cypress\" to the skills section or bullets if you have used it"
+    ]
+  },
+  "atsScore": {
+    "overall": 90,
+    "issues": [
+      {
+        "severity": "Medium",
+        "issue": "Medium keyword density (45%) — could be improved",
+        "fix": "Add 2–3 more keywords from the job description to improve ATS ranking"
+      }
+    ],
+    "recommendations": [
+      "1 improvement point(s) detected:",
+      "• Medium keyword density (45%) — could be improved → Add 2–3 more keywords from the job description to improve ATS ranking"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Sam Carter",
+      "email": "sam.carter@email.com",
+      "phone": "+1 (512) 555-0147",
+      "location": "Austin, TX",
+      "linkedIn": "linkedin.com/in/sam-carter-dev",
+      "gitHub": "github.com/samcarter-dev"
+    },
+    "summary": "Junior Full Stack Developer with 2+ years of experience, specializing in React, Jest, TypeScript, and Git.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of Texas at Austin",
+        "location": "Austin, TX",
+        "graduationDate": "May 2024",
+        "gpa": "3.5",
+        "relevantCourses": [
+          "Data Structures",
+          "Web Development",
+          "Databases"
+        ],
+        "honors": ""
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Engineer",
+        "company": "BrightApps",
+        "location": "Austin, TX",
+        "startDate": "Jul 2024",
+        "endDate": "Present",
+        "bullets": [
+          "Built REST endpoints in Node.js and Express serving a React dashboard used by 300 internal users",
+          "Wrote Jest unit tests that raised coverage of the billing module from 40% to 75%",
+          "Fixed 25+ production bugs and shipped fixes through a GitHub Actions CI pipeline"
+        ],
+        "skills": [
+          "Node.js",
+          "Express",
+          "React",
+          "Jest",
+          "GitHub Actions"
+        ]
+      },
+      {
+        "role": "Software Engineering Intern",
+        "company": "CloudNest",
+        "location": "Remote",
+        "startDate": "Jun 2023",
+        "endDate": "Aug 2023",
+        "bullets": [
+          "Developed a internal tool in Python and Flask that automated weekly report generation",
+          "Added PostgreSQL queries and indexes that cut report time from 40s to 6s"
+        ],
+        "skills": [
+          "Python",
+          "Flask",
+          "PostgreSQL"
+        ]
+      }
+    ],
+    "skills": [
+      "React",
+      "Jest",
+      "TypeScript",
+      "Git",
+      "Python",
+      "Express",
+      "Flask",
+      "PostgreSQL",
+      "JavaScript",
+      "SQL",
+      "MongoDB",
+      "Docker",
+      "AWS",
+      "Agile",
+      "Code Review"
+    ],
+    "projects": [
+      {
+        "name": "Budget Tracker",
+        "description": "Full-stack expense tracker with charts and CSV export",
+        "technologies": [
+          "React",
+          "Node.js",
+          "MongoDB"
+        ],
+        "highlights": [
+          "Deployed on AWS with 100+ monthly users"
+        ],
+        "link": "github.com/samcarter-dev/budget-tracker"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

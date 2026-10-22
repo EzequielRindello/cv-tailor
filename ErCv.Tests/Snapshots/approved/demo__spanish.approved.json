@@ -1,0 +1,315 @@
+{
+  "matchScore": {
+    "overall": 40,
+    "skillsMatched": 4,
+    "totalSkills": 7,
+    "keywordsMatched": 1,
+    "totalKeywords": 15,
+    "seniorityMatch": false,
+    "colorClass": "red",
+    "lowMatchWarning": null
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "node.js",
+      "aws",
+      "ci/cd"
+    ],
+    "niceToHaveMissing": [],
+    "suggestions": [
+      "Add 'node.js' to cv-master.json if you have experience with this technology",
+      "Add 'aws' to cv-master.json if you have experience with this technology",
+      "Add 'ci/cd' to cv-master.json if you have experience with this technology"
+    ],
+    "potentialScoreIncrease": 21
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "node.js",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "typescript",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "postgresql",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "aws",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "rest",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "docker",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "ci/cd",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [],
+    "industryKeywords": [
+      {
+        "word": "ingeniero",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "backend",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "experiencia",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "software",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "senior",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "buscamos",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "diseñar",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "mantener",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "servicios",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "trabajarás",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "typescript",
+      "postgresql",
+      "rest",
+      "docker",
+      "software",
+      "backend"
+    ],
+    "missingFromCV": [
+      "node.js",
+      "aws",
+      "ci/cd"
+    ],
+    "keywordDensity": 0.57,
+    "suggestions": [
+      "Add \"node.js\" to the skills section or bullets if you have used it",
+      "Add \"aws\" to the skills section or bullets if you have used it",
+      "Add \"ci/cd\" to the skills section or bullets if you have used it"
+    ]
+  },
+  "atsScore": {
+    "overall": 80,
+    "issues": [
+      {
+        "severity": "Medium",
+        "issue": "Medium keyword density (57%) — could be improved",
+        "fix": "Add 2–3 more keywords from the job description to improve ATS ranking"
+      },
+      {
+        "severity": "Medium",
+        "issue": "No quantifiable achievements detected (numbers, percentages)",
+        "fix": "Add metrics to bullets: 'Reduced X by 30%', 'Handled N requests/day'"
+      },
+      {
+        "severity": "Low",
+        "issue": "Phone format may not be parsed correctly by some ATS systems",
+        "fix": "Use format: +1 (234) 567-8900 or +54 9 341 279-3916"
+      }
+    ],
+    "recommendations": [
+      "3 improvement point(s) detected:",
+      "• Phone format may not be parsed correctly by some ATS systems → Use format: +1 (234) 567-8900 or +54 9 341 279-3916",
+      "• Medium keyword density (57%) — could be improved → Add 2–3 more keywords from the job description to improve ATS ranking",
+      "• No quantifiable achievements detected (numbers, percentages) → Add metrics to bullets: 'Reduced X by 30%', 'Handled N requests/day'"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Ezequiel Rindello",
+      "email": "rindelloezequiel@gmail.com",
+      "phone": "55555",
+      "location": "Rosario, Argentina",
+      "linkedIn": "linkedin.com/in/ezequiel-rindello",
+      "gitHub": "github.com/EzequielRindello"
+    },
+    "summary": "Junior Full Stack Developer with 1+ years of experience, specializing in PostgreSQL, REST API Design, TypeScript, and Docker.",
+    "education": [
+      {
+        "degree": "B.S. Software Development (In Progress)",
+        "institution": "Brigham Young University - Idaho",
+        "location": "Rexburg, Idaho, USA",
+        "graduationDate": "Present",
+        "gpa": "",
+        "relevantCourses": [
+          "Object-Oriented Programming",
+          "Web Development",
+          "Database Management",
+          "Software Engineering Principles",
+          "Web Services"
+        ],
+        "honors": "Completed certificates: Software Development, Web Development, Web and Computer Programming"
+      },
+      {
+        "degree": "PathwayConnect Certificate",
+        "institution": "BYU-Pathway Worldwide",
+        "location": "USA (Remote)",
+        "graduationDate": "Apr 2022",
+        "gpa": "",
+        "relevantCourses": [],
+        "honors": "Advanced English proficiency (C1)"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · Chamber Mate",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Build production features on Chamber Mate, a multi-tenant SaaS platform (ASP.NET Core, React, PostgreSQL) for chambers of commerce and membership organizations, shipping tickets end to end from schema to UI across 13+ backend subsystems",
+          "Built an event discount code and promo registration system with redemption tracking, checkout integration, and discount propagation to invoices and sales orders",
+          "Delivered a configurable Member Portal Resources module with tenant-level settings, dynamic menus, and full CRUD across the REST API and the React frontend"
+        ],
+        "skills": [
+          "C#",
+          ".NET",
+          "ASP.NET Core",
+          "EF Core",
+          "PostgreSQL",
+          "React",
+          "JavaScript",
+          "REST API",
+          "OAuth",
+          "Git",
+          "Bitbucket",
+          "Jira"
+        ]
+      },
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · KOORUS",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Develop and maintain KOORUS, a multi-tenant React 19 + Vite SPA on .NET 9 and PostgreSQL with time tracking, task tracking, billing, forms, AI, and admin modules",
+          "Architected complex KOORUS UI flows with Context + useReducer, workspace-scoped state, and lazy-loaded feature areas",
+          "Built Kanban-style task boards, time-tracking dashboards, and real-time notifications with SignalR"
+        ],
+        "skills": [
+          "React",
+          "JavaScript",
+          "Vite",
+          ".NET",
+          "PostgreSQL",
+          "SignalR",
+          "REST API"
+        ]
+      },
+      {
+        "role": "Junior Software Developer",
+        "company": "Primero Systems Inc. · LabLink 360",
+        "location": "Remote · San Diego, CA, USA",
+        "startDate": "Jun 2025",
+        "endDate": "Present",
+        "bullets": [
+          "Work from proof of concept to production on AutoCommunicator, a Windows data acquisition system for laboratory instruments built for Thermo Fisher Scientific",
+          "Built WPF/MVVM client and background Worker services that capture instrument data over TCP, serial ports, and file drop, queued in an encrypted local SQLite store for reliable delivery",
+          "Contribute to the backend pipeline that stores raw uploads in object storage (MinIO/S3) and imports them through a parser engine into SQL Server, configured from a React frontend"
+        ],
+        "skills": [
+          "C#",
+          ".NET",
+          "WPF",
+          "MVVM",
+          "SQLite",
+          "SQL Server",
+          "S3",
+          "React"
+        ]
+      }
+    ],
+    "skills": [
+      "PostgreSQL",
+      "REST API Design",
+      "TypeScript",
+      "Docker",
+      ".NET",
+      "React",
+      "React Router",
+      "C#",
+      "JavaScript",
+      "SQL",
+      "ASP.NET Core",
+      "EF Core",
+      "SignalR",
+      "WPF",
+      "SQL Server"
+    ],
+    "projects": [
+      {
+        "name": "CineApi (Movie App Backend)",
+        "description": "Production-style REST API for cinema management with role-based authorization and seat reservations, built solo.",
+        "technologies": [
+          ".NET",
+          "ASP.NET Core",
+          "PostgreSQL",
+          "EF Core",
+          "JWT",
+          "RBAC",
+          "Docker"
+        ],
+        "highlights": [
+          "Cookie-based JWT authentication with three roles (Sys Admin, Cinema Admin, Regular User) enforcing fine-grained access policies",
+          "Seat reservations with business constraints (at most 4 seats per screening per user), plus movie, screening, and user administration",
+          "Layered architecture (Controllers, Services, Data) with EF Core, raw SQL migrations, centralized error handling, and a Dockerized PostgreSQL setup"
+        ],
+        "link": "gitfront.io/r/erindello/SvvLh7YTp6XL/CineApi"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

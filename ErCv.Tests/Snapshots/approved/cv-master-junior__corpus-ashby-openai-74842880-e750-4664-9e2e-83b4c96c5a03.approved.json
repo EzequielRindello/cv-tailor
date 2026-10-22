@@ -1,0 +1,282 @@
+{
+  "matchScore": {
+    "overall": 2,
+    "skillsMatched": 0,
+    "totalSkills": 4,
+    "keywordsMatched": 0,
+    "totalKeywords": 15,
+    "seniorityMatch": false,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "observability",
+      "distributed systems",
+      "ai agents",
+      "openai"
+    ],
+    "niceToHaveMissing": [],
+    "suggestions": [
+      "Add 'observability' to cv-master.json if you have experience with this technology",
+      "Add 'distributed systems' to cv-master.json if you have experience with this technology",
+      "Add 'ai agents' to cv-master.json if you have experience with this technology",
+      "Add 'openai' to cv-master.json if you have experience with this technology"
+    ],
+    "potentialScoreIncrease": 40
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "openai",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "observability",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "distributed systems",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "ai agents",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "leadership",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "reliable",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "adaptability",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "mentoring",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "relationship",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "product",
+        "frequency": 15,
+        "presentInCV": false
+      },
+      {
+        "word": "technical",
+        "frequency": 11,
+        "presentInCV": false
+      },
+      {
+        "word": "software",
+        "frequency": 7,
+        "presentInCV": true
+      },
+      {
+        "word": "design",
+        "frequency": 7,
+        "presentInCV": false
+      },
+      {
+        "word": "across",
+        "frequency": 7,
+        "presentInCV": false
+      },
+      {
+        "word": "development",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "developer",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "powered",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "workflows",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "direction",
+        "frequency": 4,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "software",
+      "engineer",
+      "full",
+      "stack",
+      "generation",
+      "review",
+      "engineering",
+      "problem",
+      "experience",
+      "strong",
+      "solving",
+      "tool",
+      "report"
+    ],
+    "missingFromCV": [
+      "openai",
+      "observability",
+      "distributed systems",
+      "ai agents",
+      "leadership",
+      "reliable",
+      "adaptability",
+      "mentoring",
+      "relationship"
+    ],
+    "keywordDensity": 0,
+    "suggestions": [
+      "Add \"openai\" to the skills section or bullets if you have used it",
+      "Add \"observability\" to the skills section or bullets if you have used it",
+      "Add \"distributed systems\" to the skills section or bullets if you have used it",
+      "Add \"ai agents\" to the skills section or bullets if you have used it",
+      "Mention \"leadership\" in a bullet point to reflect this skill",
+      "Mention \"reliable\" in a bullet point to reflect this skill",
+      "Mention \"adaptability\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 80,
+    "issues": [
+      {
+        "severity": "High",
+        "issue": "Low keyword density (0%) — ATS may reject the CV",
+        "fix": "Include more keywords from the job description in bullets and skills section"
+      }
+    ],
+    "recommendations": [
+      "1 improvement point(s) detected:",
+      "• Low keyword density (0%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Sam Carter",
+      "email": "sam.carter@email.com",
+      "phone": "+1 (512) 555-0147",
+      "location": "Austin, TX",
+      "linkedIn": "linkedin.com/in/sam-carter-dev",
+      "gitHub": "github.com/samcarter-dev"
+    },
+    "summary": "Junior DevOps Engineer with 2+ years of experience, specializing in Python, React, Express, and Flask. Strong problem-solving skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of Texas at Austin",
+        "location": "Austin, TX",
+        "graduationDate": "May 2024",
+        "gpa": "3.5",
+        "relevantCourses": [
+          "Data Structures",
+          "Web Development",
+          "Databases"
+        ],
+        "honors": ""
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Engineer",
+        "company": "BrightApps",
+        "location": "Austin, TX",
+        "startDate": "Jul 2024",
+        "endDate": "Present",
+        "bullets": [
+          "Built REST endpoints in Node.js and Express serving a React dashboard used by 300 internal users",
+          "Wrote Jest unit tests that raised coverage of the billing module from 40% to 75%",
+          "Fixed 25+ production bugs and shipped fixes through a GitHub Actions CI pipeline"
+        ],
+        "skills": [
+          "Node.js",
+          "Express",
+          "React",
+          "Jest",
+          "GitHub Actions"
+        ]
+      },
+      {
+        "role": "Software Engineering Intern",
+        "company": "CloudNest",
+        "location": "Remote",
+        "startDate": "Jun 2023",
+        "endDate": "Aug 2023",
+        "bullets": [
+          "Developed a internal tool in Python and Flask that automated weekly report generation",
+          "Added PostgreSQL queries and indexes that cut report time from 40s to 6s"
+        ],
+        "skills": [
+          "Python",
+          "Flask",
+          "PostgreSQL"
+        ]
+      }
+    ],
+    "skills": [
+      "Python",
+      "React",
+      "Express",
+      "Flask",
+      "PostgreSQL",
+      "Jest",
+      "JavaScript",
+      "TypeScript",
+      "SQL",
+      "MongoDB",
+      "Git",
+      "Docker",
+      "AWS",
+      "Agile",
+      "Code Review"
+    ],
+    "projects": [
+      {
+        "name": "Budget Tracker",
+        "description": "Full-stack expense tracker with charts and CSV export",
+        "technologies": [
+          "React",
+          "Node.js",
+          "MongoDB"
+        ],
+        "highlights": [
+          "Deployed on AWS with 100+ monthly users"
+        ],
+        "link": "github.com/samcarter-dev/budget-tracker"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

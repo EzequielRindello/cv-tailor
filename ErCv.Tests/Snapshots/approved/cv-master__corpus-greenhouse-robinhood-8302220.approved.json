@@ -1,0 +1,371 @@
+{
+  "matchScore": {
+    "overall": 34,
+    "skillsMatched": 2,
+    "totalSkills": 9,
+    "keywordsMatched": 5,
+    "totalKeywords": 15,
+    "seniorityMatch": false,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "swift",
+      "react native",
+      "android",
+      "ios",
+      "swiftui"
+    ],
+    "niceToHaveMissing": [
+      "llm"
+    ],
+    "suggestions": [
+      "Add 'swift' to cv-master.json if you have experience with this technology",
+      "Add 'react native' to cv-master.json if you have experience with this technology",
+      "Add 'android' to cv-master.json if you have experience with this technology",
+      "Add 'ios' to cv-master.json if you have experience with this technology",
+      "Add 'swiftui' to cv-master.json if you have experience with this technology",
+      "Mention 'llm' in relevant project bullet points if you have used it"
+    ],
+    "potentialScoreIncrease": 28
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "ios",
+        "frequency": 9,
+        "presentInCV": false
+      },
+      {
+        "word": "android",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "observability",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "system design",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "swift",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "swiftui",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "react",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "react native",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "llm",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "planning",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "communication",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "mentoring",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "ownership",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "trading",
+        "frequency": 14,
+        "presentInCV": false
+      },
+      {
+        "word": "technical",
+        "frequency": 10,
+        "presentInCV": false
+      },
+      {
+        "word": "experience",
+        "frequency": 9,
+        "presentInCV": true
+      },
+      {
+        "word": "mobile",
+        "frequency": 8,
+        "presentInCV": true
+      },
+      {
+        "word": "engineers",
+        "frequency": 7,
+        "presentInCV": true
+      },
+      {
+        "word": "tools",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "building",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "robinhood",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "product",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "finance",
+        "frequency": 5,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "observability",
+      "system design",
+      "react",
+      "engineer",
+      "active",
+      "mobile",
+      "page",
+      "real",
+      "time",
+      "engineers",
+      "features",
+      "least",
+      "experience",
+      "designed",
+      "load",
+      "development",
+      "senior",
+      "documentation",
+      "years",
+      "proven"
+    ],
+    "missingFromCV": [
+      "ios",
+      "android",
+      "swift",
+      "swiftui",
+      "react native",
+      "llm",
+      "planning",
+      "communication",
+      "mentoring",
+      "ownership"
+    ],
+    "keywordDensity": 0.23,
+    "suggestions": [
+      "Add \"ios\" to the skills section or bullets if you have used it",
+      "Add \"android\" to the skills section or bullets if you have used it",
+      "Add \"swift\" to the skills section or bullets if you have used it",
+      "Add \"swiftui\" to the skills section or bullets if you have used it",
+      "Add \"react native\" to the skills section or bullets if you have used it",
+      "Mention \"planning\" in a bullet point to reflect this skill",
+      "Mention \"communication\" in a bullet point to reflect this skill",
+      "Mention \"mentoring\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 80,
+    "issues": [
+      {
+        "severity": "High",
+        "issue": "Low keyword density (33%) — ATS may reject the CV",
+        "fix": "Include more keywords from the job description in bullets and skills section"
+      }
+    ],
+    "recommendations": [
+      "1 improvement point(s) detected:",
+      "• Low keyword density (33%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior Mobile Developer with 9+ years of experience, specializing in React and System Design. Proven track record of reducing frontend network requests by 60%. Strong team collaboration skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Led a team of 6 engineers through a zero-downtime migration from PostgreSQL 12 to 14, reducing query latency by 38%",
+          "Built observability dashboards in Grafana + Prometheus reducing mean time to detection (MTTD) for production incidents from 18 min to 4 min"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Built and maintained React + TypeScript frontend features for the host dashboard serving 4M+ active hosts worldwide",
+          "Developed a dynamic pricing recommendation engine using Python and scikit-learn increasing host revenue by an average of 22%",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Twilio",
+        "location": "San Francisco, CA",
+        "startDate": "Jul 2017",
+        "endDate": "May 2019",
+        "bullets": [
+          "Designed and implemented a webhook retry mechanism with exponential backoff reducing message delivery failures by 44%",
+          "Built REST APIs following OpenAPI spec with full Swagger documentation adopted by 3,000+ external developers",
+          "Optimized SQL queries and added strategic indexes on MySQL databases reducing average query time from 340ms to 45ms"
+        ],
+        "skills": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "Ruby",
+          "Rails",
+          "MySQL",
+          "REST API",
+          "Swagger",
+          "OpenAPI",
+          "Microservices",
+          "Docker",
+          "SQL",
+          "AWS"
+        ]
+      }
+    ],
+    "skills": [
+      "React",
+      "System Design",
+      "REST API Design",
+      "Docker",
+      "TypeScript",
+      "Python",
+      "Java",
+      "AWS",
+      "Microservices",
+      "Go",
+      "JavaScript",
+      "SQL",
+      "Ruby",
+      "Node.js",
+      "Spring Boot"
+    ],
+    "projects": [
+      {
+        "name": "OpenMQ — Open Source Message Queue",
+        "description": "Built a lightweight distributed message queue in Go inspired by Kafka. Supports pub/sub, consumer groups, and at-least-once delivery. Used by 3 open source projects with 800+ GitHub stars.",
+        "technologies": [
+          "Go",
+          "gRPC",
+          "Docker",
+          "Kubernetes"
+        ],
+        "highlights": [
+          "Achieved 95K messages/second throughput on a 3-node cluster in benchmarks",
+          "Implemented Raft consensus for leader election ensuring zero message loss during failover",
+          "Published detailed architecture docs and attracted 12 external contributors"
+        ],
+        "link": "github.com/alexrivera-dev/openmq"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

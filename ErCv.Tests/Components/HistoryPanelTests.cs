@@ -124,6 +124,46 @@ public class HistoryPanelTests : BunitContext
     }
 
     [Fact]
+    public void Reopen_delete_and_clear_report_the_entry_the_id_and_the_clear()
+    {
+        var loaded = new List<HistoryEntry>();
+        var deleted = new List<long>();
+        var cleared = 0;
+        var cut = Render<HistoryPanel>(p => p
+            .Add(c => c.Entries, Entries())
+            .Add(c => c.OnLoad, (HistoryEntry e) => loaded.Add(e))
+            .Add(c => c.OnDelete, (long id) => deleted.Add(id))
+            .Add(c => c.OnClear, () => cleared++));
+
+        // Rows are newest first: entry 3, then 2, then 1
+        cut.FindAll("button").Where(b => b.TextContent == "Re-open").ElementAt(1).Click();
+        cut.FindAll("button").Where(b => b.TextContent == "Delete").ElementAt(2).Click();
+        cut.FindAll("button").Single(b => b.TextContent == "Clear").Click();
+
+        Assert.Equal(2, Assert.Single(loaded).Id);
+        Assert.Equal(1, Assert.Single(deleted));
+        Assert.Equal(1, cleared);
+    }
+
+    [Fact]
+    public void While_disabled_reopen_delete_and_clear_cannot_be_used()
+    {
+        var cut = Render<HistoryPanel>(p => p.Add(c => c.Entries, Entries()).Add(c => c.Disabled, true));
+
+        var actions = cut.FindAll("button").Where(b => b.TextContent is "Re-open" or "Delete" or "Clear").ToList();
+        Assert.Equal(7, actions.Count);
+        Assert.All(actions, b => Assert.True(b.HasAttribute("disabled")));
+    }
+
+    [Fact]
+    public void Clear_is_disabled_when_there_is_nothing_to_clear()
+    {
+        var cut = Render(new List<HistoryEntry>());
+
+        Assert.True(cut.FindAll("button").Single(b => b.TextContent == "Clear").HasAttribute("disabled"));
+    }
+
+    [Fact]
     public void Empty_history_shows_the_empty_state_and_no_controls()
     {
         var cut = Render(new List<HistoryEntry>());

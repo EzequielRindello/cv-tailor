@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using ErCv.Tests.Fixtures;
+using ErCv.Web.Features.Documents;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,18 +11,24 @@ namespace ErCv.Tests.Api;
 /// <summary>
 /// A fresh app per test: the rate limiter and the session store are per app instance,
 /// so tests cannot hit each other's 60 requests/minute budget or share cookies.
+/// The Chrome warm-up (ENG-05) is off unless a test asks for it, so only the tests that render a PDF launch Chrome.
 /// </summary>
 public sealed class ApiApp : IDisposable
 {
-    private readonly WebApplicationFactory<Program> _factory = new();
+    private readonly WebApplicationFactory<Program> _root = new();
+    private readonly WebApplicationFactory<Program> _factory;
 
     public HttpClient Client { get; }
 
     /// <summary>Another browser: same app, its own cookie jar and therefore its own session.</summary>
     public HttpClient NewClient() => _factory.CreateClient();
 
-    public ApiApp()
+    public ApiApp(bool warmUpPdfEngine = false)
     {
+        _factory = warmUpPdfEngine
+            ? _root
+            : _root.WithWebHostBuilder(host => host.ConfigureServices(services =>
+                services.Remove(services.Single(s => s.ImplementationType == typeof(PdfEngineWarmUp)))));
         Client = _factory.CreateClient();
     }
 
@@ -66,6 +73,7 @@ public sealed class ApiApp : IDisposable
     public void Dispose()
     {
         Client.Dispose();
-        _factory.Dispose();
+        // Disposing the root also disposes the factory derived from it
+        _root.Dispose();
     }
 }

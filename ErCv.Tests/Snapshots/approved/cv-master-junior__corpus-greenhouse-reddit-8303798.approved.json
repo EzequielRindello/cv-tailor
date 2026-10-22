@@ -1,0 +1,315 @@
+{
+  "matchScore": {
+    "overall": 28,
+    "skillsMatched": 4,
+    "totalSkills": 10,
+    "keywordsMatched": 0,
+    "totalKeywords": 15,
+    "seniorityMatch": false,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "next.js",
+      "observability",
+      "system design"
+    ],
+    "niceToHaveMissing": [
+      "graphql",
+      "grpc"
+    ],
+    "suggestions": [
+      "Add 'next.js' to cv-master.json if you have experience with this technology",
+      "Add 'observability' to cv-master.json if you have experience with this technology",
+      "Add 'system design' to cv-master.json if you have experience with this technology",
+      "Mention 'graphql' in relevant project bullet points if you have used it",
+      "Mention 'grpc' in relevant project bullet points if you have used it"
+    ],
+    "potentialScoreIncrease": 15
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "ci/cd",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "observability",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "javascript",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "typescript",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "react",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "next.js",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "system design",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "rest",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "graphql",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "grpc",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "remote",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "planning",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "coaching",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "independent",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "information",
+        "frequency": 10,
+        "presentInCV": false
+      },
+      {
+        "word": "reddit",
+        "frequency": 9,
+        "presentInCV": false
+      },
+      {
+        "word": "platform",
+        "frequency": 8,
+        "presentInCV": false
+      },
+      {
+        "word": "experience",
+        "frequency": 7,
+        "presentInCV": true
+      },
+      {
+        "word": "performance",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "technical",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "including",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "workflows",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "development",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "health",
+        "frequency": 4,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "ci/cd",
+      "javascript",
+      "typescript",
+      "react",
+      "rest",
+      "software",
+      "engineer",
+      "built",
+      "users",
+      "developer",
+      "experience",
+      "automated",
+      "full",
+      "engineering",
+      "junior",
+      "production",
+      "time"
+    ],
+    "missingFromCV": [
+      "observability",
+      "next.js",
+      "system design",
+      "graphql",
+      "grpc",
+      "remote",
+      "planning",
+      "coaching",
+      "independent"
+    ],
+    "keywordDensity": 0.36,
+    "suggestions": [
+      "Add \"observability\" to the skills section or bullets if you have used it",
+      "Add \"next.js\" to the skills section or bullets if you have used it",
+      "Add \"system design\" to the skills section or bullets if you have used it",
+      "Add \"graphql\" to the skills section or bullets if you have used it",
+      "Add \"grpc\" to the skills section or bullets if you have used it",
+      "Mention \"remote\" in a bullet point to reflect this skill",
+      "Mention \"planning\" in a bullet point to reflect this skill",
+      "Mention \"coaching\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 90,
+    "issues": [
+      {
+        "severity": "Medium",
+        "issue": "Medium keyword density (50%) — could be improved",
+        "fix": "Add 2–3 more keywords from the job description to improve ATS ranking"
+      }
+    ],
+    "recommendations": [
+      "1 improvement point(s) detected:",
+      "• Medium keyword density (50%) — could be improved → Add 2–3 more keywords from the job description to improve ATS ranking"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Sam Carter",
+      "email": "sam.carter@email.com",
+      "phone": "+1 (512) 555-0147",
+      "location": "Austin, TX",
+      "linkedIn": "linkedin.com/in/sam-carter-dev",
+      "gitHub": "github.com/samcarter-dev"
+    },
+    "summary": "Junior Full Stack Developer with 2+ years of experience, specializing in React, JavaScript, TypeScript, and CI/CD.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of Texas at Austin",
+        "location": "Austin, TX",
+        "graduationDate": "May 2024",
+        "gpa": "3.5",
+        "relevantCourses": [
+          "Data Structures",
+          "Web Development",
+          "Databases"
+        ],
+        "honors": ""
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Engineer",
+        "company": "BrightApps",
+        "location": "Austin, TX",
+        "startDate": "Jul 2024",
+        "endDate": "Present",
+        "bullets": [
+          "Built REST endpoints in Node.js and Express serving a React dashboard used by 300 internal users",
+          "Wrote Jest unit tests that raised coverage of the billing module from 40% to 75%",
+          "Fixed 25+ production bugs and shipped fixes through a GitHub Actions CI pipeline"
+        ],
+        "skills": [
+          "Node.js",
+          "Express",
+          "React",
+          "Jest",
+          "GitHub Actions"
+        ]
+      },
+      {
+        "role": "Software Engineering Intern",
+        "company": "CloudNest",
+        "location": "Remote",
+        "startDate": "Jun 2023",
+        "endDate": "Aug 2023",
+        "bullets": [
+          "Developed a internal tool in Python and Flask that automated weekly report generation",
+          "Added PostgreSQL queries and indexes that cut report time from 40s to 6s"
+        ],
+        "skills": [
+          "Python",
+          "Flask",
+          "PostgreSQL"
+        ]
+      }
+    ],
+    "skills": [
+      "React",
+      "JavaScript",
+      "TypeScript",
+      "CI/CD",
+      "Python",
+      "Express",
+      "Flask",
+      "PostgreSQL",
+      "Jest",
+      "SQL",
+      "MongoDB",
+      "Git",
+      "Docker",
+      "AWS",
+      "Agile"
+    ],
+    "projects": [
+      {
+        "name": "Budget Tracker",
+        "description": "Full-stack expense tracker with charts and CSV export",
+        "technologies": [
+          "React",
+          "Node.js",
+          "MongoDB"
+        ],
+        "highlights": [
+          "Deployed on AWS with 100+ monthly users"
+        ],
+        "link": "github.com/samcarter-dev/budget-tracker"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}
