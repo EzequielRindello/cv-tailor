@@ -70,6 +70,11 @@ public static class DocumentConstants
     public const string ChromiumCacheAppFolder = "er-cv-generator";
     public const string ChromiumCacheFolder = "chromium";
 
+    // PDF engine states the health check reports (ENG-05)
+    public const string PdfEngineReady = "ready";
+    public const string PdfEngineStarting = "starting";
+    public const string PdfEngineUnavailable = "unavailable";
+
     // Each PDF holds a Chrome page open. The UI calls the service directly (not through the rate-limited API),
     // so this cap is what keeps a burst of generations from exhausting the instance.
     public const int MaxConcurrentPdfRenders = 2;

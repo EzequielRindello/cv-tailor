@@ -269,7 +269,12 @@ public class CVGeneratorService
     }
 
     public IActionResult Health() =>
-        new OkObjectResult(new { status = ApiConstants.StatusHealthy, timestamp = DateTime.UtcNow });
+        new OkObjectResult(new
+        {
+            status = ApiConstants.StatusHealthy,
+            timestamp = DateTime.UtcNow,
+            pdfEngine = DocumentRenderer.PdfEngineStatus
+        });
 
     /// <summary>Loads a stored profile so the visitor can export it (PROF-02).</summary>
     public Task<CVMaster> GetProfileAsync(string profileId) => LoadCVMasterAsync(profileId);

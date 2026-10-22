@@ -5,6 +5,7 @@ using ErCv.Web.Features.Documents;
 using ErCv.Web.Services;
 using ErCv.Web.UI;
 using Microsoft.AspNetCore.HttpOverrides;
+using Scalar.AspNetCore;
 
 const string ApiRateLimitPolicy = "api";
 const string PortVariable = "PORT";
@@ -27,8 +28,7 @@ builder.Services.AddControllers()
             new System.Text.Json.Serialization.JsonStringEnumConverter()
         );
     });
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 builder.Services.AddAuthorization();
 builder.Services.AddRateLimiter(options =>
 {
@@ -65,6 +65,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 builder.Services.AddScoped<CVGeneratorService>();
 builder.Services.AddScoped<BrowserStore>();
 builder.Services.AddScoped<ToastService>();
+builder.Services.AddHostedService<PdfEngineWarmUp>();
 
 var app = builder.Build();
 
@@ -72,8 +73,9 @@ app.UseForwardedHeaders();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // The OpenAPI document at /openapi/v1.json and its Scalar UI at /scalar, both Development only
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 else
 {

@@ -86,14 +86,15 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | ENG-01 | DI for helpers + single namespace root | E8 Engineering | P2 | M | Todo |
 | ENG-02 | Consolidate duplicated logic, immutable selection | E8 Engineering | P0 | M | Done |
 | ENG-03 | ILogger + ProblemDetails (no leaked exceptions) | E8 Engineering | P0 | S | Done |
-| ENG-04 | Options pattern for scoring weights | E8 Engineering | P3 | S | Todo |
-| ENG-05 | Chromium readiness in health check + warm-up | E8 Engineering | P2 | S | Todo |
-| ENG-06 | Modern OpenAPI (built-in + Scalar) | E8 Engineering | P3 | S | Todo |
+| ENG-04 | Options pattern for scoring weights | E8 Engineering | P3 | S | Won't do |
+| ENG-05 | Chromium readiness in health check + warm-up | E8 Engineering | P2 | S | Done |
+| ENG-06 | Modern OpenAPI (built-in + Scalar) | E8 Engineering | P3 | S | Done |
 | OPS-01 | GitHub Actions CI | E9 DevOps | P0 | M | Done |
-| OPS-02 | Dependabot | E9 DevOps | P2 | S | Todo |
+| OPS-02 | Dependabot | E9 DevOps | P2 | S | Done |
 | OPS-03 | README rewrite for portfolio | E9 DevOps | P1 | M | Todo |
 | OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Todo |
 | OPS-05 | Privacy note | E9 DevOps | P2 | S | Todo |
+| OPS-06 | Deploy to Render + live demo link | E9 DevOps | P1 | M | Todo |
 
 ---
 
@@ -104,7 +105,8 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 3. **M3 Your data** (v2.0.4, released): PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
 3.2. **M3.2 Real-post fixes** (v2.0.4.1, released): MATCH-07, MATCH-09, APP-06, PROF-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
 4. **M4 Output** (v2.0.5, released): EDIT-01 to EDIT-06, MATCH-08, UX-10.
-5. **M5 Polish & presentation** (v2.0.6): OPS-02 to OPS-05, ENG-01, ENG-04, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10.
+5. **M5 Polish & presentation** (v2.0.6): OPS-02 to OPS-05, ENG-01, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10. ENG-04 was dropped (Won't do, see the item). Nothing in M5 waits on M6.
+5.1. **M5.1 Deploy** (v2.0.6.1): OPS-06. The first public deploy, and the live demo link the README gets with it.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05.
 
 ### Versioning
@@ -186,7 +188,7 @@ A review of the C# code before M3.2, branch `feature/system-hardening`. No behav
 | H8 | Structure: the whole domain sat in `Helpers/`, constants in `Data/Constants/Helpers/`, namespaces did not match folders. | Fixed: `Features/<Feature>/`, namespaces = folders, file-scoped |
 | H9 | Magic numbers and repeated literals (scoring weights, limits, profile ids, JS interop names, template keys) inline across helpers and components. | Fixed: named constants, hosting values in `appsettings.json` |
 | H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Fixed with MATCH-07: one list, `SelectionConstants.TechRoleKeywords`, the summary's stricter one plus nothing broad: the selector no longer treats analyst, consultant or specialist roles as tech (a union was tried first and made "Certification Specialist" count as tech years in the real demo profile) |
-| H11 | Swashbuckle 6.5.0 is old (Development only). | Open: ENG-06 (M5) replaces it |
+| H11 | Swashbuckle 6.5.0 is old (Development only). | Fixed with ENG-06 (M5): built-in OpenAPI + Scalar |
 
 ### Open items after M4
 
@@ -328,7 +330,7 @@ Files: `ErCv.Tests/Components/*`
 Verify: tests pass.
 
 ### TEST-07: End-to-end tests (Playwright)
-**Status:** Done (26 tests passing locally; the CI job has not run on GitHub yet) · **Priority:** P1 · **Effort:** L
+**Status:** Done (26 tests; the CI job runs on GitHub and is green, first checked on the M4 merge, PR #14) · **Priority:** P1 · **Effort:** L
 
 - [x] Paste a sample JD, generate, preview visible, scores visible
 - [x] Download PDF and DOCX; files are non-empty and valid (PDF header, DOCX is a zip with `word/document.xml`)
@@ -977,22 +979,30 @@ Notes: `CVGeneratorService` takes `ILoggerFactory` and hands loggers to `CVSelec
 Verify: TEST-05 asserts 500 bodies contain no exception details.
 
 ### ENG-04: Options pattern for weights
-**Status:** Todo · **Priority:** P3 · **Effort:** S
+**Status:** Won't do (decided in M5) · **Priority:** P3 · **Effort:** S
 
-- [ ] Scoring weights and limits configurable via `appsettings.json`
+- ~~Scoring weights and limits configurable via `appsettings.json`~~
+
+Why not: `CLAUDE.md` keeps the values that tune the CV logic as constants and only the values an operator tunes per deployment (rate limit, session timeout) as settings. The weights are proven by the invariant tests, the corpus report and (TEST-08) the snapshots, all of which read the constants: a weight changed in `appsettings.json` on the server would change every score with none of those tests seeing it. There is no operator who needs to tune them, and a weight change is a code change reviewed with its diff.
 
 ### ENG-05: Chromium readiness + warm-up
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done · **Priority:** P2 · **Effort:** S
 
-- [ ] Health check reports PDF engine readiness
-- [ ] Browser launched at startup in the background to cut cold-start time on Render
+- [x] Health check reports PDF engine readiness
+- [x] Browser launched at startup in the background to cut cold-start time on Render
 
-Verify: TEST-05 health response; manual cold-start timing.
+Notes: `GET /api/cv/health` adds `pdfEngine`: `ready`, `starting` (not launched yet, or launching) or `unavailable` (the last launch failed, or Chrome was closed). It still answers 200 in every state, so Render's health check does not take the instance out while Chrome starts. `Features/Documents/PdfEngineWarmUp` (a hosted service) launches the shared Chrome in the background at startup and only logs a failure. A failed launch is no longer cached: before, a faulted launch task was kept and every later PDF failed until a restart; now the next PDF launches again. API tests turn the warm-up off (`ApiApp`), so only the tests that render a PDF start Chrome. Cold-start timing is measured on the first deploy (OPS-06).
+
+Verify: `CvApiTests` (health field, ready after the warm-up), `PdfEngineTests` (a failed launch reports unavailable, the next PDF relaunches).
 
 ### ENG-06: Modern OpenAPI
-**Status:** Todo · **Priority:** P3 · **Effort:** S
+**Status:** Done · **Priority:** P3 · **Effort:** S
 
-- [ ] Replace Swashbuckle 6.5 with built-in `MapOpenApi` + Scalar UI (or update Swashbuckle)
+- [x] Replace Swashbuckle 6.5 with built-in `MapOpenApi` + Scalar UI (or update Swashbuckle)
+
+Notes: `Microsoft.AspNetCore.OpenApi` 10.0.13 and `Scalar.AspNetCore` 2.18.2 replace `Swashbuckle.AspNetCore` 6.5.0 (H11). Development only, as before: the document is at `/openapi/v1.json` and the reference page at `/scalar`. Paths keep the declared controller name (`/api/CV/...`); routing ignores case, so `/api/cv/...` keeps working.
+
+Verify: `CvApiTests.OpenApi_document_and_its_reference_page_are_served_in_development`.
 
 ---
 
@@ -1003,7 +1013,7 @@ Verify: TEST-05 health response; manual cold-start timing.
 
 - [x] On push and PR: restore, build, unit + integration tests (coverage arrives with TEST-10)
 - [x] Docker image build
-- [x] E2E job (Playwright) in `ci.yml`, separate from the unit job (first run on GitHub pending)
+- [x] E2E job (Playwright) in `ci.yml`, separate from the unit job (green on GitHub since PR #14)
 - [x] Status badge in README
 
 Notes: `.github/workflows/ci.yml` runs the same commands that pass locally (restore, build and test in Release). PDF tests use the Chrome preinstalled on the runner through `PUPPETEER_EXECUTABLE_PATH`. Verified on PR #7: build and test (3389 passed, 6 skipped, about 2 minutes) and the Docker image build both green.
@@ -1011,14 +1021,16 @@ Notes: `.github/workflows/ci.yml` runs the same commands that pass locally (rest
 Verify: green run on a PR.
 
 ### OPS-02: Dependabot
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done · **Priority:** P2 · **Effort:** S
 
-- [ ] NuGet, GitHub Actions and Docker ecosystems
+- [x] NuGet, GitHub Actions and Docker ecosystems
+
+Notes: `.github/dependabot.yml`, weekly, one grouped PR per ecosystem (NuGet covers every project of the solution). Each PR runs `ci.yml`.
 
 ### OPS-03: README rewrite
 **Status:** Todo · **Priority:** P1 · **Effort:** M
 
-- [ ] Hero screenshot / GIF, live demo link, badges (CI, coverage, .NET 10)
+- [ ] Hero screenshot / GIF, badges (CI, coverage, .NET 10). The live demo link moved to OPS-06 (M5.1): there is no deploy yet.
 - [ ] Architecture diagram, "How matching works", testing strategy section
 
 ### OPS-04: PROJECT_OVERVIEW refresh
@@ -1030,6 +1042,14 @@ Verify: green run on a PR.
 **Status:** Todo · **Priority:** P2 · **Effort:** S
 
 - [ ] Page or footer note: no CV data stored server-side; session files expire after 10 minutes; custom profiles live only in the browser
+
+### OPS-06: Deploy to Render + live demo link
+**Status:** Todo (M5.1) · **Priority:** P1 · **Effort:** M
+
+- [ ] First deploy from `render.yaml` (Docker, free plan), health check green
+- [ ] Cold-start timing with and without the PDF warm-up (ENG-05)
+- [ ] Live demo link and badge in the README (moved from OPS-03)
+- [ ] Rate limit, security headers and the 413 body limit checked on the deployed instance (TestServer does not enforce the body limit)
 
 ---
 
