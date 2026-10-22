@@ -1,0 +1,37 @@
+<div class="mb-4">
+    <span class="form-label form-label-custom mb-3 d-block" id="cover-letter-label">Cover letter</span>
+    <label class="cover-letter-option @(Value ? "selected" : "") @(Disabled ? "disabled" : "")">
+        <input type="checkbox"
+               id="include-cover-letter"
+               aria-describedby="cover-letter-desc"
+               checked="@Value"
+               disabled="@Disabled"
+               @onchange="Toggle" />
+        <span class="cover-letter-option-text">
+            <span class="cover-letter-option-name">Also write a cover letter</span>
+            <span class="cover-letter-option-desc" id="cover-letter-desc">
+                From the same job post and profile: an opening, two experience paragraphs and a closing.
+                It quotes your CV and adds no claims of its own.
+            </span>
+        </span>
+    </label>
+</div>
+
+@code {
+    #region Parameters
+
+    [Parameter] public bool Value { get; set; }
+    [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task Toggle()
+    {
+        if (!Disabled) await ValueChanged.InvokeAsync(!Value);
+    }
+
+    #endregion
+}

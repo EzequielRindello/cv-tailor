@@ -93,6 +93,11 @@
                                                              ValueChanged="SetLanguage"
                                                              Disabled="_loading" />
                                         </div>
+                                        <div class="col-md-6">
+                                            <CoverLetterOption Value="_settings.IncludeCoverLetter"
+                                                               ValueChanged="SetIncludeCoverLetter"
+                                                               Disabled="_loading" />
+                                        </div>
                                     </div>
                                 </div>
                             }
@@ -138,6 +143,7 @@ else
                       OnBack="BackToGenerate"
                       OnStartOver="ResetAsync"
                       OnDownload="DownloadAsync"
+                      OnDownloadLetter="DownloadLetterAsync"
                       Draft="_draft"
                       Template="_resultTemplate"
                       OnDraftChanged="OnDraftChanged" />
@@ -184,6 +190,7 @@ else
     // EDIT-01/02: the edits to the CV on screen and the options it was generated with
     private CvDraft? _draft;
     private CVTemplate _resultTemplate;
+    private string _resultJobDescription = string.Empty;
     private bool _resultTwoPages;
     private HashSet<string> _staleFormats = new();
 
@@ -331,6 +338,12 @@ else
         await RefreshThumbnailsAsync();
     }
 
+    private async Task SetIncludeCoverLetter(bool value)
+    {
+        _settings.IncludeCoverLetter = value;
+        await Store.SaveSettingsAsync(_settings);
+    }
+
     private async Task SetAllowTwoPages(bool value)
     {
         _settings.AllowTwoPages = value;
@@ -364,6 +377,29 @@ else
         {
             Logger.LogError(ex, "Error downloading {Format}", format);
             Toasts.Error($"Could not download the {format.ToUpperInvariant()} file", "Retry", () => DownloadAsync(format));
+        }
+    }
+
+    private async Task DownloadLetterAsync(string format)
+    {
+        if (_analysis?.CoverLetter is not { } letter) return;
+
+        try
+        {
+            var bytes = await CvService.RenderCoverLetterAsync(letter, format);
+            using var stream = new MemoryStream(bytes);
+            using var reference = new DotNetStreamReference(stream);
+            await JS.InvokeVoidAsync(UiConstants.JsDownloadFile, BuildFileName(format, ApiConstants.CoverLetterFileNamePrefix), reference);
+            Toasts.Success($"Download started: cover letter {format.ToUpperInvariant()}");
+        }
+        catch (ArgumentException ex)
+        {
+            Toasts.Error(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error downloading the cover letter as {Format}", format);
+            Toasts.Error($"Could not download the cover letter {format.ToUpperInvariant()}", "Retry", () => DownloadLetterAsync(format));
         }
     }
 
@@ -403,7 +439,8 @@ else
                 ProfileId = _profileId,
                 Language = _settings.Language,
                 Accent = _settings.Accent,
-                Fonts = _settings.Fonts
+                Fonts = _settings.Fonts,
+                IncludeCoverLetter = _settings.IncludeCoverLetter
             };
 
             var (documents, analysis) = ActiveProfile is { } profile
@@ -414,6 +451,7 @@ else
             _analysis = analysis;
             _resultTemplate = request.Template;
             _resultTwoPages = request.AllowTwoPages;
+            _resultJobDescription = request.JobDescription;
             _draft = new CvDraft(analysis.GeneratedCV, DocumentRenderer.DefaultSectionOrder(request.Template));
             _focusResults = true;
             Toasts.Success("CV ready");
@@ -427,7 +465,8 @@ else
                 ProfileId = _profileId,
                 Language = _settings.Language,
                 Accent = _settings.Accent,
-                Fonts = _settings.Fonts
+                Fonts = _settings.Fonts,
+                IncludeCoverLetter = _settings.IncludeCoverLetter
             });
         }
         catch (ArgumentException ex)
@@ -458,6 +497,10 @@ else
             _analysis.PreviewHtml = CvService.RenderPreviewHtml(cv, _resultTemplate);
             _analysis.GeneratedCV = cv;
             _staleFormats = _documents.Keys.ToHashSet();
+
+            // The letter quotes the CV, so it is written again from the edited one
+            if (_analysis.CoverLetter != null)
+                (_analysis.CoverLetter, _analysis.CoverLetterHtml) = CvService.BuildCoverLetter(cv, _resultJobDescription);
         }
         catch (ArgumentException ex)
         {
@@ -478,6 +521,7 @@ else
         if (entry.Language is { } language && ApiConstants.Languages.Contains(language)) _settings.Language = language;
         if (entry.Accent is { } accent && ApiConstants.Accents.Contains(accent)) _settings.Accent = accent;
         if (entry.Fonts is { } fonts && ApiConstants.FontPairings.Contains(fonts)) _settings.Fonts = fonts;
+        if (entry.IncludeCoverLetter is { } letter) _settings.IncludeCoverLetter = letter;
 
         var note = RestoreProfile(entry);
         await Store.SaveSettingsAsync(_settings);
@@ -523,6 +567,7 @@ else
         _settings.Language = defaults.Language;
         _settings.Accent = defaults.Accent;
         _settings.Fonts = defaults.Fonts;
+        _settings.IncludeCoverLetter = defaults.IncludeCoverLetter;
         await Store.SaveSettingsAsync(_settings);
         await RefreshThumbnailsAsync();
 

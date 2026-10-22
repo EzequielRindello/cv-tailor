@@ -74,6 +74,7 @@ public static class ApiConstants
     public const string ContentTypeDocx = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
     public const string FileNamePrefix = "CV_";
+    public const string CoverLetterFileNamePrefix = "Cover_Letter_";
     public const string FileNameDateFormat = "yyyyMMdd_HHmmss";
 
     #endregion

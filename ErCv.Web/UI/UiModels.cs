@@ -13,6 +13,9 @@ public class AppSettings
     public string Accent { get; set; } = ApiConstants.StyleDefault;
     public string Fonts { get; set; } = ApiConstants.StyleDefault;
 
+    // EDIT-03
+    public bool IncludeCoverLetter { get; set; }
+
     /// <summary><see cref="UiConstants.ProfileSourceDemo"/> or <see cref="UiConstants.ProfileSourceMine"/> (PROF-01).</summary>
     public string ProfileSource { get; set; } = UiConstants.ProfileSourceDemo;
 }
@@ -36,6 +39,7 @@ public class HistoryEntry
     public string? Language { get; set; }
     public string? Accent { get; set; }
     public string? Fonts { get; set; }
+    public bool? IncludeCoverLetter { get; set; }
 
     // APP-01: the application this CV was made for. Entries saved before the tracker read as "Saved" with no notes.
     public string Company { get; set; } = string.Empty;

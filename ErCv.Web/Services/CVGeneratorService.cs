@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using ErCv.Web.Constants;
 using ErCv.Web.Features.Analysis;
+using ErCv.Web.Features.CoverLetters;
 using ErCv.Web.Features.Documents;
 using ErCv.Web.Features.Matching;
 using ErCv.Web.Features.Profiles;
@@ -39,6 +40,7 @@ public class CVGeneratorService
     private readonly ProfileValidator _profileValidator = new();
     private readonly JdHighlighter _jdHighlighter = new();
     private readonly PageConstraintHelper _pageConstraint = new();
+    private readonly CoverLetterGenerator _coverLetterGenerator = new();
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<CVGeneratorService> _logger;
     private readonly string _templatesFolder;
@@ -215,6 +217,29 @@ public class CVGeneratorService
     /// UX-10: a template as it really prints, filled with the made-up senior sample profile, for the template
     /// picker's thumbnails. It follows the chosen accent, fonts and language, so the picker shows the actual look.
     /// </summary>
+    /// <summary>
+    /// EDIT-03: the cover letter for a CV as it stands, so it follows the edits made in the workspace.
+    /// The letter's HTML comes with it; the PDF and DOCX are rendered on download.
+    /// </summary>
+    public (CoverLetter Letter, string Html) BuildCoverLetter(GeneratedCV cv, string jobDescription)
+    {
+        ValidateEditedCv(cv);
+        if (jobDescription.Length > ApiConstants.MaxJobDescriptionLength)
+            throw new ArgumentException(string.Format(ApiConstants.ErrorJobDescriptionTooLong, ApiConstants.MaxJobDescriptionLength));
+
+        return WriteCoverLetter(cv, _parser.Parse(jobDescription), jobDescription);
+    }
+
+    public async Task<byte[]> RenderCoverLetterAsync(CoverLetter letter, string format)
+    {
+        var normalized = NormalizeAndValidateFormat(format);
+        var renderer = DocumentRenderer.ForCoverLetter(_templatesFolder);
+
+        return normalized == ApiConstants.FormatDocx
+            ? renderer.RenderCoverLetterDocx(letter)
+            : await renderer.RenderPdfAsync(renderer.RenderCoverLetterHtml(letter));
+    }
+
     public async Task<string> RenderTemplateSampleAsync(CVTemplate template, string accent, string fonts, string language)
     {
         ValidateStyle(language, accent, fonts);
@@ -249,8 +274,8 @@ public class CVGeneratorService
     /// <summary>Loads a stored profile so the visitor can export it (PROF-02).</summary>
     public Task<CVMaster> GetProfileAsync(string profileId) => LoadCVMasterAsync(profileId);
 
-    public static string BuildFileName(string format) =>
-        ApiConstants.FileNamePrefix + DateTime.Now.ToString(ApiConstants.FileNameDateFormat) + "." + format;
+    public static string BuildFileName(string format, string prefix = ApiConstants.FileNamePrefix) =>
+        prefix + DateTime.Now.ToString(ApiConstants.FileNameDateFormat) + "." + format;
 
     #endregion
 
@@ -295,6 +320,9 @@ public class CVGeneratorService
             Explanation     = explanation,
             JdHighlight     = _jdHighlighter.Build(request.JobDescription, requirements, cvMaster, generatedCV)
         };
+
+        if (request.IncludeCoverLetter)
+            (analysis.CoverLetter, analysis.CoverLetterHtml) = WriteCoverLetter(generatedCV, requirements, request.JobDescription);
 
         return (documents, analysis);
     }
@@ -411,6 +439,12 @@ public class CVGeneratorService
             throw new ArgumentException($"Unsupported accent: {accent}. Allowed: {string.Join(", ", ApiConstants.Accents)}.");
         if (!ApiConstants.FontPairings.Contains(fonts))
             throw new ArgumentException($"Unsupported fonts: {fonts}. Allowed: {string.Join(", ", ApiConstants.FontPairings)}.");
+    }
+
+    private (CoverLetter Letter, string Html) WriteCoverLetter(GeneratedCV cv, JobRequirements requirements, string jobDescription)
+    {
+        var letter = _coverLetterGenerator.Generate(cv, requirements, jobDescription, DateTime.Today);
+        return (letter, DocumentRenderer.ForCoverLetter(_templatesFolder).RenderCoverLetterHtml(letter));
     }
 
     // The sample profile with no job description: what a thumbnail needs is a realistic amount of content
@@ -538,7 +572,8 @@ public class CVGeneratorService
             atsScore        = analysis.ATSScore,
             generatedCV     = analysis.GeneratedCV,
             previewHtml     = analysis.PreviewHtml,   // FEATURE-102
-            explanation     = analysis.Explanation
+            explanation     = analysis.Explanation,
+            coverLetter     = analysis.CoverLetter is { } letter ? CoverLetterText.ToPlainText(letter) : null
         };
 
     private List<object> BuildFileMetadata(Dictionary<string, byte[]> documents) =>

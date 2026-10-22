@@ -65,10 +65,11 @@ POST /api/cv/generate
   JobRequirements + CVMaster → RelevanceScorer → scored experiences
   scored experiences → CVSelector → GeneratedCV (top 3 exp, top 3 bullets each, top 15 skills)
   CVMaster + requirements → SummaryGenerator → professional summary
-  GeneratedCV → PageConstraintHelper → enforced 1 or 2 page CV
-  GeneratedCV → DocumentRenderer → PDF (PuppeteerSharp) + DOCX (OpenXML)
+  GeneratedCV → PageConstraintHelper → 1 or 2 pages: character estimate, then measured on the rendered PDF
+  GeneratedCV → DocumentRenderer → PDF (PuppeteerSharp) + DOCX (OpenXML), in English or Spanish
+  GeneratedCV + requirements → CoverLetterGenerator → cover letter (when includeCoverLetter is set)
   GeneratedCV + requirements → [MatchScoreCalculator, MissingSkillsAnalyzer, KeywordAnalyzer, ATSChecker] → AnalysisResult
-  → returns { generatedCV, files[], matchScore, missingSkills, keywordAnalysis, atsScore, previewHtml }
+  → returns { generatedCV, files[], matchScore, missingSkills, keywordAnalysis, atsScore, previewHtml, coverLetter }
 
 POST /api/cv/regenerate
   GeneratedCV + BulletSelections (user-edited) → PageConstraintHelper → DocumentRenderer
@@ -96,7 +97,7 @@ er-cv-generator/
 │   ├── Constants/                           # cross-cutting only: ApiConstants (limits, messages, formats), TemplatePaths
 │   ├── Configuration/                       # ErCvOptions (the "ErCv" section of appsettings.json), SecurityHeaders
 │   ├── Models/                              # CVMaster, GeneratedCV, request and analysis models
-│   ├── Templates/                           # harvard, minimalist (single-column, ATS-safe) and modern (two-column) HTML templates
+│   ├── Templates/                           # harvard, minimalist, compact, executive (single-column) and modern (two-column), the cover letter, and partials/ they share
 │   ├── Data/                                # content only: cv-master.json (demo profile), sample-jobs.json (embedded samples)
 │   ├── Components/                          # Blazor Server UI (App, Routes, Layout, Pages/Home, Profile, Error, Shared/*)
 │   ├── UI/                                  # BrowserStore (localStorage), ToastService, ApplicationTracker, UiConstants, UI models
@@ -115,7 +116,7 @@ er-cv-generator/
 ## Key Data Shapes
 
 ```jsonc
-// cv-master.json — the only file to customize
+// cv-master.json: the only file to customize
 {
   "header": { "fullName", "email", "phone", "location", "linkedin", "github" },
   "education": [{ "degree", "institution", "location", "graduationDate", "gpa", "honors" }],
@@ -126,7 +127,7 @@ er-cv-generator/
     "startDate": "Jun 2024",
     "endDate": "Present",             // use "Present" for current role
     "bullets": ["Did X resulting in Y%..."],
-    "skills": ["React", "PostgreSQL"] // used for relevance scoring — be complete
+    "skills": ["React", "PostgreSQL"] // used for relevance scoring, so be complete
   }],
   "skills": {
     "languages": [], "frameworks": [], "databases": [],
@@ -135,16 +136,20 @@ er-cv-generator/
   "projects": [{ "name", "description", "technologies": [], "highlights": [], "link" }]
 }
 
-// POST /api/cv/generate — request
+// POST /api/cv/generate: request
 {
   "jobDescription": "...",
   "formats": ["pdf", "docx"],
   "template": "Harvard",
   "allowTwoPages": false,
-  "profileId": "cv-master"
+  "profileId": "cv-master",
+  "language": "en",                  // "en" or "es": headings, dates and summary
+  "accent": "default",               // default, navy, teal, burgundy, forest, slate
+  "fonts": "default",                // default, classic, clean, mixed
+  "includeCoverLetter": false
 }
 
-// POST /api/cv/generate — response
+// POST /api/cv/generate: response
 {
   "success": true,
   "files": [{ "format", "filename", "size" }],
@@ -153,10 +158,11 @@ er-cv-generator/
   "missingSkills": { "requiredMissing": [], "niceToHaveMissing": [], "suggestions": [], "potentialScoreIncrease" },
   "keywordAnalysis": { "technicalKeywords": [], "softSkillKeywords": [], "presentInCV": [], "missingFromCV": [] },
   "atsScore": { "overall", "issues": [{ "severity", "issue", "fix" }], "recommendations": [], "colorClass" },
-  "previewHtml": "<html>...rendered cv...</html>"
+  "previewHtml": "<html>...rendered cv...</html>",
+  "coverLetter": "plain text of the letter, or null"
 }
 
-// POST /api/cv/regenerate — request
+// POST /api/cv/regenerate: request
 {
   "generatedCV": { ... },             // full GeneratedCV object from generate response
   "bulletSelections": { "exp0": [0,2], "exp1": [1] }, // indices of selected bullets per experience
@@ -170,7 +176,7 @@ er-cv-generator/
 
 ## Version
 
-Current version: **2.0.4.1** (M3.2 Real-post fixes). Each milestone of the roadmap ships as one version, see [Versioning in `features.md`](features.md#versioning).
+Current version: **2.0.5** (M4 Output). Each milestone of the roadmap ships as one version, see [Versioning in `features.md`](features.md#versioning).
 
 ---
 
@@ -199,9 +205,9 @@ dotnet test --filter "Category!=E2E"             # everything except the browser
 dotnet test ErCv.E2E                             # browser tests only (Playwright), about 1 minute
 ```
 
-The browser tests (`ErCv.E2E`) start the web app on a free port and drive it with Playwright: generate flow, downloads, edit and regenerate, persistence, keyboard shortcuts, 360 / 390 / 768px viewports and an axe accessibility scan in light and dark. They use a browser that is already installed (Chrome, then Edge) and download nothing. Set `E2E_BROWSER_CHANNEL` to pick another one, or `E2E_BASE_URL` to test an app that is already running.
+The browser tests (`ErCv.E2E`) start the web app on a free port and drive it with Playwright: generate flow, downloads, editing with the live preview, cover letter, templates and styles, persistence, keyboard shortcuts, 360 / 390 / 768px viewports and an axe accessibility scan in light and dark. They use a browser that is already installed (Chrome, then Edge) and download nothing. Set `E2E_BROWSER_CHANNEL` to pick another one, or `E2E_BASE_URL` to test an app that is already running.
 
-PDF tests use the Chromium that PuppeteerSharp downloads on first use; set `PUPPETEER_EXECUTABLE_PATH` to use an installed Chrome instead (CI does). One test is skipped on purpose: Minimalist 1-page mode can spill onto a second page (`MATCH-08` in `features.md`).
+PDF tests use the Chromium that PuppeteerSharp downloads on first use; set `PUPPETEER_EXECUTABLE_PATH` to use an installed Chrome instead (CI does). Page fit is measured on the rendered PDF (`MATCH-08` in `features.md`), so every template stays within its page limit.
 
 ---
 

@@ -1,0 +1,44 @@
+@inject IJSRuntime JS
+@inject ToastService Toasts
+@inject ILogger<CoverLetterActions> Logger
+
+<div class="text-export" role="group" aria-label="Cover letter downloads">
+    <button type="button" class="btn btn-sm btn-outline-primary" disabled="@Disabled" @onclick="() => OnDownload.InvokeAsync(ApiConstants.FormatPdf)">
+        <i class="bi bi-download me-1" aria-hidden="true"></i>Letter PDF
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-primary" disabled="@Disabled" @onclick="() => OnDownload.InvokeAsync(ApiConstants.FormatDocx)">
+        <i class="bi bi-download me-1" aria-hidden="true"></i>Letter DOCX
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@Disabled" @onclick="CopyAsync">
+        <i class="bi bi-clipboard me-1" aria-hidden="true"></i>Copy letter
+    </button>
+</div>
+
+@code {
+    #region Parameters
+
+    [Parameter, EditorRequired] public CoverLetter Letter { get; set; } = default!;
+    [Parameter] public EventCallback<string> OnDownload { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task CopyAsync()
+    {
+        try
+        {
+            var copied = await JS.InvokeAsync<bool>(UiConstants.JsCopyText, CoverLetterText.ToPlainText(Letter));
+            if (copied) Toasts.Success("Cover letter copied");
+            else Toasts.Error("The browser did not allow copying. Download the letter instead.");
+        }
+        catch (JSException ex)
+        {
+            Logger.LogError(ex, "Error copying the cover letter");
+            Toasts.Error("Could not copy the cover letter", "Retry", CopyAsync);
+        }
+    }
+
+    #endregion
+}

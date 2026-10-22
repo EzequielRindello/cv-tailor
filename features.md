@@ -68,7 +68,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | MATCH-09 | Seniority detection from the title and wording | E4 Matching | P1 | S | Done |
 | EDIT-01 | Inline editing in the workspace | E5 Editing | P2 | L | Done |
 | EDIT-02 | Live HTML preview, documents on download | E5 Editing | P2 | M | Done |
-| EDIT-03 | Cover letter generator | E5 Editing | P2 | M | Todo |
+| EDIT-03 | Cover letter generator | E5 Editing | P2 | M | Done |
 | EDIT-04 | CV output language (EN/ES) | E5 Editing | P2 | M | Done |
 | EDIT-05 | More templates | E5 Editing | P3 | M | Done |
 | EDIT-06 | Plain-text / Markdown export | E5 Editing | P3 | S | Done |
@@ -103,7 +103,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 2. **M2 Redesign** (v2.0.3, released): UX-01 to UX-09, APP-03, TEST-07 (E2E written against the new UI).
 3. **M3 Your data** (v2.0.4, released): PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
 3.2. **M3.2 Real-post fixes** (v2.0.4.1, released): MATCH-07, MATCH-09, APP-06, PROF-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
-4. **M4 Output** (v2.0.5): EDIT-01 to EDIT-06, MATCH-08, UX-10.
+4. **M4 Output** (v2.0.5, released): EDIT-01 to EDIT-06, MATCH-08, UX-10.
 5. **M5 Polish & presentation** (v2.0.6): OPS-02 to OPS-05, ENG-01, ENG-04, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05.
 
@@ -187,6 +187,19 @@ A review of the C# code before M3.2, branch `feature/system-hardening`. No behav
 | H9 | Magic numbers and repeated literals (scoring weights, limits, profile ids, JS interop names, template keys) inline across helpers and components. | Fixed: named constants, hosting values in `appsettings.json` |
 | H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Fixed with MATCH-07: one list, `SelectionConstants.TechRoleKeywords`, the summary's stricter one plus nothing broad: the selector no longer treats analyst, consultant or specialist roles as tech (a union was tried first and made "Certification Specialist" count as tech years in the real demo profile) |
 | H11 | Swashbuckle 6.5.0 is old (Development only). | Open: ENG-06 (M5) replaces it |
+
+### Open items after M4
+
+Nothing in M4 is blocked. Found while building it, not scheduled yet (each would be a new item):
+
+| Item | Why it is not in M4 | Owner |
+|---|---|---|
+| The editor toggles what the generated CV holds; a project or skill the selection or the page fit left out cannot be added back | Needs the profile in the workspace and a rule for what still fits on the page. | New item (not scheduled) |
+| Match, ATS and keyword scores are not recomputed after edits | The edit loop renders HTML only; the analysis would have to run again per change. | New item (not scheduled) |
+| The cover letter has a generic salutation and no company name (the parser does not read the company), and its text cannot be edited, only the CV it quotes | A company field (the tracker has one) and letter editing are their own features. | New item (not scheduled) |
+| Spanish keeps role titles as written and leaves out the summary's achievement sentence | Translating profile text is out of scope by design (the app never rewrites the profile). | By design |
+| The suite without browsers takes about 7 minutes (five templates over the corpus) | The page count over the whole corpus is what proves MATCH-08. | TEST-10 (M5) can look at splitting it |
+| TEST-08 snapshots over `FixtureLoader.CorpusJdNames` | Snapshots are not built yet. | TEST-08 (M5) |
 
 ### Open items after M3.2
 
@@ -735,17 +748,23 @@ Done notes:
 - Tests: `EditedCvTests` (service: preview, edited PDF and DOCX, not trimmed, input limits), E2E `EditingTests` (preview follows an unchecked bullet, a rewrite and a section move without regenerating, scroll kept, the DOCX downloaded after an edit holds it).
 
 ### EDIT-03: Cover letter generator
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+**Status:** Done · **Priority:** P2 · **Effort:** M
 
 Moved from the legacy FEATURE-301.
 
-- [ ] "Also generate cover letter" option, same JD and profile
-- [ ] Structure: opening, two experience paragraphs, closing
-- [ ] Template-driven (Mustache), uses only CV data
-- [ ] PDF and DOCX
+- [x] "Also generate cover letter" option, same JD and profile
+- [x] Structure: opening, two experience paragraphs, closing
+- [x] Template-driven (Mustache), uses only CV data
+- [x] PDF and DOCX
 
-Files: new `Helpers/CoverLetterGenerator.cs`, `Templates/cover-letter-template.html`
+Files: `Features/CoverLetters/CoverLetterGenerator.cs`, `CoverLetterConstants.cs`, `CoverLetterText.cs`, `Templates/cover-letter-template.html`
 Verify: invariant test that every fact in the letter comes from the profile.
+
+Done notes:
+- `GenerateRequest.IncludeCoverLetter` (step 3: "Also write a cover letter"). The letter is written from the CV as it stands: the opening names the position (the post's first line, only when it is short and names a role; otherwise "this position") and quotes the summary's first sentence; one paragraph each for the two most relevant experiences (role, company, dates and two bullets quoted verbatim); the closing names the skills that are both on the CV and in the post, then thanks the reader. English or Spanish (EDIT-04), the CV's accent and fonts (UX-10), on the shared partials.
+- No fabrication: each paragraph is a list of parts, fixed wording (`CoverLetterConstants.Phrases`) or a fact. `CoverLetterInvariantTests` checks, for every profile x JD in the corpus x language, that every fact is the CV's (role, company, dates, a bullet, a skill, the summary's first sentence) or the post's position, and every other part is the letter's wording.
+- In the workspace a "CV | Cover letter" switch sits over the preview; the letter has its own PDF, DOCX and copy buttons, rendered on download. It is written again after every edit, so a rewritten bullet shows in the letter too. The API returns its text as `coverLetter`.
+- Tests: `CoverLetterGeneratorTests` (unit), `CoverLetterInvariantTests`, `CoverLetterApiTests` (only on request, follows an edit, one-page PDF and DOCX, API field), E2E `CoverLetterTests`.
 
 ### EDIT-04: CV output language
 **Status:** Done · **Priority:** P2 · **Effort:** M

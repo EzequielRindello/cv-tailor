@@ -88,7 +88,8 @@ public class BrowserStore
             ProfileId = options?.ProfileId,
             Language = options?.Language,
             Accent = options?.Accent,
-            Fonts = options?.Fonts
+            Fonts = options?.Fonts,
+            IncludeCoverLetter = options?.IncludeCoverLetter
         };
 
         var updated = (await GetHistoryAsync()).Prepend(entry).Take(MaxHistoryEntries).ToList();

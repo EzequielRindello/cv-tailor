@@ -79,6 +79,10 @@ public partial class DocumentRenderer
         return new DocumentRenderer(Path.Combine(templatesFolder, file), template);
     }
 
+    /// <summary>The cover letter's renderer (EDIT-03); it shares the CV templates' partials.</summary>
+    public static DocumentRenderer ForCoverLetter(string templatesFolder) =>
+        new(Path.Combine(templatesFolder, TemplatePaths.CoverLetterTemplate));
+
     public static IReadOnlyList<string> DefaultSectionOrder(CVTemplate template) => template switch
     {
         CVTemplate.Modern => DocumentConstants.ModernSectionOrder,
@@ -220,6 +224,72 @@ public partial class DocumentRenderer
         return Stubble.Render(template, data, partials);
     }
 
+    public string RenderCoverLetterHtml(CoverLetter letter)
+    {
+        var template = TemplateCache.GetOrAdd(_templatePath, File.ReadAllText);
+        var partials = PartialsCache.GetOrAdd(_partialsFolder, LoadPartials);
+
+        var data = new
+        {
+            Lang = CvLabels.For(letter.Language).Language,
+            StyleClasses = StyleClasses(letter.Accent, letter.Fonts),
+            FullName = letter.Header.FullName ?? "",
+            ContactItems = ContactItems(letter.Header),
+            letter.Date,
+            Subject = letter.Subject,
+            letter.Salutation,
+            Paragraphs = letter.Paragraphs.Select(p => p.Text.Trim()).ToList(),
+            letter.Closing
+        };
+
+        return Stubble.Render(template, data, partials);
+    }
+
+    public byte[] RenderCoverLetterDocx(CoverLetter letter)
+    {
+        using var memoryStream = new MemoryStream();
+
+        using (var document = WordprocessingDocument.Create(memoryStream, WordprocessingDocumentType.Document))
+        {
+            var mainPart = document.AddMainDocumentPart();
+            mainPart.Document = new Document();
+            var body = mainPart.Document.AppendChild(new Body());
+
+            AddHeader(body, letter.Header);
+            AddParagraph(body, letter.Date);
+            body.AppendChild(new Paragraph());
+            if (!string.IsNullOrEmpty(letter.Subject))
+            {
+                var subject = body.AppendChild(new Paragraph()).AppendChild(new Run());
+                subject.AppendChild(new RunProperties(new Bold()));
+                subject.AppendChild(new Text(letter.Subject));
+            }
+            AddParagraph(body, letter.Salutation);
+            foreach (var paragraph in letter.Paragraphs)
+            {
+                body.AppendChild(new Paragraph());
+                AddParagraph(body, paragraph.Text.Trim());
+            }
+            body.AppendChild(new Paragraph());
+            AddParagraph(body, letter.Closing);
+            AddParagraph(body, letter.Header.FullName ?? "");
+
+            // The schema requires the section properties to be the last child of the body
+            body.AppendChild(new SectionProperties(
+                new PageMargin
+                {
+                    Top = DocumentConstants.DocxMarginVerticalTwips,
+                    Bottom = DocumentConstants.DocxMarginVerticalTwips,
+                    Left = DocumentConstants.DocxMarginHorizontalTwips,
+                    Right = DocumentConstants.DocxMarginHorizontalTwips
+                }));
+
+            mainPart.Document.Save();
+        }
+
+        return memoryStream.ToArray();
+    }
+
     public byte[] RenderDocx(GeneratedCV cv)
     {
         using var memoryStream = new MemoryStream();
@@ -315,13 +385,15 @@ public partial class DocumentRenderer
             : new Dictionary<string, string>();
 
     /// <summary>Classes for the accent and font pairing, only for known keys, so nothing a request sends reaches the CSS.</summary>
-    private static string StyleClasses(GeneratedCV cv)
+    private static string StyleClasses(GeneratedCV cv) => StyleClasses(cv.Accent, cv.Fonts);
+
+    private static string StyleClasses(string? accent, string? fonts)
     {
         var classes = new List<string>();
-        if (cv.Accent != ApiConstants.StyleDefault && ApiConstants.Accents.Contains(cv.Accent))
-            classes.Add(DocumentConstants.AccentClassPrefix + cv.Accent);
-        if (cv.Fonts != ApiConstants.StyleDefault && ApiConstants.FontPairings.Contains(cv.Fonts))
-            classes.Add(DocumentConstants.FontsClassPrefix + cv.Fonts);
+        if (accent != ApiConstants.StyleDefault && ApiConstants.Accents.Contains(accent))
+            classes.Add(DocumentConstants.AccentClassPrefix + accent);
+        if (fonts != ApiConstants.StyleDefault && ApiConstants.FontPairings.Contains(fonts))
+            classes.Add(DocumentConstants.FontsClassPrefix + fonts);
         return string.Join(" ", classes);
     }
 

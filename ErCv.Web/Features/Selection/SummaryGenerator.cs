@@ -60,10 +60,6 @@ public partial class SummaryGenerator
         { "cross-functional collaboration", "colaboración entre equipos" }
     };
 
-    // Spanish writes "e" instead of "y" before a word that starts with the sound /i/ ("Go e Istio"), not before "hie"
-    [GeneratedRegex(@"^(i|hi(?!e))", RegexOptions.IgnoreCase)]
-    private static partial Regex StartsWithISound();
-
     [GeneratedRegex(@"(improving|increasing|reducing|achieving|exceeding|delivering|cutting|boosting).*?(\d+)%", RegexOptions.IgnoreCase)]
     private static partial Regex Achievement();
 
@@ -227,7 +223,7 @@ public partial class SummaryGenerator
     {
         if (items.Count == 1) return items[0];
         var last = items[^1];
-        var conjunction = StartsWithISound().IsMatch(last) ? "e" : "y";
+        var conjunction = LanguagePatterns.StartsWithISound().IsMatch(last) ? "e" : "y";
         return $"{string.Join(", ", items.Take(items.Count - 1))} {conjunction} {last}";
     }
 

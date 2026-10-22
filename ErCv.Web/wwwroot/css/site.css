@@ -3075,6 +3075,61 @@ body:not(:has(#samples)) .app-try-demo {
   width: 816px;
 }
 
+/* ===== Cover letter (EDIT-03) ===== */
+.cover-letter-option {
+  align-items: flex-start;
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border-hover);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+}
+
+.cover-letter-option.selected {
+  background: var(--color-bg-selected);
+  border-color: var(--color-primary-400);
+}
+
+.cover-letter-option.disabled { cursor: not-allowed; opacity: 0.6; }
+.cover-letter-option input { accent-color: var(--color-primary-400); margin-top: 3px; }
+.cover-letter-option-text { display: flex; flex-direction: column; gap: 2px; }
+
+.cover-letter-option-name {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.cover-letter-option-desc { color: var(--color-text-tertiary); font-size: var(--font-size-xs); }
+
+/* Shown on every viewport, unlike the preview / insights switch */
+.document-switch {
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  margin-bottom: var(--spacing-md);
+  padding: 3px;
+}
+
+.document-switch-btn {
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-xs) var(--spacing-md);
+}
+
+.document-switch-btn.active {
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-primary);
+}
+
 /* ===== StyleOptions (UX-10) ===== */
 .accent-options,
 .font-options {

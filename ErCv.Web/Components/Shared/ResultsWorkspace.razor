@@ -96,11 +96,35 @@ else
 
         <div class="details-layout" data-pane="@_pane">
             <div class="details-preview-panel">
-                <CVPreview Html="@Analysis.PreviewHtml">
-                    <Actions>
-                        <TextExport Cv="Analysis.GeneratedCV" Disabled="Loading" />
-                    </Actions>
-                </CVPreview>
+                @if (Analysis.CoverLetter != null)
+                {
+                    <div class="document-switch" role="group" aria-label="Show the CV or the cover letter">
+                        <button type="button"
+                                class="document-switch-btn @(!_showLetter ? "active" : "")"
+                                aria-pressed="@(!_showLetter ? "true" : "false")"
+                                @onclick="() => _showLetter = false">CV</button>
+                        <button type="button"
+                                class="document-switch-btn @(_showLetter ? "active" : "")"
+                                aria-pressed="@(_showLetter ? "true" : "false")"
+                                @onclick="() => _showLetter = true">Cover letter</button>
+                    </div>
+                }
+                @if (_showLetter && Analysis.CoverLetter != null)
+                {
+                    <CVPreview Html="@Analysis.CoverLetterHtml" Title="Cover letter">
+                        <Actions>
+                            <CoverLetterActions Letter="Analysis.CoverLetter" OnDownload="OnDownloadLetter" Disabled="Loading" />
+                        </Actions>
+                    </CVPreview>
+                }
+                else
+                {
+                    <CVPreview Html="@Analysis.PreviewHtml">
+                        <Actions>
+                            <TextExport Cv="Analysis.GeneratedCV" Disabled="Loading" />
+                        </Actions>
+                    </CVPreview>
+                }
             </div>
 
             <div class="details-analysis-panel">
@@ -183,6 +207,7 @@ else
     [Parameter] public EventCallback OnBack { get; set; }
     [Parameter] public EventCallback OnStartOver { get; set; }
     [Parameter] public EventCallback<string> OnDownload { get; set; }
+    [Parameter] public EventCallback<string> OnDownloadLetter { get; set; }
     [Parameter] public CvDraft? Draft { get; set; }
     [Parameter] public CVTemplate Template { get; set; }
     [Parameter] public EventCallback OnDraftChanged { get; set; }
@@ -197,6 +222,9 @@ else
     // Below the desktop breakpoint only one of preview / insights is shown at a time
     private string _pane = PanePreview;
     private bool _wasEditing;
+
+    // EDIT-03: the preview pane shows the CV or, when one was written, the cover letter
+    private bool _showLetter;
 
     #endregion
 

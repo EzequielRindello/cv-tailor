@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="{{Lang}}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{FullName}} - Cover letter</title>
+    <style>
+        @page { size: letter; margin: 0.9in 1in 0.9in 1in; }
+
+{{> base-styles}}
+
+        /* ─── Cover letter (EDIT-03): the CV's accent and fonts, a business letter layout ─── */
+        :root {
+            --cv-accent: #1a1a1a;
+            --cv-fs-body: 11pt;
+            --cv-fs-name: 20pt;
+            --cv-lh: 1.45;
+        }
+
+        .cv-header {
+            border-bottom: 1.5pt solid var(--cv-accent);
+            margin-bottom: calc(var(--cv-step) * 8);
+            padding-bottom: calc(var(--cv-step) * 3);
+        }
+
+        .cv-name { color: var(--cv-accent); font-weight: bold; margin-bottom: calc(var(--cv-step) * 1.5); }
+        .cv-contact { color: var(--cv-muted); }
+
+        .letter-date { margin-bottom: calc(var(--cv-step) * 6); }
+        .letter-subject { font-weight: bold; margin-bottom: calc(var(--cv-step) * 4); }
+        .letter-salutation { margin-bottom: calc(var(--cv-step) * 4); }
+        .letter-paragraph { margin-bottom: calc(var(--cv-step) * 4); text-align: left; }
+        .letter-closing { margin-top: calc(var(--cv-step) * 6); }
+        .letter-signature { font-weight: bold; margin-top: calc(var(--cv-step) * 2); }
+    </style>
+</head>
+<body class="{{StyleClasses}}">
+    <header class="cv-header">
+        <h1 class="cv-name">{{FullName}}</h1>
+        <div class="cv-contact">{{> contact}}</div>
+    </header>
+
+    <p class="letter-date">{{Date}}</p>
+    {{#Subject}}<p class="letter-subject">{{Subject}}</p>{{/Subject}}
+    <p class="letter-salutation">{{Salutation}}</p>
+    {{#Paragraphs}}
+    <p class="letter-paragraph">{{.}}</p>
+    {{/Paragraphs}}
+    <p class="letter-closing">{{Closing}}</p>
+    <p class="letter-signature">{{FullName}}</p>
+</body>
+</html>
