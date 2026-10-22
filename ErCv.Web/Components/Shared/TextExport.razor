@@ -1,0 +1,70 @@
+@using System.Text
+@inject IJSRuntime JS
+@inject ToastService Toasts
+@inject ILogger<TextExport> Logger
+
+<div class="text-export" role="group" aria-label="Plain text for job application forms">
+    <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@Disabled" @onclick="CopyAsync">
+        <i class="bi bi-clipboard me-1" aria-hidden="true"></i>Copy text
+    </button>
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary"
+            disabled="@Disabled"
+            title="Download as Markdown"
+            @onclick="() => DownloadAsync(ApiConstants.FormatMarkdown)">
+        <i class="bi bi-markdown me-1" aria-hidden="true"></i><span class="visually-hidden">Download </span>.md
+    </button>
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary"
+            disabled="@Disabled"
+            title="Download as plain text"
+            @onclick="() => DownloadAsync(ApiConstants.FormatText)">
+        <i class="bi bi-filetype-txt me-1" aria-hidden="true"></i><span class="visually-hidden">Download </span>.txt
+    </button>
+</div>
+
+@code {
+    #region Parameters
+
+    [Parameter, EditorRequired] public GeneratedCV Cv { get; set; } = default!;
+    [Parameter] public bool Disabled { get; set; }
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task CopyAsync()
+    {
+        try
+        {
+            var copied = await JS.InvokeAsync<bool>(UiConstants.JsCopyText, CvTextRenderer.ToPlainText(Cv));
+            if (copied) Toasts.Success("CV text copied");
+            else Toasts.Error("The browser did not allow copying. Download the .txt file instead.");
+        }
+        catch (JSException ex)
+        {
+            Logger.LogError(ex, "Error copying the CV text");
+            Toasts.Error("Could not copy the CV text", "Retry", CopyAsync);
+        }
+    }
+
+    private async Task DownloadAsync(string format)
+    {
+        var text = format == ApiConstants.FormatMarkdown ? CvTextRenderer.ToMarkdown(Cv) : CvTextRenderer.ToPlainText(Cv);
+
+        try
+        {
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+            using var reference = new DotNetStreamReference(stream);
+            await JS.InvokeVoidAsync(UiConstants.JsDownloadFile, CVGeneratorService.BuildFileName(format), reference);
+            Toasts.Success($"Download started: .{format}");
+        }
+        catch (Exception ex) when (ex is JSException or InvalidOperationException)
+        {
+            Logger.LogError(ex, "Error downloading the CV as {Format}", format);
+            Toasts.Error($"Could not download the .{format} file", "Retry", () => DownloadAsync(format));
+        }
+    }
+
+    #endregion
+}

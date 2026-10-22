@@ -1,0 +1,91 @@
+<div class="mb-4 style-options">
+    <span class="form-label form-label-custom mb-2 d-block" id="accent-label">Accent color</span>
+    <div class="accent-options" role="radiogroup" aria-labelledby="accent-label">
+        @foreach (var accent in Accents)
+        {
+            var selected = Accent == accent.Key;
+            <label class="accent-swatch @(selected ? "selected" : "") @(Disabled ? "disabled" : "")" title="@accent.Name">
+                <input type="radio"
+                       class="visually-hidden"
+                       name="cv-accent"
+                       value="@accent.Key"
+                       checked="@selected"
+                       disabled="@Disabled"
+                       @onchange="() => SelectAccent(accent.Key)" />
+                <span class="accent-dot @(accent.Key == ApiConstants.StyleDefault ? "accent-dot-default" : "")"
+                      style="@(accent.Color is { } color ? $"background:{color}" : null)"
+                      aria-hidden="true"></span>
+                <span class="accent-name">@accent.Name</span>
+            </label>
+        }
+    </div>
+
+    <span class="form-label form-label-custom mt-3 mb-2 d-block" id="fonts-label">Fonts</span>
+    <div class="font-options" role="radiogroup" aria-labelledby="fonts-label">
+        @foreach (var pairing in FontPairings)
+        {
+            var selected = Fonts == pairing.Key;
+            <label class="font-option @(selected ? "selected" : "") @(Disabled ? "disabled" : "")">
+                <input type="radio"
+                       class="visually-hidden"
+                       name="cv-fonts"
+                       value="@pairing.Key"
+                       checked="@selected"
+                       disabled="@Disabled"
+                       @onchange="() => SelectFonts(pairing.Key)" />
+                <span class="font-option-name">@pairing.Name</span>
+                <span class="font-option-desc">@pairing.Description</span>
+            </label>
+        }
+    </div>
+    <p class="style-options-note">Every option keeps the text dark and the layout ATS-readable.</p>
+</div>
+
+@code {
+    #region Constants
+
+    // Swatch colors shown in the picker; the CV gets them from the accent-* classes in Templates/partials/base-styles.html
+    private static readonly (string Key, string Name, string? Color)[] Accents =
+    {
+        (ApiConstants.StyleDefault, "Template's own", null),
+        (ApiConstants.AccentNavy, "Navy", "#1f3a5f"),
+        (ApiConstants.AccentTeal, "Teal", "#0f5f58"),
+        (ApiConstants.AccentBurgundy, "Burgundy", "#7a1f2b"),
+        (ApiConstants.AccentForest, "Forest", "#2f5d3a"),
+        (ApiConstants.AccentSlate, "Slate", "#334155")
+    };
+
+    private static readonly (string Key, string Name, string Description)[] FontPairings =
+    {
+        (ApiConstants.StyleDefault, "Template's own", "As designed"),
+        (ApiConstants.FontsClassic, "Classic", "Serif throughout"),
+        (ApiConstants.FontsClean, "Clean", "Sans-serif throughout"),
+        (ApiConstants.FontsMixed, "Mixed", "Serif titles, sans text")
+    };
+
+    #endregion
+
+    #region Parameters
+
+    [Parameter] public string Accent { get; set; } = ApiConstants.StyleDefault;
+    [Parameter] public EventCallback<string> AccentChanged { get; set; }
+    [Parameter] public string Fonts { get; set; } = ApiConstants.StyleDefault;
+    [Parameter] public EventCallback<string> FontsChanged { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task SelectAccent(string key)
+    {
+        if (!Disabled) await AccentChanged.InvokeAsync(key);
+    }
+
+    private async Task SelectFonts(string key)
+    {
+        if (!Disabled) await FontsChanged.InvokeAsync(key);
+    }
+
+    #endregion
+}

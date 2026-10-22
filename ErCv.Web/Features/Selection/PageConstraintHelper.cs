@@ -17,6 +17,7 @@ public class PageConstraintHelper
     private const int SkillsSectionLines = 3;
     private const int ProjectLines = 3;
     private const int BulletMinLines = 1;
+    private const int OnePage = 1;
     private const int TwoPages = 2;
 
     // Trimming never goes below these, even if the CV still does not fit
@@ -24,45 +25,18 @@ public class PageConstraintHelper
     private const int MinExperiences = 2;
     private const int MinSkills = 8;
 
-    // Skills are trimmed one at a time but the line count only changes every few, so it is recounted every N removals
-    private const int SkillsRecountInterval = 5;
-
     #endregion
 
     #region Public Methods
 
+    /// <summary>First pass (F6): trims by the character estimate, before anything is rendered.</summary>
     public GeneratedCV EnforcePageConstraint(GeneratedCV source, bool allowTwoPages = false)
     {
         var cv = CvCloner.Clone(source);
         var maxLines = allowTwoPages ? LinesPerPage * TwoPages : LinesPerPage;
-        var current = CalculateTotalLines(cv);
 
-        if (current <= maxLines) return cv;
-        while (current > maxLines &&
-               cv.Experience.Any(e => (e.Bullets?.Count ?? 0) > MinBulletsPerExperience))
+        while (CalculateTotalLines(cv) > maxLines && TrimOneStep(cv))
         {
-            var exp = cv.Experience
-                .Where(e => (e.Bullets?.Count ?? 0) > MinBulletsPerExperience)
-                .OrderByDescending(e => e.Bullets!.Count)
-                .First();
-            exp.Bullets!.RemoveAt(exp.Bullets.Count - 1);
-            current = CalculateTotalLines(cv);
-        }
-        if (current > maxLines && cv.Projects.Any())
-        {
-            cv.Projects.Clear();
-            current = CalculateTotalLines(cv);
-        }
-        while (current > maxLines && cv.Experience.Count > MinExperiences)
-        {
-            cv.Experience.RemoveAt(cv.Experience.Count - 1);
-            current = CalculateTotalLines(cv);
-        }
-        while (current > maxLines && cv.Skills.Count > MinSkills)
-        {
-            cv.Skills.RemoveAt(cv.Skills.Count - 1);
-            if (cv.Skills.Count % SkillsRecountInterval == 0)
-                current = CalculateTotalLines(cv);
         }
 
         return cv;
@@ -70,6 +44,49 @@ public class PageConstraintHelper
 
     public GeneratedCV EnforceOnePageConstraint(GeneratedCV cv) =>
         EnforcePageConstraint(cv, allowTwoPages: false);
+
+    /// <summary>
+    /// Second pass (MATCH-08): renders the CV and counts the real pages. When it spills over, it keeps trimming in
+    /// the same order as the estimate, binary searching the number of steps so only a few renders are needed.
+    /// The render of the returned CV comes back too, so the caller does not render it again.
+    /// </summary>
+    public async Task<(GeneratedCV Cv, T Render)> FitMeasuredAsync<T>(
+        GeneratedCV source, bool allowTwoPages, Func<GeneratedCV, Task<T>> render, Func<T, int> countPages)
+    {
+        var maxPages = allowTwoPages ? TwoPages : OnePage;
+        var first = await render(source);
+        if (countPages(first) <= maxPages) return (source, first);
+
+        var stepsAvailable = CountTrimSteps(source);
+        if (stepsAvailable == 0) return (source, first);
+
+        (GeneratedCV Cv, T Render)? fit = null;
+        var mostTrimmed = (Cv: source, Render: first);
+        var low = 1;
+        var high = stepsAvailable;
+
+        // Removing content never adds a page, so the smallest number of steps that fits is found by bisection
+        while (low <= high)
+        {
+            var steps = low + (high - low) / 2;
+            var candidate = Trimmed(source, steps);
+            var rendered = await render(candidate);
+
+            if (countPages(rendered) <= maxPages)
+            {
+                fit = (candidate, rendered);
+                high = steps - 1;
+            }
+            else
+            {
+                if (steps == stepsAvailable) mostTrimmed = (candidate, rendered);
+                low = steps + 1;
+            }
+        }
+
+        // When nothing fits, the search has climbed to the last step, so the most trimmed CV is already rendered
+        return fit ?? mostTrimmed;
+    }
 
     public bool CanFitProject(GeneratedCV cv, bool allowTwoPages = false)
     {
@@ -107,6 +124,60 @@ public class PageConstraintHelper
     #endregion
 
     #region Private Methods
+
+    /// <summary>
+    /// Removes the least valuable piece left, in this order: the last bullet of the experience with the most,
+    /// then the projects, then the oldest experience, then the last skill. False when nothing can go.
+    /// </summary>
+    private static bool TrimOneStep(GeneratedCV cv)
+    {
+        var withSpareBullets = cv.Experience
+            .Where(e => (e.Bullets?.Count ?? 0) > MinBulletsPerExperience)
+            .OrderByDescending(e => e.Bullets!.Count)
+            .FirstOrDefault();
+        if (withSpareBullets != null)
+        {
+            withSpareBullets.Bullets.RemoveAt(withSpareBullets.Bullets.Count - 1);
+            return true;
+        }
+
+        if (cv.Projects.Any())
+        {
+            cv.Projects.Clear();
+            return true;
+        }
+
+        if (cv.Experience.Count > MinExperiences)
+        {
+            cv.Experience.RemoveAt(cv.Experience.Count - 1);
+            return true;
+        }
+
+        if (cv.Skills.Count > MinSkills)
+        {
+            cv.Skills.RemoveAt(cv.Skills.Count - 1);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static int CountTrimSteps(GeneratedCV source)
+    {
+        var cv = CvCloner.Clone(source);
+        var steps = 0;
+        while (TrimOneStep(cv)) steps++;
+        return steps;
+    }
+
+    private static GeneratedCV Trimmed(GeneratedCV source, int steps)
+    {
+        var cv = CvCloner.Clone(source);
+        for (var i = 0; i < steps && TrimOneStep(cv); i++)
+        {
+        }
+        return cv;
+    }
 
     private int EstimateLines(string text, int minimumLines)
     {

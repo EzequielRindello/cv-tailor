@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="{{Lang}}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{FullName}} - Resume</title>
+    <style>
+        @page { size: letter; margin: 0.7in 0.75in 0.6in 0.75in; }
+
+{{> base-styles}}
+
+        /* ─── Executive: serif display name, accent rules, a highlighted profile ───
+           (no small-caps: synthesized small capitals can break the text layer an ATS reads) */
+        :root {
+            --cv-text: #1c1c1c;
+            --cv-muted: #4f4f4f;
+            --cv-accent: #7a1f2b;
+            --cv-font-body: Times New Roman, Times, Liberation Serif, serif;
+            --cv-font-heading: Times New Roman, Times, Liberation Serif, serif;
+            --cv-contact-sep: "  ·  ";
+            --cv-fs-body: 10pt;
+            --cv-fs-small: 9pt;
+            --cv-fs-section: 10.5pt;
+            --cv-fs-name: 22pt;
+            --cv-lh: 1.25;
+        }
+
+        .cv-header {
+            border-bottom: 2pt solid var(--cv-accent);
+            margin-bottom: calc(var(--cv-step) * 3);
+            padding-bottom: calc(var(--cv-step) * 3);
+        }
+
+        .cv-name { letter-spacing: 0.5pt; margin-bottom: calc(var(--cv-step) * 2); }
+        .cv-contact { color: var(--cv-muted); white-space: pre-wrap; }
+
+        .cv-section { margin-top: calc(var(--cv-step) * 4); }
+
+        .cv-section-title {
+            border-bottom: 0.75pt solid #c9c9c9;
+            letter-spacing: 1.2pt;
+            text-transform: uppercase;
+            padding-bottom: 2pt;
+        }
+
+        .cv-section-summary .cv-summary {
+            border-left: 2pt solid var(--cv-accent);
+            padding-left: 8pt;
+        }
+
+        .cv-entry-head { font-size: 10.5pt; }
+        .cv-bullets { margin-left: 14pt; }
+        .cv-bullets li::marker { color: var(--cv-accent); }
+    </style>
+</head>
+<body class="{{StyleClasses}}">
+    <header class="cv-header">
+        <h1 class="cv-name">{{FullName}}</h1>
+        <div class="cv-contact">{{> contact}}</div>
+    </header>
+
+{{> sections}}
+</body>
+</html>

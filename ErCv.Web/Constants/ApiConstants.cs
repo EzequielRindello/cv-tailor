@@ -16,7 +16,33 @@ public static class ApiConstants
 
     // The very-long fixture is 50k characters; real posts in the corpus are far shorter
     public const int MaxJobDescriptionLength = 100_000;
+
+    // EDIT-01: a rewritten bullet; the editor's textarea and the service check share it
+    public const int MaxEditedBulletLength = 600;
     public const long MaxRequestBodyBytes = 2 * 1024 * 1024;
+
+    #endregion
+
+    #region Document Style
+
+    // EDIT-04: the language of the CV (headings, dates, summary). The profile's own text is never translated.
+    public const string LanguageEnglish = "en";
+    public const string LanguageSpanish = "es";
+    public static readonly string[] Languages = { LanguageEnglish, LanguageSpanish };
+
+    // UX-10: an accent color and a font pairing, as keys of classes in Templates/partials/base-styles.html.
+    // "default" keeps the template's own look.
+    public const string StyleDefault = "default";
+    public const string AccentNavy = "navy";
+    public const string AccentTeal = "teal";
+    public const string AccentBurgundy = "burgundy";
+    public const string AccentForest = "forest";
+    public const string AccentSlate = "slate";
+    public const string FontsClassic = "classic";
+    public const string FontsClean = "clean";
+    public const string FontsMixed = "mixed";
+    public static readonly string[] Accents = { StyleDefault, AccentNavy, AccentTeal, AccentBurgundy, AccentForest, AccentSlate };
+    public static readonly string[] FontPairings = { StyleDefault, FontsClassic, FontsClean, FontsMixed };
 
     #endregion
 
@@ -30,7 +56,7 @@ public static class ApiConstants
     public const string ProfileIdPrefix = "cv-master-";
     public const string DefaultProfileName = "Default";
 
-    // Key of one experience in RegenerateRequest.BulletSelections (BulletEditor writes it, the service reads it)
+    // Key of one experience in RegenerateRequest.BulletSelections (the API client writes it, the service reads it)
     public const string BulletSelectionKeyPrefix = "exp";
 
     #endregion
@@ -40,10 +66,15 @@ public static class ApiConstants
     public const string FormatPdf = "pdf";
     public const string FormatDocx = "docx";
 
+    // Text exports (EDIT-06) are built in the browser session from the generated CV, not stored like the documents
+    public const string FormatMarkdown = "md";
+    public const string FormatText = "txt";
+
     public const string ContentTypePdf = "application/pdf";
     public const string ContentTypeDocx = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
     public const string FileNamePrefix = "CV_";
+    public const string CoverLetterFileNamePrefix = "Cover_Letter_";
     public const string FileNameDateFormat = "yyyyMMdd_HHmmss";
 
     #endregion

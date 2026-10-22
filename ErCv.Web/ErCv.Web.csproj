@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>ErCv.Web</RootNamespace>
 		<!-- One version per milestone, see "Versioning" in features.md. Shown in the app footer. -->
-		<Version>2.0.4.1</Version>
+		<Version>2.0.5</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

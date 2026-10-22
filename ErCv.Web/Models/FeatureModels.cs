@@ -77,7 +77,9 @@ public enum CVTemplate
 {
     Harvard,
     Modern,
-    Minimalist
+    Minimalist,
+    Compact,
+    Executive
 }
 
 public class GenerateRequest
@@ -87,6 +89,12 @@ public class GenerateRequest
     public CVTemplate Template { get; set; } = CVTemplate.Harvard;
     public bool AllowTwoPages { get; set; } = false;
     public string ProfileId { get; set; } = ApiConstants.DefaultProfileId;
+    public string Language { get; set; } = ApiConstants.LanguageEnglish;
+    public string Accent { get; set; } = ApiConstants.StyleDefault;
+    public string Fonts { get; set; } = ApiConstants.StyleDefault;
+
+    /// <summary>EDIT-03: also write a cover letter from the same job post and profile.</summary>
+    public bool IncludeCoverLetter { get; set; }
 }
 
 public class AnalysisResult
@@ -99,4 +107,6 @@ public class AnalysisResult
     public string? PreviewHtml { get; set; }
     public SelectionExplanation Explanation { get; set; } = new();
     public JdHighlight JdHighlight { get; set; } = new();
+    public CoverLetter? CoverLetter { get; set; }
+    public string? CoverLetterHtml { get; set; }
 }

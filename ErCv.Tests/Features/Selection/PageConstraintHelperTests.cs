@@ -173,4 +173,82 @@ public class PageConstraintHelperTests
         Assert.NotSame(input.Experience[0], result.Experience[0]);
         Assert.Equal(input.Experience[0].Bullets, result.Experience[0].Bullets);
     }
+
+    // MATCH-08: a fake renderer stands in for Chrome. It returns the CV it was given, so the tests can check that
+    // the render handed back belongs to the CV handed back, and it reports pages from the bullet count.
+    private static Func<GeneratedCV, Task<GeneratedCV>> FakeRender(List<GeneratedCV> calls) => cv =>
+    {
+        calls.Add(cv);
+        return Task.FromResult(cv);
+    };
+
+    private static int TotalBullets(GeneratedCV cv) => cv.Experience.Sum(e => e.Bullets.Count);
+
+    [Fact]
+    public async Task Measured_fit_renders_once_and_keeps_the_cv_when_it_already_fits()
+    {
+        var calls = new List<GeneratedCV>();
+        var input = Oversized(experiences: 3, bulletsEach: 4, bulletChars: 50);
+
+        var (cv, render) = await _helper.FitMeasuredAsync(input, false, FakeRender(calls), _ => 1);
+
+        Assert.Same(input, cv);
+        Assert.Same(cv, render);
+        Assert.Single(calls);
+    }
+
+    [Fact]
+    public async Task Measured_fit_trims_only_until_the_rendered_cv_fits()
+    {
+        var calls = new List<GeneratedCV>();
+        var input = Oversized(experiences: 3, bulletsEach: 6, bulletChars: 50);
+        const int bulletsThatFit = 13;
+
+        var (cv, render) = await _helper.FitMeasuredAsync(
+            input, false, FakeRender(calls), r => TotalBullets(r) > bulletsThatFit ? 2 : 1);
+
+        Assert.Equal(bulletsThatFit, TotalBullets(cv));
+        Assert.Same(cv, render);
+        Assert.Equal(18, TotalBullets(input));
+    }
+
+    [Fact]
+    public async Task Measured_fit_needs_few_renders_thanks_to_the_binary_search()
+    {
+        var calls = new List<GeneratedCV>();
+        var input = Oversized(experiences: 5, bulletsEach: 8, bulletChars: 50);
+
+        await _helper.FitMeasuredAsync(input, false, FakeRender(calls), r => TotalBullets(r) > 12 ? 2 : 1);
+
+        // 30 bullet steps plus experiences and skills: the first render and about log2 of the steps
+        Assert.InRange(calls.Count, 2, 8);
+    }
+
+    [Fact]
+    public async Task Measured_fit_allows_two_pages_in_two_page_mode()
+    {
+        var calls = new List<GeneratedCV>();
+        var input = Oversized(experiences: 3, bulletsEach: 6, bulletChars: 50);
+
+        var (cv, _) = await _helper.FitMeasuredAsync(input, true, FakeRender(calls), _ => 2);
+
+        Assert.Same(input, cv);
+        Assert.Single(calls);
+    }
+
+    [Fact]
+    public async Task Measured_fit_returns_the_most_trimmed_cv_when_nothing_fits()
+    {
+        var calls = new List<GeneratedCV>();
+        var input = Oversized(experiences: 5, bulletsEach: 6, bulletChars: 50);
+        input.Projects = new List<Project> { new() { Name = "P" } };
+
+        var (cv, render) = await _helper.FitMeasuredAsync(input, false, FakeRender(calls), _ => 3);
+
+        Assert.Same(cv, render);
+        Assert.Equal(2, cv.Experience.Count);
+        Assert.All(cv.Experience, e => Assert.Equal(2, e.Bullets.Count));
+        Assert.Empty(cv.Projects);
+        Assert.Equal(8, cv.Skills.Count);
+    }
 }

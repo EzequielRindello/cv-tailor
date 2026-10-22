@@ -50,7 +50,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | UX-07 | Empty, error and toast states | E2 Redesign | P1 | S | Done |
 | UX-08 | Accessibility (WCAG AA, keyboard reorder) | E2 Redesign | P1 | M | Done |
 | UX-09 | Responsive pass | E2 Redesign | P1 | M | Done |
-| UX-10 | CV template visual polish | E2 Redesign | P2 | M | Todo |
+| UX-10 | CV template visual polish | E2 Redesign | P2 | M | Done |
 | PROF-01 | In-browser profile editor | E3 Your profile | P1 | L | Done |
 | PROF-02 | Profile JSON import/export + validation | E3 Your profile | P1 | M | Done |
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
@@ -64,14 +64,14 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | MATCH-05 | JD highlighter | E4 Matching | P1 | M | Done |
 | MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Todo |
 | MATCH-07 | Skill/alias dictionary as data file, tuned on real posts | E4 Matching | P1 | M | Done |
-| MATCH-08 | Page fit measured on the rendered PDF | E4 Matching | P1 | M | Todo |
+| MATCH-08 | Page fit measured on the rendered PDF | E4 Matching | P1 | M | Done |
 | MATCH-09 | Seniority detection from the title and wording | E4 Matching | P1 | S | Done |
-| EDIT-01 | Inline editing in the workspace | E5 Editing | P2 | L | Todo |
-| EDIT-02 | Live HTML preview, documents on download | E5 Editing | P2 | M | Todo |
-| EDIT-03 | Cover letter generator | E5 Editing | P2 | M | Todo |
-| EDIT-04 | CV output language (EN/ES) | E5 Editing | P2 | M | Todo |
-| EDIT-05 | More templates | E5 Editing | P3 | M | Todo |
-| EDIT-06 | Plain-text / Markdown export | E5 Editing | P3 | S | Todo |
+| EDIT-01 | Inline editing in the workspace | E5 Editing | P2 | L | Done |
+| EDIT-02 | Live HTML preview, documents on download | E5 Editing | P2 | M | Done |
+| EDIT-03 | Cover letter generator | E5 Editing | P2 | M | Done |
+| EDIT-04 | CV output language (EN/ES) | E5 Editing | P2 | M | Done |
+| EDIT-05 | More templates | E5 Editing | P3 | M | Done |
+| EDIT-06 | Plain-text / Markdown export | E5 Editing | P3 | S | Done |
 | APP-01 | Application tracker | E6 Workflow | P2 | M | Done |
 | APP-02 | Re-open a past generation | E6 Workflow | P2 | S | Done |
 | APP-03 | Sample JD gallery | E6 Workflow | P0 | S | Done |
@@ -103,7 +103,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 2. **M2 Redesign** (v2.0.3, released): UX-01 to UX-09, APP-03, TEST-07 (E2E written against the new UI).
 3. **M3 Your data** (v2.0.4, released): PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
 3.2. **M3.2 Real-post fixes** (v2.0.4.1, released): MATCH-07, MATCH-09, APP-06, PROF-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
-4. **M4 Output** (v2.0.5): EDIT-01 to EDIT-06, MATCH-08, UX-10.
+4. **M4 Output** (v2.0.5, released): EDIT-01 to EDIT-06, MATCH-08, UX-10.
 5. **M5 Polish & presentation** (v2.0.6): OPS-02 to OPS-05, ENG-01, ENG-04, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05.
 
@@ -132,7 +132,7 @@ Found during the roadmap review. Each one is covered by a feature below.
 | F3 | "Most recent role" sorts `EndDate` strings lexically, so `"May 2020"` ranks above `"Dec 2023"`. | `Helpers/MatchScoreCalculator.cs:67`, `Helpers/SummaryGenerator.cs:59` | MATCH-03 (fixed) |
 | F4 | `ContainsTerm` copied 3 times, seniority map duplicated, year parsing duplicated. | `RelevanceScorer`, `MissingSkillsAnalyzer`, `KeywordAnalyzer`, `MatchScoreConstants`, `SummaryGenerator` | ENG-02 (fixed) |
 | F5 | Generated CV shares `Header`/`Education` references with the master; page constraint mutates in place (caller clones as a workaround). | `Helpers/CVSelector.cs:59`, `Helpers/PageConstraintHelper.cs`, `Components/Pages/Home.razor:300` | ENG-02 (fixed) |
-| F6 | Page fit is estimated by character count, not measured; a "1-page" CV can spill over. | `Helpers/PageConstraintHelper.cs` | MATCH-08, TEST-04 |
+| F6 | Page fit is estimated by character count, not measured; a "1-page" CV can spill over. | `Helpers/PageConstraintHelper.cs` | MATCH-08 (fixed) |
 | F7 | Generate auto-downloads files before the user sees the preview. | `Components/Pages/Home.razor:268` | UX-04 |
 | F8 | 500 responses include `ex.Message`; logging uses `Console.WriteLine`. | `Services/CVGeneratorService.cs:63`, helpers | ENG-03 (fixed) |
 | F9 | Mixed namespaces (`ErCvApi.*` and `ErCv.Web.*`); helpers built with `new` instead of DI. | Whole project | Namespaces fixed in the system hardening (H8); DI is ENG-01 |
@@ -164,6 +164,12 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 | F21 | The single-letter skill `c` matches "Washington D.C." in pay-range text. | Fixed with MATCH-07 |
 | F22 | `KeywordAnalyzer` keeps its own `TechWords` list, apart from the dictionary, and classifies single JD words with it: "next" (as in "the next generation") is still listed as a technical keyword in the keywords tab, because the alias `next` still normalizes to Next.js. | Fixed in M3.2 (MATCH-07 follow-up): technical keywords are the dictionary skills the job description names (phrases such as "machine learning" included), `KeywordAnalyzerConstants.TechWords` is gone, and the words of a skill are no longer repeated as industry keywords |
 
+### Findings during M4
+
+| # | Finding | Status |
+|---|---|---|
+| F23 | `BrowserStore` let a `TaskCanceledException` from JS interop escape `Home.OnInitializedAsync` when the circuit went away during the first storage reads (a reload, a closed tab, or hot reload while the app runs from the IDE). | Fixed: reads give the default and writes and removals do nothing when the circuit is gone (`JSDisconnectedException`, `TaskCanceledException`); other script errors still surface. `BrowserStoreTests` |
+
 ### System hardening (between M3 and M3.2)
 
 A review of the C# code before M3.2, branch `feature/system-hardening`. No behavior change: every existing test passes (tests were only moved and renamed to the new namespaces), and the corpus report regenerates byte for byte. No version bump (not a milestone). The conventions it set are in `CLAUDE.md`.
@@ -181,6 +187,19 @@ A review of the C# code before M3.2, branch `feature/system-hardening`. No behav
 | H9 | Magic numbers and repeated literals (scoring weights, limits, profile ids, JS interop names, template keys) inline across helpers and components. | Fixed: named constants, hosting values in `appsettings.json` |
 | H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Fixed with MATCH-07: one list, `SelectionConstants.TechRoleKeywords`, the summary's stricter one plus nothing broad: the selector no longer treats analyst, consultant or specialist roles as tech (a union was tried first and made "Certification Specialist" count as tech years in the real demo profile) |
 | H11 | Swashbuckle 6.5.0 is old (Development only). | Open: ENG-06 (M5) replaces it |
+
+### Open items after M4
+
+Nothing in M4 is blocked. Found while building it, not scheduled yet (each would be a new item):
+
+| Item | Why it is not in M4 | Owner |
+|---|---|---|
+| The editor toggles what the generated CV holds; a project or skill the selection or the page fit left out cannot be added back | Needs the profile in the workspace and a rule for what still fits on the page. | New item (not scheduled) |
+| Match, ATS and keyword scores are not recomputed after edits | The edit loop renders HTML only; the analysis would have to run again per change. | New item (not scheduled) |
+| The cover letter has a generic salutation and no company name (the parser does not read the company), and its text cannot be edited, only the CV it quotes | A company field (the tracker has one) and letter editing are their own features. | New item (not scheduled) |
+| Spanish keeps role titles as written and leaves out the summary's achievement sentence | Translating profile text is out of scope by design (the app never rewrites the profile). | By design |
+| The suite without browsers takes about 7 minutes (five templates over the corpus) | The page count over the whole corpus is what proves MATCH-08. | TEST-10 (M5) can look at splitting it |
+| TEST-08 snapshots over `FixtureLoader.CorpusJdNames` | Snapshots are not built yet. | TEST-08 (M5) |
 
 ### Open items after M3.2
 
@@ -444,6 +463,13 @@ Verify: manual check plus E2E that the indicator appears and disappears.
 
 Verify: E2E for empty JD and no format selected.
 
+Follow-up (during M4, owner's request):
+- Toasts sit at the top right, below the header (`--header-height`), slide in from the right, and have no colored left border: a card with the icon in a soft tinted circle per kind.
+- More actions confirm with a toast: CV ready, job description pasted with the shortcut, start over, tracker entry updated, removed from history, history cleared, and on the profile page: base profile loaded, profile cleared, imported, export and blank template downloads (with a retry on failure), and save blocked by validation errors (with the count). Picking a template, format or page mode has no toast: the selection shows on screen.
+- The profile page's inline status line ("Saved in this browser", "Imported...", "Profile cleared") is replaced by the toast with the same text, so the message is not shown and announced twice.
+- The same message again (a tracker field saved after another) replaces the toast on screen instead of stacking.
+- Tests: `ToastServiceTests` (unit), E2E `Toasts_appear_at_the_top_right_below_the_header`; the existing E2E that wait for "Imported" and "Saved in this browser" now find the toast.
+
 ### UX-08: Accessibility
 **Status:** Done (keyboard-only manual pass still welcome) · **Priority:** P1 · **Effort:** M
 
@@ -465,14 +491,21 @@ Verify: TEST-07 axe check + keyboard-only manual pass.
 Verify: E2E at 390px and 768px.
 
 ### UX-10: CV template polish
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+**Status:** Done · **Priority:** P2 · **Effort:** M
 
-- [ ] Shared typographic rhythm across Harvard, Modern and Minimalist
-- [ ] Optional accent color and font pairing per template (kept ATS-safe)
-- [ ] Real thumbnails generated from each template for the template picker
+- [x] Shared typographic rhythm across Harvard, Modern and Minimalist
+- [x] Optional accent color and font pairing per template (kept ATS-safe)
+- [x] Real thumbnails generated from each template for the template picker
 
 Files: `Templates/*.html`, `TemplateSelector.razor`
 Verify: TEST-04 still passes for every template.
+
+Done notes:
+- `Templates/partials/`: `base-styles` (one body size and one spacing step as CSS variables, every margin a multiple of the step; the accent and font classes; the shared element styles), `contact`, one partial per section, and `sections` (the ordered loop). Every template includes them and only sets its header, its values of the scale and its details; Modern places the same section partials in its two columns. `DocumentRenderer` loads the partials once (`PartialsCache`). The markup is now the same everywhere (`cv-section`, `cv-entry`, `h2.cv-section-title`), which also fixed stray separators ("Acme, " with no location, "a@b.com •  • ").
+- Minimalist was tightened (line height and section spacing): measured over the 95 profile x JD combinations in one-page mode, the measured fit (MATCH-08) now trims 5 of them by one bullet each, where it trimmed 57, by 2 or 3 bullets and usually the project. Harvard, Modern, Compact and Executive need no trim at all (Executive did, 21 of 95, until its body size and spacing were brought onto the same scale).
+- Accent (navy, teal, burgundy, forest, slate) and fonts (classic serif, clean sans, mixed) are classes from a fixed list (`ApiConstants.Accents`, `FontPairings`; anything else is a 400, and the renderer ignores unknown keys), so nothing a request sends reaches the CSS. Accents only color titles, rules and markers, and are all dark; the text stays dark. Fonts are limited to what the PDF container ships (`fonts-liberation`: Times, Arial and Courier metrics), so the PDF looks the same locally and on Render. "Template's own" keeps each template as designed.
+- Thumbnails: `CVGeneratorService.RenderTemplateSampleAsync` renders each template with the made-up senior sample profile in the chosen accent, fonts and language (cached); the picker shows it scaled down in a sandboxed iframe with no scripts. They follow every style change. The old hand-drawn SVGs are gone.
+- Tests: `LanguageAndStyleTests` (classes only for known keys, every class the UI offers is defined in the shared styles, every template uses the partials), `StyleAndTemplatePickerTests` (bUnit: five cards with a real thumbnail each, picker without thumbnails, accent, fonts and language report their keys, every value the service accepts is offered), `StyleOptionsApiTests` (a sample for every template follows the style), E2E `StyleAndLanguageTests` (thumbnails, an accent restyles them, choices are remembered).
 
 ---
 
@@ -647,12 +680,19 @@ Done notes:
 - F22, found while closing this item, fixed in the same milestone: the keywords tab takes its technical keywords from the dictionary (`KeywordAnalyzerTests`).
 
 ### MATCH-08: Page fit measured on the rendered PDF
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** Done · **Priority:** P1 · **Effort:** M
 
-- [ ] After rendering, count PDF pages (or measure DOM height via Puppeteer); trim and re-render until it fits (F6)
-- [ ] Character estimate kept only as a first pass
+- [x] After rendering, count PDF pages (or measure DOM height via Puppeteer); trim and re-render until it fits (F6)
+- [x] Character estimate kept only as a first pass
 
 Verify: TEST-04 page count assertion over the whole corpus.
+
+Done notes:
+- `PageConstraintHelper.FitMeasuredAsync` renders the CV and counts the real pages (`DocumentRenderer.CountPages`, the page objects of the PDF Chrome wrote). If it spills over it trims in the same order as the estimate (one step at a time: last bullet of the longest experience, projects, oldest experience, last skill) and binary searches the number of steps, so a spill costs about 4 or 5 renders. A CV that already fits costs nothing extra: the measured PDF is the one returned. The estimate and the measured fit share one trim step (`TrimOneStep`).
+- `CVGeneratorService` fits right after selection, then runs the keyword and ATS analysis, the explanation (`CVSelector.FollowFinalCv`), the preview and the DOCX on the fitted CV, so every output shows the same CV. Regenerate goes through the same path. Without a PDF in the request there is nothing to measure and the estimate stands.
+- Measured over 5 profiles x 17 JDs (the 9 hand-written ones and one real post per role family) x 3 templates x 2 page modes: only Minimalist in one-page mode spilled over (57 of 570). It loses 2 or 3 bullets, and usually the project, to fit. Harvard and Modern already fit with the estimate. Tightening Minimalist's spacing (UX-10) would keep more content.
+- Tests: `PdfTests.Page_count_respects_the_selected_mode` now covers every template (the skipped Minimalist case is gone) over the whole matrix including the corpus; `Page_counter_agrees_with_a_pdf_reader` and `Page_counter_counts_every_page_of_a_long_pdf` check the counter against PdfPig; `PageConstraintHelperTests` (fake renderer: no extra render when it fits, smallest trim, few renders, two-page mode, nothing fits); `PageFitTests` (service: one-page PDF, preview, DOCX and explanation show the fitted CV, and the measured fit trims what the estimate keeps).
+- The suite without browsers takes about 5 to 6 minutes now (the page count runs over the corpus, about 0.4 s per PDF).
 
 ### MATCH-09: Seniority detection
 **Status:** Done · **Priority:** P1 · **Effort:** S
@@ -676,55 +716,92 @@ Done notes:
 ## E5. Editing and output
 
 ### EDIT-01: Inline editing
-**Status:** Todo · **Priority:** P2 · **Effort:** L
+**Status:** Done · **Priority:** P2 · **Effort:** L
 
-- [ ] Edit bullet text in the workspace; edited bullets are flagged as user-edited
-- [ ] Toggle summary, projects and individual skills
-- [ ] Reorder sections
+- [x] Edit bullet text in the workspace; edited bullets are flagged as user-edited
+- [x] Toggle summary, projects and individual skills
+- [x] Reorder sections
 
 Verify: bUnit + E2E.
 
-### EDIT-02: Live HTML preview
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+Done notes:
+- `Features/Editing/CvDraft.cs` holds the edits apart from the generated CV, so each one can be undone (one bullet, or "Undo all changes"): bullet text, bullets, summary, skills and projects in or out, bullet and section order. `Build()` gives the CV as edited. A rewrite is trimmed, cannot be empty or longer than `ApiConstants.MaxEditedBulletLength` (600, checked again in the service), and typing the profile's text again undoes it.
+- No fabrication with edits: the app still writes nothing; a bullet the user rewrote is listed in `GeneratedCV.EditedBullets` with the profile's original (`BulletEdit`), shown with an "Edited" badge, and the "Why" tab explains it as the profile bullet it came from.
+- Section order: `GeneratedCV.SectionOrder` (keys `DocumentConstants.Section*Key`). The templates print their sections in a `{{#Sections}}` loop; each template's own order is a constant (`HarvardSectionOrder`, `ModernSectionOrder`, `MinimalistSectionOrder`), so an empty order prints exactly as before. Modern keeps its two columns: a section moves within its column, and the editor says so. The DOCX and the text export follow the chosen order, Harvard's by default. `DocumentRenderer.ResolveSectionOrder` drops unknown keys and repeats and adds what is missing, so every section prints once. `DocumentRenderer.ForTemplate` now pairs each template file with its order (it replaces the per-template paths in the service and the tests).
+- `Components/Shared/CvEditor.razor` replaces `BulletEditor.razor`, keeping drag and Alt+Up/Down for bullets and its focus handling. Rewrite opens a textarea (Ctrl+Enter saves, Escape cancels). Edits survive closing and reopening the editor; a new generation starts a new draft.
+- Edits only reach the CV the user sees; the match, ATS and keyword scores stay those of the generated CV.
+- Tests: `CvDraftTests` (unit, including every bullet being a profile bullet or a flagged rewrite of one, and the generated CV never changing), `SectionOrderTests` (HTML of each template, Modern columns, DOCX, text export, resolving), `CvEditorTests` (bUnit), E2E `EditingTests`.
 
-- [ ] Preview updates from HTML only while editing
-- [ ] PDF/DOCX rendered on download, not on every change
+### EDIT-02: Live HTML preview
+**Status:** Done · **Priority:** P2 · **Effort:** M
+
+- [x] Preview updates from HTML only while editing
+- [x] PDF/DOCX rendered on download, not on every change
 
 Verify: E2E: edit updates preview without a render delay.
 
+Done notes:
+- Every edit renders the preview HTML only (`CVGeneratorService.RenderPreviewHtml`), there is no "Regenerate" step any more. The PDF and DOCX of an edited CV are built when a download button is clicked (`RenderEditedDocumentAsync`) and kept until the next edit.
+- The edited CV is printed as the user left it, never trimmed by the page fit (MATCH-08 would undo their choices). When an edited PDF runs past the page limit, a toast says how many pages it has.
+- The preview keeps its scroll position across the reloads (`cvApp.keepScroll`, set up by the page; the sandboxed CV document still runs no script).
+- The UI no longer calls `RebuildCvAsync` (removed); `POST /api/cv/regenerate` keeps its own path for API clients.
+- Tests: `EditedCvTests` (service: preview, edited PDF and DOCX, not trimmed, input limits), E2E `EditingTests` (preview follows an unchecked bullet, a rewrite and a section move without regenerating, scroll kept, the DOCX downloaded after an edit holds it).
+
 ### EDIT-03: Cover letter generator
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+**Status:** Done · **Priority:** P2 · **Effort:** M
 
 Moved from the legacy FEATURE-301.
 
-- [ ] "Also generate cover letter" option, same JD and profile
-- [ ] Structure: opening, two experience paragraphs, closing
-- [ ] Template-driven (Mustache), uses only CV data
-- [ ] PDF and DOCX
+- [x] "Also generate cover letter" option, same JD and profile
+- [x] Structure: opening, two experience paragraphs, closing
+- [x] Template-driven (Mustache), uses only CV data
+- [x] PDF and DOCX
 
-Files: new `Helpers/CoverLetterGenerator.cs`, `Templates/cover-letter-template.html`
+Files: `Features/CoverLetters/CoverLetterGenerator.cs`, `CoverLetterConstants.cs`, `CoverLetterText.cs`, `Templates/cover-letter-template.html`
 Verify: invariant test that every fact in the letter comes from the profile.
 
-### EDIT-04: CV output language
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+Done notes:
+- `GenerateRequest.IncludeCoverLetter` (step 3: "Also write a cover letter"). The letter is written from the CV as it stands: the opening names the position (the post's first line, only when it is short and names a role; otherwise "this position") and quotes the summary's first sentence; one paragraph each for the two most relevant experiences (role, company, dates and two bullets quoted verbatim); the closing names the skills that are both on the CV and in the post, then thanks the reader. English or Spanish (EDIT-04), the CV's accent and fonts (UX-10), on the shared partials.
+- No fabrication: each paragraph is a list of parts, fixed wording (`CoverLetterConstants.Phrases`) or a fact. `CoverLetterInvariantTests` checks, for every profile x JD in the corpus x language, that every fact is the CV's (role, company, dates, a bullet, a skill, the summary's first sentence) or the post's position, and every other part is the letter's wording.
+- In the workspace a "CV | Cover letter" switch sits over the preview; the letter has its own PDF, DOCX and copy buttons, rendered on download. It is written again after every edit, so a rewritten bullet shows in the letter too. The API returns its text as `coverLetter`.
+- Tests: `CoverLetterGeneratorTests` (unit), `CoverLetterInvariantTests`, `CoverLetterApiTests` (only on request, follows an edit, one-page PDF and DOCX, API field), E2E `CoverLetterTests`.
 
-- [ ] English or Spanish section headings, dates and summary phrasing
+### EDIT-04: CV output language
+**Status:** Done · **Priority:** P2 · **Effort:** M
+
+- [x] English or Spanish section headings, dates and summary phrasing
 
 Verify: document tests for both languages.
 
-### EDIT-05: More templates
-**Status:** Todo · **Priority:** P3 · **Effort:** M
+Done notes:
+- `GenerateRequest.Language` (`en` or `es`, `ApiConstants.Languages`; anything else is a 400) is kept on the CV (`GeneratedCV.Language`), so the preview, the PDF, the DOCX, the text export and an edited CV's downloads all follow it.
+- `Features/Documents/CvLabels.cs` holds the words a CV prints around the profile's content: section titles (each template picks the formal, short or executive summary title), skill categories, "GPA"/"Promedio", "Technologies"/"Tecnologías", and dates. English keeps the profile's dates as written; Spanish rewrites the formats the date parser knows ("Jan 2020" is "ene. 2020", "Present" is "Actualidad") and leaves anything else ("Spring 2019") alone. The HTML gets `lang="es"`.
+- The summary is phrased in Spanish ("... con 6+ años de experiencia, con foco en Go, Kafka y PostgreSQL", "y" becomes "e" before an /i/ sound). Role titles stay as they are (tech titles are usually English in Spanish CVs too, and a translated title would have to pick a grammatical gender). The "proven track record" sentence is left out in Spanish, because it quotes a bullet and the profile's text is never translated.
+- The UI option is in step 3 next to the page options, and is remembered with the other settings and in the history (APP-02 restores it).
+- Tests: `CvLabelsTests`, `SpanishSummaryTests` (unit), `LanguageAndStyleTests` (HTML of every template in both languages, DOCX and text in Spanish, a Spanish PDF), `StyleOptionsApiTests` (a Spanish request, unknown values refused), E2E `A_spanish_executive_cv_has_spanish_titles_in_the_preview`.
 
-- [ ] "Compact" and "Executive" templates on a shared partial
+### EDIT-05: More templates
+**Status:** Done · **Priority:** P3 · **Effort:** M
+
+- [x] "Compact" and "Executive" templates on a shared partial
 
 Verify: TEST-04 across new templates.
 
-### EDIT-06: Plain-text / Markdown export
-**Status:** Todo · **Priority:** P3 · **Effort:** S
+Done notes:
+- Compact (`CVTemplate.Compact`): dense single column (9pt, a smaller spacing step, name and contact on one band, skills right after the experience) for a long history on one page. Executive (`CVTemplate.Executive`): serif, a large name over an accent rule, uppercase spaced titles, the profile set off by an accent bar. No small capitals: synthesized small caps broke the PDF text layer that an ATS reads.
+- Both are built from the shared partials (UX-10) and get every TEST-04 check through `Enum.GetValues<CVTemplate>()`: valid PDF, page count over the whole corpus, every bullet and title in the extracted text, reading order, DOCX, HTML without Mustache tags. `DocumentSupport.ExpectedTitles` now derives the titles from each template's order and labels, in either language.
 
-- [ ] Copy-to-clipboard and `.md`/`.txt` download for ATS paste-in fields
+### EDIT-06: Plain-text / Markdown export
+**Status:** Done · **Priority:** P3 · **Effort:** S
+
+- [x] Copy-to-clipboard and `.md`/`.txt` download for ATS paste-in fields
 
 Verify: unit test of the text renderer.
+
+Done notes:
+- `Features/Documents/CvTextRenderer.cs` writes the CV as plain text or Markdown: same sections and order as the DOCX, nothing that is not in the CV, missing fields leave no stray separator, Markdown escapes the characters it would read as formatting (`C#`, `*nix`). The DOCX now shares its separators and labels (`DocumentConstants.DetailSeparator`, `DateRangeSeparator`, `GpaLabel`).
+- `Components/Shared/TextExport.razor` sits in the preview header (`CVPreview` takes an `Actions` fragment): "Copy text" (plain text, `cvApp.copyText`; a refused clipboard points to the .txt), ".md" and ".txt". Built in the circuit from the generated CV, so nothing is stored in the session or added to the API.
+- Tests: `CvTextRendererTests` (unit: order, contact line, separators, empty sections, Markdown headings and escaping, every bullet and skill of every fixture CV over every JD), `TextExportTests` (bUnit: clipboard text, refused copy, both downloads, disabled while regenerating).
 
 ---
 

@@ -1,0 +1,12 @@
+<section class="cv-section cv-section-experience">
+    <h2 class="cv-section-title">{{Labels.Experience}}</h2>
+    {{#Experience}}
+    <div class="cv-entry">
+        <div class="cv-entry-head"><span class="cv-entry-title">{{Role}}</span><span class="cv-entry-dates">{{DateRange}}</span></div>
+        {{#CompanyLine}}<div class="cv-entry-sub">{{CompanyLine}}</div>{{/CompanyLine}}
+        <ul class="cv-bullets">
+            {{#Bullets}}<li>{{.}}</li>{{/Bullets}}
+        </ul>
+    </div>
+    {{/Experience}}
+</section>

@@ -139,6 +139,9 @@
   --z-modal: 200;
   --z-tooltip: 300;
 
+  /* height of the sticky app header: the results bar sticks below it and toasts appear below it */
+  --header-height: 57px;
+
   /* Bootstrap 5 mapping */
   --bs-primary: #0f766e;
   --bs-primary-rgb: 15, 118, 110;
@@ -276,7 +279,7 @@ h1, h2, h3, .form-title {
 }
 /* ===== app ===== */
 .app-container {
-  min-height: calc(100vh - 57px);
+  min-height: calc(100vh - var(--header-height));
   padding: var(--spacing-xl) var(--spacing-md);
   background-color: var(--color-bg-page);
 }
@@ -713,6 +716,126 @@ h1, h2, h3, .form-title {
   color: var(--color-text-tertiary);
 }
 
+/* ===== CvEditor (EDIT-01) ===== */
+.cv-editor-head {
+  margin-bottom: var(--spacing-md);
+}
+
+.cv-editor-section {
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.cv-editor-section-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-sm);
+}
+
+.cv-editor-hint {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.cv-editor-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cv-editor-section-row {
+  align-items: center;
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.cv-editor-section-name {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+}
+
+.cv-editor-include {
+  align-items: center;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--font-size-sm);
+  gap: var(--spacing-xs);
+}
+
+.cv-editor-include input {
+  accent-color: var(--color-primary-400);
+}
+
+.cv-editor-project {
+  display: flex;
+  font-size: var(--font-size-md);
+  padding: var(--spacing-xs) 0;
+}
+
+.cv-editor-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.cv-editor-chip {
+  align-items: center;
+  background: transparent;
+  border: 1px dashed var(--color-border-hover);
+  border-radius: 999px;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--font-size-sm);
+  gap: 4px;
+  padding: 2px var(--spacing-sm);
+}
+
+.cv-editor-chip.included {
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-100);
+  color: var(--color-text-primary);
+}
+
+.bullet-row.editing {
+  cursor: default;
+}
+
+.bullet-edit-area {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.bullet-edit-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: flex-end;
+}
+
+.bullet-edited-badge {
+  background: var(--color-warning-soft);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  margin-left: var(--spacing-xs);
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
 
 /* ===== CVPreview.css ===== */
 .cv-preview-frame-wrapper {
@@ -917,7 +1040,7 @@ h1, h2, h3, .form-title {
 
   .toast-host {
     left: var(--spacing-md);
-    max-width: none;
+    width: auto;
   }
 
   .history-item {
@@ -978,40 +1101,49 @@ h1, h2, h3, .form-title {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  max-width: min(420px, calc(100vw - 2 * var(--spacing-md)));
   pointer-events: none;
-  bottom: var(--spacing-md);
   position: fixed;
   right: var(--spacing-md);
+  top: calc(var(--header-height) + var(--spacing-sm));
+  width: min(380px, calc(100vw - 2 * var(--spacing-md)));
   z-index: var(--z-tooltip);
 }
 
 .app-toast {
   align-items: center;
-  animation: toast-in 200ms ease-out both;
+  animation: toast-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border-default);
-  border-left: 4px solid var(--color-primary-500);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
   color: var(--color-text-primary);
   display: flex;
   font-size: var(--font-size-md);
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  line-height: 1.4;
+  padding: var(--spacing-sm);
   pointer-events: auto;
 }
 
-.app-toast.success { border-left-color: var(--color-success); }
-.app-toast.error   { border-left-color: var(--color-error); }
+.app-toast-icon {
+  align-items: center;
+  background: var(--color-primary-50);
+  border-radius: 50%;
+  color: var(--color-primary-500);
+  display: inline-flex;
+  flex: none;
+  font-size: var(--font-size-md);
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
 
-.app-toast-icon { flex: none; }
-.app-toast.success .app-toast-icon { color: var(--color-success); }
-.app-toast.error .app-toast-icon   { color: var(--color-error); }
-.app-toast.info .app-toast-icon    { color: var(--color-primary-500); }
+.app-toast.success .app-toast-icon { background: var(--color-success-soft); color: var(--color-success); }
+.app-toast.error .app-toast-icon   { background: var(--color-error-soft); color: var(--color-error); }
 
 .app-toast-text {
   flex: 1;
+  min-width: 0;
 }
 
 .app-toast-action {
@@ -1042,7 +1174,7 @@ h1, h2, h3, .form-title {
 }
 
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(-6px); }
+  from { opacity: 0; transform: translateX(16px); }
 }
 
 .field-error {
@@ -1337,7 +1469,7 @@ h1, h2, h3, .form-title {
   margin-bottom: var(--spacing-lg);
   padding: var(--spacing-sm) 0;
   position: sticky;
-  top: 57px;
+  top: var(--header-height);
   z-index: calc(var(--z-dropdown) - 1);
 }
 
@@ -1354,9 +1486,16 @@ h1, h2, h3, .form-title {
 .cv-preview-header {
   align-items: center;
   display: flex;
-  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  gap: var(--spacing-sm) var(--spacing-md);
   justify-content: space-between;
   margin-bottom: var(--spacing-md);
+}
+
+.text-export {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
 }
 
 /* Same look as the composer steps: every tab has its own underline, the current one in the accent color */
@@ -2872,12 +3011,13 @@ body:not(:has(#samples)) .app-try-demo {
 
 /* ===== TemplateSelector.css ===== */
 .template-options {
-  display: flex;
+  display: grid;
   gap: var(--spacing-sm);
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
 }
 
 @media (max-width: 576px) {
-  .template-options { flex-direction: column; }
+  .template-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 .template-card {
@@ -2909,19 +3049,161 @@ body:not(:has(#samples)) .app-try-demo {
   cursor: not-allowed;
 }
 
+/* UX-10: a real render of the template (a Letter page, 816 x 1056 CSS px) scaled down to the card */
 .template-preview {
-  width: 60px;
-  height: 80px;
-  margin: 0 auto var(--spacing-sm);
+  --thumb-width: 96px;
+  background: #ffffff;
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-sm);
-  overflow: hidden;
   box-shadow: var(--shadow-sm);
+  height: calc(var(--thumb-width) * 11 / 8.5);
+  margin: 0 auto var(--spacing-sm);
+  overflow: hidden;
+  position: relative;
+  width: var(--thumb-width);
 }
 
-.template-preview svg {
-  width: 100%;
-  height: 100%;
+.template-preview iframe {
+  border: 0;
+  height: 1056px;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transform: scale(calc(96 / 816));
+  transform-origin: 0 0;
+  width: 816px;
+}
+
+/* ===== Cover letter (EDIT-03) ===== */
+.cover-letter-option {
+  align-items: flex-start;
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border-hover);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+}
+
+.cover-letter-option.selected {
+  background: var(--color-bg-selected);
+  border-color: var(--color-primary-400);
+}
+
+.cover-letter-option.disabled { cursor: not-allowed; opacity: 0.6; }
+.cover-letter-option input { accent-color: var(--color-primary-400); margin-top: 3px; }
+.cover-letter-option-text { display: flex; flex-direction: column; gap: 2px; }
+
+.cover-letter-option-name {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.cover-letter-option-desc { color: var(--color-text-tertiary); font-size: var(--font-size-xs); }
+
+/* Shown on every viewport, unlike the preview / insights switch */
+.document-switch {
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  margin-bottom: var(--spacing-md);
+  padding: 3px;
+}
+
+.document-switch-btn {
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-xs) var(--spacing-md);
+}
+
+.document-switch-btn.active {
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-primary);
+}
+
+/* ===== StyleOptions (UX-10) ===== */
+.accent-options,
+.font-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.accent-swatch,
+.font-option {
+  align-items: center;
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.accent-swatch.selected,
+.font-option.selected {
+  background: var(--color-bg-selected);
+  border-color: var(--color-primary-400);
+}
+
+.accent-swatch.disabled,
+.font-option.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.accent-swatch:has(input:focus-visible),
+.font-option:has(input:focus-visible) {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.accent-dot {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  display: inline-block;
+  flex: none;
+  height: 14px;
+  width: 14px;
+}
+
+/* "Template's own": a split dot, since each template has a different color */
+.accent-dot-default {
+  background: conic-gradient(#1d4ed8 0 25%, #7a1f2b 0 50%, #1a1a1a 0 75%, #8a8a8a 0);
+}
+
+.accent-name,
+.font-option-name {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.font-option {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0;
+}
+
+.font-option-desc {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.style-options-note {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  margin: var(--spacing-sm) 0 0;
 }
 
 .template-name {

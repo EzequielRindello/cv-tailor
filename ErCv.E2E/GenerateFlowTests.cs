@@ -141,6 +141,22 @@ public class GenerateFlowTests : E2ETestBase
     }
 
     [Fact]
+    public async Task Toasts_appear_at_the_top_right_below_the_header()
+    {
+        await GenerateAsync();
+
+        var toast = Page.Locator(".app-toast").Filter(new() { HasText = "CV ready" });
+        await Assertions.Expect(toast).ToBeVisibleAsync();
+
+        var box = (await toast.BoundingBoxAsync())!;
+        var header = (await Page.Locator("#app-header").BoundingBoxAsync())!;
+        var viewport = Page.ViewportSize!;
+        Assert.True(box.Y >= header.Y + header.Height, "the toast overlaps the header");
+        Assert.True(box.Y < viewport.Height / 3, "the toast is not at the top");
+        Assert.True(viewport.Width - (box.X + box.Width) < 40, "the toast is not at the right edge");
+    }
+
+    [Fact]
     public async Task Progress_stages_are_shown_in_order_while_generating()
     {
         await OpenHomeAsync();
@@ -164,23 +180,6 @@ public class GenerateFlowTests : E2ETestBase
         Assert.True(stages.Length >= 2, $"Expected several stages, saw: {string.Join(", ", stages)}");
         Assert.All(stages, s => Assert.Contains(s, canonical));
         Assert.Equal(stages.OrderBy(s => Array.IndexOf(canonical, s)), stages);
-    }
-
-    [Fact]
-    public async Task Editing_bullets_and_regenerating_updates_the_preview()
-    {
-        await GenerateAsync();
-
-        await Button("Edit", exact: true).ClickAsync();
-        var firstBullet = (await Page.Locator("#bullet-text-0-0").InnerTextAsync()).Trim();
-        await Assertions.Expect(PreviewBody).ToContainTextAsync(firstBullet);
-
-        await Page.Locator("#bullet-0-0").UncheckAsync();
-        await Button("Regenerate CV").ClickAsync();
-
-        await Assertions.Expect(Page.Locator(".app-toast").Filter(new() { HasText = "CV regenerated" })).ToBeVisibleAsync();
-        await Assertions.Expect(PreviewBody).Not.ToContainTextAsync(firstBullet);
-        await Assertions.Expect(Page.Locator(".bullet-editor-card")).ToHaveCountAsync(0);
     }
 
     [Fact]

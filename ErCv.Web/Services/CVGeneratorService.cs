@@ -1,6 +1,8 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using ErCv.Web.Constants;
 using ErCv.Web.Features.Analysis;
+using ErCv.Web.Features.CoverLetters;
 using ErCv.Web.Features.Documents;
 using ErCv.Web.Features.Matching;
 using ErCv.Web.Features.Profiles;
@@ -21,6 +23,10 @@ public class CVGeneratorService
 
     private static readonly JsonSerializerOptions ProfileReadOptions = new() { PropertyNameCaseInsensitive = true };
 
+    // UX-10 thumbnails: the sample CV per language and its HTML per look, built once (a few dozen small strings)
+    private static readonly ConcurrentDictionary<string, Task<GeneratedCV>> SampleCvCache = new();
+    private static readonly ConcurrentDictionary<string, string> SampleHtmlCache = new();
+
     #endregion
 
     #region Fields
@@ -33,11 +39,11 @@ public class CVGeneratorService
     private readonly ATSChecker _atsChecker;
     private readonly ProfileValidator _profileValidator = new();
     private readonly JdHighlighter _jdHighlighter = new();
+    private readonly PageConstraintHelper _pageConstraint = new();
+    private readonly CoverLetterGenerator _coverLetterGenerator = new();
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<CVGeneratorService> _logger;
-    private readonly string _harvardTemplatePath;
-    private readonly string _modernTemplatePath;
-    private readonly string _minimalistTemplatePath;
+    private readonly string _templatesFolder;
 
     #endregion
 
@@ -53,10 +59,7 @@ public class CVGeneratorService
         _missingSkillsAnalyzer = new MissingSkillsAnalyzer();
         _keywordAnalyzer = new KeywordAnalyzer();
         _atsChecker = new ATSChecker();
-
-        _harvardTemplatePath   = TemplatePath(TemplatePaths.HarvardTemplate);
-        _modernTemplatePath    = TemplatePath(TemplatePaths.ModernTemplate);
-        _minimalistTemplatePath= TemplatePath(TemplatePaths.MinimalistTemplate);
+        _templatesFolder = Path.Combine(_env.ContentRootPath, TemplatePaths.TemplatesFolder);
     }
 
     #endregion
@@ -187,10 +190,67 @@ public class CVGeneratorService
         return await GenerateCVInternalAsync(request, progress, profile);
     }
 
-    public async Task<(Dictionary<string, byte[]> Documents, string PreviewHtml)> RebuildCvAsync(RegenerateRequest request)
+    /// <summary>EDIT-02: the preview of a CV being edited. HTML only, so it can follow every change.</summary>
+    public string RenderPreviewHtml(GeneratedCV cv, CVTemplate template)
     {
-        ValidateRegenerateRequest(request);
-        return await RegenerateCVInternalAsync(request);
+        ValidateEditedCv(cv);
+        return DocumentRenderer.ForTemplate(_templatesFolder, template).RenderHtml(cv);
+    }
+
+    /// <summary>
+    /// EDIT-02: one document of an edited CV, rendered when the user downloads it. The CV is printed as the user left
+    /// it, never trimmed: <c>Pages</c> lets the caller say when it runs past the page limit (0 for a DOCX).
+    /// </summary>
+    public async Task<(byte[] Bytes, int Pages)> RenderEditedDocumentAsync(GeneratedCV cv, CVTemplate template, string format)
+    {
+        ValidateEditedCv(cv);
+        var normalized = NormalizeAndValidateFormat(format);
+        var renderer = DocumentRenderer.ForTemplate(_templatesFolder, template);
+
+        if (normalized == ApiConstants.FormatDocx) return (renderer.RenderDocx(cv), 0);
+
+        var pdf = await renderer.RenderPdfAsync(renderer.RenderHtml(cv));
+        return (pdf, DocumentRenderer.CountPages(pdf));
+    }
+
+    /// <summary>
+    /// UX-10: a template as it really prints, filled with the made-up senior sample profile, for the template
+    /// picker's thumbnails. It follows the chosen accent, fonts and language, so the picker shows the actual look.
+    /// </summary>
+    /// <summary>
+    /// EDIT-03: the cover letter for a CV as it stands, so it follows the edits made in the workspace.
+    /// The letter's HTML comes with it; the PDF and DOCX are rendered on download.
+    /// </summary>
+    public (CoverLetter Letter, string Html) BuildCoverLetter(GeneratedCV cv, string jobDescription)
+    {
+        ValidateEditedCv(cv);
+        if (jobDescription.Length > ApiConstants.MaxJobDescriptionLength)
+            throw new ArgumentException(string.Format(ApiConstants.ErrorJobDescriptionTooLong, ApiConstants.MaxJobDescriptionLength));
+
+        return WriteCoverLetter(cv, _parser.Parse(jobDescription), jobDescription);
+    }
+
+    public async Task<byte[]> RenderCoverLetterAsync(CoverLetter letter, string format)
+    {
+        var normalized = NormalizeAndValidateFormat(format);
+        var renderer = DocumentRenderer.ForCoverLetter(_templatesFolder);
+
+        return normalized == ApiConstants.FormatDocx
+            ? renderer.RenderCoverLetterDocx(letter)
+            : await renderer.RenderPdfAsync(renderer.RenderCoverLetterHtml(letter));
+    }
+
+    public async Task<string> RenderTemplateSampleAsync(CVTemplate template, string accent, string fonts, string language)
+    {
+        ValidateStyle(language, accent, fonts);
+
+        var key = $"{template}|{accent}|{fonts}|{language}";
+        if (SampleHtmlCache.TryGetValue(key, out var cached)) return cached;
+
+        var sample = CvCloner.Clone(await SampleCvCache.GetOrAdd(language, SampleCvAsync));
+        sample.Accent = accent;
+        sample.Fonts = fonts;
+        return SampleHtmlCache.GetOrAdd(key, _ => DocumentRenderer.ForTemplate(_templatesFolder, template).RenderHtml(sample));
     }
 
     public IActionResult GetProfiles()
@@ -214,8 +274,8 @@ public class CVGeneratorService
     /// <summary>Loads a stored profile so the visitor can export it (PROF-02).</summary>
     public Task<CVMaster> GetProfileAsync(string profileId) => LoadCVMasterAsync(profileId);
 
-    public string BuildFileName(string format) =>
-        ApiConstants.FileNamePrefix + DateTime.Now.ToString(ApiConstants.FileNameDateFormat) + "." + format;
+    public static string BuildFileName(string format, string prefix = ApiConstants.FileNamePrefix) =>
+        prefix + DateTime.Now.ToString(ApiConstants.FileNameDateFormat) + "." + format;
 
     #endregion
 
@@ -234,17 +294,20 @@ public class CVGeneratorService
         var missingSkills   = _missingSkillsAnalyzer.Analyze(cvMaster, requirements);
 
         await ReportAsync(progress, GenerationStage.Selecting);
-        var (generatedCV, explanation) = _selector.SelectWithExplanation(cvMaster, requirements, request.AllowTwoPages);
-        var keywordAnalysis = _keywordAnalyzer.Analyze(request.JobDescription, generatedCV);
+        var (selectedCV, explanation) = _selector.SelectWithExplanation(
+            cvMaster, requirements, request.AllowTwoPages, request.Language);
+        selectedCV.Accent = request.Accent;
+        selectedCV.Fonts = request.Fonts;
 
+        // The analysis reads the CV after the measured page fit, which can trim more than the selection did
         await ReportAsync(progress, GenerationStage.Rendering);
+        var renderer = DocumentRenderer.ForTemplate(_templatesFolder, request.Template);
+        var (generatedCV, previewHtml, documents) =
+            await RenderDocumentsAsync(request.Formats, renderer, selectedCV, request.AllowTwoPages);
+        explanation = CVSelector.FollowFinalCv(explanation, generatedCV);
+
+        var keywordAnalysis = _keywordAnalyzer.Analyze(request.JobDescription, generatedCV);
         var atsScore        = _atsChecker.Check(generatedCV, requirements, request.Template);
-
-        var templatePath = ResolveTemplatePath(request.Template);
-        var renderer = new DocumentRenderer(templatePath);
-
-        var previewHtml = renderer.RenderHtml(generatedCV);
-        var documents = await RenderDocumentsAsync(request.Formats, renderer, generatedCV, previewHtml);
 
         var analysis = new AnalysisResult
         {
@@ -257,6 +320,9 @@ public class CVGeneratorService
             Explanation     = explanation,
             JdHighlight     = _jdHighlighter.Build(request.JobDescription, requirements, cvMaster, generatedCV)
         };
+
+        if (request.IncludeCoverLetter)
+            (analysis.CoverLetter, analysis.CoverLetterHtml) = WriteCoverLetter(generatedCV, requirements, request.JobDescription);
 
         return (documents, analysis);
     }
@@ -287,17 +353,20 @@ public class CVGeneratorService
             }
         }
 
-        cv = new PageConstraintHelper().EnforcePageConstraint(cv, request.AllowTwoPages);
+        cv = _pageConstraint.EnforcePageConstraint(cv, request.AllowTwoPages);
 
-        var renderer = new DocumentRenderer(ResolveTemplatePath(request.Template));
-        var previewHtml = renderer.RenderHtml(cv);
-        var documents = await RenderDocumentsAsync(request.Formats, renderer, cv, previewHtml);
+        var renderer = DocumentRenderer.ForTemplate(_templatesFolder, request.Template);
+        var (_, previewHtml, documents) = await RenderDocumentsAsync(request.Formats, renderer, cv, request.AllowTwoPages);
 
         return (documents, previewHtml);
     }
 
-    private async Task<Dictionary<string, byte[]>> RenderDocumentsAsync(
-        IEnumerable<string> formats, DocumentRenderer renderer, GeneratedCV cv, string html)
+    /// <summary>
+    /// Renders the requested documents. With a PDF, the page count is measured on the real PDF and the CV trimmed
+    /// further if it spills over (MATCH-08), so the preview, the PDF and the DOCX all show the fitted CV.
+    /// </summary>
+    private async Task<(GeneratedCV Cv, string Html, Dictionary<string, byte[]> Documents)> RenderDocumentsAsync(
+        IEnumerable<string> formats, DocumentRenderer renderer, GeneratedCV cv, bool allowTwoPages)
     {
         var docs = new Dictionary<string, byte[]>();
         var normalized = formats
@@ -305,24 +374,32 @@ public class CVGeneratorService
             .Select(f => f.Trim().ToLowerInvariant())
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
+        string html;
         if (normalized.Contains(ApiConstants.FormatPdf))
-            docs[ApiConstants.FormatPdf] = await renderer.RenderPdfAsync(html);
+        {
+            (cv, var fitted) = await _pageConstraint.FitMeasuredAsync(
+                cv,
+                allowTwoPages,
+                async candidate =>
+                {
+                    var candidateHtml = renderer.RenderHtml(candidate);
+                    return (Html: candidateHtml, Pdf: await renderer.RenderPdfAsync(candidateHtml));
+                },
+                rendered => DocumentRenderer.CountPages(rendered.Pdf));
+
+            html = fitted.Html;
+            docs[ApiConstants.FormatPdf] = fitted.Pdf;
+        }
+        else
+        {
+            html = renderer.RenderHtml(cv);
+        }
 
         if (normalized.Contains(ApiConstants.FormatDocx))
             docs[ApiConstants.FormatDocx] = renderer.RenderDocx(cv);
 
-        return docs;
+        return (cv, html, docs);
     }
-
-    private string ResolveTemplatePath(CVTemplate template) => template switch
-    {
-        CVTemplate.Modern     => _modernTemplatePath,
-        CVTemplate.Minimalist => _minimalistTemplatePath,
-        _                     => _harvardTemplatePath
-    };
-
-    private string TemplatePath(string filename) =>
-        Path.Combine(_env.ContentRootPath, TemplatePaths.TemplatesFolder, filename);
 
     private async Task<CVMaster> LoadCVMasterAsync(string profileId = ApiConstants.DefaultProfileId)
     {
@@ -351,6 +428,30 @@ public class CVGeneratorService
             throw new ArgumentException(ApiConstants.ErrorFormatsRequired);
 
         ValidateFormats(request.Formats);
+        ValidateStyle(request.Language, request.Accent, request.Fonts);
+    }
+
+    private static void ValidateStyle(string? language, string? accent, string? fonts)
+    {
+        if (!ApiConstants.Languages.Contains(language))
+            throw new ArgumentException($"Unsupported language: {language}. Allowed: {string.Join(", ", ApiConstants.Languages)}.");
+        if (!ApiConstants.Accents.Contains(accent))
+            throw new ArgumentException($"Unsupported accent: {accent}. Allowed: {string.Join(", ", ApiConstants.Accents)}.");
+        if (!ApiConstants.FontPairings.Contains(fonts))
+            throw new ArgumentException($"Unsupported fonts: {fonts}. Allowed: {string.Join(", ", ApiConstants.FontPairings)}.");
+    }
+
+    private (CoverLetter Letter, string Html) WriteCoverLetter(GeneratedCV cv, JobRequirements requirements, string jobDescription)
+    {
+        var letter = _coverLetterGenerator.Generate(cv, requirements, jobDescription, DateTime.Today);
+        return (letter, DocumentRenderer.ForCoverLetter(_templatesFolder).RenderCoverLetterHtml(letter));
+    }
+
+    // The sample profile with no job description: what a thumbnail needs is a realistic amount of content
+    private async Task<GeneratedCV> SampleCvAsync(string language)
+    {
+        var master = await LoadCVMasterAsync(ApiConstants.SeniorSampleProfileId);
+        return _selector.SelectAndAdaptCV(master, new JobRequirements(), allowTwoPages: false, language);
     }
 
     private void ValidateProfile(CVMaster? profile)
@@ -374,6 +475,15 @@ public class CVGeneratorService
             throw new ArgumentException(ApiConstants.ErrorFormatsRequired);
 
         ValidateFormats(request.Formats);
+    }
+
+    private static void ValidateEditedCv(GeneratedCV? cv)
+    {
+        if (cv == null)
+            throw new ArgumentException(ApiConstants.ErrorGeneratedCvRequired);
+
+        if (cv.Experience.SelectMany(e => e.Bullets).Any(b => b.Length > ApiConstants.MaxEditedBulletLength))
+            throw new ArgumentException($"A bullet can be at most {ApiConstants.MaxEditedBulletLength} characters.");
     }
 
     private void ValidateFormats(IEnumerable<string> formats)
@@ -462,7 +572,8 @@ public class CVGeneratorService
             atsScore        = analysis.ATSScore,
             generatedCV     = analysis.GeneratedCV,
             previewHtml     = analysis.PreviewHtml,   // FEATURE-102
-            explanation     = analysis.Explanation
+            explanation     = analysis.Explanation,
+            coverLetter     = analysis.CoverLetter is { } letter ? CoverLetterText.ToPlainText(letter) : null
         };
 
     private List<object> BuildFileMetadata(Dictionary<string, byte[]> documents) =>

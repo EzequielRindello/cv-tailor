@@ -48,11 +48,11 @@ public class DocxTests
         var paragraphs = Paragraphs(bytes).Select(p => p.InnerText).ToList();
 
         var expected = new List<string>();
-        if (!string.IsNullOrEmpty(cv.Summary)) expected.Add(DocumentConstants.SectionSummary);
-        expected.Add(DocumentConstants.SectionEducation);
-        expected.Add(DocumentConstants.SectionExperience);
-        if (cv.Skills.Any()) expected.Add(DocumentConstants.SectionSkills);
-        if (cv.Projects.Any()) expected.Add(DocumentConstants.SectionProjects);
+        if (!string.IsNullOrEmpty(cv.Summary)) expected.Add(CvLabels.English.Summary.ToUpperInvariant());
+        expected.Add(CvLabels.English.Education.ToUpperInvariant());
+        expected.Add(CvLabels.English.Experience.ToUpperInvariant());
+        if (cv.Skills.Any()) expected.Add(CvLabels.English.Skills.ToUpperInvariant());
+        if (cv.Projects.Any()) expected.Add(CvLabels.English.Projects.ToUpperInvariant());
 
         var found = paragraphs.Where(expected.Contains).ToList();
         Assert.Equal(expected, found);
