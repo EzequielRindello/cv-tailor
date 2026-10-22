@@ -1,0 +1,71 @@
+@inject ToastService Toasts
+
+<label class="btn btn-outline-secondary btn-sm mb-0 @(_reading ? "disabled" : "")" id="profile-use-resume">
+    <i class="bi bi-file-earmark-text" aria-hidden="true"></i> @(_reading ? "Reading your resume..." : "My resume (PDF or Word)")
+    <InputFile id="profile-import-resume" class="visually-hidden" accept="@Accept" disabled="@_reading" OnChange="ImportAsync" />
+</label>
+
+@code {
+    #region Constants
+
+    private const string Unreadable = "The file could not be read.";
+    private const string Accept = ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+    #endregion
+
+    #region Parameters
+
+    /// <summary>The draft read from the resume (PROF-05); the page loads it in the editor for review.</summary>
+    [Parameter] public EventCallback<CVMaster> OnImport { get; set; }
+
+    #endregion
+
+    #region State
+
+    private bool _reading;
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task ImportAsync(InputFileChangeEventArgs e)
+    {
+        if (ResumeImporter.SizeError(e.File.Size) is { } tooLarge)
+        {
+            Toasts.Error(tooLarge);
+            return;
+        }
+
+        _reading = true;
+        try
+        {
+            byte[] bytes;
+            try
+            {
+                await using var stream = e.File.OpenReadStream(ResumeImportConstants.MaxImportBytes);
+                using var memory = new MemoryStream();
+                await stream.CopyToAsync(memory);
+                bytes = memory.ToArray();
+            }
+            catch (IOException)
+            {
+                Toasts.Error(Unreadable);
+                return;
+            }
+
+            var result = await ResumeImporter.ImportAsync(bytes);
+            if (result.Profile == null)
+            {
+                Toasts.Error(result.Error ?? Unreadable);
+                return;
+            }
+            await OnImport.InvokeAsync(result.Profile);
+        }
+        finally
+        {
+            _reading = false;
+        }
+    }
+
+    #endregion
+}

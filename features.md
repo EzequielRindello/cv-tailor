@@ -56,7 +56,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
 | PROF-04 | Profile health check | E3 Your profile | P2 | M | Done |
 | PROF-06 | The owner's real profile as the demo | E3 Your profile | P1 | S | Done |
-| PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Todo (M5.1) |
+| PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Done |
 | MATCH-01 | Fix fuzzy-match false positives | E4 Matching | P0 | S | Done |
 | MATCH-02 | Word-boundary ATS keyword density | E4 Matching | P0 | S | Done |
 | MATCH-03 | Shared date parser + correct "most recent role" | E4 Matching | P0 | M | Done |
@@ -636,12 +636,22 @@ Done notes:
 - Profile page layout: one toolbar for "Start from", the JSON file and clearing; section hints; entries with their role and company under the title; icon buttons to remove a bullet; dashed "Add experience" buttons; wider gutters; a save bar that stays at the bottom of the screen while the form scrolls, "Check profile health" scrolls to the health card and moves focus to it (`cvApp.revealElement`), and the destructive buttons (Clear my profile, Remove) are a red outline without the soft red fill that looked muddy in dark mode.
 
 ### PROF-05: Import from an existing resume
-**Status:** Todo (M5.1) · **Priority:** P3 · **Effort:** L
+**Status:** Done (M5.1; AI-assisted parsing stays with M6) · **Priority:** P3 · **Effort:** L
 
-- [ ] Upload PDF/DOCX, heuristic section parsing into a draft profile the user reviews
+- [x] Upload PDF/DOCX, heuristic section parsing into a draft profile the user reviews
 - [ ] AI-assisted parsing when E7 is enabled (stays with M6, parked; not part of M5.1)
 
 Verify: tests with sample resumes.
+
+Notes: *My profile* gets a third "Start from" button, **My resume (PDF or Word)** (`ResumeImport`). The draft replaces what is in the editor, as the other "Start from" buttons do, and nothing is saved until the visitor saves (the Save button lights up, a toast says how many jobs, schools, skills and projects were read). New package, approved by the owner: PdfPig 0.1.16 in ErCv.Web (ErCv.Tests already used it).
+- `Features/Profiles/ResumeText`: the text. Word: paragraphs in order, list paragraphs as "- " items, tabs as " | " columns. PDF: words grouped into lines top to bottom, a wide gap as " | " (a right-aligned date), a two-column page (an empty vertical band most lines do not cross) read one column after the other, and a line marked as wrapped when the next line's first word would not have fit before the right edge and the two lines are as close as a paragraph's lines (Chrome puts one pixel between list items). LinkedIn and GitHub link targets come first, for resumes that print only "LinkedIn".
+- `ResumeParser`: section titles (English and Spanish, "Skills & Interests" read as skills), contact details by pattern, experience entries found by their date ranges with the role and company next to them (after the dates, or above them when only those name a role; an entry without dates by a role line and a company line), education by school, degree and date words, skills by label ("Languages:", "Bases de datos:") or by a known list, projects by a short opening line, a link, a stack line or "Technologies:". Dates are written in the profile's format ("ene. 2021" is "Jan 2021", "Actualidad" is "Present"). Nothing is invented: every value is text of the resume.
+- `ResumeImporter`: the checks, at the one entry point both the component and any later API use: 4 MB, PDF or .docx by their first bytes, a .docx that would expand past 32 MB refused before it is opened (zip bomb), the first 6 PDF pages, at most 2 files read at a time and 15 seconds each, messages written for the visitor (a damaged, scanned or empty file says so).
+- The privacy page says the file is read in memory and dropped.
+
+Tests: `ResumeRoundTripTests` (every profile fixture x every template x English and Spanish, PDF and DOCX: the CV this app printed reads back as what it printed: contact, roles, companies and places, dates, bullets, education, projects; skills by their words, since a PDF can cut "SQL" / "Server" at a line end), `ResumeParserTests` (resumes laid out as people write them: company and dates above the role, tabs, Spanish, wrapped PDF lines, letter-spaced titles, entries without dates, years inside a bullet, a project's stack on its line, commas inside parentheses, the date formats), `ResumeTextTests`, `ResumeImporterTests` (limits and messages), `ResumeImportTests` (bUnit), E2E `Starting_from_a_word_resume_fills_the_editor_for_review`. Also checked by hand on the owner's real resume (one PDF, three Word versions): every section read right; the sub-project titles inside a job (such as "LabLink 360", a client project) come in as bullets to edit.
+
+Known limits: a scanned resume (an image) has no text to read; a PDF with unmarked bullets and no space between them can join two bullets; two text styles with one font size but a different line height can leave a wrapped skill split ("SQL" / "Server"); where the company ends and its place starts is a guess when both are on one line with commas (both are kept, in one field or the other).
 
 ---
 

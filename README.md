@@ -126,8 +126,8 @@ In Development the OpenAPI document is at `/openapi/v1.json` and its reference p
 **Deploy:** one Docker web service on Render, defined in `render.yaml`, health check at `/api/cv/health`. The first
 public deploy is milestone M5.2.
 
-**Your own profile:** open *My profile*, start from a sample or import a JSON file, and save it. It stays in your
-browser.
+**Your own profile:** open *My profile*, start from a sample, from your resume (PDF or Word, read into a draft you
+check) or from a JSON file, and save it. It stays in your browser.
 
 ---
 

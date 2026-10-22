@@ -1,3 +1,5 @@
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.Playwright;
 
 namespace ErCv.E2E;
@@ -92,5 +94,37 @@ public class MyProfileTests : E2ETestBase
 
         await Assertions.Expect(Page.Locator("#source-mine")).ToBeDisabledAsync();
         await Assertions.Expect(Page.Locator("#header-profile-link")).ToHaveAttributeAsync("href", "profile");
+    }
+
+    // PROF-05: a Word resume fills the editor; nothing is saved until the visitor saves
+    [Fact]
+    public async Task Starting_from_a_word_resume_fills_the_editor_for_review()
+    {
+        await OpenProfilePageAsync();
+
+        await Page.Locator("#profile-import-resume").SetInputFilesAsync(new FilePayload
+        {
+            Name = "jane-doe.docx",
+            MimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            Buffer = WordResume("Jane Doe", "jane@doe.dev", "EXPERIENCE", "Platform Engineer at Acme", "Jan 2021 - Present")
+        });
+
+        await Assertions.Expect(Page.Locator(".app-toast").Filter(new() { HasText = "Read from your resume" })).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#p-fullName")).ToHaveValueAsync("Jane Doe");
+        await Assertions.Expect(Page.Locator("#exp-0-role")).ToHaveValueAsync("Platform Engineer");
+        await Assertions.Expect(Page.Locator("#profile-save")).ToBeEnabledAsync();
+        Assert.Null(await Page.EvaluateAsync<string?>("() => localStorage.getItem('cv-generator-my-profile')"));
+    }
+
+    private static byte[] WordResume(params string[] lines)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, DocumentFormat.OpenXml.WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            main.Document = new Document(new Body(lines.Select(l => new Paragraph(new Run(new Text(l))))));
+            main.Document.Save();
+        }
+        return stream.ToArray();
     }
 }

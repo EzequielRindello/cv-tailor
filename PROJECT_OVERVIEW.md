@@ -23,6 +23,8 @@ Target users: job seekers, mainly software engineers, who adapt one master CV to
 - **API docs:** the built-in OpenAPI document and the Scalar reference page, Development only.
 - **Tests:** xUnit, bUnit, Playwright (installed Chrome or Edge), coverlet; GitHub Actions CI.
 - **No database, no account.** Profiles, history and settings live in the visitor's browser (see the Privacy page).
+- **A profile can start from a resume** (PROF-05): `ResumeImporter` reads a PDF (PdfPig) or a .docx (OpenXML) in
+  memory and `ResumeParser` turns its text into a draft the visitor reviews before saving.
 
 ## Request flow
 
@@ -62,7 +64,7 @@ er-cv-generator/
 │   │   ├── Matching/                JobDescriptionParser, SkillDictionary (Data/skills.json), SkillNormalizer, samples
 │   │   ├── Analysis/                MatchScoreCalculator, MissingSkillsAnalyzer, KeywordAnalyzer, ATSChecker, JdHighlighter
 │   │   ├── Selection/               CVSelector, RelevanceScorer, SummaryGenerator, PageConstraintHelper, CvCloner
-│   │   ├── Profiles/                ProfileValidator, ProfileHealthChecker, ProfileJson, DateParser
+│   │   ├── Profiles/                ProfileValidator, ProfileHealthChecker, ProfileJson, DateParser, ResumeImporter (PDF/DOCX)
 │   │   ├── Documents/               DocumentRenderer (HTML, PDF, DOCX), CvLabels (EN/ES), CvTextRenderer, PdfEngineWarmUp
 │   │   ├── Editing/                 CvDraft: the editable copy behind the editor
 │   │   └── CoverLetters/            CoverLetterGenerator, CoverLetterText
