@@ -1,3 +1,4 @@
+using System.Globalization;
 using ErCv.Web.Features.Analysis;
 using ErCv.Web.Models;
 using static ErCv.Tests.Support.Build;
@@ -173,5 +174,23 @@ public class ATSCheckerTests
         var r = _checker.Check(cv, Req(skills: new[] { "go" }), CVTemplate.Harvard);
 
         Assert.DoesNotContain(r.Issues, i => i.Issue.Contains("keyword density"));
+    }
+
+    // F28: the server's culture used to decide the text ("12%" on Windows, "12 %" on Linux, where production runs)
+    [Theory]
+    [InlineData("")]
+    [InlineData("en-US")]
+    [InlineData("fr-FR")]
+    public void Keyword_density_issue_prints_a_whole_percent_whatever_the_culture(string culture)
+    {
+        CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(culture);
+        var cv = Generated(new[] { Exp(bullets: new[] { "Built services in Go serving 2M users every single day" }) },
+            skills: new[] { "go" });
+
+        // 1 of 8 skills present: 12.5%, rounded half to even like the "P0" format it replaced
+        var r = _checker.Check(cv, Req(skills: new[] { "go", "rust", "kafka", "redis", "java", "scala", "elixir", "haskell" }),
+            CVTemplate.Harvard);
+
+        Assert.Contains(r.Issues, i => i.Issue == "Low keyword density (12%): ATS may reject the CV");
     }
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using ErCv.Tests.Api;
 using ErCv.Tests.Fixtures;
 using ErCv.Tests.Support;
@@ -50,7 +51,34 @@ public class GenerationSnapshotTests : IClassFixture<SnapshotHost>
 
     [Theory]
     [MemberData(nameof(Cases))]
-    public async Task Generation_matches_its_approved_snapshot(string profile, string jd)
+    public async Task Generation_matches_its_approved_snapshot(string profile, string jd) =>
+        Snapshot.Verify(Name(profile, jd), await GenerateAsync(profile, jd));
+
+    // F28: production runs on Linux, where .NET starts with the invariant culture, and a developer machine has its
+    // own. "P0" printed "0%" on one and "0 %" on the other, so every case is generated again under other cultures
+    // and must match the same approved snapshot.
+    [Theory]
+    [InlineData("")]        // invariant: the Linux CI runner and the container
+    [InlineData("es-AR")]   // decimal comma, dot for thousands
+    [InlineData("de-DE")]
+    [InlineData("fr-FR")]   // a space before the percent sign
+    public async Task Generation_does_not_depend_on_the_culture(string culture)
+    {
+        // Approving writes the snapshots once, from the run above
+        if (Snapshot.Approving) return;
+
+        // The culture flows with this async test only, so tests running in parallel keep theirs
+        CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(culture);
+        CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(culture);
+
+        foreach (var row in Cases())
+        {
+            var (profile, jd) = ((string)row[0], (string)row[1]);
+            Snapshot.Verify(Name(profile, jd), await GenerateAsync(profile, jd));
+        }
+    }
+
+    private async Task<object> GenerateAsync(string profile, string jd)
     {
         using var _ = DateParser.PinNow(PinnedDate);
         var request = new GenerateRequest
@@ -61,13 +89,12 @@ public class GenerationSnapshotTests : IClassFixture<SnapshotHost>
             Template = CVTemplate.Harvard
         };
 
-        object snapshot;
         try
         {
             var (_, analysis) = await _app.InScopeAsync(sp =>
                 sp.GetRequiredService<CVGeneratorService>().BuildCvAsync(request, FixtureLoader.LoadProfile(profile)));
 
-            snapshot = new
+            return new
             {
                 analysis.MatchScore,
                 analysis.MissingSkills,
@@ -79,10 +106,8 @@ public class GenerationSnapshotTests : IClassFixture<SnapshotHost>
         catch (ArgumentException ex)
         {
             // A rejected request (an empty job description) is an outcome worth pinning too
-            snapshot = new { Rejected = ex.Message };
+            return new { Rejected = ex.Message };
         }
-
-        Snapshot.Verify(Name(profile, jd), snapshot);
     }
 
     [Fact]

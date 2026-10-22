@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Text.Json;
 using ErCv.Web.Constants;
 using ErCv.Web.Features.Analysis;
@@ -241,7 +242,7 @@ public class CVGeneratorService
     {
         ValidateEditedCv(cv);
         if (jobDescription.Length > ApiConstants.MaxJobDescriptionLength)
-            throw new ArgumentException(string.Format(ApiConstants.ErrorJobDescriptionTooLong, ApiConstants.MaxJobDescriptionLength));
+            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ApiConstants.ErrorJobDescriptionTooLong, ApiConstants.MaxJobDescriptionLength));
 
         return WriteCoverLetter(cv, _parser.Parse(jobDescription), jobDescription);
     }
@@ -443,7 +444,7 @@ public class CVGeneratorService
             throw new ArgumentException(ApiConstants.ErrorJobDescriptionRequired);
 
         if (request.JobDescription.Length > ApiConstants.MaxJobDescriptionLength)
-            throw new ArgumentException(string.Format(ApiConstants.ErrorJobDescriptionTooLong, ApiConstants.MaxJobDescriptionLength));
+            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ApiConstants.ErrorJobDescriptionTooLong, ApiConstants.MaxJobDescriptionLength));
 
         if (request.Formats == null || !request.Formats.Any())
             throw new ArgumentException(ApiConstants.ErrorFormatsRequired);

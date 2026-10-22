@@ -86,10 +86,11 @@ public static partial class ATSConstants
     public const string PhoneInvalidIssue = "Phone format may not be parsed correctly by some ATS systems";
     public const string PhoneInvalidFix = "Use format: +1 (234) 567-8900 or +54 9 341 279-3916";
 
-    public const string LowDensityIssue = "Low keyword density ({0:P0}) — ATS may reject the CV";
+    // {0} is a whole percent, formatted by the caller: "P0" would print "0 %" where the culture is invariant (Linux)
+    public const string LowDensityIssue = "Low keyword density ({0}%): ATS may reject the CV";
     public const string LowDensityFix = "Include more keywords from the job description in bullets and skills section";
 
-    public const string MediumDensityIssue = "Medium keyword density ({0:P0}) — could be improved";
+    public const string MediumDensityIssue = "Medium keyword density ({0}%): could be improved";
     public const string MediumDensityFix = "Add 2–3 more keywords from the job description to improve ATS ranking";
 
     public const string MissingSectionsIssue = "Missing required sections (Education / Experience / Skills)";
@@ -106,7 +107,7 @@ public static partial class ATSConstants
     public const string FewMetricsFix = "Add more numbers and percentages to your bullets";
 
     public const string ModernTemplateIssue =
-        "Modern (two-column) template detected — major ATS systems (Workday, Taleo, Greenhouse) " +
+        "Modern (two-column) template detected: major ATS systems (Workday, Taleo, Greenhouse) " +
         "linearize columns and may scramble your content";
     public const string ModernTemplateFix =
         "Use Harvard or Minimalist template when applying through ATS portals. " +

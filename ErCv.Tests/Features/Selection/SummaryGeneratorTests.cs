@@ -131,6 +131,17 @@ public class SummaryGeneratorTests
         Assert.StartsWith(expected, s);
     }
 
+    // F29: "ui" (a frontend signal) used to match inside "build" and "guide", so a backend post read as full stack
+    [Fact]
+    public void Role_signals_match_whole_terms_only()
+    {
+        var cv = Master(new[] { Exp(role: "Developer") });
+
+        var s = Summary(cv, Req(skills: new[] { "kafka", "postgresql" }, keywords: new[] { "build", "guide", "quickly" }));
+
+        Assert.StartsWith("Backend Developer", s);
+    }
+
     [Fact]
     public void Specializing_in_lists_jd_matching_top_skills()
     {

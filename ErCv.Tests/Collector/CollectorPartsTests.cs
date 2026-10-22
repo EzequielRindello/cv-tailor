@@ -1,4 +1,5 @@
 using ErCv.Collector;
+using static ErCv.Tests.Support.Build;
 
 namespace ErCv.Tests.Collector;
 
@@ -53,9 +54,54 @@ public class CollectorPartsTests
             Post("clear", "Senior Full Stack Engineer", "React.")
         };
 
-        var sample = SamplePicker.Pick(postings, out _).Single(s => s.Id == "fullstack");
+        var sample = SamplePicker.Pick(postings, null, out _).Single(s => s.Id == "fullstack");
 
         Assert.Equal("clear", sample.PostingId);
+    }
+
+    // F27: the demo starts with the senior sample profile, so a Staff post was a seniority mismatch on first try
+    [Fact]
+    public void Sample_picker_prefers_the_demo_profiles_level_over_another_clear_level()
+    {
+        static Posting Post(string id, string title, string text) => new()
+        {
+            Id = id, Source = "greenhouse", Url = "https://example.com/" + id, Company = "Acme", Title = title,
+            PostedAt = DateTimeOffset.Parse("2026-10-01T00:00:00Z"), RoleFamily = "backend", Seniority = Classifier.Seniority(title), Text = text
+        };
+        var postings = new[]
+        {
+            Post("staff", "Staff Backend Engineer", "Go, Kafka, Redis, PostgreSQL, Kubernetes and AWS."),
+            Post("senior", "Senior Backend Engineer", "Go and PostgreSQL."),
+            Post("plain", "Backend Engineer", "Go, Kafka, Redis, PostgreSQL, Kubernetes, AWS and Terraform.")
+        };
+
+        var sample = SamplePicker.Pick(postings, null, out _).Single(s => s.Id == "backend");
+
+        Assert.Equal("senior", sample.PostingId);
+    }
+
+    // F27: among the posts at the demo's level, the one the demo profile fits best, not the one with the most skills
+    [Fact]
+    public void Sample_picker_takes_the_post_the_demo_profile_matches_best()
+    {
+        static Posting Post(string id, string text) => new()
+        {
+            Id = id, Source = "greenhouse", Url = "https://example.com/" + id, Company = "Acme", Title = "Senior Backend Engineer",
+            PostedAt = DateTimeOffset.Parse("2026-10-01T00:00:00Z"), RoleFamily = "backend", Seniority = "senior", Text = text
+        };
+        var postings = new[]
+        {
+            Post("trivial", "Go."),
+            Post("many-skills", "Rust, Elixir, Haskell, Scala, Erlang, OCaml and Clojure."),
+            Post("fits", "Go, Kafka, PostgreSQL, Redis, Docker and Kubernetes.")
+        };
+        var profile = Master(new[] { Exp(role: "Senior Backend Engineer") },
+            languages: new[] { "Go" }, tools: new[] { "Kafka", "PostgreSQL", "Redis", "Docker", "Kubernetes" });
+
+        var sample = SamplePicker.Pick(postings, profile, out _).Single(s => s.Id == "backend");
+
+        // "trivial" is a perfect match on its one skill, too few to make a sample
+        Assert.Equal("fits", sample.PostingId);
     }
 
     [Theory]

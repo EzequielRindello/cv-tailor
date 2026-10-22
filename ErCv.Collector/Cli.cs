@@ -1,4 +1,7 @@
 using System.Text.Json;
+using ErCv.Web.Constants;
+using ErCv.Web.Features.Profiles;
+using ErCv.Web.Models;
 
 namespace ErCv.Collector;
 
@@ -144,10 +147,17 @@ public static class Cli
 
     private static void WriteSamples(CorpusStore store, string samplesPath)
     {
-        var samples = SamplePicker.Pick(store.LoadPostings(), out var missing);
+        var samples = SamplePicker.Pick(store.LoadPostings(), LoadDemoProfile(samplesPath), out var missing);
         var changed = CorpusStore.WriteIfChanged(samplesPath, samples);
         Console.WriteLine($"Samples: {string.Join(", ", samples.Select(s => $"{s.Label} = {s.Company}"))}{(changed ? " (updated)" : " (unchanged)")}");
         if (missing.Count > 0) Console.WriteLine($"  ! no post for sample(s): {string.Join(", ", missing)}");
+    }
+
+    /// <summary>The profile the demo starts with, next to the samples file (ErCv.Web/Data); null when it is not there.</summary>
+    public static CVMaster? LoadDemoProfile(string samplesPath)
+    {
+        var path = Path.Combine(Path.GetDirectoryName(samplesPath) ?? ".", ApiConstants.SeniorSampleProfileId + ".json");
+        return File.Exists(path) ? ProfileJson.Parse(File.ReadAllText(path)).Profile : null;
     }
 
     private static List<SampleRecord>? ReadSamples(string path) =>

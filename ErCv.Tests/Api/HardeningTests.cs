@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using ErCv.Web.Configuration;
 using ErCv.Web.Constants;
@@ -53,6 +54,26 @@ public class HardeningTests
             var service = (CVGeneratorService)sp.GetService(typeof(CVGeneratorService))!;
             return await service.BuildCvAsync(request);
         }));
+    }
+
+    // F28: the limit in the message is formatted the same on every server, whatever its culture
+    [Theory]
+    [InlineData("")]
+    [InlineData("de-DE")]
+    public async Task The_length_error_names_the_limit_the_same_way_in_every_culture(string culture)
+    {
+        CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(culture);
+        using var app = new ApiApp();
+        var request = new GenerateRequest
+        {
+            JobDescription = new string('a', ApiConstants.MaxJobDescriptionLength + 1),
+            Formats = new List<string> { ApiConstants.FormatDocx }
+        };
+
+        var error = await Assert.ThrowsAsync<ArgumentException>(() => app.InScopeAsync(sp =>
+            ((CVGeneratorService)sp.GetService(typeof(CVGeneratorService))!).BuildCvAsync(request)));
+
+        Assert.Contains("maximum 100,000 characters", error.Message);
     }
 
     [Theory]

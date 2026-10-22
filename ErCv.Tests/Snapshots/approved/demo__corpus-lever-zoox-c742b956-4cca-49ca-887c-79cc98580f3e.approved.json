@@ -131,7 +131,7 @@
     "issues": [
       {
         "severity": "Medium",
-        "issue": "Medium keyword density (50%) — could be improved",
+        "issue": "Medium keyword density (50%): could be improved",
         "fix": "Add 2–3 more keywords from the job description to improve ATS ranking"
       },
       {
@@ -148,7 +148,7 @@
     "recommendations": [
       "3 improvement point(s) detected:",
       "• Phone format may not be parsed correctly by some ATS systems → Use format: +1 (234) 567-8900 or +54 9 341 279-3916",
-      "• Medium keyword density (50%) — could be improved → Add 2–3 more keywords from the job description to improve ATS ranking",
+      "• Medium keyword density (50%): could be improved → Add 2–3 more keywords from the job description to improve ATS ranking",
       "• No quantifiable achievements detected (numbers, percentages) → Add metrics to bullets: 'Reduced X by 30%', 'Handled N requests/day'"
     ],
     "colorClass": "yellow"

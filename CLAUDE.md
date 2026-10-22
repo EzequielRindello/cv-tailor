@@ -94,6 +94,10 @@ Constants classes longer than about 50 lines use topic regions instead (`Scoring
   `appsettings.json`, bound by `Configuration/ErCvOptions.cs`, validated at startup. Values that tune the CV logic
   are constants, not settings.
 - External API field names (Collector sources) stay inline in the parser that reads them.
+- Text never depends on the server's culture: production and CI run on Linux, where .NET starts with the invariant
+  culture, while a developer machine has its own. Format numbers with `CultureInfo.InvariantCulture`, or pass a
+  number already rounded (no `P0`: it prints "12 %" there). `GenerationSnapshotTests` checks every case under
+  several cultures.
 
 ## Performance rules
 

@@ -15,8 +15,8 @@ public class ScreenshotTests : E2ETestBase
     // Lets the score gauges and the page transitions finish before a shot
     private const int SettleMilliseconds = 1500;
 
-    // The sample the default (senior) profile matches best, so the shots show a typical result
-    private const string Sample = "DevOps";
+    // The sample the default (senior) profile matches best (F27); check the scores again after a corpus refresh
+    private const string Sample = "Full stack";
 
     public ScreenshotTests(AppFixture app) : base(app)
     {

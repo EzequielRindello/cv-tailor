@@ -202,13 +202,13 @@
     "issues": [
       {
         "severity": "Medium",
-        "issue": "Medium keyword density (50%) — could be improved",
+        "issue": "Medium keyword density (50%): could be improved",
         "fix": "Add 2–3 more keywords from the job description to improve ATS ranking"
       }
     ],
     "recommendations": [
       "1 improvement point(s) detected:",
-      "• Medium keyword density (50%) — could be improved → Add 2–3 more keywords from the job description to improve ATS ranking"
+      "• Medium keyword density (50%): could be improved → Add 2–3 more keywords from the job description to improve ATS ranking"
     ],
     "colorClass": "green"
   },

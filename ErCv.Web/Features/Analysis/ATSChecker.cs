@@ -5,6 +5,12 @@ namespace ErCv.Web.Features.Analysis;
 
 public class ATSChecker
 {
+    #region Constants
+
+    private const int PercentScale = 100;
+
+    #endregion
+
     #region Public Methods
 
     public ATSScore Check(GeneratedCV cv, JobRequirements requirements, CVTemplate template)
@@ -85,7 +91,7 @@ public class ATSChecker
             issues.Add(new ATSIssue
             {
                 Severity = ATSConstants.SeverityHigh,
-                Issue = string.Format(ATSConstants.LowDensityIssue, density),
+                Issue = string.Format(ATSConstants.LowDensityIssue, WholePercent(density)),
                 Fix = ATSConstants.LowDensityFix
             });
         }
@@ -95,7 +101,7 @@ public class ATSChecker
             issues.Add(new ATSIssue
             {
                 Severity = ATSConstants.SeverityMedium,
-                Issue = string.Format(ATSConstants.MediumDensityIssue, density),
+                Issue = string.Format(ATSConstants.MediumDensityIssue, WholePercent(density)),
                 Fix = ATSConstants.MediumDensityFix
             });
         }
@@ -245,6 +251,11 @@ public class ATSChecker
 
         return recs;
     }
+
+    // Rounded like the "P0" format it replaces (half to even: 1/8 is 12%), without the culture, so the issue text is
+    // the same on every server
+    private static int WholePercent(double ratio) =>
+        (int)Math.Round(ratio * PercentScale, MidpointRounding.ToEven);
 
     #endregion
 }

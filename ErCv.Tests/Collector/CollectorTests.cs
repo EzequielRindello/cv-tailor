@@ -208,7 +208,7 @@ public sealed class CollectorTests : IDisposable
     {
         await RefreshAsync();
 
-        var samples = SamplePicker.Pick(_store.LoadPostings(), out var missing);
+        var samples = SamplePicker.Pick(_store.LoadPostings(), null, out var missing);
 
         Assert.Equal(new[] { "backend", "data", "devops", "junior" }, samples.Select(s => s.Id));
         Assert.Equal(new[] { "Frontend", "Full stack" }, missing);

@@ -167,7 +167,9 @@ public partial class SummaryGenerator
         var scores = new Dictionary<string, int>();
         foreach (var kvp in RoleTypeSignals)
         {
-            var score = kvp.Value.Count(signal => allSignals.Any(s => s.Contains(signal)));
+            // Whole terms (F29): as a substring, the frontend signal "ui" matched keywords such as "build" and "guide",
+            // so a backend post read as frontend
+            var score = kvp.Value.Count(signal => allSignals.Any(s => SkillNormalizer.ContainsTerm(s, signal)));
             if (score > 0) scores[kvp.Key] = score;
         }
 

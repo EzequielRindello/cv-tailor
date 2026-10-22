@@ -113,7 +113,7 @@
       {
         "word": "backend",
         "frequency": 2,
-        "presentInCV": false
+        "presentInCV": true
       },
       {
         "word": "engineer",
@@ -169,6 +169,7 @@
       "ci/cd",
       "on-call",
       "senior",
+      "backend",
       "engineer",
       "years",
       "experience",
@@ -205,7 +206,7 @@
       "linkedIn": "linkedin.com/in/alex-rivera-dev",
       "gitHub": "github.com/alexrivera-dev"
     },
-    "summary": "Senior Full Stack Developer with 9+ years of experience, specializing in REST API Design, AWS, Go, PostgreSQL, and Redis. Proven track record of reducing frontend network requests by 60%. Strong team collaboration skills.",
+    "summary": "Senior Backend Developer with 9+ years of experience, specializing in REST API Design, AWS, Go, PostgreSQL, and Redis. Proven track record of reducing frontend network requests by 60%. Strong team collaboration skills.",
     "education": [
       {
         "degree": "B.S. Computer Science",

@@ -184,7 +184,7 @@
     "issues": [
       {
         "severity": "High",
-        "issue": "Low keyword density (0%) — ATS may reject the CV",
+        "issue": "Low keyword density (0%): ATS may reject the CV",
         "fix": "Include more keywords from the job description in bullets and skills section"
       },
       {
@@ -201,7 +201,7 @@
     "recommendations": [
       "3 improvement point(s) detected:",
       "• Phone format may not be parsed correctly by some ATS systems → Use format: +1 (234) 567-8900 or +54 9 341 279-3916",
-      "• Low keyword density (0%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section",
+      "• Low keyword density (0%): ATS may reject the CV → Include more keywords from the job description in bullets and skills section",
       "• No quantifiable achievements detected (numbers, percentages) → Add metrics to bullets: 'Reduced X by 30%', 'Handled N requests/day'"
     ],
     "colorClass": "yellow"

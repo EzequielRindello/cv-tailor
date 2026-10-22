@@ -63,7 +63,7 @@
       {
         "word": "backend",
         "frequency": 2,
-        "presentInCV": false
+        "presentInCV": true
       },
       {
         "word": "experiencia",
@@ -114,7 +114,8 @@
       "rest",
       "docker",
       "ci/cd",
-      "software"
+      "software",
+      "backend"
     ],
     "missingFromCV": [],
     "keywordDensity": 1,
@@ -137,7 +138,7 @@
       "linkedIn": "linkedin.com/in/sam-carter-dev",
       "gitHub": "github.com/samcarter-dev"
     },
-    "summary": "Junior Full Stack Developer with 2+ years of experience, specializing in PostgreSQL, TypeScript, Docker, AWS, and CI/CD.",
+    "summary": "Junior Backend Developer with 2+ years of experience, specializing in PostgreSQL, TypeScript, Docker, AWS, and CI/CD.",
     "education": [
       {
         "degree": "B.S. Computer Science",

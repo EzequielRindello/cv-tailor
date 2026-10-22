@@ -99,7 +99,8 @@ public class CorpusTests
     [Fact]
     public void Samples_are_what_the_picker_chooses_from_the_committed_corpus()
     {
-        var picked = SamplePicker.Pick(FixtureLoader.CorpusPostings, out var missing);
+        var samplesPath = Path.Combine(FixtureLoader.RepoRoot(), "ErCv.Web", "Data", "sample-jobs.json");
+        var picked = SamplePicker.Pick(FixtureLoader.CorpusPostings, Cli.LoadDemoProfile(samplesPath), out var missing);
 
         Assert.Empty(missing);
         Assert.Equal(picked.Select(s => s.PostingId), SampleJobDescriptions.All.Select(s => s.PostingId));

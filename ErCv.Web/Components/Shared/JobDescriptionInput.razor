@@ -21,7 +21,7 @@
         </div>
     }
     <div class="jd-meta" id="job-description-meta">
-        <span class="jd-counter">@_text.Length.ToString("N0") characters</span>
+        <span class="jd-counter">@_text.Length.ToString("N0", System.Globalization.CultureInfo.InvariantCulture) characters</span>
         <span class="jd-counter">
             @if (_skills.Count == 0)
             {

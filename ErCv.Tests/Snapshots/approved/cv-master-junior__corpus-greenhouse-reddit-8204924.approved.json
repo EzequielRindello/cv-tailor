@@ -173,13 +173,13 @@
     "issues": [
       {
         "severity": "High",
-        "issue": "Low keyword density (20%) — ATS may reject the CV",
+        "issue": "Low keyword density (20%): ATS may reject the CV",
         "fix": "Include more keywords from the job description in bullets and skills section"
       }
     ],
     "recommendations": [
       "1 improvement point(s) detected:",
-      "• Low keyword density (20%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section"
+      "• Low keyword density (20%): ATS may reject the CV → Include more keywords from the job description in bullets and skills section"
     ],
     "colorClass": "yellow"
   },
