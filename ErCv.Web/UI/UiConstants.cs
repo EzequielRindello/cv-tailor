@@ -32,6 +32,9 @@ public static class UiConstants
     public const string SeniorSampleProfileLabel = "Senior sample profile";
     public const string CreatorProfileLabel = "Creator's profile";
 
+    // Cascaded by the profile page to its fields, which report edits so Save is enabled only when there is something new
+    public const string ProfileEditedCascade = "ProfileEdited";
+
     // The health check card: rendered by ProfileHealthCard, scrolled to by the profile page's check button
     public const string ProfileHealthCardId = "profile-health";
 

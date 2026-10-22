@@ -1,0 +1,90 @@
+@* Asks before an action that deletes the visitor's data. The caller awaits AskAsync and goes on only on true. *@
+@if (_request is { } request)
+{
+    <div class="confirm-overlay" @onclick="Cancel">
+        <div class="confirm-dialog" role="alertdialog" aria-modal="true"
+             aria-labelledby="confirm-title" aria-describedby="confirm-body"
+             @onclick:stopPropagation="true" @onkeydown="OnKeyDown">
+            <h2 class="confirm-title" id="confirm-title">
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                @request.Title
+            </h2>
+            <div class="confirm-body" id="confirm-body">@request.Body</div>
+            <div class="confirm-actions">
+                <button type="button" class="btn btn-outline-secondary" id="confirm-cancel"
+                        @ref="_cancelButton" @onclick="Cancel">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-ok" @onclick="Confirm">@request.ConfirmLabel</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    #region Constants
+
+    private const string EscapeKey = "Escape";
+
+    #endregion
+
+    #region State
+
+    private ConfirmRequest? _request;
+    private TaskCompletionSource<bool>? _answer;
+    private ElementReference _cancelButton;
+    private bool _focusCancel;
+
+    #endregion
+
+    #region Lifecycle
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Cancel takes the focus, so Enter right after the click never deletes anything
+        if (!_focusCancel) return;
+        _focusCancel = false;
+        await _cancelButton.FocusAsync();
+    }
+
+    #endregion
+
+    #region Event Handlers
+
+    /// <summary>Shows the dialog; true once the visitor confirms, false on Cancel, Escape or a click outside it.</summary>
+    public Task<bool> AskAsync(string title, RenderFragment body, string confirmLabel)
+    {
+        _answer?.TrySetResult(false);
+        _answer = new TaskCompletionSource<bool>();
+        _request = new ConfirmRequest(title, body, confirmLabel);
+        _focusCancel = true;
+        StateHasChanged();
+        return _answer.Task;
+    }
+
+    private void Confirm() => Close(true);
+
+    private void Cancel() => Close(false);
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == EscapeKey) Cancel();
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private void Close(bool confirmed)
+    {
+        _request = null;
+        _answer?.TrySetResult(confirmed);
+        _answer = null;
+    }
+
+    #endregion
+
+    #region Nested Types
+
+    private sealed record ConfirmRequest(string Title, RenderFragment Body, string ConfirmLabel);
+
+    #endregion
+}

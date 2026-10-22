@@ -1,6 +1,7 @@
 using Bunit;
 using ErCv.Web.Components.Shared;
 using ErCv.Web.UI;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace ErCv.Tests.Components;
 
@@ -135,10 +136,12 @@ public class HistoryPanelTests : BunitContext
             .Add(c => c.OnDelete, (long id) => deleted.Add(id))
             .Add(c => c.OnClear, () => cleared++));
 
-        // Rows are newest first: entry 3, then 2, then 1
+        // Rows are newest first: entry 3, then 2, then 1. Delete and Clear go through the confirm dialog.
         cut.FindAll("button").Where(b => b.TextContent == "Re-open").ElementAt(1).Click();
-        cut.FindAll("button").Where(b => b.TextContent == "Delete").ElementAt(2).Click();
-        cut.FindAll("button").Single(b => b.TextContent == "Clear").Click();
+        cut.FindAll(".history-delete-btn").ElementAt(2).Click();
+        cut.Find("#confirm-ok").Click();
+        cut.FindAll("button").Single(b => b.TextContent.Trim() == "Clear").Click();
+        cut.Find("#confirm-ok").Click();
 
         Assert.Equal(2, Assert.Single(loaded).Id);
         Assert.Equal(1, Assert.Single(deleted));
@@ -146,11 +149,37 @@ public class HistoryPanelTests : BunitContext
     }
 
     [Fact]
+    public void Delete_and_clear_do_nothing_until_confirmed_and_cancel_backs_out()
+    {
+        var deleted = new List<long>();
+        var cleared = 0;
+        var cut = Render<HistoryPanel>(p => p
+            .Add(c => c.Entries, Entries())
+            .Add(c => c.OnDelete, (long id) => deleted.Add(id))
+            .Add(c => c.OnClear, () => cleared++));
+
+        var delete = cut.FindAll(".history-delete-btn").First();
+        Assert.Equal("Delete Site Reliability Engineer at Acme", delete.GetAttribute("aria-label"));
+        delete.Click();
+        Assert.Contains("Site Reliability Engineer at Acme", cut.Find("#confirm-body strong").TextContent);
+        cut.Find("#confirm-cancel").Click();
+
+        cut.FindAll("button").Single(b => b.TextContent.Trim() == "Clear").Click();
+        Assert.Equal("all 3 CVs", cut.Find("#confirm-body strong").TextContent);
+        cut.Find(".confirm-dialog").KeyDown(new KeyboardEventArgs { Key = "Escape" });
+
+        Assert.Empty(deleted);
+        Assert.Equal(0, cleared);
+        Assert.Empty(cut.FindAll(".confirm-dialog"));
+    }
+
+    [Fact]
     public void While_disabled_reopen_delete_and_clear_cannot_be_used()
     {
         var cut = Render<HistoryPanel>(p => p.Add(c => c.Entries, Entries()).Add(c => c.Disabled, true));
 
-        var actions = cut.FindAll("button").Where(b => b.TextContent is "Re-open" or "Delete" or "Clear").ToList();
+        var actions = cut.FindAll("button").Where(b => b.TextContent.Trim() is "Re-open" or "Clear")
+            .Concat(cut.FindAll(".history-delete-btn")).ToList();
         Assert.Equal(7, actions.Count);
         Assert.All(actions, b => Assert.True(b.HasAttribute("disabled")));
     }
@@ -160,7 +189,7 @@ public class HistoryPanelTests : BunitContext
     {
         var cut = Render(new List<HistoryEntry>());
 
-        Assert.True(cut.FindAll("button").Single(b => b.TextContent == "Clear").HasAttribute("disabled"));
+        Assert.True(cut.FindAll("button").Single(b => b.TextContent.Trim() == "Clear").HasAttribute("disabled"));
     }
 
     [Fact]

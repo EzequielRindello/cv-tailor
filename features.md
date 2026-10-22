@@ -184,6 +184,22 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 | F28 | Text depended on the server's culture. The ATS density issue used `{0:P0}`: "12%" on Windows (en-US) and "12 %" on Linux, where .NET runs with the invariant culture, so the first CI run of the M5 merge failed 44 snapshots, and the Render container would have shown "12 %". `{0:N0}` in the job description length error and the character counter would print "100.000" under a German or Spanish culture. | Fixed in `fix/culture-independent-text` (no version change): the ATS gets a whole percent rounded half to even (the "P0" rounding), the counts are formatted with the invariant culture, the ATS messages lost their em dashes. `GenerationSnapshotTests.Generation_does_not_depend_on_the_culture` generates every case under the invariant, es-AR, de-DE and fr-FR cultures against the same snapshots; `ATSCheckerTests` and `HardeningTests` pin the two messages |
 | F26 | E2E `Toasts_have_no_serious_violations` failed now and then: "CV ready" is usually still on screen when the download toast appears, so the bare `.app-toast` locator matched two toasts (Playwright strict mode). It passed only when the assertion ran before the second toast was added. | Fixed: the test waits for the "Download started" toast |
 
+### UX polish after M5
+
+Branch `feature/m5-ux-polish`. Visual and interaction fixes asked for by the owner after the M5 release, no version change (not a milestone). Each one ships with a bUnit or E2E test.
+
+| # | Change | Status |
+|---|---|---|
+| U1 | Step 2 "Profile to use": radios became cards (icon, name, one-line description), like the template cards below them. The empty "My profile" card is dashed and points to the header. | Done. `ProfileSourceSwitcherTests` |
+| U2 | Favicon (`wwwroot/favicon.svg`, drawn by hand in the app's teal). | Done (manual check) |
+| U3 | Backup hint on the profile page: export the profile, or give the blank template and a CV to an AI and import what it returns. | Done (manual check) |
+| U4 | `ConfirmDialog` before deleting data: clear history, delete a history entry, clear the profile, remove an experience, education or project. Cancel takes the focus; Escape or a click outside cancels. | Done. `ConfirmDialogTests`, `HistoryPanelTests` |
+| U5 | History panel: styled selects (chevron visible in dark mode), quiet danger buttons, a trash icon for Delete, room between the cards and the scrollbar. | Done (manual check in both themes) |
+| U6 | "Profile" link in the header (marked active on `/profile`); the link inside the step 2 card is gone. | Done. `AppHeaderTests` |
+| U7 | Save buttons are disabled when there is nothing new: the profile page compares the editor with what is saved (a field typed in and erased counts as empty), the bullet editor compares with the current text. | Done. `ProfileFieldsTests`, `CvEditorTests`, E2E `Save_is_enabled_only_while_there_is_something_new_to_save` |
+| U8 | Checkboxes (PDF, Word, cover letter) in the app's colors instead of Bootstrap's blue. | Done (manual check) |
+| F30 | Template thumbnails in step 2 sometimes do not show until another template is picked (reported by the owner). Picking a template does not refetch the thumbnails, so they were loaded and only not drawn. Not reproduced: fresh load, cold server, and back from `/profile` all showed them. | Open: needs the steps that trigger it |
+
 ### System hardening (between M3 and M3.2)
 
 A review of the C# code before M3.2, branch `feature/system-hardening`. No behavior change: every existing test passes (tests were only moved and renamed to the new namespaces), and the corpus report regenerates byte for byte. No version bump (not a milestone). The conventions it set are in `CLAUDE.md`.
@@ -214,6 +230,7 @@ Nothing in M5 is blocked; every item is Done except ENG-04 (Won't do, the reason
 | F27: most samples are Staff posts, a weak match for the default senior profile | A picker or demo rule, reviewed on its own. | Fixed after M5 (see F27); Backend stays weak until the corpus has a senior backend post the demo profile fits |
 | The summary's role signals: one mention of Kotlin reads as a mobile role (F29) | Tuning the signal lists changes many summaries. | New item (not scheduled) |
 | The M4 open items (add back what the selection left out, scores after edits, company name in the cover letter) | Unchanged in M5. | New items (not scheduled) |
+| F30: template thumbnails sometimes missing until another template is picked | Found after M5, not reproduced yet. | UX polish after M5 (open) |
 | Optional AI | Out of this pass by the owner's decision. | M6 |
 
 ### Open items after M4

@@ -113,7 +113,8 @@
                                         }
                                         <div class="bullet-edit-actions">
                                             <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelEdit">Cancel</button>
-                                            <button type="button" class="btn btn-sm btn-primary" @onclick="() => SaveEdit(ei, bi)">Save</button>
+                                            <button type="button" class="btn btn-sm btn-primary" disabled="@(_editText.Trim() == bullet.Text)"
+                                                    @onclick="() => SaveEdit(ei, bi)">Save</button>
                                         </div>
                                     </div>
                                     <span class="visually-hidden" id="bullet-text-@ei-@bi">@bullet.Text</span>

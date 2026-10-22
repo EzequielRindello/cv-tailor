@@ -18,6 +18,7 @@ public class MyProfileTests : E2ETestBase
     public async Task Saving_an_incomplete_profile_shows_field_errors_and_saves_nothing()
     {
         await OpenProfilePageAsync();
+        await Page.Locator("#p-phone").FillAsync("555 0100");
         await Page.Locator("#profile-save").ClickAsync();
 
         await Assertions.Expect(Page.Locator("#p-fullName-err")).ToBeVisibleAsync();
@@ -29,6 +30,25 @@ public class MyProfileTests : E2ETestBase
 
         var saved = await Page.EvaluateAsync<string?>("() => localStorage.getItem('cv-generator-my-profile')");
         Assert.Null(saved);
+    }
+
+    [Fact]
+    public async Task Save_is_enabled_only_while_there_is_something_new_to_save()
+    {
+        await OpenProfilePageAsync();
+        await Assertions.Expect(Page.Locator("#profile-save")).ToBeDisabledAsync();
+
+        await Page.Locator("#p-phone").FillAsync("555 0100");
+        await Assertions.Expect(Page.Locator("#profile-save")).ToBeEnabledAsync();
+
+        // Typing it back to what is saved leaves nothing new once the field is left
+        await Page.Locator("#p-phone").FillAsync(string.Empty);
+        await Page.Locator("#p-phone").PressAsync("Tab");
+        await Assertions.Expect(Page.Locator("#profile-save")).ToBeDisabledAsync();
+
+        // Lists edit in place inside their own component and still count
+        await Page.Locator("#exp-0-bullets-add").ClickAsync();
+        await Assertions.Expect(Page.Locator("#profile-save")).ToBeEnabledAsync();
     }
 
     [Fact]
@@ -46,6 +66,7 @@ public class MyProfileTests : E2ETestBase
         await Page.Locator("#exp-0-skills").FillAsync("C#, SQL");
         await Page.Locator("#profile-save").ClickAsync();
         await Assertions.Expect(Page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Saved in this browser" })).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#profile-save")).ToBeDisabledAsync();
 
         var saved = await Page.EvaluateAsync<string>("() => localStorage.getItem('cv-generator-my-profile')");
         Assert.Contains("Zed Tester", saved);
@@ -70,6 +91,6 @@ public class MyProfileTests : E2ETestBase
         await NextAsync();
 
         await Assertions.Expect(Page.Locator("#source-mine")).ToBeDisabledAsync();
-        await Assertions.Expect(Page.Locator("#profile-edit-link")).ToHaveTextAsync("Create my profile");
+        await Assertions.Expect(Page.Locator("#header-profile-link")).ToHaveAttributeAsync("href", "profile");
     }
 }
