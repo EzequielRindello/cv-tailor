@@ -1,0 +1,305 @@
+{
+  "matchScore": {
+    "overall": 56,
+    "skillsMatched": 2,
+    "totalSkills": 3,
+    "keywordsMatched": 3,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "red",
+    "lowMatchWarning": null
+  },
+  "missingSkills": {
+    "requiredMissing": [],
+    "niceToHaveMissing": [
+      "llm"
+    ],
+    "suggestions": [
+      "Mention 'llm' in relevant project bullet points if you have used it"
+    ],
+    "potentialScoreIncrease": 0
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "llm",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "python",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "sql",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "remote",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "reliable",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "curious",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "growth",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "elevenlabs",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "agents",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "impact",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "engineer",
+        "frequency": 3,
+        "presentInCV": true
+      },
+      {
+        "word": "first",
+        "frequency": 3,
+        "presentInCV": false
+      },
+      {
+        "word": "voice",
+        "frequency": 3,
+        "presentInCV": false
+      },
+      {
+        "word": "models",
+        "frequency": 3,
+        "presentInCV": false
+      },
+      {
+        "word": "location",
+        "frequency": 3,
+        "presentInCV": false
+      },
+      {
+        "word": "beyond",
+        "frequency": 3,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "python",
+      "sql",
+      "engineer",
+      "testing",
+      "across",
+      "global",
+      "dynamic",
+      "development",
+      "supports",
+      "real",
+      "based",
+      "full",
+      "stack",
+      "built",
+      "experience"
+    ],
+    "missingFromCV": [
+      "llm",
+      "remote",
+      "reliable",
+      "curious"
+    ],
+    "keywordDensity": 0.33,
+    "suggestions": [
+      "Add \"llm\" to the skills section or bullets if you have used it",
+      "Mention \"remote\" in a bullet point to reflect this skill",
+      "Mention \"reliable\" in a bullet point to reflect this skill",
+      "Mention \"curious\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 100,
+    "issues": [],
+    "recommendations": [
+      "Your CV is fully optimized for ATS"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior Software Engineer with 9+ years of experience, specializing in Python and SQL. Proven track record of improving backward compatibility and reducing breaking changes by 90%. Strong team collaboration skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Built a distributed rate-limiting system using Redis and Lua scripts handling 500K+ requests/second across 12 global regions",
+          "Designed and enforced API versioning strategy across 15+ internal microservices improving backward compatibility and reducing breaking changes by 90%"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Twilio",
+        "location": "San Francisco, CA",
+        "startDate": "Jul 2017",
+        "endDate": "May 2019",
+        "bullets": [
+          "Designed and implemented a webhook retry mechanism with exponential backoff reducing message delivery failures by 44%",
+          "Created internal developer tooling in Python that automated repetitive QA workflows saving the team 15 hours/week",
+          "Optimized SQL queries and added strategic indexes on MySQL databases reducing average query time from 340ms to 45ms"
+        ],
+        "skills": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "Ruby",
+          "Rails",
+          "MySQL",
+          "REST API",
+          "Swagger",
+          "OpenAPI",
+          "Microservices",
+          "Docker",
+          "SQL",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Developed a dynamic pricing recommendation engine using Python and scikit-learn increasing host revenue by an average of 22%",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s",
+          "Refactored the search ranking service (Java + Elasticsearch) improving relevance scores by 31% based on user engagement metrics"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      }
+    ],
+    "skills": [
+      "Python",
+      "SQL",
+      "REST API Design",
+      "Docker",
+      "TypeScript",
+      "Java",
+      "AWS",
+      "Microservices",
+      "Go",
+      "JavaScript",
+      "Ruby",
+      "Node.js",
+      "React",
+      "Spring Boot",
+      "Rails"
+    ],
+    "projects": [
+      {
+        "name": "Querywise — AI-powered SQL Assistant",
+        "description": "Full-stack web app that translates natural language questions into SQL queries using OpenAI API. Built with Next.js, FastAPI, and PostgreSQL. Supports schema introspection and query explanation.",
+        "technologies": [
+          "Next.js",
+          "TypeScript",
+          "FastAPI",
+          "Python",
+          "PostgreSQL",
+          "OpenAI API"
+        ],
+        "highlights": [
+          "Generates accurate SQL for 91% of natural language queries in internal testing",
+          "Built schema-aware prompt engineering reducing hallucinated column names by 78%",
+          "Deployed on Railway with zero-downtime deploys and automated integration tests"
+        ],
+        "link": "github.com/alexrivera-dev/querywise"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

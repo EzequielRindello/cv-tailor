@@ -1,0 +1,322 @@
+{
+  "matchScore": {
+    "overall": 77,
+    "skillsMatched": 9,
+    "totalSkills": 10,
+    "keywordsMatched": 8,
+    "totalKeywords": 15,
+    "seniorityMatch": false,
+    "colorClass": "yellow",
+    "lowMatchWarning": null
+  },
+  "missingSkills": {
+    "requiredMissing": [],
+    "niceToHaveMissing": [],
+    "suggestions": [],
+    "potentialScoreIncrease": 0
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "java",
+        "frequency": 208,
+        "presentInCV": true
+      },
+      {
+        "word": "spring",
+        "frequency": 207,
+        "presentInCV": true
+      },
+      {
+        "word": "spring boot",
+        "frequency": 207,
+        "presentInCV": true
+      },
+      {
+        "word": "go",
+        "frequency": 207,
+        "presentInCV": true
+      },
+      {
+        "word": "python",
+        "frequency": 207,
+        "presentInCV": true
+      },
+      {
+        "word": "kafka",
+        "frequency": 207,
+        "presentInCV": true
+      },
+      {
+        "word": "postgresql",
+        "frequency": 207,
+        "presentInCV": true
+      },
+      {
+        "word": "redis",
+        "frequency": 207,
+        "presentInCV": true
+      },
+      {
+        "word": "aws",
+        "frequency": 207,
+        "presentInCV": true
+      },
+      {
+        "word": "kubernetes",
+        "frequency": 207,
+        "presentInCV": true
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "ownership",
+        "frequency": 208,
+        "presentInCV": false
+      },
+      {
+        "word": "communication",
+        "frequency": 208,
+        "presentInCV": true
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "value",
+        "frequency": 208,
+        "presentInCV": false
+      },
+      {
+        "word": "clear",
+        "frequency": 208,
+        "presentInCV": false
+      },
+      {
+        "word": "pragmatic",
+        "frequency": 208,
+        "presentInCV": false
+      },
+      {
+        "word": "engineering",
+        "frequency": 208,
+        "presentInCV": false
+      },
+      {
+        "word": "stack",
+        "frequency": 208,
+        "presentInCV": false
+      },
+      {
+        "word": "includes",
+        "frequency": 208,
+        "presentInCV": false
+      },
+      {
+        "word": "design",
+        "frequency": 207,
+        "presentInCV": true
+      },
+      {
+        "word": "operate",
+        "frequency": 207,
+        "presentInCV": false
+      },
+      {
+        "word": "services",
+        "frequency": 207,
+        "presentInCV": false
+      },
+      {
+        "word": "millions",
+        "frequency": 207,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "java",
+      "spring",
+      "spring boot",
+      "go",
+      "python",
+      "kafka",
+      "postgresql",
+      "redis",
+      "aws",
+      "kubernetes",
+      "engineer",
+      "communication",
+      "design",
+      "used"
+    ],
+    "missingFromCV": [
+      "ownership"
+    ],
+    "keywordDensity": 0.92,
+    "suggestions": [
+      "Mention \"ownership\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 100,
+    "issues": [],
+    "recommendations": [
+      "Your CV is fully optimized for ATS"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior Backend Developer with 9+ years of experience, specializing in Python, Java, AWS, Go, and Spring Boot. Proven track record of reducing frontend network requests by 60%. Strong team collaboration and communication skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Built a distributed rate-limiting system using Redis and Lua scripts handling 500K+ requests/second across 12 global regions",
+          "Led a team of 6 engineers through a zero-downtime migration from PostgreSQL 12 to 14, reducing query latency by 38%"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Twilio",
+        "location": "San Francisco, CA",
+        "startDate": "Jul 2017",
+        "endDate": "May 2019",
+        "bullets": [
+          "Built core features for Twilio's SMS and voice API platform using Java and Spring Boot serving 1B+ API calls/month",
+          "Designed and implemented a webhook retry mechanism with exponential backoff reducing message delivery failures by 44%",
+          "Created internal developer tooling in Python that automated repetitive QA workflows saving the team 15 hours/week"
+        ],
+        "skills": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "Ruby",
+          "Rails",
+          "MySQL",
+          "REST API",
+          "Swagger",
+          "OpenAPI",
+          "Microservices",
+          "Docker",
+          "SQL",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Developed a dynamic pricing recommendation engine using Python and scikit-learn increasing host revenue by an average of 22%",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s",
+          "Refactored the search ranking service (Java + Elasticsearch) improving relevance scores by 31% based on user engagement metrics"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      }
+    ],
+    "skills": [
+      "Python",
+      "Java",
+      "AWS",
+      "Go",
+      "Spring Boot",
+      "PostgreSQL",
+      "Redis",
+      "Kubernetes",
+      "REST API Design",
+      "Docker",
+      "TypeScript",
+      "Microservices",
+      "JavaScript",
+      "SQL",
+      "Ruby"
+    ],
+    "projects": [
+      {
+        "name": "OpenMQ — Open Source Message Queue",
+        "description": "Built a lightweight distributed message queue in Go inspired by Kafka. Supports pub/sub, consumer groups, and at-least-once delivery. Used by 3 open source projects with 800+ GitHub stars.",
+        "technologies": [
+          "Go",
+          "gRPC",
+          "Docker",
+          "Kubernetes"
+        ],
+        "highlights": [
+          "Achieved 95K messages/second throughput on a 3-node cluster in benchmarks",
+          "Implemented Raft consensus for leader election ensuring zero message loss during failover",
+          "Published detailed architecture docs and attracted 12 external contributors"
+        ],
+        "link": "github.com/alexrivera-dev/openmq"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

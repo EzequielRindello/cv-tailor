@@ -199,7 +199,7 @@ public class RelevanceScorer
 
         if (DateParser.TryParse(endDate, out var year, out _))
         {
-            var diff = DateTime.Now.Year - year;
+            var diff = DateParser.Now.Year - year;
             if (diff <= 1) return RecencyWithinOneYear;
             if (diff <= 2) return RecencyWithinTwoYears;
             if (diff <= 3) return RecencyWithinThreeYears;

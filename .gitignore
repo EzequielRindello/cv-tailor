@@ -122,3 +122,6 @@ scratchpad/
 .agent-memory/
 *.transcript.md
 *.chat.md
+
+# Snapshot tests (TEST-08): what a run produced when it differs from the approved file
+*.received.json

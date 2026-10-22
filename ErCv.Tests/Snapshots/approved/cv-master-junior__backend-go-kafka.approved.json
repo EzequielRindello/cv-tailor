@@ -1,0 +1,319 @@
+{
+  "matchScore": {
+    "overall": 25,
+    "skillsMatched": 3,
+    "totalSkills": 14,
+    "keywordsMatched": 2,
+    "totalKeywords": 15,
+    "seniorityMatch": false,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "go",
+      "observability",
+      "on-call",
+      "api design",
+      "distributed systems",
+      "event-driven"
+    ],
+    "niceToHaveMissing": [
+      "redis",
+      "kafka",
+      "kubernetes",
+      "grpc"
+    ],
+    "suggestions": [
+      "Add 'go' to cv-master.json if you have experience with this technology",
+      "Add 'observability' to cv-master.json if you have experience with this technology",
+      "Add 'on-call' to cv-master.json if you have experience with this technology",
+      "Add 'api design' to cv-master.json if you have experience with this technology",
+      "Add 'distributed systems' to cv-master.json if you have experience with this technology",
+      "Mention 'redis' in relevant project bullet points if you have used it",
+      "Mention 'kafka' in relevant project bullet points if you have used it",
+      "Mention 'kubernetes' in relevant project bullet points if you have used it",
+      "There are 1 more required skills — review the full JSON"
+    ],
+    "potentialScoreIncrease": 21
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "go",
+        "frequency": 3,
+        "presentInCV": false
+      },
+      {
+        "word": "kafka",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "postgresql",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "redis",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "rest",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "event-driven",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "kubernetes",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "distributed systems",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "grpc",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "api design",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "aws",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "ci/cd",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "observability",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "on-call",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "ownership",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "senior",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "backend",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "engineer",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "experience",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "services",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "looking",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "years",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "building",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "throughput",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "running",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "postgresql",
+      "rest",
+      "aws",
+      "ci/cd",
+      "engineer",
+      "years",
+      "experience"
+    ],
+    "missingFromCV": [
+      "go",
+      "kafka",
+      "redis",
+      "event-driven",
+      "kubernetes",
+      "distributed systems",
+      "grpc",
+      "api design",
+      "observability",
+      "on-call",
+      "ownership"
+    ],
+    "keywordDensity": 0.27,
+    "suggestions": [
+      "Add \"go\" to the skills section or bullets if you have used it",
+      "Add \"kafka\" to the skills section or bullets if you have used it",
+      "Add \"redis\" to the skills section or bullets if you have used it",
+      "Add \"event-driven\" to the skills section or bullets if you have used it",
+      "Add \"kubernetes\" to the skills section or bullets if you have used it",
+      "Mention \"ownership\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 80,
+    "issues": [
+      {
+        "severity": "High",
+        "issue": "Low keyword density (29%) — ATS may reject the CV",
+        "fix": "Include more keywords from the job description in bullets and skills section"
+      }
+    ],
+    "recommendations": [
+      "1 improvement point(s) detected:",
+      "• Low keyword density (29%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Sam Carter",
+      "email": "sam.carter@email.com",
+      "phone": "+1 (512) 555-0147",
+      "location": "Austin, TX",
+      "linkedIn": "linkedin.com/in/sam-carter-dev",
+      "gitHub": "github.com/samcarter-dev"
+    },
+    "summary": "Junior Full Stack Developer with 2+ years of experience, specializing in PostgreSQL, AWS, and CI/CD.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of Texas at Austin",
+        "location": "Austin, TX",
+        "graduationDate": "May 2024",
+        "gpa": "3.5",
+        "relevantCourses": [
+          "Data Structures",
+          "Web Development",
+          "Databases"
+        ],
+        "honors": ""
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Engineer",
+        "company": "BrightApps",
+        "location": "Austin, TX",
+        "startDate": "Jul 2024",
+        "endDate": "Present",
+        "bullets": [
+          "Built REST endpoints in Node.js and Express serving a React dashboard used by 300 internal users",
+          "Wrote Jest unit tests that raised coverage of the billing module from 40% to 75%",
+          "Fixed 25+ production bugs and shipped fixes through a GitHub Actions CI pipeline"
+        ],
+        "skills": [
+          "Node.js",
+          "Express",
+          "React",
+          "Jest",
+          "GitHub Actions"
+        ]
+      },
+      {
+        "role": "Software Engineering Intern",
+        "company": "CloudNest",
+        "location": "Remote",
+        "startDate": "Jun 2023",
+        "endDate": "Aug 2023",
+        "bullets": [
+          "Developed a internal tool in Python and Flask that automated weekly report generation",
+          "Added PostgreSQL queries and indexes that cut report time from 40s to 6s"
+        ],
+        "skills": [
+          "Python",
+          "Flask",
+          "PostgreSQL"
+        ]
+      }
+    ],
+    "skills": [
+      "PostgreSQL",
+      "AWS",
+      "CI/CD",
+      "Python",
+      "React",
+      "Express",
+      "Flask",
+      "Jest",
+      "JavaScript",
+      "TypeScript",
+      "SQL",
+      "MongoDB",
+      "Git",
+      "Docker",
+      "Agile"
+    ],
+    "projects": [
+      {
+        "name": "Budget Tracker",
+        "description": "Full-stack expense tracker with charts and CSV export",
+        "technologies": [
+          "React",
+          "Node.js",
+          "MongoDB"
+        ],
+        "highlights": [
+          "Deployed on AWS with 100+ monthly users"
+        ],
+        "link": "github.com/samcarter-dev/budget-tracker"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

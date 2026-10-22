@@ -1,0 +1,351 @@
+{
+  "matchScore": {
+    "overall": 66,
+    "skillsMatched": 8,
+    "totalSkills": 10,
+    "keywordsMatched": 2,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "yellow",
+    "lowMatchWarning": null
+  },
+  "missingSkills": {
+    "requiredMissing": [],
+    "niceToHaveMissing": [
+      "grpc"
+    ],
+    "suggestions": [
+      "Mention 'grpc' in relevant project bullet points if you have used it"
+    ],
+    "potentialScoreIncrease": 0
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "ci/cd",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "observability",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "javascript",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "typescript",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "react",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "next.js",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "system design",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "rest",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "graphql",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "grpc",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "remote",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "planning",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "coaching",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "independent",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "information",
+        "frequency": 10,
+        "presentInCV": false
+      },
+      {
+        "word": "reddit",
+        "frequency": 9,
+        "presentInCV": false
+      },
+      {
+        "word": "platform",
+        "frequency": 8,
+        "presentInCV": false
+      },
+      {
+        "word": "experience",
+        "frequency": 7,
+        "presentInCV": true
+      },
+      {
+        "word": "performance",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "technical",
+        "frequency": 6,
+        "presentInCV": false
+      },
+      {
+        "word": "including",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "workflows",
+        "frequency": 5,
+        "presentInCV": true
+      },
+      {
+        "word": "development",
+        "frequency": 4,
+        "presentInCV": true
+      },
+      {
+        "word": "health",
+        "frequency": 4,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "ci/cd",
+      "observability",
+      "javascript",
+      "typescript",
+      "react",
+      "next.js",
+      "system design",
+      "rest",
+      "graphql",
+      "senior",
+      "software",
+      "engineer",
+      "built",
+      "active",
+      "development",
+      "developer",
+      "experience",
+      "optimizing",
+      "tooling",
+      "automated"
+    ],
+    "missingFromCV": [
+      "grpc",
+      "remote",
+      "planning",
+      "coaching",
+      "independent"
+    ],
+    "keywordDensity": 0.64,
+    "suggestions": [
+      "Add \"grpc\" to the skills section or bullets if you have used it",
+      "Mention \"remote\" in a bullet point to reflect this skill",
+      "Mention \"planning\" in a bullet point to reflect this skill",
+      "Mention \"coaching\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 100,
+    "issues": [],
+    "recommendations": [
+      "Your CV is fully optimized for ATS"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior Full Stack Developer with 9+ years of experience, specializing in REST API Design, TypeScript, JavaScript, React, and GraphQL. Proven track record of reducing frontend network requests by 60%. Strong team collaboration skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Redesigned the merchant onboarding API (Node.js + TypeScript) reducing integration time from 3 weeks to 4 days for enterprise clients",
+          "Built observability dashboards in Grafana + Prometheus reducing mean time to detection (MTTD) for production incidents from 18 min to 4 min"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Built and maintained React + TypeScript frontend features for the host dashboard serving 4M+ active hosts worldwide",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s",
+          "Reduced CI/CD pipeline duration from 28 minutes to 9 minutes by parallelizing test suites and optimizing Docker layer caching"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Twilio",
+        "location": "San Francisco, CA",
+        "startDate": "Jul 2017",
+        "endDate": "May 2019",
+        "bullets": [
+          "Designed and implemented a webhook retry mechanism with exponential backoff reducing message delivery failures by 44%",
+          "Created internal developer tooling in Python that automated repetitive QA workflows saving the team 15 hours/week",
+          "Built REST APIs following OpenAPI spec with full Swagger documentation adopted by 3,000+ external developers"
+        ],
+        "skills": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "Ruby",
+          "Rails",
+          "MySQL",
+          "REST API",
+          "Swagger",
+          "OpenAPI",
+          "Microservices",
+          "Docker",
+          "SQL",
+          "AWS"
+        ]
+      }
+    ],
+    "skills": [
+      "REST API Design",
+      "TypeScript",
+      "JavaScript",
+      "React",
+      "GraphQL",
+      "CI/CD",
+      "Next.js",
+      "System Design",
+      "Docker",
+      "Python",
+      "Java",
+      "AWS",
+      "Microservices",
+      "Go",
+      "SQL"
+    ],
+    "projects": [
+      {
+        "name": "Querywise — AI-powered SQL Assistant",
+        "description": "Full-stack web app that translates natural language questions into SQL queries using OpenAI API. Built with Next.js, FastAPI, and PostgreSQL. Supports schema introspection and query explanation.",
+        "technologies": [
+          "Next.js",
+          "TypeScript",
+          "FastAPI",
+          "Python",
+          "PostgreSQL",
+          "OpenAI API"
+        ],
+        "highlights": [
+          "Generates accurate SQL for 91% of natural language queries in internal testing",
+          "Built schema-aware prompt engineering reducing hallucinated column names by 78%",
+          "Deployed on Railway with zero-downtime deploys and automated integration tests"
+        ],
+        "link": "github.com/alexrivera-dev/querywise"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

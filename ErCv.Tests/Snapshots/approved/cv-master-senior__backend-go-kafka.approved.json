@@ -1,0 +1,354 @@
+{
+  "matchScore": {
+    "overall": 67,
+    "skillsMatched": 9,
+    "totalSkills": 14,
+    "keywordsMatched": 5,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "yellow",
+    "lowMatchWarning": null
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "distributed systems",
+      "event-driven"
+    ],
+    "niceToHaveMissing": [
+      "grpc"
+    ],
+    "suggestions": [
+      "Add 'distributed systems' to cv-master.json if you have experience with this technology",
+      "Add 'event-driven' to cv-master.json if you have experience with this technology",
+      "Mention 'grpc' in relevant project bullet points if you have used it"
+    ],
+    "potentialScoreIncrease": 7
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "go",
+        "frequency": 3,
+        "presentInCV": true
+      },
+      {
+        "word": "kafka",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "postgresql",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "redis",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "rest",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "event-driven",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "kubernetes",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "distributed systems",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "grpc",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "api design",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "aws",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "ci/cd",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "observability",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "on-call",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "ownership",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "senior",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "backend",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "engineer",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "experience",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "services",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "looking",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "years",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "building",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "throughput",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "running",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "go",
+      "kafka",
+      "postgresql",
+      "redis",
+      "rest",
+      "kubernetes",
+      "grpc",
+      "api design",
+      "aws",
+      "ci/cd",
+      "on-call",
+      "senior",
+      "engineer",
+      "years",
+      "experience",
+      "strong"
+    ],
+    "missingFromCV": [
+      "event-driven",
+      "distributed systems",
+      "observability",
+      "ownership"
+    ],
+    "keywordDensity": 0.73,
+    "suggestions": [
+      "Add \"event-driven\" to the skills section or bullets if you have used it",
+      "Add \"distributed systems\" to the skills section or bullets if you have used it",
+      "Add \"observability\" to the skills section or bullets if you have used it",
+      "Mention \"ownership\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 100,
+    "issues": [],
+    "recommendations": [
+      "Your CV is fully optimized for ATS"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior Full Stack Developer with 9+ years of experience, specializing in REST API Design, AWS, Go, PostgreSQL, and Redis. Proven track record of reducing frontend network requests by 60%. Strong team collaboration skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Built a distributed rate-limiting system using Redis and Lua scripts handling 500K+ requests/second across 12 global regions",
+          "Led a team of 6 engineers through a zero-downtime migration from PostgreSQL 12 to 14, reducing query latency by 38%"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Developed a dynamic pricing recommendation engine using Python and scikit-learn increasing host revenue by an average of 22%",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s",
+          "Reduced CI/CD pipeline duration from 28 minutes to 9 minutes by parallelizing test suites and optimizing Docker layer caching"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Twilio",
+        "location": "San Francisco, CA",
+        "startDate": "Jul 2017",
+        "endDate": "May 2019",
+        "bullets": [
+          "Designed and implemented a webhook retry mechanism with exponential backoff reducing message delivery failures by 44%",
+          "Built REST APIs following OpenAPI spec with full Swagger documentation adopted by 3,000+ external developers",
+          "Participated in on-call rotation, resolving 95% of P1 incidents within SLA and writing detailed post-mortems"
+        ],
+        "skills": [
+          "Java",
+          "Spring Boot",
+          "Python",
+          "Ruby",
+          "Rails",
+          "MySQL",
+          "REST API",
+          "Swagger",
+          "OpenAPI",
+          "Microservices",
+          "Docker",
+          "SQL",
+          "AWS"
+        ]
+      }
+    ],
+    "skills": [
+      "REST API Design",
+      "AWS",
+      "Go",
+      "PostgreSQL",
+      "Redis",
+      "Kubernetes",
+      "CI/CD",
+      "On-call",
+      "Docker",
+      "TypeScript",
+      "Python",
+      "Java",
+      "Microservices",
+      "JavaScript",
+      "SQL"
+    ],
+    "projects": [
+      {
+        "name": "OpenMQ — Open Source Message Queue",
+        "description": "Built a lightweight distributed message queue in Go inspired by Kafka. Supports pub/sub, consumer groups, and at-least-once delivery. Used by 3 open source projects with 800+ GitHub stars.",
+        "technologies": [
+          "Go",
+          "gRPC",
+          "Docker",
+          "Kubernetes"
+        ],
+        "highlights": [
+          "Achieved 95K messages/second throughput on a 3-node cluster in benchmarks",
+          "Implemented Raft consensus for leader election ensuring zero message loss during failover",
+          "Published detailed architecture docs and attracted 12 external contributors"
+        ],
+        "link": "github.com/alexrivera-dev/openmq"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

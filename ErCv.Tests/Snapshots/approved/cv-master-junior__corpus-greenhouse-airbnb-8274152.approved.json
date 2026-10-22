@@ -1,0 +1,297 @@
+{
+  "matchScore": {
+    "overall": 26,
+    "skillsMatched": 2,
+    "totalSkills": 8,
+    "keywordsMatched": 0,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "java",
+      "go",
+      "kotlin",
+      "on-call",
+      "distributed systems",
+      "a/b testing"
+    ],
+    "niceToHaveMissing": [],
+    "suggestions": [
+      "Add 'java' to cv-master.json if you have experience with this technology",
+      "Add 'go' to cv-master.json if you have experience with this technology",
+      "Add 'kotlin' to cv-master.json if you have experience with this technology",
+      "Add 'on-call' to cv-master.json if you have experience with this technology",
+      "Add 'distributed systems' to cv-master.json if you have experience with this technology",
+      "There are 1 more required skills — review the full JSON"
+    ],
+    "potentialScoreIncrease": 38
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "on-call",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "java",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "kotlin",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "python",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "go",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "sql",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "distributed systems",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "a/b testing",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "softSkillKeywords": [
+      {
+        "word": "remote",
+        "frequency": 2,
+        "presentInCV": false
+      },
+      {
+        "word": "reliable",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "communication",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "airbnb",
+        "frequency": 15,
+        "presentInCV": false
+      },
+      {
+        "word": "experience",
+        "frequency": 7,
+        "presentInCV": true
+      },
+      {
+        "word": "insurance",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "services",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "technical",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "process",
+        "frequency": 5,
+        "presentInCV": false
+      },
+      {
+        "word": "hosts",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "across",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "backend",
+        "frequency": 4,
+        "presentInCV": false
+      },
+      {
+        "word": "product",
+        "frequency": 4,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "python",
+      "sql",
+      "software",
+      "engineer",
+      "coverage",
+      "code",
+      "engineering",
+      "fixes",
+      "review",
+      "years",
+      "experience",
+      "production",
+      "full"
+    ],
+    "missingFromCV": [
+      "on-call",
+      "java",
+      "kotlin",
+      "go",
+      "distributed systems",
+      "a/b testing",
+      "remote",
+      "reliable",
+      "communication"
+    ],
+    "keywordDensity": 0.18,
+    "suggestions": [
+      "Add \"on-call\" to the skills section or bullets if you have used it",
+      "Add \"java\" to the skills section or bullets if you have used it",
+      "Add \"kotlin\" to the skills section or bullets if you have used it",
+      "Add \"go\" to the skills section or bullets if you have used it",
+      "Add \"distributed systems\" to the skills section or bullets if you have used it",
+      "Mention \"remote\" in a bullet point to reflect this skill",
+      "Mention \"reliable\" in a bullet point to reflect this skill",
+      "Mention \"communication\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 80,
+    "issues": [
+      {
+        "severity": "High",
+        "issue": "Low keyword density (25%) — ATS may reject the CV",
+        "fix": "Include more keywords from the job description in bullets and skills section"
+      }
+    ],
+    "recommendations": [
+      "1 improvement point(s) detected:",
+      "• Low keyword density (25%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Sam Carter",
+      "email": "sam.carter@email.com",
+      "phone": "+1 (512) 555-0147",
+      "location": "Austin, TX",
+      "linkedIn": "linkedin.com/in/sam-carter-dev",
+      "gitHub": "github.com/samcarter-dev"
+    },
+    "summary": "Junior Frontend Developer with 2+ years of experience, specializing in Python and SQL.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of Texas at Austin",
+        "location": "Austin, TX",
+        "graduationDate": "May 2024",
+        "gpa": "3.5",
+        "relevantCourses": [
+          "Data Structures",
+          "Web Development",
+          "Databases"
+        ],
+        "honors": ""
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Engineer",
+        "company": "BrightApps",
+        "location": "Austin, TX",
+        "startDate": "Jul 2024",
+        "endDate": "Present",
+        "bullets": [
+          "Built REST endpoints in Node.js and Express serving a React dashboard used by 300 internal users",
+          "Wrote Jest unit tests that raised coverage of the billing module from 40% to 75%",
+          "Fixed 25+ production bugs and shipped fixes through a GitHub Actions CI pipeline"
+        ],
+        "skills": [
+          "Node.js",
+          "Express",
+          "React",
+          "Jest",
+          "GitHub Actions"
+        ]
+      },
+      {
+        "role": "Software Engineering Intern",
+        "company": "CloudNest",
+        "location": "Remote",
+        "startDate": "Jun 2023",
+        "endDate": "Aug 2023",
+        "bullets": [
+          "Developed a internal tool in Python and Flask that automated weekly report generation",
+          "Added PostgreSQL queries and indexes that cut report time from 40s to 6s"
+        ],
+        "skills": [
+          "Python",
+          "Flask",
+          "PostgreSQL"
+        ]
+      }
+    ],
+    "skills": [
+      "Python",
+      "SQL",
+      "React",
+      "Express",
+      "Flask",
+      "PostgreSQL",
+      "Jest",
+      "JavaScript",
+      "TypeScript",
+      "MongoDB",
+      "Git",
+      "Docker",
+      "AWS",
+      "Agile",
+      "Code Review"
+    ],
+    "projects": [
+      {
+        "name": "Budget Tracker",
+        "description": "Full-stack expense tracker with charts and CSV export",
+        "technologies": [
+          "React",
+          "Node.js",
+          "MongoDB"
+        ],
+        "highlights": [
+          "Deployed on AWS with 100+ monthly users"
+        ],
+        "link": "github.com/samcarter-dev/budget-tracker"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

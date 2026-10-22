@@ -1,0 +1,320 @@
+{
+  "matchScore": {
+    "overall": 56,
+    "skillsMatched": 6,
+    "totalSkills": 11,
+    "keywordsMatched": 5,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "red",
+    "lowMatchWarning": null
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "css",
+      "accessibility",
+      "e2e testing"
+    ],
+    "niceToHaveMissing": [],
+    "suggestions": [
+      "Add 'css' to cv-master.json if you have experience with this technology",
+      "Add 'accessibility' to cv-master.json if you have experience with this technology",
+      "Add 'e2e testing' to cv-master.json if you have experience with this technology"
+    ],
+    "potentialScoreIncrease": 14
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "react",
+        "frequency": 3,
+        "presentInCV": true
+      },
+      {
+        "word": "typescript",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "graphql",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "e2e testing",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "css",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "accessibility",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "jest",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "cypress",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "git",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "next.js",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "node.js",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "softSkillKeywords": [],
+    "industryKeywords": [
+      {
+        "word": "frontend",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "engineer",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "product",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "accessible",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "redux",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "write",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "component",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "collaborate",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "closely",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "designers",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "react",
+      "typescript",
+      "graphql",
+      "e2e testing",
+      "jest",
+      "cypress",
+      "git",
+      "next.js",
+      "node.js",
+      "frontend",
+      "engineer",
+      "years",
+      "design"
+    ],
+    "missingFromCV": [
+      "css",
+      "accessibility"
+    ],
+    "keywordDensity": 0.82,
+    "suggestions": [
+      "Add \"css\" to the skills section or bullets if you have used it",
+      "Add \"accessibility\" to the skills section or bullets if you have used it"
+    ]
+  },
+  "atsScore": {
+    "overall": 100,
+    "issues": [],
+    "recommendations": [
+      "Your CV is fully optimized for ATS"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior Full Stack Developer with 9+ years of experience, specializing in TypeScript, Node.js, React, GraphQL, and Next.js. Proven track record of achieving 87%.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Built and maintained React + TypeScript frontend features for the host dashboard serving 4M+ active hosts worldwide",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s",
+          "Wrote comprehensive integration and E2E tests using Jest and Cypress achieving 87% code coverage on critical paths"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      },
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Redesigned the merchant onboarding API (Node.js + TypeScript) reducing integration time from 3 weeks to 4 days for enterprise clients",
+          "Built a distributed rate-limiting system using Redis and Lua scripts handling 500K+ requests/second across 12 global regions"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineering Intern",
+        "company": "Box",
+        "location": "Redwood City, CA",
+        "startDate": "Jun 2016",
+        "endDate": "Aug 2016",
+        "bullets": [
+          "Built an internal analytics dashboard using React and D3.js to visualize file upload/download patterns across enterprise accounts",
+          "Fixed 12 production bugs in the Node.js content delivery service as first contributions to a large codebase",
+          "Wrote unit tests for 3 untested modules achieving 70% coverage and catching 2 pre-existing bugs"
+        ],
+        "skills": [
+          "React",
+          "JavaScript",
+          "Node.js",
+          "D3.js",
+          "Python",
+          "SQL"
+        ]
+      }
+    ],
+    "skills": [
+      "TypeScript",
+      "Node.js",
+      "React",
+      "GraphQL",
+      "Next.js",
+      "Git",
+      "JavaScript",
+      "Python",
+      "REST API Design",
+      "Docker",
+      "Go",
+      "Java",
+      "SQL",
+      "PostgreSQL",
+      "Redis"
+    ],
+    "projects": [
+      {
+        "name": "Querywise — AI-powered SQL Assistant",
+        "description": "Full-stack web app that translates natural language questions into SQL queries using OpenAI API. Built with Next.js, FastAPI, and PostgreSQL. Supports schema introspection and query explanation.",
+        "technologies": [
+          "Next.js",
+          "TypeScript",
+          "FastAPI",
+          "Python",
+          "PostgreSQL",
+          "OpenAI API"
+        ],
+        "highlights": [
+          "Generates accurate SQL for 91% of natural language queries in internal testing",
+          "Built schema-aware prompt engineering reducing hallucinated column names by 78%",
+          "Deployed on Railway with zero-downtime deploys and automated integration tests"
+        ],
+        "link": "github.com/alexrivera-dev/querywise"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

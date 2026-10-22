@@ -35,9 +35,26 @@ public static partial class DateParser
     [GeneratedRegex(@"\b(19|20)\d{2}\b")]
     private static partial Regex AnyYear();
 
+    // "Today" for one async flow only, so the snapshot tests (TEST-08) can pin it without affecting other tests
+    private static readonly AsyncLocal<DateTime?> PinnedNow = new();
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>The date "Present" roles end at and recency is measured from: the current date unless pinned.</summary>
+    public static DateTime Now => PinnedNow.Value ?? DateTime.Now;
+
     #endregion
 
     #region Public Methods
+
+    /// <summary>Pins <see cref="Now"/> for the calling async flow until the result is disposed (tests only).</summary>
+    public static IDisposable PinNow(DateTime now)
+    {
+        PinnedNow.Value = now;
+        return new Unpin();
+    }
 
     public static bool IsPresent(string? value)
     {
@@ -160,9 +177,9 @@ public static partial class DateParser
 
     #region Private Methods
 
-    private static int CurrentMonthIndex() => DateTime.Now.Year * MonthsPerYear + (DateTime.Now.Month - 1);
+    private static int CurrentMonthIndex() => Now.Year * MonthsPerYear + (Now.Month - 1);
 
-    private static bool IsPlausible(int year) => year >= MinYear && year <= DateTime.Now.Year + MaxYearsAhead;
+    private static bool IsPlausible(int year) => year >= MinYear && year <= Now.Year + MaxYearsAhead;
 
     private static bool TryMatch(Regex pattern, string text, out int year, out int? month, bool nameMonth)
     {
@@ -186,6 +203,15 @@ public static partial class DateParser
         year = int.Parse(m.Groups["y"].Value);
         month = monthNumber;
         return true;
+    }
+
+    #endregion
+
+    #region Nested Types
+
+    private sealed class Unpin : IDisposable
+    {
+        public void Dispose() => PinnedNow.Value = null;
     }
 
     #endregion

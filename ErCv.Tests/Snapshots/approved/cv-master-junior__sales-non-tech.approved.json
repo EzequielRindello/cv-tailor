@@ -1,0 +1,214 @@
+{
+  "matchScore": {
+    "overall": 17,
+    "skillsMatched": 0,
+    "totalSkills": 1,
+    "keywordsMatched": 1,
+    "totalKeywords": 15,
+    "seniorityMatch": true,
+    "colorClass": "red",
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+  },
+  "missingSkills": {
+    "requiredMissing": [],
+    "niceToHaveMissing": [],
+    "suggestions": [],
+    "potentialScoreIncrease": 0
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [],
+    "softSkillKeywords": [
+      {
+        "word": "communication",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "negotiation",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "industryKeywords": [
+      {
+        "word": "experience",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "account",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "executive",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "drive",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "business",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "retail",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "clients",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "manage",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "pipeline",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "discovery",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "pipeline",
+      "years",
+      "experience",
+      "communication",
+      "skills"
+    ],
+    "missingFromCV": [
+      "negotiation"
+    ],
+    "keywordDensity": 0.5,
+    "suggestions": [
+      "Mention \"negotiation\" in a bullet point to reflect this skill"
+    ]
+  },
+  "atsScore": {
+    "overall": 80,
+    "issues": [
+      {
+        "severity": "High",
+        "issue": "Low keyword density (0%) — ATS may reject the CV",
+        "fix": "Include more keywords from the job description in bullets and skills section"
+      }
+    ],
+    "recommendations": [
+      "1 improvement point(s) detected:",
+      "• Low keyword density (0%) — ATS may reject the CV → Include more keywords from the job description in bullets and skills section"
+    ],
+    "colorClass": "yellow"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Sam Carter",
+      "email": "sam.carter@email.com",
+      "phone": "+1 (512) 555-0147",
+      "location": "Austin, TX",
+      "linkedIn": "linkedin.com/in/sam-carter-dev",
+      "gitHub": "github.com/samcarter-dev"
+    },
+    "summary": "Junior Data Engineer with 2+ years of experience, specializing in Python, React, Express, and Flask. Strong communication skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of Texas at Austin",
+        "location": "Austin, TX",
+        "graduationDate": "May 2024",
+        "gpa": "3.5",
+        "relevantCourses": [
+          "Data Structures",
+          "Web Development",
+          "Databases"
+        ],
+        "honors": ""
+      }
+    ],
+    "experience": [
+      {
+        "role": "Junior Software Engineer",
+        "company": "BrightApps",
+        "location": "Austin, TX",
+        "startDate": "Jul 2024",
+        "endDate": "Present",
+        "bullets": [
+          "Built REST endpoints in Node.js and Express serving a React dashboard used by 300 internal users",
+          "Wrote Jest unit tests that raised coverage of the billing module from 40% to 75%",
+          "Fixed 25+ production bugs and shipped fixes through a GitHub Actions CI pipeline"
+        ],
+        "skills": [
+          "Node.js",
+          "Express",
+          "React",
+          "Jest",
+          "GitHub Actions"
+        ]
+      },
+      {
+        "role": "Software Engineering Intern",
+        "company": "CloudNest",
+        "location": "Remote",
+        "startDate": "Jun 2023",
+        "endDate": "Aug 2023",
+        "bullets": [
+          "Developed a internal tool in Python and Flask that automated weekly report generation",
+          "Added PostgreSQL queries and indexes that cut report time from 40s to 6s"
+        ],
+        "skills": [
+          "Python",
+          "Flask",
+          "PostgreSQL"
+        ]
+      }
+    ],
+    "skills": [
+      "Python",
+      "React",
+      "Express",
+      "Flask",
+      "PostgreSQL",
+      "Jest",
+      "JavaScript",
+      "TypeScript",
+      "SQL",
+      "MongoDB",
+      "Git",
+      "Docker",
+      "AWS",
+      "Agile",
+      "Code Review"
+    ],
+    "projects": [
+      {
+        "name": "Budget Tracker",
+        "description": "Full-stack expense tracker with charts and CSV export",
+        "technologies": [
+          "React",
+          "Node.js",
+          "MongoDB"
+        ],
+        "highlights": [
+          "Deployed on AWS with 100+ monthly users"
+        ],
+        "link": "github.com/samcarter-dev/budget-tracker"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

@@ -38,9 +38,9 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | TEST-05 | API integration tests (WebApplicationFactory) | E1 Tests | P0 | M | Done |
 | TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | Done |
 | TEST-07 | End-to-end tests (Playwright) | E1 Tests | P1 | L | Done |
-| TEST-08 | Golden snapshot tests for generation output | E1 Tests | P2 | S | Todo |
+| TEST-08 | Golden snapshot tests for generation output | E1 Tests | P2 | S | Done |
 | TEST-09 | Retire the Node scripts in `testing/` | E1 Tests | P2 | S | Done |
-| TEST-10 | Coverage report and target | E1 Tests | P2 | S | Todo |
+| TEST-10 | Coverage report and target | E1 Tests | P2 | S | Done |
 | UX-01 | Design system: tokens, fonts, dark mode | E2 Redesign | P0 | M | Done |
 | UX-02 | New app shell and editorial hero | E2 Redesign | P0 | M | Done |
 | UX-03 | Guided 3-step composer | E2 Redesign | P0 | M | Done |
@@ -120,6 +120,7 @@ One milestone is one version: `2.0.<N+1>` for milestone `M<N>`. The version befo
 2. Updates "Current version" in `README.md`.
 3. Marks the milestone as `released` in the list above and checks that every item in it is `Done` in the dashboard.
 4. Updates the "Open items after" section: what was left to a later milestone, and which one owns it.
+5. Updates the coverage badge in `README.md` with the number in the CI job summary (TEST-10).
 
 ---
 
@@ -208,8 +209,8 @@ Nothing in M4 is blocked. Found while building it, not scheduled yet (each would
 | Match, ATS and keyword scores are not recomputed after edits | The edit loop renders HTML only; the analysis would have to run again per change. | New item (not scheduled) |
 | The cover letter has a generic salutation and no company name (the parser does not read the company), and its text cannot be edited, only the CV it quotes | A company field (the tracker has one) and letter editing are their own features. | New item (not scheduled) |
 | Spanish keeps role titles as written and leaves out the summary's achievement sentence | Translating profile text is out of scope by design (the app never rewrites the profile). | By design |
-| The suite without browsers takes about 7 minutes (five templates over the corpus) | The page count over the whole corpus is what proves MATCH-08. | TEST-10 (M5) can look at splitting it |
-| TEST-08 snapshots over `FixtureLoader.CorpusJdNames` | Snapshots are not built yet. | TEST-08 (M5) |
+| The suite without browsers takes about 7 minutes (five templates over the corpus) | The page count over the whole corpus is what proves MATCH-08. | Looked at in TEST-10 (M5): kept, see its notes |
+| TEST-08 snapshots over `FixtureLoader.CorpusJdNames` | Snapshots are not built yet. | Done in TEST-08 (M5) |
 
 ### Open items after M3.2
 
@@ -356,13 +357,15 @@ Files: `ErCv.E2E/*` (`AppFixture` starts the app on a free port and launches an 
 Verify: `dotnet test ErCv.E2E`; runs in CI as its own job.
 
 ### TEST-08: Golden snapshot tests
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done (M5) · **Priority:** P2 · **Effort:** S
 
-- [ ] Approved `GeneratedCV` + scores JSON per corpus JD
-- [ ] Scoring changes show up as a reviewable diff instead of silent drift
-- [ ] Snapshots also cover the real posts from the APP-05 corpus (`FixtureLoader.CorpusJdNames`)
+- [x] Approved `GeneratedCV` + scores JSON per corpus JD
+- [x] Scoring changes show up as a reviewable diff instead of silent drift
+- [x] Snapshots also cover the real posts from the APP-05 corpus (`FixtureLoader.CorpusJdNames`)
 
-Verify: snapshot tests pass; intentional changes are re-approved.
+Notes: no library. `ErCv.Tests/Snapshots/GenerationSnapshotTests` runs the real service (DOCX only, Harvard, one page, so the selection before the measured PDF fit) for every profile x job description (the hand-written ones plus one real post per role family: 95 cases, about 2 seconds) and compares the match score, missing skills, keyword analysis, ATS score and generated CV with `Snapshots/approved/*.approved.json`. A difference writes a `.received.json` next to it (git ignores it) and the failure shows the first differing lines. `ERCV_SNAPSHOTS=approve` accepts every current output and deletes the snapshots no case uses; `Every_approved_snapshot_belongs_to_a_current_case` catches the leftovers otherwise. The corpus refresh workflow approves the snapshots after a refresh, so the PR shows them next to the new posts. "Present" roles and recency used `DateTime.Now`, which would have changed the snapshots with the calendar: `DateParser.Now` can now be pinned for one async flow (`DateParser.PinNow`, an `AsyncLocal`, so tests running in parallel are not affected), and `RelevanceScorer` reads it too. Job descriptions are compared with LF line endings (git checks the fixtures out with CRLF on Windows); the output was checked to be the same either way.
+
+Verify: `dotnet test ErCv.Tests --filter Category=Snapshot`; `SnapshotTests` (the helper fails on a change and on a missing file), `DateParserTests` (the pin).
 
 ### TEST-09: Retire the Node scripts
 **Status:** Done (M5) · **Priority:** P2 · **Effort:** S
@@ -375,11 +378,15 @@ Notes: TC-01 to TC-07 run end to end through the API in `ErCv.Tests/Api/LegacySc
 Verify: every old TC-xx has a matching .NET test.
 
 ### TEST-10: Coverage
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done (M5) · **Priority:** P2 · **Effort:** S
 
-- [ ] coverlet report generated in CI
-- [ ] 80% or more line coverage on `Helpers/` and `Services/`
-- [ ] Coverage badge in README
+- [x] coverlet report generated in CI
+- [x] 80% or more line coverage on `Helpers/` and `Services/` (now `Features/` and `Services/`; the gate is 95%, see below)
+- [x] Coverage badge in README
+
+Notes: `coverlet.collector` 10.1.0 in `ErCv.Tests`, configured by `ErCv.Tests/coverage.runsettings` (the `ErCv.Web` assembly only, generated code excluded). `.github/scripts/coverage_summary.py` (standard library Python) reads the cobertura report, counts each line once per file and prints the coverage per feature folder and for `Services/`; CI writes the table to the job summary and fails under 95%. First measure, in Release as CI builds it (full suite without browsers): 98.2% (Analysis 95.8, CoverLetters 100, Documents 98.3, Editing 100, Matching 100, Profiles 100, Selection 100, Services 95.0). The gate is 95%, not the 80% this item asked for: at 98% an 80% gate would let a whole feature lose its tests (Selection is a fifth of the measured lines) without failing, while 95% still leaves about 80 lines of room for an untested guard or log line. The test step runs `ErCv.Tests` only (the browser project has no collector), and the trx logger copies the report, so two identical files exist. The README badge is a static number: the release steps below update it from the CI summary. Components and `UI/` are not in the target (bUnit and the E2E tests cover them). The suite without browsers still takes about 7 minutes: the time is the PDF page count over the corpus (MATCH-08), which is the proof of the page fit, so it is not split.
+
+Verify: the `Coverage` step of `ci.yml`.
 
 ---
 

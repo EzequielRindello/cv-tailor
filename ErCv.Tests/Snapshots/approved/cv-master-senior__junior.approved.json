@@ -1,0 +1,289 @@
+{
+  "matchScore": {
+    "overall": 65,
+    "skillsMatched": 5,
+    "totalSkills": 6,
+    "keywordsMatched": 5,
+    "totalKeywords": 15,
+    "seniorityMatch": false,
+    "colorClass": "yellow",
+    "lowMatchWarning": null
+  },
+  "missingSkills": {
+    "requiredMissing": [
+      "css"
+    ],
+    "niceToHaveMissing": [],
+    "suggestions": [
+      "Add 'css' to cv-master.json if you have experience with this technology"
+    ],
+    "potentialScoreIncrease": 8
+  },
+  "keywordAnalysis": {
+    "technicalKeywords": [
+      {
+        "word": "javascript",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "react",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "node.js",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "css",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "git",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "sql",
+        "frequency": 1,
+        "presentInCV": true
+      }
+    ],
+    "softSkillKeywords": [],
+    "industryKeywords": [
+      {
+        "word": "experience",
+        "frequency": 2,
+        "presentInCV": true
+      },
+      {
+        "word": "junior",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "software",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "developer",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "first",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "second",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "senior",
+        "frequency": 1,
+        "presentInCV": true
+      },
+      {
+        "word": "needed",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "alongside",
+        "frequency": 1,
+        "presentInCV": false
+      },
+      {
+        "word": "mentors",
+        "frequency": 1,
+        "presentInCV": false
+      }
+    ],
+    "presentInCV": [
+      "javascript",
+      "react",
+      "node.js",
+      "git",
+      "sql",
+      "software",
+      "developer",
+      "first",
+      "second",
+      "senior",
+      "experience",
+      "bugs",
+      "features",
+      "years",
+      "learn"
+    ],
+    "missingFromCV": [
+      "css"
+    ],
+    "keywordDensity": 0.83,
+    "suggestions": [
+      "Add \"css\" to the skills section or bullets if you have used it"
+    ]
+  },
+  "atsScore": {
+    "overall": 100,
+    "issues": [],
+    "recommendations": [
+      "Your CV is fully optimized for ATS"
+    ],
+    "colorClass": "green"
+  },
+  "generatedCV": {
+    "header": {
+      "fullName": "Alex Rivera",
+      "email": "alex.rivera@email.com",
+      "phone": "+1 (415) 555-0192",
+      "location": "San Francisco, CA",
+      "linkedIn": "linkedin.com/in/alex-rivera-dev",
+      "gitHub": "github.com/alexrivera-dev"
+    },
+    "summary": "Senior Full Stack Developer with 9+ years of experience, specializing in JavaScript, Node.js, React, SQL, and Git. Proven track record of achieving 70%. Strong mentoring skills.",
+    "education": [
+      {
+        "degree": "B.S. Computer Science",
+        "institution": "University of California, Berkeley",
+        "location": "Berkeley, CA",
+        "graduationDate": "May 2017",
+        "gpa": "3.7",
+        "relevantCourses": [
+          "Data Structures & Algorithms",
+          "Distributed Systems",
+          "Database Systems",
+          "Operating Systems",
+          "Software Engineering"
+        ],
+        "honors": "Magna Cum Laude"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Software Engineering Intern",
+        "company": "Box",
+        "location": "Redwood City, CA",
+        "startDate": "Jun 2016",
+        "endDate": "Aug 2016",
+        "bullets": [
+          "Built an internal analytics dashboard using React and D3.js to visualize file upload/download patterns across enterprise accounts",
+          "Fixed 12 production bugs in the Node.js content delivery service as first contributions to a large codebase",
+          "Wrote unit tests for 3 untested modules achieving 70% coverage and catching 2 pre-existing bugs"
+        ],
+        "skills": [
+          "React",
+          "JavaScript",
+          "Node.js",
+          "D3.js",
+          "Python",
+          "SQL"
+        ]
+      },
+      {
+        "role": "Senior Software Engineer",
+        "company": "Stripe",
+        "location": "Remote · San Francisco, CA",
+        "startDate": "Mar 2022",
+        "endDate": "Present",
+        "bullets": [
+          "Architected and led development of a real-time payment reconciliation service using Go and Kafka processing 2M+ transactions/day with 99.99% uptime",
+          "Redesigned the merchant onboarding API (Node.js + TypeScript) reducing integration time from 3 weeks to 4 days for enterprise clients",
+          "Built a distributed rate-limiting system using Redis and Lua scripts handling 500K+ requests/second across 12 global regions"
+        ],
+        "skills": [
+          "Go",
+          "Node.js",
+          "TypeScript",
+          "Kafka",
+          "Redis",
+          "PostgreSQL",
+          "Kubernetes",
+          "ArgoCD",
+          "GitHub Actions",
+          "Grafana",
+          "Prometheus",
+          "Microservices",
+          "REST API",
+          "Docker",
+          "AWS"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "company": "Airbnb",
+        "location": "San Francisco, CA",
+        "startDate": "Jun 2019",
+        "endDate": "Feb 2022",
+        "bullets": [
+          "Built and maintained React + TypeScript frontend features for the host dashboard serving 4M+ active hosts worldwide",
+          "Developed a dynamic pricing recommendation engine using Python and scikit-learn increasing host revenue by an average of 22%",
+          "Designed a GraphQL API layer replacing 8 legacy REST endpoints, reducing frontend network requests by 60% and improving page load time by 1.4s"
+        ],
+        "skills": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Python",
+          "GraphQL",
+          "Java",
+          "Elasticsearch",
+          "Jest",
+          "Cypress",
+          "Docker",
+          "CI/CD",
+          "A/B Testing",
+          "REST API",
+          "Agile",
+          "Scrum"
+        ]
+      }
+    ],
+    "skills": [
+      "JavaScript",
+      "Node.js",
+      "React",
+      "SQL",
+      "Git",
+      "TypeScript",
+      "Python",
+      "REST API Design",
+      "Docker",
+      "Go",
+      "Java",
+      "GraphQL",
+      "PostgreSQL",
+      "Redis",
+      "Elasticsearch"
+    ],
+    "projects": [
+      {
+        "name": "OpenMQ — Open Source Message Queue",
+        "description": "Built a lightweight distributed message queue in Go inspired by Kafka. Supports pub/sub, consumer groups, and at-least-once delivery. Used by 3 open source projects with 800+ GitHub stars.",
+        "technologies": [
+          "Go",
+          "gRPC",
+          "Docker",
+          "Kubernetes"
+        ],
+        "highlights": [
+          "Achieved 95K messages/second throughput on a 3-node cluster in benchmarks",
+          "Implemented Raft consensus for leader election ensuring zero message loss during failover",
+          "Published detailed architecture docs and attracted 12 external contributors"
+        ],
+        "link": "github.com/alexrivera-dev/openmq"
+      }
+    ],
+    "sectionOrder": [],
+    "language": "en",
+    "accent": "default",
+    "fonts": "default",
+    "editedBullets": []
+  }
+}

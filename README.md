@@ -1,6 +1,7 @@
 # ER CV Generator
 
 [![CI](https://github.com/EzequielRindello/er-cv-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/EzequielRindello/er-cv-generator/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-98%25-brightgreen)](features.md#test-10-coverage)
 
 ASP.NET Core monolith (.NET 10) that generates ATS-optimized, tailored resumes from a job description. The UI is Blazor Server and the REST API lives in the same project, so the whole app ships as a single deploy. It never fabricates content: it selects, reorders, and summarizes what's already in `cv-master.json`.
 
@@ -204,6 +205,10 @@ dotnet test --filter Category=Documents          # DOCX, PDF and HTML preview
 dotnet test --filter "Category!=E2E"             # everything except the browser tests
 dotnet test ErCv.E2E                             # browser tests only (Playwright), about 1 minute
 ```
+
+Line coverage of `Features/` and `Services/` is measured in CI (coverlet), shown in the job summary, and the job fails under 95%. The badge is the number of the last release.
+
+Generation snapshots (`Category=Snapshot`) pin the generated CV and every score for each profile and job description in `ErCv.Tests/Snapshots/approved`. A change shows up as a diff; review it and approve it with `ERCV_SNAPSHOTS=approve`.
 
 The browser tests (`ErCv.E2E`) start the web app on a free port and drive it with Playwright: generate flow, downloads, editing with the live preview, cover letter, templates and styles, persistence, keyboard shortcuts, 360 / 390 / 768px viewports and an axe accessibility scan in light and dark. They use a browser that is already installed (Chrome, then Edge) and download nothing. Set `E2E_BROWSER_CHANNEL` to pick another one, or `E2E_BASE_URL` to test an app that is already running.
 
