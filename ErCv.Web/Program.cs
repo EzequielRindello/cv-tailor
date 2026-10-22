@@ -18,6 +18,7 @@ const string ErrorPath = "/Error";
 
 var builder = WebApplication.CreateBuilder(args);
 var settings = ErCvOptions.Load(builder.Configuration);
+builder.Services.AddSingleton(settings);
 
 // Render injects the port to bind to
 var port = Environment.GetEnvironmentVariable(PortVariable);

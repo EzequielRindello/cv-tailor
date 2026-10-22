@@ -91,9 +91,9 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | ENG-06 | Modern OpenAPI (built-in + Scalar) | E8 Engineering | P3 | S | Done |
 | OPS-01 | GitHub Actions CI | E9 DevOps | P0 | M | Done |
 | OPS-02 | Dependabot | E9 DevOps | P2 | S | Done |
-| OPS-03 | README rewrite for portfolio | E9 DevOps | P1 | M | Todo |
-| OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Todo |
-| OPS-05 | Privacy note | E9 DevOps | P2 | S | Todo |
+| OPS-03 | README rewrite for portfolio | E9 DevOps | P1 | M | Done |
+| OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Done |
+| OPS-05 | Privacy note | E9 DevOps | P2 | S | Done |
 | OPS-06 | Deploy to Render + live demo link | E9 DevOps | P1 | M | Todo |
 
 ---
@@ -105,7 +105,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 3. **M3 Your data** (v2.0.4, released): PROF-01 to PROF-04, MATCH-04, MATCH-05, APP-01, APP-02, APP-05.
 3.2. **M3.2 Real-post fixes** (v2.0.4.1, released): MATCH-07, MATCH-09, APP-06, PROF-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
 4. **M4 Output** (v2.0.5, released): EDIT-01 to EDIT-06, MATCH-08, UX-10.
-5. **M5 Polish & presentation** (v2.0.6): OPS-02 to OPS-05, ENG-01, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10. ENG-04 was dropped (Won't do, see the item). Nothing in M5 waits on M6.
+5. **M5 Polish & presentation** (v2.0.6, released): OPS-02 to OPS-05, ENG-01, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10. ENG-04 was dropped (Won't do, see the item). Nothing in M5 waits on M6.
 5.1. **M5.1 Deploy** (v2.0.6.1): OPS-06. The first public deploy, and the live demo link the README gets with it.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05.
 
@@ -139,7 +139,7 @@ Found during the roadmap review. Each one is covered by a feature below.
 | F7 | Generate auto-downloads files before the user sees the preview. | `Components/Pages/Home.razor:268` | UX-04 |
 | F8 | 500 responses include `ex.Message`; logging uses `Console.WriteLine`. | `Services/CVGeneratorService.cs:63`, helpers | ENG-03 (fixed) |
 | F9 | Mixed namespaces (`ErCvApi.*` and `ErCv.Web.*`); helpers built with `new` instead of DI. | Whole project | Namespaces fixed in the system hardening (H8); DI fixed with ENG-01 (M5) |
-| F10 | Docs drift: legacy FIX-002 says low match is below 30%, code uses below 40%. Node runner expectations depend on a fixture in `testing/`. | `Helpers/MatchScoreCalculator.cs:43`, `testing/` | OPS-04, TEST-09 |
+| F10 | Docs drift: legacy FIX-002 says low match is below 30%, code uses below 40%. Node runner expectations depend on a fixture in `testing/`. | `Helpers/MatchScoreCalculator.cs:43`, `testing/` | OPS-04, TEST-09 (fixed in M5: the docs say 40%, `testing/` is gone) |
 | F11 | Bullet reordering is drag-only, not keyboard accessible. | `Components/Shared/BulletEditor.razor` | UX-08 |
 
 ### New findings (from TEST-02 to TEST-05)
@@ -179,6 +179,7 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 |---|---|---|
 | F24 | The match card never showed `MatchScore.LowMatchWarning`: the API returns it, the Blazor UI dropped it (only the red "Weak Match" badge was left). Its text also had an em dash. | Fixed with TEST-06: shown under the breakdown, text without the em dash. `ScoreCardsTests` |
 | F25 | Required vs nice-to-have does not follow the job post's sections: in TC-01 "GitOps" (listed under "Nice to have") is reported as a required missing skill and "RabbitMQ" (under "Requirements") as nice to have. | Open: MATCH-06 (not scheduled) |
+| F27 | The app's samples are mostly "Staff" posts (the picker takes the newest post per role family) while the default profile is senior, so the first try of the demo gives a weak match on 5 of 6 samples (Backend 52, Frontend 50, Full stack 38, Data 48, DevOps 61, Junior 36 with the senior sample). The scores are right; the first impression is not. | Open: new item, a picker rule that prefers senior posts or a demo profile per sample (not scheduled) |
 | F26 | E2E `Toasts_have_no_serious_violations` failed now and then: "CV ready" is usually still on screen when the download toast appears, so the bare `.app-toast` locator matched two toasts (Playwright strict mode). It passed only when the assertion ran before the second toast was added. | Fixed: the test waits for the "Download started" toast |
 
 ### System hardening (between M3 and M3.2)
@@ -198,6 +199,19 @@ A review of the C# code before M3.2, branch `feature/system-hardening`. No behav
 | H9 | Magic numbers and repeated literals (scoring weights, limits, profile ids, JS interop names, template keys) inline across helpers and components. | Fixed: named constants, hosting values in `appsettings.json` |
 | H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Fixed with MATCH-07: one list, `SelectionConstants.TechRoleKeywords`, the summary's stricter one plus nothing broad: the selector no longer treats analyst, consultant or specialist roles as tech (a union was tried first and made "Certification Specialist" count as tech years in the real demo profile) |
 | H11 | Swashbuckle 6.5.0 is old (Development only). | Fixed with ENG-06 (M5): built-in OpenAPI + Scalar |
+
+### Open items after M5
+
+Nothing in M5 is blocked; every item is Done except ENG-04 (Won't do, the reason is in the item). Left for later:
+
+| Item | Why it is not in M5 | Owner |
+|---|---|---|
+| First public deploy, live demo link, cold-start timing with the warm-up, limits checked on the real instance | Needs the Render service. | OPS-06 (M5.1) |
+| The coverage step and the snapshots have not run on GitHub's Linux runner yet | They were checked locally with the CI commands in Release, and the snapshots with LF and CRLF job descriptions. | First CI run of the M5 PR |
+| F25: required and nice-to-have skills do not follow the post's sections | It changes scoring. | MATCH-06 (not scheduled) |
+| F27: most samples are Staff posts, a weak match for the default senior profile | A picker or demo rule, reviewed on its own. | New item (not scheduled) |
+| The M4 open items (add back what the selection left out, scores after edits, company name in the cover letter) | Unchanged in M5. | New items (not scheduled) |
+| Optional AI | Out of this pass by the owner's decision. | M6 |
 
 ### Open items after M4
 
@@ -1049,20 +1063,28 @@ Verify: green run on a PR.
 Notes: `.github/dependabot.yml`, weekly, one grouped PR per ecosystem (NuGet covers every project of the solution). Each PR runs `ci.yml`.
 
 ### OPS-03: README rewrite
-**Status:** Todo · **Priority:** P1 · **Effort:** M
+**Status:** Done (M5) · **Priority:** P1 · **Effort:** M
 
-- [ ] Hero screenshot / GIF, badges (CI, coverage, .NET 10). The live demo link moved to OPS-06 (M5.1): there is no deploy yet.
-- [ ] Architecture diagram, "How matching works", testing strategy section
+- [x] Hero screenshot / GIF, badges (CI, coverage, .NET 10). The live demo link moved to OPS-06 (M5.1): there is no deploy yet.
+- [x] Architecture diagram, "How matching works", testing strategy section
+
+Notes: the README is now the short tour (what it does, how matching works, a Mermaid architecture diagram, the testing strategy, how to run it); the technical reference moved to `PROJECT_OVERVIEW.md`. Four screenshots in `docs/screenshots/` come from the running app: `ScreenshotTests` in `ErCv.E2E` takes them when `ERCV_SCREENSHOTS` names the folder, and does nothing otherwise, so they can be retaken at each release. They use the DevOps sample, the one the default profile matches best (see F27).
 
 ### OPS-04: PROJECT_OVERVIEW refresh
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done (M5) · **Priority:** P2 · **Effort:** S
 
-- [ ] Fix the drift (F10) and document the new features
+- [x] Fix the drift (F10) and document the new features
+
+Notes: rewritten as the technical reference: request flow (with what `/regenerate` and `/health` return now), project structure with every feature folder, design decisions, UI and restyling, data shapes, testing layers, security and hosting, open items. The old "Possible improvements" list was mostly done (DI, tests, date parsing, cover letter) and is replaced by a pointer to the open items here. `CLAUDE.md` now lists the `Editing` and `CoverLetters` feature folders.
 
 ### OPS-05: Privacy note
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done (M5) · **Priority:** P2 · **Effort:** S
 
-- [ ] Page or footer note: no CV data stored server-side; session files expire after 10 minutes; custom profiles live only in the browser
+- [x] Page or footer note: no CV data stored server-side; session files expire after 10 minutes; custom profiles live only in the browser
+
+Notes: a `/privacy` page, linked from the footer. The old footer said "We don't store your data", which was not exact: the server keeps the generated CV in memory while the page is open, and API sessions keep the files for the configured idle time. The page says what stays in the browser (settings, history of up to 50 entries with the job descriptions, My profile) and how to remove it, what the server sees and for how long (the timeout is read from `ErCvOptions`, now registered in DI), that logs hold technical details only, and that there is no analytics or third-party request. Each statement was checked against the code; the page says to update it when that changes.
+
+Verify: `PrivacyTests` (bUnit: the configured timeout, the footer link), E2E `The_footer_opens_the_privacy_page_and_it_has_no_serious_violations` (it found the in-text link too faint in dark mode, fixed with the app's link color).
 
 ### OPS-06: Deploy to Render + live demo link
 **Status:** Todo (M5.1) · **Priority:** P1 · **Effort:** M

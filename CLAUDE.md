@@ -30,6 +30,8 @@ ErCv.Web/
     Selection/      Choosing experiences, bullets, skills, projects and the summary; page fit
     Profiles/       Validating, checking and (de)serializing the visitor's profile; date parsing
     Documents/      HTML, PDF and DOCX rendering
+    Editing/        The editable copy of a generated CV behind the workspace editor (CvDraft)
+    CoverLetters/   The cover letter: fixed sentences plus facts from the CV
   Constants/        Only constants used across features (ApiConstants, TemplatePaths)
   Configuration/    Options bound from appsettings.json and app-wide middleware (security headers)
   Models/           Plain data classes and records shared across layers
