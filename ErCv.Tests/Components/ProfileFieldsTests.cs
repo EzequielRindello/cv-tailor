@@ -1,5 +1,7 @@
 using Bunit;
 using ErCv.Web.Components.Shared;
+using ErCv.Web.UI;
+using Microsoft.AspNetCore.Components;
 
 namespace ErCv.Tests.Components;
 
@@ -38,6 +40,39 @@ public class ProfileFieldsTests : BunitContext
         cut.Find("input#f").Change("Staff Engineer");
 
         Assert.Equal("Staff Engineer", seen);
+    }
+
+    [Fact]
+    public void Inside_the_profile_page_a_field_reports_typing_then_the_change_and_the_blur()
+    {
+        var reports = new List<bool>();
+        var cut = Render<CascadingValue<Action<bool>>>(p => p
+            .Add(c => c.Name, UiConstants.ProfileEditedCascade)
+            .Add(c => c.Value, (Action<bool>)reports.Add)
+            .AddChildContent<ProfileField>(f => f.Add(c => c.Id, "f").Add(c => c.Label, "Role")));
+
+        cut.Find("input#f").Input("Sta");
+        cut.Find("input#f").Change("Staff");
+        cut.Find("input#f").Blur();
+
+        Assert.Equal(new[] { true, false, false }, reports);
+    }
+
+    [Fact]
+    public void Adding_or_removing_a_list_item_is_reported_to_the_profile_page()
+    {
+        var reports = new List<bool>();
+        var items = new List<string> { "One" };
+        var cut = Render<CascadingValue<Action<bool>>>(p => p
+            .Add(c => c.Name, UiConstants.ProfileEditedCascade)
+            .Add(c => c.Value, (Action<bool>)reports.Add)
+            .AddChildContent<ProfileListField>(f => f.Add(c => c.Id, "b").Add(c => c.Label, "Bullet").Add(c => c.Items, items)));
+
+        cut.Find("#b-add").Click();
+        cut.Find("[aria-label='Remove Bullet 1']").Click();
+
+        Assert.Equal(new[] { string.Empty }, items);
+        Assert.Equal(new[] { false, false }, reports);
     }
 
     [Fact]

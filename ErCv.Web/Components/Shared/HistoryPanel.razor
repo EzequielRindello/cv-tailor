@@ -4,7 +4,7 @@
             <h6 class="mb-0">Generation History</h6>
             <div class="history-header-actions">
                 <button type="button" class="btn btn-outline-danger btn-sm"
-                        disabled="@(Disabled || Entries.Count == 0)" @onclick="OnClear">Clear</button>
+                        disabled="@(Disabled || Entries.Count == 0)" @onclick="ConfirmClearAsync"><i class="bi bi-trash me-1" aria-hidden="true"></i>Clear</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="OnClose">Close</button>
             </div>
         </div>
@@ -72,8 +72,11 @@
                                         @onclick="() => _openId = open ? null : entry.Id">Details</button>
                                 <button type="button" class="btn btn-outline-primary btn-sm"
                                         disabled="@Disabled" @onclick="() => OnLoad.InvokeAsync(entry)">Re-open</button>
-                                <button type="button" class="btn btn-outline-danger btn-sm"
-                                        disabled="@Disabled" @onclick="() => OnDelete.InvokeAsync(entry.Id)">Delete</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm history-delete-btn"
+                                        title="Delete" aria-label="@($"Delete {Heading(entry)}")"
+                                        disabled="@Disabled" @onclick="() => ConfirmDeleteAsync(entry)">
+                                    <i class="bi bi-trash" aria-hidden="true"></i>
+                                </button>
                             </div>
                         </div>
                         @if (open)
@@ -112,6 +115,8 @@
     </div>
 </div>
 
+<ConfirmDialog @ref="_confirm" />
+
 @code {
     #region Constants
 
@@ -137,6 +142,7 @@
     private string _statusFilter = string.Empty;
     private HistorySort _sort = HistorySort.Newest;
     private long? _openId;
+    private ConfirmDialog _confirm = default!;
 
     #endregion
 
@@ -146,6 +152,30 @@
 
     private void OnSortChange(ChangeEventArgs e) =>
         _sort = Enum.TryParse<HistorySort>(e.Value?.ToString(), out var sort) ? sort : HistorySort.Newest;
+
+    private async Task ConfirmDeleteAsync(HistoryEntry entry)
+    {
+        var heading = Heading(entry);
+        if (await _confirm.AskAsync("Delete this CV?",
+                @<p>Delete <strong>@heading</strong> from your history, with its application status and notes?
+                    <strong>This cannot be undone.</strong></p>,
+                "Delete"))
+        {
+            await OnDelete.InvokeAsync(entry.Id);
+        }
+    }
+
+    private async Task ConfirmClearAsync()
+    {
+        var count = Entries.Count;
+        if (await _confirm.AskAsync("Clear the history?",
+                @<p>Delete <strong>all @count @(count == 1 ? "CV" : "CVs")</strong> in your history, with their application
+                    tracking? <strong>This cannot be undone.</strong></p>,
+                "Clear history"))
+        {
+            await OnClear.InvokeAsync();
+        }
+    }
 
     private Task Edit(HistoryEntry entry, Action<HistoryEntry> change)
     {

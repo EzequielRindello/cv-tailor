@@ -2,6 +2,7 @@
     <span class="form-label form-label-custom mb-3 d-block" id="cover-letter-label">Cover letter</span>
     <label class="cover-letter-option @(Value ? "selected" : "") @(Disabled ? "disabled" : "")">
         <input type="checkbox"
+               class="form-check-input"
                id="include-cover-letter"
                aria-describedby="cover-letter-desc"
                checked="@Value"

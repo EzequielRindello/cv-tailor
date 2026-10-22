@@ -1,25 +1,33 @@
 @using static ErCv.Web.Services.CVGeneratorService
 
-@* Step 2: one choice per stored profile (the senior sample first), then the visitor's own saved profile *@
+@* Step 2: one card per stored profile (the senior sample first), then the visitor's own saved profile *@
 <fieldset class="mb-4 profile-source">
     <legend class="form-label form-label-custom">Profile to use</legend>
-    <div class="d-flex flex-wrap gap-3 align-items-center">
+    <div class="profile-source-options">
         @foreach (var profile in Ordered())
         {
             var id = RadioId(profile.Id);
-            <div class="form-check mb-0">
-                <input class="form-check-input" type="radio" name="profile-source" id="@id"
-                       checked="@(Value == UiConstants.ProfileSourceDemo && ProfileId == profile.Id)"
-                       disabled="@Disabled" @onchange="() => PickStored(profile.Id)" />
-                <label class="form-check-label" for="@id">@Label(profile)</label>
+            var selected = Value == UiConstants.ProfileSourceDemo && ProfileId == profile.Id;
+            <div class="profile-source-card @(selected ? "selected" : "") @(Disabled ? "disabled" : "")">
+                <input class="visually-hidden" type="radio" name="profile-source" id="@id"
+                       checked="@selected" disabled="@Disabled" @onchange="() => PickStored(profile.Id)" />
+                <label class="profile-source-label" for="@id">
+                    <i class="bi @Icon(profile) profile-source-icon" aria-hidden="true"></i>
+                    <span class="profile-source-name">@Label(profile)</span>
+                    <span class="profile-source-desc">@Description(profile)</span>
+                </label>
             </div>
         }
-        <div class="form-check mb-0">
-            <input class="form-check-input" type="radio" name="profile-source" id="source-mine"
-                   checked="@(Value == UiConstants.ProfileSourceMine)" disabled="@(Disabled || !HasMine)" @onchange="PickMine" />
-            <label class="form-check-label" for="source-mine">My profile</label>
+        @{ var mineSelected = Value == UiConstants.ProfileSourceMine; }
+        <div class="profile-source-card @(mineSelected ? "selected" : "") @(HasMine ? "" : "empty") @(Disabled || !HasMine ? "disabled" : "")">
+            <input class="visually-hidden" type="radio" name="profile-source" id="source-mine"
+                   checked="@mineSelected" disabled="@(Disabled || !HasMine)" @onchange="PickMine" />
+            <label class="profile-source-label" for="source-mine">
+                <i class="bi bi-person-circle profile-source-icon" aria-hidden="true"></i>
+                <span class="profile-source-name">My profile</span>
+                <span class="profile-source-desc">@(HasMine ? "Saved in this browser" : "Not created yet. Use Profile at the top.")</span>
+            </label>
         </div>
-        <a href="/profile" id="profile-edit-link">@(HasMine ? "Edit my profile" : "Create my profile")</a>
     </div>
 </fieldset>
 
@@ -71,6 +79,17 @@
         ApiConstants.DefaultProfileId => UiConstants.CreatorProfileLabel,
         _ => profile.Name
     };
+
+    private static string Description(ProfileInfo profile) => profile.Id switch
+    {
+        ApiConstants.SeniorSampleProfileId => "Fictional senior engineer",
+        ApiConstants.DefaultProfileId => "The app creator's real CV",
+        _ => "Stored profile"
+    };
+
+    // Same icons as the "Start from" buttons on the profile page
+    private static string Icon(ProfileInfo profile) =>
+        profile.Id == ApiConstants.SeniorSampleProfileId ? "bi-person-badge" : "bi-person";
 
     #endregion
 }

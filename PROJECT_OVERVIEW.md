@@ -88,7 +88,7 @@ er-cv-generator/
 
 - **Deterministic, explainable heuristics instead of a model.** Every score is a weighted sum of named constants, and
   the UI shows why each experience, bullet, skill and project was chosen (MATCH-04). An optional AI layer is planned
-  as M6, off by default, and may only reorder or suggest, never write facts.
+  as M6 (parked until there is an API key to use), off by default, and may only reorder or suggest, never write facts.
 - **Constants, not settings, for the CV logic.** Weights and thresholds are proven by the invariant tests, the corpus
   report and the generation snapshots; a deployment cannot change them (ENG-04 was dropped for this reason). Only
   hosting values (rate limit, session timeout) are settings.
@@ -196,5 +196,5 @@ the suite with line coverage of `Features/` and `Services/` (gate 95%), the brow
 ## Open items
 
 Tracked in `features.md`: the "Open items after" sections and the findings tables. The main ones: the parser does
-not split required and nice-to-have skills by the post's sections (MATCH-06, F25), scores are not recomputed after
-edits, the cover letter has no company name, and the first public deploy is M5.1 (OPS-06).
+not split required and nice-to-have skills by the post's sections (MATCH-06, F25, planned for M5.1), scores are not
+recomputed after edits, the cover letter has no company name, and the first public deploy is M5.2 (OPS-06).

@@ -76,6 +76,21 @@ public class CvEditorTests : BunitContext
     }
 
     [Fact]
+    public void Save_stays_disabled_until_the_bullet_text_changes()
+    {
+        var cut = Render();
+
+        cut.Find("#bullet-edit-btn-0-0").Click();
+        Assert.True(cut.FindAll("button").Single(b => b.TextContent.Trim() == "Save").HasAttribute("disabled"));
+
+        cut.Find("#bullet-edit-0-0").Input("Built the billing API ");
+        Assert.True(cut.FindAll("button").Single(b => b.TextContent.Trim() == "Save").HasAttribute("disabled"));
+
+        cut.Find("#bullet-edit-0-0").Input("Built the billing API in Go");
+        Assert.False(cut.FindAll("button").Single(b => b.TextContent.Trim() == "Save").HasAttribute("disabled"));
+    }
+
+    [Fact]
     public void An_empty_rewrite_shows_an_error_and_keeps_the_text()
     {
         var cut = Render();

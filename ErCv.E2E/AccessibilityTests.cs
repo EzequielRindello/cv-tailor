@@ -68,6 +68,7 @@ public class AccessibilityTests : E2ETestBase
     public async Task Profile_editor_with_validation_errors_has_no_serious_violations()
     {
         await Page.GotoAsync("/profile");
+        await Page.Locator("#p-phone").FillAsync("555 0100");
         await Page.Locator("#profile-save").ClickAsync();
         await Assertions.Expect(Page.Locator("#p-fullName-err")).ToBeVisibleAsync();
 

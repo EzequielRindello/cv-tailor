@@ -56,13 +56,13 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | PROF-03 | Generate from a custom profile | E3 Your profile | P1 | S | Done |
 | PROF-04 | Profile health check | E3 Your profile | P2 | M | Done |
 | PROF-06 | The owner's real profile as the demo | E3 Your profile | P1 | S | Done |
-| PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Todo |
+| PROF-05 | Import from existing PDF/DOCX resume | E3 Your profile | P3 | L | Todo (M5.1) |
 | MATCH-01 | Fix fuzzy-match false positives | E4 Matching | P0 | S | Done |
 | MATCH-02 | Word-boundary ATS keyword density | E4 Matching | P0 | S | Done |
 | MATCH-03 | Shared date parser + correct "most recent role" | E4 Matching | P0 | M | Done |
 | MATCH-04 | Explainability: "why this was chosen" | E4 Matching | P1 | M | Done |
 | MATCH-05 | JD highlighter | E4 Matching | P1 | M | Done |
-| MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Todo |
+| MATCH-06 | Required vs nice-to-have from JD sections | E4 Matching | P2 | M | Todo (M5.1) |
 | MATCH-07 | Skill/alias dictionary as data file, tuned on real posts | E4 Matching | P1 | M | Done |
 | MATCH-08 | Page fit measured on the rendered PDF | E4 Matching | P1 | M | Done |
 | MATCH-09 | Seniority detection from the title and wording | E4 Matching | P1 | S | Done |
@@ -75,7 +75,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | APP-01 | Application tracker | E6 Workflow | P2 | M | Done |
 | APP-02 | Re-open a past generation | E6 Workflow | P2 | S | Done |
 | APP-03 | Sample JD gallery | E6 Workflow | P0 | S | Done |
-| APP-04 | Import JD from URL (Greenhouse/Lever) | E6 Workflow | P3 | M | Todo |
+| APP-04 | Import JD from URL (Greenhouse/Lever) | E6 Workflow | P3 | M | Todo (M5.1) |
 | APP-05 | Real job-post corpus, dated and kept fresh | E6 Workflow | P1 | L | Done |
 | APP-06 | Corpus follow-ups: sample picker rules, first Action run | E6 Workflow | P2 | S | Done |
 | AI-01 | LLM options + feature flag | E7 AI | P3 | S | Parked |
@@ -106,8 +106,9 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 3.2. **M3.2 Real-post fixes** (v2.0.4.1, released): MATCH-07, MATCH-09, APP-06, PROF-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
 4. **M4 Output** (v2.0.5, released): EDIT-01 to EDIT-06, MATCH-08, UX-10.
 5. **M5 Polish & presentation** (v2.0.6, released): OPS-02 to OPS-05, ENG-01, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10. ENG-04 was dropped (Won't do, see the item). Nothing in M5 waits on M6.
-5.1. **M5.1 Deploy** (v2.0.6.1): OPS-06. The first public deploy, and the live demo link the README gets with it.
-6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05.
+5.1. **M5.1 Smarter input** (v2.0.6.1): MATCH-06, PROF-05, APP-04. Read the job post's sections, start a profile from an existing resume, take the job post from its URL. PROF-05's AI-assisted parsing stays with M6. PROF-05 and APP-04 may need new packages (PDF/DOCX reading) and outbound HTTP: both are asked for before they are added.
+5.2. **M5.2 Deploy** (v2.0.6.2): OPS-06. The first public deploy, and the live demo link the README gets with it. Moved after M5.1 by the owner (2026-10-22).
+6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05. Parked until the owner has an API key the app can use.
 
 ### Versioning
 
@@ -178,11 +179,27 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 | # | Finding | Status |
 |---|---|---|
 | F24 | The match card never showed `MatchScore.LowMatchWarning`: the API returns it, the Blazor UI dropped it (only the red "Weak Match" badge was left). Its text also had an em dash. | Fixed with TEST-06: shown under the breakdown, text without the em dash. `ScoreCardsTests` |
-| F25 | Required vs nice-to-have does not follow the job post's sections: in TC-01 "GitOps" (listed under "Nice to have") is reported as a required missing skill and "RabbitMQ" (under "Requirements") as nice to have. | Open: MATCH-06 (not scheduled) |
+| F25 | Required vs nice-to-have does not follow the job post's sections: in TC-01 "GitOps" (listed under "Nice to have") is reported as a required missing skill and "RabbitMQ" (under "Requirements") as nice to have. | Open: MATCH-06 (M5.1) |
 | F27 | The app's samples are mostly "Staff" posts (the picker takes the newest post per role family) while the default profile is senior, so the first try of the demo gives a weak match on 5 of 6 samples (Backend 52, Frontend 50, Full stack 38, Data 48, DevOps 61, Junior 36 with the senior sample). The scores are right; the first impression is not. | Fixed (owner's choice: senior posts, then the best match): `SamplePicker` prefers posts at the demo profile's level (senior), then posts with at least 6 parsed skills (a 1-skill post was a trivial 100% match), then the post the demo profile (`cv-master-senior`) matches best. Now Full stack 83, Frontend 66, DevOps 64, Data 57, Junior 54, Backend 46: the corpus has no senior backend post this profile fits (the picker takes one when a refresh brings it). `CollectorPartsTests` (level, skill floor, best match) |
 | F29 | The summary's role type matched its signals as substrings: "ui" (frontend) matched keywords such as "build" and "guide", so the backend fixture read "Senior Full Stack Developer" and a Datadog backend post "Senior Frontend Developer". | Fixed: whole-term matching (`SkillNormalizer.ContainsTerm`, as F1 and F13). 12 snapshots changed, all in the summary: the backend posts now read "Backend Developer". Left open: one mention of Kotlin makes the Airbnb Payments post read "Mobile Developer" (the signal lists, not the matching). `SummaryGeneratorTests.Role_signals_match_whole_terms_only` |
 | F28 | Text depended on the server's culture. The ATS density issue used `{0:P0}`: "12%" on Windows (en-US) and "12 %" on Linux, where .NET runs with the invariant culture, so the first CI run of the M5 merge failed 44 snapshots, and the Render container would have shown "12 %". `{0:N0}` in the job description length error and the character counter would print "100.000" under a German or Spanish culture. | Fixed in `fix/culture-independent-text` (no version change): the ATS gets a whole percent rounded half to even (the "P0" rounding), the counts are formatted with the invariant culture, the ATS messages lost their em dashes. `GenerationSnapshotTests.Generation_does_not_depend_on_the_culture` generates every case under the invariant, es-AR, de-DE and fr-FR cultures against the same snapshots; `ATSCheckerTests` and `HardeningTests` pin the two messages |
 | F26 | E2E `Toasts_have_no_serious_violations` failed now and then: "CV ready" is usually still on screen when the download toast appears, so the bare `.app-toast` locator matched two toasts (Playwright strict mode). It passed only when the assertion ran before the second toast was added. | Fixed: the test waits for the "Download started" toast |
+
+### UX polish after M5
+
+Branch `feature/m5-ux-polish`. Visual and interaction fixes asked for by the owner after the M5 release, no version change (not a milestone). Each one ships with a bUnit or E2E test.
+
+| # | Change | Status |
+|---|---|---|
+| U1 | Step 2 "Profile to use": radios became cards (icon, name, one-line description), like the template cards below them. The empty "My profile" card is dashed and points to the header. | Done. `ProfileSourceSwitcherTests` |
+| U2 | Favicon (`wwwroot/favicon.svg`, drawn by hand in the app's teal). | Done (manual check) |
+| U3 | Backup hint on the profile page: export the profile, or give the blank template and a CV to an AI and import what it returns. | Done (manual check) |
+| U4 | `ConfirmDialog` before deleting data: clear history, delete a history entry, clear the profile, remove an experience, education or project. Cancel takes the focus; Escape or a click outside cancels. | Done. `ConfirmDialogTests`, `HistoryPanelTests` |
+| U5 | History panel: styled selects (chevron visible in dark mode), quiet danger buttons, a trash icon for Delete, room between the cards and the scrollbar. | Done (manual check in both themes) |
+| U6 | "Profile" link in the header (marked active on `/profile`); the link inside the step 2 card is gone. | Done. `AppHeaderTests` |
+| U7 | Save buttons are disabled when there is nothing new: the profile page compares the editor with what is saved (a field typed in and erased counts as empty), the bullet editor compares with the current text. | Done. `ProfileFieldsTests`, `CvEditorTests`, E2E `Save_is_enabled_only_while_there_is_something_new_to_save` |
+| U8 | Checkboxes (PDF, Word, cover letter) in the app's colors instead of Bootstrap's blue. | Done (manual check) |
+| F30 | Template thumbnails in step 2 sometimes do not show until another template is picked (reported by the owner). Picking a template does not refetch the thumbnails, so they were loaded and only not drawn. Not reproduced: fresh load, cold server, and back from `/profile` all showed them. | Open: needs the steps that trigger it |
 
 ### System hardening (between M3 and M3.2)
 
@@ -208,13 +225,14 @@ Nothing in M5 is blocked; every item is Done except ENG-04 (Won't do, the reason
 
 | Item | Why it is not in M5 | Owner |
 |---|---|---|
-| First public deploy, live demo link, cold-start timing with the warm-up, limits checked on the real instance | Needs the Render service. | OPS-06 (M5.1) |
+| First public deploy, live demo link, cold-start timing with the warm-up, limits checked on the real instance | Needs the Render service. | OPS-06 (M5.2) |
 | The coverage step and the snapshots have not run on GitHub's Linux runner yet | They were checked locally with the CI commands in Release, and the snapshots with LF and CRLF job descriptions. | Ran on the M5 merge: the snapshots failed on the culture (F28), fixed in its own PR |
-| F25: required and nice-to-have skills do not follow the post's sections | It changes scoring. | MATCH-06 (not scheduled) |
+| F25: required and nice-to-have skills do not follow the post's sections | It changes scoring. | MATCH-06 (M5.1) |
 | F27: most samples are Staff posts, a weak match for the default senior profile | A picker or demo rule, reviewed on its own. | Fixed after M5 (see F27); Backend stays weak until the corpus has a senior backend post the demo profile fits |
 | The summary's role signals: one mention of Kotlin reads as a mobile role (F29) | Tuning the signal lists changes many summaries. | New item (not scheduled) |
 | The M4 open items (add back what the selection left out, scores after edits, company name in the cover letter) | Unchanged in M5. | New items (not scheduled) |
-| Optional AI | Out of this pass by the owner's decision. | M6 |
+| F30: template thumbnails sometimes missing until another template is picked | Found after M5, not reproduced yet. | UX polish after M5 (open) |
+| Optional AI | Out of this pass by the owner's decision; parked until there is an API key the app can use. | M6 (parked) |
 
 ### Open items after M4
 
@@ -618,10 +636,10 @@ Done notes:
 - Profile page layout: one toolbar for "Start from", the JSON file and clearing; section hints; entries with their role and company under the title; icon buttons to remove a bullet; dashed "Add experience" buttons; wider gutters; a save bar that stays at the bottom of the screen while the form scrolls, "Check profile health" scrolls to the health card and moves focus to it (`cvApp.revealElement`), and the destructive buttons (Clear my profile, Remove) are a red outline without the soft red fill that looked muddy in dark mode.
 
 ### PROF-05: Import from an existing resume
-**Status:** Todo · **Priority:** P3 · **Effort:** L
+**Status:** Todo (M5.1) · **Priority:** P3 · **Effort:** L
 
 - [ ] Upload PDF/DOCX, heuristic section parsing into a draft profile the user reviews
-- [ ] AI-assisted parsing when E7 is enabled
+- [ ] AI-assisted parsing when E7 is enabled (stays with M6, parked; not part of M5.1)
 
 Verify: tests with sample resumes.
 
@@ -682,7 +700,7 @@ Files: `Helpers/JdHighlighter.cs`, `Models/JdHighlightModels.cs`, `Components/Sh
 Verify: `JdHighlighterTests` (lossless split over profiles x corpus, whole tokens, locations, markup stays text); `JdHighlightCardTests` (bUnit: HTML-encoded output, selection, labels); E2E `Job_tab_highlights_skills_and_shows_where_one_appears_in_the_cv` and the axe scan of the Job tab.
 
 ### MATCH-06: Required vs nice-to-have from JD sections
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+**Status:** Todo (M5.1) · **Priority:** P2 · **Effort:** M
 
 - [ ] Parser detects sections ("Requirements", "Must have", "Nice to have", "Bonus", "Preferred")
 - [ ] Missing-skills split uses the JD section instead of a fixed list
@@ -877,7 +895,7 @@ Notes: since APP-05 the six samples are real posts picked from `corpus/` by the 
 Verify: E2E: pick sample, generate.
 
 ### APP-04: Import JD from URL
-**Status:** Todo · **Priority:** P3 · **Effort:** M
+**Status:** Todo (M5.1) · **Priority:** P3 · **Effort:** M
 
 - [ ] Greenhouse and Lever public job APIs only, allowlisted hosts (SSRF-safe), timeout and size limit
 
@@ -947,6 +965,8 @@ Progress notes:
 ## E7. AI assist (optional, off by default)
 
 The app must work fully without an API key. AI only picks or suggests; it never writes content into the CV without the user accepting it.
+
+Parked (owner's decision, 2026-10-22) until there is an API key the app can use.
 
 ### AI-01: LLM options + feature flag
 **Status:** Parked · **Priority:** P3 · **Effort:** S
@@ -1068,7 +1088,7 @@ Notes: `.github/dependabot.yml`, weekly, one grouped PR per ecosystem (NuGet cov
 ### OPS-03: README rewrite
 **Status:** Done (M5) · **Priority:** P1 · **Effort:** M
 
-- [x] Hero screenshot / GIF, badges (CI, coverage, .NET 10). The live demo link moved to OPS-06 (M5.1): there is no deploy yet.
+- [x] Hero screenshot / GIF, badges (CI, coverage, .NET 10). The live demo link moved to OPS-06 (M5.2): there is no deploy yet.
 - [x] Architecture diagram, "How matching works", testing strategy section
 
 Notes: the README is now the short tour (what it does, how matching works, a Mermaid architecture diagram, the testing strategy, how to run it); the technical reference moved to `PROJECT_OVERVIEW.md`. Four screenshots in `docs/screenshots/` come from the running app: `ScreenshotTests` in `ErCv.E2E` takes them when `ERCV_SCREENSHOTS` names the folder, and does nothing otherwise, so they can be retaken at each release. They use the Full stack sample, the one the default profile matches best (see F27); check the scores again after a corpus refresh.
@@ -1090,7 +1110,7 @@ Notes: a `/privacy` page, linked from the footer. The old footer said "We don't 
 Verify: `PrivacyTests` (bUnit: the configured timeout, the footer link), E2E `The_footer_opens_the_privacy_page_and_it_has_no_serious_violations` (it found the in-text link too faint in dark mode, fixed with the app's link color).
 
 ### OPS-06: Deploy to Render + live demo link
-**Status:** Todo (M5.1) · **Priority:** P1 · **Effort:** M
+**Status:** Todo (M5.2) · **Priority:** P1 · **Effort:** M
 
 - [ ] First deploy from `render.yaml` (Docker, free plan), health check green
 - [ ] Cold-start timing with and without the PDF warm-up (ENG-05)

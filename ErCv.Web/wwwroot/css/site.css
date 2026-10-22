@@ -921,7 +921,40 @@ h1, h2, h3, .form-title {
   color: var(--color-text-primary);
 }
 
+/* Checkboxes and radios in the app's colors (Bootstrap's are blue and white in both themes) */
+.form-check-input {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--color-border-hover);
+  background-color: var(--color-bg-card);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.form-check-input[type="checkbox"] {
+  border-radius: var(--radius-sm);
+}
+
+.form-check-input:hover:not(:disabled) {
+  border-color: var(--color-primary-400);
+}
+
+.form-check-input:checked {
+  background-color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+}
+
+.form-check-input:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.form-check-input:disabled {
+  cursor: not-allowed;
+}
+
 .format-checkbox {
+  margin: 0;
   position: absolute;
   top: var(--spacing-md);
   right: var(--spacing-md);
@@ -1052,6 +1085,7 @@ h1, h2, h3, .form-title {
 /* ===== Accessibility (UX-08) ===== */
 /* Selectable cards wrap a visually hidden radio/checkbox, so the ring goes on the card */
 .template-card:has(input:focus-visible),
+.profile-source-card:has(input:focus-visible),
 .page-option-card:has(input:focus-visible),
 .format-card:has(input:focus-visible) {
   outline: 2px solid var(--color-border-focus);
@@ -1928,7 +1962,7 @@ h1, h2, h3, .form-title {
   --bs-btn-color: var(--color-text-link);
 }
 
-/* "outline" primary and danger are tonal: a soft tint of the color, no border */
+/* "outline" primary is tonal: a soft tint of the color, no border */
 .btn-outline-primary {
   --bs-btn-bg: var(--color-bg-selected);
   --bs-btn-border-color: transparent;
@@ -1944,19 +1978,57 @@ h1, h2, h3, .form-title {
   --bs-btn-disabled-color: var(--color-text-tertiary);
 }
 
+/* danger: same quiet surface as secondary with red text; the red fill only shows on hover */
 .btn-outline-danger {
-  --bs-btn-bg: var(--color-error-soft);
-  --bs-btn-border-color: transparent;
+  --bs-btn-bg: var(--color-bg-card);
+  --bs-btn-border-color: var(--color-border-default);
   --bs-btn-color: var(--color-error);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--color-error) 16%, var(--color-bg-card));
-  --bs-btn-hover-border-color: transparent;
+  --bs-btn-hover-bg: var(--color-error-soft);
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--color-error) 45%, var(--color-bg-card));
   --bs-btn-hover-color: var(--color-error);
-  --bs-btn-active-bg: color-mix(in srgb, var(--color-error) 22%, var(--color-bg-card));
-  --bs-btn-active-border-color: transparent;
+  --bs-btn-active-bg: color-mix(in srgb, var(--color-error) 16%, var(--color-bg-card));
+  --bs-btn-active-border-color: var(--color-error);
   --bs-btn-active-color: var(--color-error);
-  --bs-btn-disabled-bg: var(--color-error-soft);
-  --bs-btn-disabled-border-color: transparent;
+  --bs-btn-disabled-bg: var(--color-bg-card);
+  --bs-btn-disabled-border-color: var(--color-border-default);
   --bs-btn-disabled-color: var(--color-text-tertiary);
+}
+
+/* Selects: same surface and size as the text inputs, a hover state and a chevron visible in both themes */
+.form-select {
+  --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236b6760' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  border-color: var(--color-border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+:root[data-theme="dark"] .form-select {
+  --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a29d93' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+.form-select:hover:not(:disabled) {
+  border-color: var(--color-border-hover);
+}
+
+.form-select:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.form-select:disabled {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.form-select-sm {
+  min-width: 170px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-md);
 }
 
 /* ===== Composer steps and JD meta (UX-03) ===== */
@@ -2231,6 +2303,12 @@ h1, h2, h3, .form-title {
   color: var(--color-text-primary);
 }
 
+/* The page you are on (NavLink adds .active) */
+.app-topbar-link.active {
+  background: var(--color-bg-selected);
+  color: var(--color-text-link);
+}
+
 .app-theme-toggle {
   justify-content: center;
   width: 36px;
@@ -2394,6 +2472,9 @@ body:not(:has(#samples)) .app-try-demo {
   gap: var(--spacing-md);
   max-height: 360px;
   overflow-y: auto;
+  /* Room between the cards and the scrollbar, and for the focus ring of the cards' buttons */
+  padding: var(--spacing-xs) var(--spacing-md) var(--spacing-xs) var(--spacing-xs);
+  scrollbar-gutter: stable;
 }
 
 .history-item {
@@ -2446,6 +2527,10 @@ body:not(:has(#samples)) .app-try-demo {
 
   .history-item-actions .btn {
     flex: 1;
+  }
+
+  .history-item-actions .history-delete-btn {
+    flex: 0 0 auto;
   }
 
   .history-subtitle {
@@ -3116,7 +3201,7 @@ body:not(:has(#samples)) .app-try-demo {
 }
 
 .cover-letter-option.disabled { cursor: not-allowed; opacity: 0.6; }
-.cover-letter-option input { accent-color: var(--color-primary-400); margin-top: 3px; }
+.cover-letter-option input { flex-shrink: 0; margin: 1px 0 0; }
 .cover-letter-option-text { display: flex; flex-direction: column; gap: 2px; }
 
 .cover-letter-option-name {
@@ -3556,9 +3641,144 @@ body:not(:has(#samples)) .app-try-demo {
   box-shadow: var(--shadow-lg);
 }
 
-.profile-source a {
-  color: var(--color-text-link);
+/* Step 2: profile choices as cards, matching the template cards below them */
+.profile-source-options {
+  display: grid;
+  gap: var(--spacing-sm);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 }
+
+@media (max-width: 576px) {
+  .profile-source-options { grid-template-columns: 1fr; }
+}
+
+.profile-source-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  border: 2px solid var(--color-border-hover);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  transition: all var(--transition-default);
+}
+
+.profile-source-card:hover:not(.disabled) {
+  border-color: var(--color-primary-300);
+  box-shadow: var(--shadow-md);
+}
+
+.profile-source-card.selected {
+  border-color: var(--color-primary-400);
+  background: var(--color-bg-selected);
+  box-shadow: var(--shadow-sm);
+}
+
+.profile-source-card.empty { border-style: dashed; }
+
+.profile-source-label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--spacing-sm);
+  align-items: center;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* The whole card is the click target for its radio */
+.profile-source-label::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.profile-source-card.disabled .profile-source-label {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-source-icon {
+  grid-row: span 2;
+  font-size: var(--font-size-xl);
+  color: var(--color-text-tertiary);
+}
+
+.profile-source-card.selected .profile-source-icon {
+  color: var(--color-primary-400);
+}
+
+.profile-source-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.profile-source-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ===== ConfirmDialog ===== */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--spacing-xxl) var(--spacing-md) var(--spacing-md);
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.confirm-dialog {
+  width: 100%;
+  max-width: 440px;
+  padding: var(--spacing-lg);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-lg);
+}
+
+.confirm-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.confirm-title .bi { color: var(--color-error); }
+
+.confirm-body {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+}
+
+.confirm-body p { margin: 0; }
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+}
+
+/* An info note on the profile page */
+.profile-hint {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-sm) 0 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-selected);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.profile-hint .bi { color: var(--color-primary-400); }
 
 .profile-health {
   border: 1px solid var(--color-border-default);

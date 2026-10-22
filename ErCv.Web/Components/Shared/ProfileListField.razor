@@ -10,16 +10,38 @@
                           ValueChanged="v => Items[index] = v" CssClass="profile-list-item" />
             <button type="button" class="btn btn-sm profile-icon-btn"
                     aria-label="@($"Remove {Label} {index + 1}")" title="@($"Remove {Label.ToLowerInvariant()} {index + 1}")"
-                    @onclick="() => Items.RemoveAt(index)"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+                    @onclick="() => Remove(index)"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </div>
     }
     <button type="button" class="btn btn-sm profile-add-inline" id="@(Id + "-add")"
-            @onclick="() => Items.Add(string.Empty)"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add @Label.ToLowerInvariant()</button>
+            @onclick="Add"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add @Label.ToLowerInvariant()</button>
 </fieldset>
 
 @code {
+    #region Parameters
+
     [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
     [Parameter, EditorRequired] public List<string> Items { get; set; } = new();
     [Parameter] public Func<int, string?>? ErrorFor { get; set; }
+    [CascadingParameter(Name = UiConstants.ProfileEditedCascade)] public Action<bool>? Edited { get; set; }
+
+    #endregion
+
+    #region Event Handlers
+
+    // The list is edited in place, so only this component re-renders: the profile page hears about it here
+    private void Add()
+    {
+        Items.Add(string.Empty);
+        Edited?.Invoke(false);
+    }
+
+    private void Remove(int index)
+    {
+        Items.RemoveAt(index);
+        Edited?.Invoke(false);
+    }
+
+    #endregion
 }

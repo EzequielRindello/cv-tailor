@@ -11,6 +11,12 @@
                 <i class="bi bi-play-circle" aria-hidden="true"></i>
                 <span>Try demo</span>
             </a>
+            @* The label is hidden on phones, so the link also carries its name as aria-label *@
+            <NavLink class="app-topbar-link" id="header-profile-link" href="profile" Match="NavLinkMatch.All"
+                     aria-label="Profile" title="Profile">
+                <i class="bi bi-person-circle" aria-hidden="true"></i>
+                <span>Profile</span>
+            </NavLink>
             <a class="app-topbar-link"
                href="https://github.com/EzequielRindello/er-cv-generator"
                target="_blank"

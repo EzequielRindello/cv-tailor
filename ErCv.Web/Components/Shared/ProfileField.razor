@@ -5,7 +5,7 @@
         <textarea id="@Id" class="form-control @(Error != null ? "is-invalid" : "")" rows="2"
                   aria-invalid="@(Error != null ? "true" : null)"
                   aria-describedby="@(Error != null ? Id + "-err" : null)"
-                  value="@Value" @onchange="OnChange"></textarea>
+                  value="@Value" @oninput="OnInput" @onchange="OnChange" @onblur="OnBlur"></textarea>
     }
     else
     {
@@ -13,7 +13,7 @@
                placeholder="@Placeholder"
                aria-invalid="@(Error != null ? "true" : null)"
                aria-describedby="@(Error != null ? Id + "-err" : null)"
-               value="@Value" @onchange="OnChange" />
+               value="@Value" @oninput="OnInput" @onchange="OnChange" @onblur="OnBlur" />
     }
     @if (Error != null)
     {
@@ -33,11 +33,23 @@
     [Parameter] public bool Multiline { get; set; }
     [Parameter] public string? CssClass { get; set; }
 
+    /// <summary>Set by the profile page: true while typing (the value reaches the model only on change), false on change or blur.</summary>
+    [CascadingParameter(Name = UiConstants.ProfileEditedCascade)] public Action<bool>? Edited { get; set; }
+
     #endregion
 
     #region Event Handlers
 
-    private Task OnChange(ChangeEventArgs e) => ValueChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+    private void OnInput() => Edited?.Invoke(true);
+
+    // Typed and erased again before leaving: the browser raises no change, so leaving the field ends the typing too
+    private void OnBlur() => Edited?.Invoke(false);
+
+    private async Task OnChange(ChangeEventArgs e)
+    {
+        await ValueChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+        Edited?.Invoke(false);
+    }
 
     #endregion
 }

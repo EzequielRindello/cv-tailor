@@ -24,8 +24,8 @@ public class ProfileSourceSwitcherTests : BunitContext
         var radios = cut.FindAll("input[type=radio]");
         Assert.Equal(new[] { "source-cv-master-senior", "source-demo", "source-mine" }, radios.Select(r => r.Id));
         Assert.True(radios[0].HasAttribute("checked"));
-        Assert.Equal(UiConstants.SeniorSampleProfileLabel, cut.Find("label[for='source-cv-master-senior']").TextContent);
-        Assert.Equal(UiConstants.CreatorProfileLabel, cut.Find("label[for='source-demo']").TextContent);
+        Assert.Equal(UiConstants.SeniorSampleProfileLabel, cut.Find("label[for='source-cv-master-senior'] .profile-source-name").TextContent);
+        Assert.Equal(UiConstants.CreatorProfileLabel, cut.Find("label[for='source-demo'] .profile-source-name").TextContent);
     }
 
     [Fact]
@@ -51,6 +51,33 @@ public class ProfileSourceSwitcherTests : BunitContext
         var cut = Render<ProfileSourceSwitcher>(p => p.Add(c => c.Profiles, StoredProfiles));
 
         Assert.True(cut.Find("#source-mine").HasAttribute("disabled"));
-        Assert.Equal("Create my profile", cut.Find("#profile-edit-link").TextContent);
+    }
+
+    [Fact]
+    public void Without_a_saved_profile_its_card_is_empty_and_points_to_the_header()
+    {
+        var cut = Render<ProfileSourceSwitcher>(p => p.Add(c => c.Profiles, StoredProfiles));
+
+        var card = cut.Find("#source-mine").ParentElement!;
+        Assert.Contains("empty", card.ClassList);
+        Assert.Contains("disabled", card.ClassList);
+        Assert.Equal("Not created yet. Use Profile at the top.", card.QuerySelector(".profile-source-desc")!.TextContent);
+        // Editing the profile lives in the header now, not in the card
+        Assert.Empty(cut.FindAll("a"));
+    }
+
+    [Fact]
+    public void Only_the_picked_card_is_marked_selected()
+    {
+        var cut = Render<ProfileSourceSwitcher>(p => p
+            .Add(c => c.Profiles, StoredProfiles)
+            .Add(c => c.Value, UiConstants.ProfileSourceMine)
+            .Add(c => c.HasMine, true));
+
+        var selected = cut.FindAll(".profile-source-card.selected");
+        Assert.Single(selected);
+        Assert.NotNull(selected[0].QuerySelector("#source-mine"));
+        Assert.Equal("Saved in this browser", selected[0].QuerySelector(".profile-source-desc")!.TextContent);
+        Assert.DoesNotContain("empty", selected[0].ClassList);
     }
 }

@@ -26,7 +26,7 @@ public class ProfileImportTests : E2ETestBase
         await NextAsync();
 
         await Assertions.Expect(Page.Locator("#source-demo")).ToBeVisibleAsync();
-        await Assertions.Expect(Page.Locator("#profile-edit-link")).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#header-profile-link")).ToBeVisibleAsync();
         await Assertions.Expect(Page.Locator("#profile-import, #profile-export, #profile-template")).ToHaveCountAsync(0);
     }
 
