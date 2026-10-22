@@ -83,7 +83,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | AI-03 | Bullet rewrite suggestions (user accepts) | E7 AI | P3 | M | Parked |
 | AI-04 | Cover letter polish | E7 AI | P3 | S | Parked |
 | AI-05 | Cost guardrails and caching | E7 AI | P3 | S | Parked |
-| ENG-01 | DI for helpers + single namespace root | E8 Engineering | P2 | M | Todo |
+| ENG-01 | DI for helpers + single namespace root | E8 Engineering | P2 | M | Done |
 | ENG-02 | Consolidate duplicated logic, immutable selection | E8 Engineering | P0 | M | Done |
 | ENG-03 | ILogger + ProblemDetails (no leaked exceptions) | E8 Engineering | P0 | S | Done |
 | ENG-04 | Options pattern for scoring weights | E8 Engineering | P3 | S | Won't do |
@@ -137,7 +137,7 @@ Found during the roadmap review. Each one is covered by a feature below.
 | F6 | Page fit is estimated by character count, not measured; a "1-page" CV can spill over. | `Helpers/PageConstraintHelper.cs` | MATCH-08 (fixed) |
 | F7 | Generate auto-downloads files before the user sees the preview. | `Components/Pages/Home.razor:268` | UX-04 |
 | F8 | 500 responses include `ex.Message`; logging uses `Console.WriteLine`. | `Services/CVGeneratorService.cs:63`, helpers | ENG-03 (fixed) |
-| F9 | Mixed namespaces (`ErCvApi.*` and `ErCv.Web.*`); helpers built with `new` instead of DI. | Whole project | Namespaces fixed in the system hardening (H8); DI is ENG-01 |
+| F9 | Mixed namespaces (`ErCvApi.*` and `ErCv.Web.*`); helpers built with `new` instead of DI. | Whole project | Namespaces fixed in the system hardening (H8); DI fixed with ENG-01 (M5) |
 | F10 | Docs drift: legacy FIX-002 says low match is below 30%, code uses below 40%. Node runner expectations depend on a fixture in `testing/`. | `Helpers/MatchScoreCalculator.cs:43`, `testing/` | OPS-04, TEST-09 |
 | F11 | Bullet reordering is drag-only, not keyboard accessible. | `Components/Shared/BulletEditor.razor` | UX-08 |
 
@@ -950,12 +950,14 @@ Verify: tests with a fake client; TEST-03 invariants still hold.
 ## E8. Engineering quality
 
 ### ENG-01: DI + single namespace root
-**Status:** Todo · **Priority:** P2 · **Effort:** M
+**Status:** Done · **Priority:** P2 · **Effort:** M
 
-- [ ] Helpers registered in DI; interfaces only where tests need seams
-- [ ] All code under `ErCv.Web.*` (F9)
+- [x] Helpers registered in DI; interfaces only where tests need seams
+- [x] All code under `ErCv.Web.*` (F9)
 
-Verify: build + all tests pass.
+Notes: the twelve instance classes of the domain (parser, selector and its parts, the analyzers, highlighter, profile validator, cover letter generator) are singletons registered in `Program.cs`: none keeps per-request state. `CVGeneratorService` (scoped, as before) and `CVSelector` take their parts through the constructor, and the loggers reach `RelevanceScorer` and `SummaryGenerator` through DI instead of an `ILoggerFactory` handed down. No interfaces: no test needed a seam, the tests build the real classes with `new` (`CVSelector()` builds its own parts) and the collector does the same. Static helpers (`SkillNormalizer`, `DateParser`, `ProfileHealthChecker`, `CvTextRenderer`...) stay static: they are pure functions with nothing to inject. `DocumentRenderer` stays a factory per template. The namespace half was already done in the system hardening (H8).
+
+Verify: `ServiceRegistrationTests` (each domain class is one shared instance, the service is built per scope); the container validates every registration at startup in Development, which every API test runs.
 
 ### ENG-02: Consolidate duplicated logic
 **Status:** Done · **Priority:** P0 · **Effort:** M

@@ -1,7 +1,12 @@
 using System.Threading.RateLimiting;
 using ErCv.Web.Components;
 using ErCv.Web.Configuration;
+using ErCv.Web.Features.Analysis;
+using ErCv.Web.Features.CoverLetters;
 using ErCv.Web.Features.Documents;
+using ErCv.Web.Features.Matching;
+using ErCv.Web.Features.Profiles;
+using ErCv.Web.Features.Selection;
 using ErCv.Web.Services;
 using ErCv.Web.UI;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -62,6 +67,19 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
+// ENG-01. The domain classes keep no per-request state, so one instance of each serves every request.
+builder.Services.AddSingleton<JobDescriptionParser>();
+builder.Services.AddSingleton<RelevanceScorer>();
+builder.Services.AddSingleton<SummaryGenerator>();
+builder.Services.AddSingleton<PageConstraintHelper>();
+builder.Services.AddSingleton<CVSelector>();
+builder.Services.AddSingleton<MatchScoreCalculator>();
+builder.Services.AddSingleton<MissingSkillsAnalyzer>();
+builder.Services.AddSingleton<KeywordAnalyzer>();
+builder.Services.AddSingleton<ATSChecker>();
+builder.Services.AddSingleton<JdHighlighter>();
+builder.Services.AddSingleton<ProfileValidator>();
+builder.Services.AddSingleton<CoverLetterGenerator>();
 builder.Services.AddScoped<CVGeneratorService>();
 builder.Services.AddScoped<BrowserStore>();
 builder.Services.AddScoped<ToastService>();
