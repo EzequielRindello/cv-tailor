@@ -333,6 +333,22 @@ public class CvApiTests
             (await download.Content.ReadAsByteArrayAsync()).Length);
     }
 
+    // TEST-09: from the retired testing/bug-regression-2.0.2.js (BUG-402)
+    [Fact]
+    public async Task Regenerate_rejects_unsupported_formats_with_400()
+    {
+        using var app = new ApiApp();
+        var generate = await ApiApp.JsonAsync(await app.PostAsync("/api/cv/generate", ApiApp.GenerateBody()));
+
+        var response = await app.PostAsync("/api/cv/regenerate", new Dictionary<string, object?>
+        {
+            ["generatedCV"] = generate.GetProperty("generatedCV"),
+            ["formats"] = new[] { "zip" }
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     [Fact]
     public async Task Regenerate_rejects_missing_formats_with_400()
     {

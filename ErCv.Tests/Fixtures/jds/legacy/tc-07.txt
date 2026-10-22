@@ -1,0 +1,17 @@
+Junior Software Engineer — Full Stack
+
+We're a startup looking for a junior engineer eager to learn and grow.
+
+You will:
+- Build features across our React frontend and Node.js backend
+- Write and maintain PostgreSQL queries and migrations
+- Participate in code reviews
+
+Requirements:
+- 0-2 years experience
+- Basic knowledge of React or similar frontend framework
+- Understanding of REST APIs
+- Familiarity with SQL and databases
+- Git basics
+
+No senior experience required. We value curiosity over years of experience.

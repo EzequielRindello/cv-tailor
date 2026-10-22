@@ -1,0 +1,16 @@
+Full Stack Developer
+
+We need a full stack developer comfortable across the entire stack.
+
+Technical requirements:
+- NodeJS backend development experience
+- ReactJS or React frontend skills
+- PostgresQL or Postgres database experience
+- Experience with k8s for container orchestration
+- TypeScript (TS) proficiency
+- Familiarity with CI/CD and devops practices
+- RESTful API design
+- Git and version control
+
+The ideal candidate has experience with microservices and distributed systems.
+We use AWS and containerized deployments with Docker.

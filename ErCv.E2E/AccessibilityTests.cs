@@ -130,7 +130,8 @@ public class AccessibilityTests : E2ETestBase
     {
         await GenerateAsync();
         await Button("Download DOCX").ClickAsync();
-        await Assertions.Expect(Page.Locator(".app-toast")).ToBeVisibleAsync();
+        // "CV ready" is usually still on screen, so a bare ".app-toast" can match two toasts (strict mode)
+        await Assertions.Expect(Page.Locator(".app-toast").Filter(new() { HasText = "Download started" })).ToBeVisibleAsync();
         await AssertNoSeriousViolationsAsync("download toast");
     }
 }

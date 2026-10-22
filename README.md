@@ -207,18 +207,9 @@ dotnet test ErCv.E2E                             # browser tests only (Playwrigh
 
 The browser tests (`ErCv.E2E`) start the web app on a free port and drive it with Playwright: generate flow, downloads, editing with the live preview, cover letter, templates and styles, persistence, keyboard shortcuts, 360 / 390 / 768px viewports and an axe accessibility scan in light and dark. They use a browser that is already installed (Chrome, then Edge) and download nothing. Set `E2E_BROWSER_CHANNEL` to pick another one, or `E2E_BASE_URL` to test an app that is already running.
 
+The scenarios of the old Node scripts (`testing/`, removed in M5) run as .NET tests: TC-01 to TC-07 in `ErCv.Tests/Api/LegacyScenarioTests.cs`, the format and rate limit checks in `CvApiTests`.
+
 PDF tests use the Chromium that PuppeteerSharp downloads on first use; set `PUPPETEER_EXECUTABLE_PATH` to use an installed Chrome instead (CI does). Page fit is measured on the rendered PDF (`MATCH-08` in `features.md`), so every template stays within its page limit.
 
 ---
 
-## Testing Scripts (legacy, replaced by `dotnet test`)
-
-- `node testing/test-runner-2.0.1.js`
-- `node testing/test-runner-2.0.1.js --tc TC-01`
-- `node testing/test-runner-2.0.1.js --profile cv-master`
-- `PROFILE_ID=cv-master node testing/test-runner-2.0.1.js`
-
-The runner now supports profile override via CLI or env:
-- CLI flag: `--profile`
-- Env var: `PROFILE_ID`
-- Default: `cv-master`

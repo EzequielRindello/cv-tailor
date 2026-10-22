@@ -1,0 +1,20 @@
+Senior Backend Engineer — Payments Infrastructure
+
+We are looking for a Senior Backend Engineer to join our Payments Infrastructure team.
+
+Requirements:
+- 5+ years of backend engineering experience
+- Strong proficiency in Go or similar systems language
+- Experience with distributed systems and message queues (Kafka, RabbitMQ)
+- Deep knowledge of PostgreSQL and Redis
+- Experience with Kubernetes and container orchestration
+- Familiarity with observability tools (Prometheus, Grafana, Datadog)
+- Experience designing and building high-throughput REST APIs
+- Strong understanding of microservices architecture
+
+Nice to have:
+- Experience with ArgoCD or GitOps workflows
+- Payment processing domain knowledge
+- Experience mentoring junior engineers
+
+We offer a collaborative remote-first environment with 2-week agile sprints.

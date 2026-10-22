@@ -36,10 +36,10 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | TEST-03 | Invariant tests (no fabrication, ordering, bounds) | E1 Tests | P0 | M | Done |
 | TEST-04 | Document tests (DOCX structure, PDF pages + text extraction) | E1 Tests | P0 | M | Done |
 | TEST-05 | API integration tests (WebApplicationFactory) | E1 Tests | P0 | M | Done |
-| TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | In progress |
+| TEST-06 | Blazor component tests (bUnit) | E1 Tests | P1 | M | Done |
 | TEST-07 | End-to-end tests (Playwright) | E1 Tests | P1 | L | Done |
 | TEST-08 | Golden snapshot tests for generation output | E1 Tests | P2 | S | Todo |
-| TEST-09 | Retire the Node scripts in `testing/` | E1 Tests | P2 | S | Todo |
+| TEST-09 | Retire the Node scripts in `testing/` | E1 Tests | P2 | S | Done |
 | TEST-10 | Coverage report and target | E1 Tests | P2 | S | Todo |
 | UX-01 | Design system: tokens, fonts, dark mode | E2 Redesign | P0 | M | Done |
 | UX-02 | New app shell and editorial hero | E2 Redesign | P0 | M | Done |
@@ -171,6 +171,14 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 | # | Finding | Status |
 |---|---|---|
 | F23 | `BrowserStore` let a `TaskCanceledException` from JS interop escape `Home.OnInitializedAsync` when the circuit went away during the first storage reads (a reload, a closed tab, or hot reload while the app runs from the IDE). | Fixed: reads give the default and writes and removals do nothing when the circuit is gone (`JSDisconnectedException`, `TaskCanceledException`); other script errors still surface. `BrowserStoreTests` |
+
+### Findings during M5
+
+| # | Finding | Status |
+|---|---|---|
+| F24 | The match card never showed `MatchScore.LowMatchWarning`: the API returns it, the Blazor UI dropped it (only the red "Weak Match" badge was left). Its text also had an em dash. | Fixed with TEST-06: shown under the breakdown, text without the em dash. `ScoreCardsTests` |
+| F25 | Required vs nice-to-have does not follow the job post's sections: in TC-01 "GitOps" (listed under "Nice to have") is reported as a required missing skill and "RabbitMQ" (under "Requirements") as nice to have. | Open: MATCH-06 (not scheduled) |
+| F26 | E2E `Toasts_have_no_serious_violations` failed now and then: "CV ready" is usually still on screen when the download toast appears, so the bare `.app-toast` locator matched two toasts (Playwright strict mode). It passed only when the assertion ran before the second toast was added. | Fixed: the test waits for the "Download started" toast |
 
 ### System hardening (between M3 and M3.2)
 
@@ -319,15 +327,17 @@ Files: `ErCv.Tests/Api/*`
 Verify: tests pass with `WebApplicationFactory<Program>`.
 
 ### TEST-06: Blazor component tests (bUnit)
-**Status:** In progress (`bunit` 2.12.5 added in M3 with the JD highlighter tests; the checklist below is still to do, M5) · **Priority:** P1 · **Effort:** M
+**Status:** Done (M5) · **Priority:** P1 · **Effort:** M
 
-- [ ] BulletEditor: at least 1 bullet always selected, reorder updates selections, emitted selections map is correct
-- [ ] Template, format and page selectors emit the right values and respect `Disabled`
-- [ ] HistoryPanel: load, delete, clear
-- [ ] Score cards render every color state and the low-match warning
+- [x] CvEditor (it replaced BulletEditor in M4): at least 1 bullet always selected, reorder keeps which bullets are left out, the draft it builds is correct
+- [x] Template, format and page selectors emit the right values and respect `Disabled`
+- [x] HistoryPanel: load, delete, clear
+- [x] Score cards render every color state and the low-match warning
+
+Notes: `bunit` 2.12.5 came in M3. M5 added `ScoreCardsTests` (match and ATS cards in green, yellow and red, the fallback tone, the breakdown, ATS issues and all-clear, the gauge clamp), `OptionSelectorsTests` (format, page and template selectors, with and without `Disabled`), and new cases in `HistoryPanelTests` (re-open, delete, clear, disabled) and `CvEditorTests` (move a bullet, Alt+arrow keys). The low-match warning was never shown by the Blazor UI (F24), so the match card now shows it.
 
 Files: `ErCv.Tests/Components/*`
-Verify: tests pass.
+Verify: `dotnet test ErCv.Tests --filter Category=Component`.
 
 ### TEST-07: End-to-end tests (Playwright)
 **Status:** Done (26 tests; the CI job runs on GitHub and is green, first checked on the M4 merge, PR #14) · **Priority:** P1 · **Effort:** L
@@ -355,10 +365,12 @@ Verify: `dotnet test ErCv.E2E`; runs in CI as its own job.
 Verify: snapshot tests pass; intentional changes are re-approved.
 
 ### TEST-09: Retire the Node scripts
-**Status:** Todo · **Priority:** P2 · **Effort:** S
+**Status:** Done (M5) · **Priority:** P2 · **Effort:** S
 
-- [ ] Port the cases from `test-runner-2.0.1.js`, `bug-regression-2.0.2.js` and `security-hardening-2.0.3.js` into TEST-02/05/08
-- [ ] Delete `testing/` and update README
+- [x] Port the cases from `test-runner-2.0.1.js`, `bug-regression-2.0.2.js` and `security-hardening-2.0.3.js` into TEST-02/05/08
+- [x] Delete `testing/` and update README
+
+Notes: TC-01 to TC-07 run end to end through the API in `ErCv.Tests/Api/LegacyScenarioTests.cs`, with the runner's job descriptions (`Fixtures/jds/legacy/`, kept out of `JdNames` so the corpus matrices do not grow) and the profile they were written for (the senior sample). Every assertion is the runner's except three match floors, written against the 2.0.1 parser: TC-01 and TC-06 asked for 75 (now 72 and 70), TC-05 for 70 (now 69). Since MATCH-07 the dictionary also recognizes "distributed systems", "gitops" and "devops", which the profile does not list as skills, so fewer of the job's skills are matched; the floors are 70 and 65, with the reason in the test. `bug-regression-2.0.2.js` was already covered except one case, now `CvApiTests.Regenerate_rejects_unsupported_formats_with_400`; `security-hardening-2.0.3.js` is `CvApiTests.Rate_limit_answers_429_after_60_requests_per_minute`. Running the scenarios also found F25.
 
 Verify: every old TC-xx has a matching .NET test.
 

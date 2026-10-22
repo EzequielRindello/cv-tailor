@@ -2704,6 +2704,23 @@ body:not(:has(#samples)) .app-try-demo {
 .match-badge.yellow { background: var(--color-warning); }
 .match-badge.red    { background: var(--color-error); }
 
+/* MatchScore.LowMatchWarning: shown below the breakdown when the overall score is under the low-match threshold */
+.match-low-warning {
+  align-items: flex-start;
+  background: var(--color-warning-soft);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  display: flex;
+  font-size: var(--font-size-sm);
+  gap: var(--spacing-xs);
+  margin: var(--spacing-md) 0 0;
+  padding: var(--spacing-sm);
+}
+
+.match-low-warning i {
+  color: var(--color-warning);
+}
+
 .match-breakdown {
   display: flex;
   flex-direction: column;

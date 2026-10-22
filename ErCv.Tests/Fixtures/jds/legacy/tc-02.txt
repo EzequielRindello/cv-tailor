@@ -1,0 +1,21 @@
+Frontend Engineer — React / TypeScript
+
+We're building the next generation of developer tooling and need a frontend engineer to own our web application.
+
+What you'll do:
+- Build and maintain React components and pages
+- Work with TypeScript in a modern Next.js codebase
+- Write unit and integration tests with Jest and Testing Library
+- Collaborate with designers using Figma specs
+
+Requirements:
+- 3+ years experience with React and TypeScript
+- Solid understanding of modern JavaScript (ES2020+)
+- Experience with Next.js or similar SSR framework
+- Familiarity with REST APIs and GraphQL
+- Experience writing tests (Jest, Cypress, or Playwright)
+- Git and GitHub workflow
+
+Nice to have:
+- Experience with Tailwind CSS
+- Familiarity with CI/CD pipelines

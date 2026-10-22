@@ -1,0 +1,23 @@
+Platform Engineer — DevOps / Infrastructure
+
+We're looking for a Platform Engineer to own our cloud infrastructure.
+
+Responsibilities:
+- Design and maintain Kubernetes clusters on AWS EKS
+- Build and improve CI/CD pipelines (GitHub Actions, ArgoCD)
+- Write infrastructure as code using Terraform
+- Monitor system health with Prometheus and Grafana
+- Manage container lifecycle with Docker
+
+Requirements:
+- 3+ years in DevOps, SRE, or Platform Engineering
+- Strong Kubernetes and Docker experience
+- Proficiency with Terraform or Pulumi
+- Experience with GitHub Actions or similar CI/CD tools
+- AWS or GCP cloud experience
+- Linux systems administration
+- Scripting in Python or Bash
+
+Nice to have:
+- Helm chart authoring
+- Experience with service mesh (Istio, Linkerd)
