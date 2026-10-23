@@ -26,7 +26,8 @@ public class ServiceRegistrationTests
         typeof(ATSChecker),
         typeof(JdHighlighter),
         typeof(ProfileValidator),
-        typeof(CoverLetterGenerator)
+        typeof(CoverLetterGenerator),
+        typeof(JobPostImporter)
     };
 
     [Theory]
@@ -39,6 +40,19 @@ public class ServiceRegistrationTests
         var second = await app.InScopeAsync(sp => Task.FromResult(sp.GetRequiredService(type)));
 
         Assert.Same(first, second);
+    }
+
+    // APP-04: a redirect from a board API is not followed, so no other host is ever reached
+    [Fact]
+    public async Task The_job_post_client_does_not_follow_redirects()
+    {
+        using var app = new ApiApp();
+
+        var handler = await app.InScopeAsync(sp =>
+            Task.FromResult(sp.GetRequiredService<IHttpMessageHandlerFactory>().CreateHandler(JobPostImporter.HttpClientName)));
+        while (handler is DelegatingHandler outer) handler = outer.InnerHandler!;
+
+        Assert.False(Assert.IsType<SocketsHttpHandler>(handler).AllowAutoRedirect);
     }
 
     [Fact]

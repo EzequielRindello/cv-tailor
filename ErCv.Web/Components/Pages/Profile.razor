@@ -39,6 +39,7 @@
                                         @onclick="() => StartFromAsync(ApiConstants.DefaultProfileId)">
                                     <i class="bi bi-person" aria-hidden="true"></i> @UiConstants.CreatorProfileLabel
                                 </button>
+                                <ResumeImport OnImport="ImportResume" />
                             </div>
                         </div>
                         <ProfileTools Disabled="false" OnImport="ImportProfile"
@@ -53,8 +54,9 @@
                         <i class="bi bi-info-circle" aria-hidden="true"></i>
                         <span>
                             Your profile is saved only in this browser, so <strong>export it</strong> to keep a backup.
-                            Starting from scratch? Download the <strong>blank template</strong> and give it to an AI along with
-                            your current CV: it shows the exact format to fill in. Then <strong>import</strong> the file it returns.
+                            Starting from scratch? Start from <strong>your resume</strong> (PDF or Word) and check what was read,
+                            or download the <strong>blank template</strong> and give it to an AI along with your current CV: it
+                            shows the exact format to fill in. Then <strong>import</strong> the file it returns.
                         </span>
                     </p>
 
@@ -347,6 +349,20 @@
         _profile = imported;
         _errors = new();
         Toasts.Success("Imported. Review it and save.");
+    }
+
+    // PROF-05: a draft read from the visitor's resume, to review before saving
+    private void ImportResume(CVMaster draft)
+    {
+        if (draft.Experience.Count == 0) draft.Experience.Add(new Experience());
+        Normalize(draft);
+        _profile = draft;
+        _errors = new();
+
+        static string Count(int n, string one, string many) => $"{n} {(n == 1 ? one : many)}";
+        Toasts.Info($"Read from your resume: {Count(draft.Experience.Count(x => x.Role.Length > 0), "job", "jobs")}, " +
+                    $"{Count(draft.Education.Count, "school", "schools")}, {Count(ResumeImporter.SkillCount(draft.Skills), "skill", "skills")} " +
+                    $"and {Count(draft.Projects.Count, "project", "projects")}. Check every field, then save.");
     }
 
     private async Task RemoveEntryAsync<T>(List<T> entries, int index, string label, string summary)

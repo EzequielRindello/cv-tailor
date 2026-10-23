@@ -1,4 +1,7 @@
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
 using ErCv.Web.Models;
+using W = DocumentFormat.OpenXml.Wordprocessing;
 
 namespace ErCv.Tests.Support;
 
@@ -61,4 +64,35 @@ public static class Build
     };
 
     public static string Year(int yearsAgo) => (DateTime.Now.Year - yearsAgo).ToString();
+
+    /// <summary>A Word document with one paragraph per line; lines starting with "- " become numbered list items.</summary>
+    public static byte[] ResumeDocx(IEnumerable<string> lines, string? link = null)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            main.Document = new W.Document(new W.Body());
+            foreach (var line in lines)
+            {
+                var paragraph = main.Document.Body!.AppendChild(new W.Paragraph());
+                var text = line;
+                if (text.StartsWith("- "))
+                {
+                    paragraph.AppendChild(new W.ParagraphProperties(new W.NumberingProperties(new W.NumberingId { Val = 1 })));
+                    text = text[2..];
+                }
+                var run = paragraph.AppendChild(new W.Run());
+                var columns = text.Split('\t');
+                for (var i = 0; i < columns.Length; i++)
+                {
+                    if (i > 0) run.AppendChild(new W.TabChar());
+                    run.AppendChild(new W.Text(columns[i]) { Space = SpaceProcessingModeValues.Preserve });
+                }
+            }
+            if (link != null) main.AddHyperlinkRelationship(new Uri(link), true);
+            main.Document.Save();
+        }
+        return stream.ToArray();
+    }
 }

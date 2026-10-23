@@ -35,6 +35,8 @@
             <h2 class="privacy-section-title" id="privacy-server">What the server sees</h2>
             <ul>
                 <li>When you generate a CV, the job description and the profile are sent to the server to build it.</li>
+                <li>When you read a job post from its Greenhouse or Lever link, the server asks that job board's public API for the post. Only the board and the post id from your link are sent to it.</li>
+                <li>When you start your profile from your resume, the file is sent to the server, read in memory and dropped. Only the fields read from it come back to the page; nothing is kept.</li>
                 <li>While this page is open, the server keeps the generated CV in memory so you can edit and download it. It is gone when you close the page.</li>
                 <li>Through the API, the generated files stay in a server-side session for up to @Options.Session.IdleTimeoutMinutes minutes of inactivity, so they can be downloaded.</li>
                 <li>Nothing is written to disk or to a database.</li>

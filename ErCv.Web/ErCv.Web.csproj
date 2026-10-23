@@ -6,12 +6,14 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>ErCv.Web</RootNamespace>
 		<!-- One version per milestone, see "Versioning" in features.md. Shown in the app footer. -->
-		<Version>2.0.6</Version>
+		<Version>2.0.6.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
+		<!-- PROF-05: reads the text of an uploaded resume PDF -->
+		<PackageReference Include="PdfPig" Version="0.1.16" />
 		<PackageReference Include="PuppeteerSharp" Version="25.15.0" />
 		<PackageReference Include="Scalar.AspNetCore" Version="2.18.2" />
 		<PackageReference Include="Stubble.Core" Version="1.10.8" />

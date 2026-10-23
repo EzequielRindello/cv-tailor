@@ -126,8 +126,8 @@ In Development the OpenAPI document is at `/openapi/v1.json` and its reference p
 **Deploy:** one Docker web service on Render, defined in `render.yaml`, health check at `/api/cv/health`. The first
 public deploy is milestone M5.2.
 
-**Your own profile:** open *My profile*, start from a sample or import a JSON file, and save it. It stays in your
-browser.
+**Your own profile:** open *My profile*, start from a sample, from your resume (PDF or Word, read into a draft you
+check) or from a JSON file, and save it. It stays in your browser.
 
 ---
 
@@ -154,5 +154,5 @@ CV in memory only while it builds it. The details are on the app's Privacy page 
 
 ## Roadmap and version
 
-Current version: **2.0.6** (M5 Polish & presentation). Each milestone ships as one version; the roadmap, the findings and the
+Current version: **2.0.6.1** (M5.1 Smarter input). Each milestone ships as one version; the roadmap, the findings and the
 reasoning behind each decision are in [`features.md`](features.md).

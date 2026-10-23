@@ -2158,6 +2158,38 @@ h1, h2, h3, .form-title {
   }
 }
 
+/* ===== JobPostLink (APP-04) ===== */
+/* Same quiet weight as the samples below it: an alternative to pasting, not the main path */
+.job-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs) var(--spacing-sm);
+  margin: calc(-1 * var(--spacing-sm)) 0 var(--spacing-md);
+}
+
+.job-link-label {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.job-link-row {
+  display: flex;
+  flex: 1 1 18rem;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.job-link-row .form-control {
+  font-size: var(--font-size-sm);
+  min-width: 0;
+}
+
+.job-link-row .btn {
+  white-space: nowrap;
+}
+
 /* ===== SampleJobPicker (APP-03) ===== */
 /* Secondary on purpose: it sits under the editor and stays out of the way of someone who already has a job description */
 .sample-picker {

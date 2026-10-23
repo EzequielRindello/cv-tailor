@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace ErCv.Collector;
+namespace ErCv.Web.Features.Matching;
 
 /// <summary>Turns a job post's HTML into the plain text the app reads: paragraphs, "- " bullets, no markup.</summary>
 public static partial class HtmlText

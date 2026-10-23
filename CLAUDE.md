@@ -25,10 +25,10 @@ ErCv.Web/
   Api/              Controllers. No logic: call the service, return its result.
   Services/         CVGeneratorService: request validation, orchestration, session.
   Features/<Name>/  The domain, one folder per feature. Each feature keeps its classes and its <Name>Constants.cs together.
-    Matching/       Parsing the job description, skill aliases and matching, sample job posts
+    Matching/       Parsing the job description, skill aliases and matching, sample job posts, reading a post from its link
     Analysis/       Scores and reports on the generated CV (match, ATS, keywords, gaps, highlights)
     Selection/      Choosing experiences, bullets, skills, projects and the summary; page fit
-    Profiles/       Validating, checking and (de)serializing the visitor's profile; date parsing
+    Profiles/       Validating, checking and (de)serializing the visitor's profile; date parsing; reading a resume
     Documents/      HTML, PDF and DOCX rendering
     Editing/        The editable copy of a generated CV behind the workspace editor (CvDraft)
     CoverLetters/   The cover letter: fixed sentences plus facts from the CV
@@ -118,7 +118,8 @@ Constants classes longer than about 50 lines use topic regions instead (`Scoring
 
 - Validate at the service boundary (`CVGeneratorService`), not in the controller or the component, so the API and
   the Blazor UI get the same checks. Limits live in `ApiConstants` (`MaxJobDescriptionLength`, `MaxRequestBodyBytes`,
-  session sizes) and in `ProfileJson.MaxImportBytes`.
+  session sizes), in `ProfileJson.MaxImportBytes` and in `ResumeImportConstants` (resume size, pages, zip expansion,
+  read time). An uploaded resume is read in memory through `ResumeImporter` and never stored.
 - The API body limit is `[RequestSizeLimit]` on `CVController`. Kestrel enforces it (TestServer does not, so it is
   verified in the container); `Program.cs` maps the resulting `BadHttpRequestException` to its 413.
 - Error responses go through `CVGeneratorService.Problem`: the client gets a message written for it, never
@@ -136,6 +137,8 @@ Constants classes longer than about 50 lines use topic regions instead (`Scoring
   with a spoofed X-Forwarded-For).
 - The container runs as the non-root `app` user. Do not add `USER root` for runtime steps.
 - No CDN assets: vendor libraries under `wwwroot/lib/`.
+- The only outbound requests are `JobPostImporter`'s, to fixed board API hosts. A pasted link is parsed, never
+  requested; keep it that way for any new source (allowlisted host, strict path pattern, no redirects).
 - Never add a download, install or new package without asking the repo owner first.
 
 ## Tests

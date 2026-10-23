@@ -1,3 +1,4 @@
+using System.Net;
 using System.Threading.RateLimiting;
 using ErCv.Web.Components;
 using ErCv.Web.Configuration;
@@ -81,6 +82,20 @@ builder.Services.AddSingleton<ATSChecker>();
 builder.Services.AddSingleton<JdHighlighter>();
 builder.Services.AddSingleton<ProfileValidator>();
 builder.Services.AddSingleton<CoverLetterGenerator>();
+// APP-04: the only outbound requests the app makes, to the Greenhouse and Lever board APIs. A redirect is not
+// followed, so the fixed API host is the only host ever reached.
+builder.Services.AddHttpClient(JobPostImporter.HttpClientName, client =>
+    {
+        client.Timeout = JobPostImporter.RequestTimeout;
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(JobPostImporter.UserAgent);
+        client.DefaultRequestHeaders.Accept.ParseAdd(JobPostImporter.JsonMediaType);
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+    {
+        AllowAutoRedirect = false,
+        AutomaticDecompression = DecompressionMethods.All
+    });
+builder.Services.AddSingleton<JobPostImporter>();
 builder.Services.AddScoped<CVGeneratorService>();
 builder.Services.AddScoped<BrowserStore>();
 builder.Services.AddScoped<ToastService>();
