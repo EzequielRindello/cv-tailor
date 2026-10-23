@@ -48,6 +48,19 @@ public class GenerateFlowTests : E2ETestBase
         await Assertions.Expect(PreviewBody).ToContainTextAsync("Rindello");
     }
 
+    // APP-04: only Greenhouse and Lever links are read; any other link is refused before a request is made
+    [Fact]
+    public async Task A_link_from_another_job_site_says_why_it_cannot_be_read()
+    {
+        await OpenHomeAsync();
+
+        await Page.Locator("#job-link").FillAsync("https://www.linkedin.com/jobs/view/123");
+        await Page.Locator("#job-link-read").ClickAsync();
+
+        await Assertions.Expect(Page.Locator(".app-toast").Filter(new() { HasText = "Only Greenhouse and Lever" })).ToBeVisibleAsync();
+        await Assertions.Expect(JobDescription).ToHaveValueAsync("");
+    }
+
     // APP-05: the samples are real posts, so the picker says whose they are, when they were posted and links back
     [Fact]
     public async Task Picking_a_sample_shows_where_and_when_it_was_posted_with_a_link_to_the_original()

@@ -75,7 +75,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | APP-01 | Application tracker | E6 Workflow | P2 | M | Done |
 | APP-02 | Re-open a past generation | E6 Workflow | P2 | S | Done |
 | APP-03 | Sample JD gallery | E6 Workflow | P0 | S | Done |
-| APP-04 | Import JD from URL (Greenhouse/Lever) | E6 Workflow | P3 | M | Todo (M5.1) |
+| APP-04 | Import JD from URL (Greenhouse/Lever) | E6 Workflow | P3 | M | Done |
 | APP-05 | Real job-post corpus, dated and kept fresh | E6 Workflow | P1 | L | Done |
 | APP-06 | Corpus follow-ups: sample picker rules, first Action run | E6 Workflow | P2 | S | Done |
 | AI-01 | LLM options + feature flag | E7 AI | P3 | S | Parked |
@@ -106,7 +106,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 3.2. **M3.2 Real-post fixes** (v2.0.4.1, released): MATCH-07, MATCH-09, APP-06, PROF-06. Fixes what the real-post report found (F18 to F21) so the parser and the demo match what employers write.
 4. **M4 Output** (v2.0.5, released): EDIT-01 to EDIT-06, MATCH-08, UX-10.
 5. **M5 Polish & presentation** (v2.0.6, released): OPS-02 to OPS-05, ENG-01, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10. ENG-04 was dropped (Won't do, see the item). Nothing in M5 waits on M6.
-5.1. **M5.1 Smarter input** (v2.0.6.1): MATCH-06, PROF-05, APP-04. Read the job post's sections, start a profile from an existing resume, take the job post from its URL. PROF-05's AI-assisted parsing stays with M6. PROF-05 and APP-04 may need new packages (PDF/DOCX reading) and outbound HTTP: both are asked for before they are added.
+5.1. **M5.1 Smarter input** (v2.0.6.1, released): MATCH-06, PROF-05, APP-04. Read the job post's sections, start a profile from an existing resume, take the job post from its URL. PROF-05's AI-assisted parsing stays with M6. PROF-05 and APP-04 may need new packages (PDF/DOCX reading) and outbound HTTP: both are asked for before they are added.
 5.2. **M5.2 Deploy** (v2.0.6.2): OPS-06. The first public deploy, and the live demo link the README gets with it. Moved after M5.1 by the owner (2026-10-22).
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05. Parked until the owner has an API key the app can use.
 
@@ -218,6 +218,18 @@ A review of the C# code before M3.2, branch `feature/system-hardening`. No behav
 | H9 | Magic numbers and repeated literals (scoring weights, limits, profile ids, JS interop names, template keys) inline across helpers and components. | Fixed: named constants, hosting values in `appsettings.json` |
 | H10 | `CVSelector` and `SummaryGenerator` keep two slightly different "tech role" word lists. | Fixed with MATCH-07: one list, `SelectionConstants.TechRoleKeywords`, the summary's stricter one plus nothing broad: the selector no longer treats analyst, consultant or specialist roles as tech (a union was tried first and made "Certification Specialist" count as tech years in the real demo profile) |
 | H11 | Swashbuckle 6.5.0 is old (Development only). | Fixed with ENG-06 (M5): built-in OpenAPI + Scalar |
+
+### Open items after M5.1
+
+Every item in M5.1 is Done (PROF-05's AI-assisted parsing was always M6's). Left for later:
+
+| Item | Why it is not in M5.1 | Owner |
+|---|---|---|
+| Career-site links that embed Greenhouse (`?gh_jid=`), Ashby and Workable links | The board cannot be read from a career-site link; Ashby and Workable were not in APP-04's scope. | New item (not scheduled) |
+| Job post import through the API | The UI was the scope; an endpoint would need its own rate limit thought through. | New item (not scheduled) |
+| Resume import: scanned resumes, unmarked PDF bullets with no space between them, a skill cut at a line end | Limits of reading text out of a PDF; the visitor reviews the draft. | PROF-05 notes |
+| First public deploy | Unchanged. | OPS-06 (M5.2) |
+| Optional AI | Unchanged. | M6 (parked) |
 
 ### Open items after M5
 
@@ -912,11 +924,20 @@ Notes: since APP-05 the six samples are real posts picked from `corpus/` by the 
 Verify: E2E: pick sample, generate.
 
 ### APP-04: Import JD from URL
-**Status:** Todo (M5.1) · **Priority:** P3 · **Effort:** M
+**Status:** Done (M5.1) · **Priority:** P3 · **Effort:** M
 
-- [ ] Greenhouse and Lever public job APIs only, allowlisted hosts (SSRF-safe), timeout and size limit
+- [x] Greenhouse and Lever public job APIs only, allowlisted hosts (SSRF-safe), timeout and size limit
 
 Verify: integration tests with mocked HTTP; disallowed hosts rejected.
+
+Notes: step 1 gets a link field under the editor, "Or read it from a Greenhouse or Lever link" (`JobPostLink`, Enter or **Read post**). The post goes into the editor as the corpus writes it (title, a blank line, the body as plain text with "- " bullets), cut at `ApiConstants.MaxJobDescriptionLength`, and a toast names the role and the company. Outbound HTTP approved by the owner for this item only; no new package (`IHttpClientFactory` is in the framework).
+- `Features/Matching/JobPostImporter`: the pasted link is never requested. Its host must be `boards.greenhouse.io`, `job-boards.greenhouse.io`, `jobs.lever.co` or `jobs.eu.lever.co` (default port, no user info), the board and the post id are read with strict patterns (Greenhouse id digits, Lever id a UUID, the Greenhouse embed form `embed/job_app?for=&token=` too), and the request goes to the board API on a fixed host (`boards-api.greenhouse.io`, `api.lever.co`, `api.eu.lever.co`). One request, 10 s timeout, 2 MB cap read as the body streams in, redirects not followed (the named client in `Program.cs`, checked by `ServiceRegistrationTests`), at most 2 board requests at a time for the whole app (the UI is not rate limited). Failures are logged and the visitor gets a message (closed post, board down, too large, not JSON, no text).
+- `HtmlText` moved from the Collector to `Features/Matching` so the app and the Collector turn board HTML into text the same way (the Collector references the web project).
+- The single-post API answers were checked by hand once against a live Greenhouse and a live Lever post (field names, the escaped Greenhouse HTML, 404 for a closed post).
+
+Tests: `JobPostImporterTests` (links read as their API address; refused: other hosts, look-alike hosts, user info, other ports, metadata and localhost addresses, file and javascript links, encoded paths, bad ids, other job sites; dot segments stay on the API host; Greenhouse and Lever answers to text; the parser finds the skills and the level; cut at the limit; 404, 500, a 302 not followed, unreachable, timeout, not JSON, too large, no text; a refused link makes no request), `JobPostLinkTests` (bUnit), `ServiceRegistrationTests` (one instance, no redirects), E2E `A_link_from_another_job_site_says_why_it_cannot_be_read` (no network).
+
+Known limits: company career sites that embed Greenhouse (`careers.airbnb.com/positions/123?gh_jid=123`) do not say which board they belong to, so they are refused; Ashby and Workable links (both in the corpus) are not read yet; there is no API endpoint for it (the UI only).
 
 ### APP-05: Real job-post corpus, dated and kept fresh
 **Status:** Done · **Priority:** P1 · **Effort:** L

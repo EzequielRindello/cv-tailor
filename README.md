@@ -154,5 +154,5 @@ CV in memory only while it builds it. The details are on the app's Privacy page 
 
 ## Roadmap and version
 
-Current version: **2.0.6** (M5 Polish & presentation). Each milestone ships as one version; the roadmap, the findings and the
+Current version: **2.0.6.1** (M5.1 Smarter input). Each milestone ships as one version; the roadmap, the findings and the
 reasoning behind each decision are in [`features.md`](features.md).

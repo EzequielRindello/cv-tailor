@@ -1,0 +1,73 @@
+@inject JobPostImporter Importer
+@inject ToastService Toasts
+
+<div class="job-link" role="group" aria-labelledby="job-link-label">
+    <label class="job-link-label" id="job-link-label" for="job-link">Or read it from a Greenhouse or Lever link:</label>
+    <div class="job-link-row">
+        <input id="job-link" type="url" class="form-control form-control-sm" inputmode="url" autocomplete="off"
+               placeholder="https://boards.greenhouse.io/company/jobs/123"
+               maxlength="@JobPostImporter.MaxLinkLength"
+               disabled="@(Disabled || _reading)"
+               @bind="_link" @bind:event="oninput" @onkeydown="OnKeyDown" />
+        <button type="button" id="job-link-read" class="btn btn-outline-secondary btn-sm"
+                disabled="@(Disabled || _reading || string.IsNullOrWhiteSpace(_link))" @onclick="ReadAsync">
+            <i class="bi bi-link-45deg" aria-hidden="true"></i> @(_reading ? "Reading..." : "Read post")
+        </button>
+    </div>
+</div>
+
+@code {
+    #region Constants
+
+    private const string EnterKey = "Enter";
+
+    #endregion
+
+    #region Parameters
+
+    /// <summary>The job description read from the link; the page puts it in the editor.</summary>
+    [Parameter] public EventCallback<string> OnImport { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    #endregion
+
+    #region State
+
+    private string _link = string.Empty;
+    private bool _reading;
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == EnterKey && !string.IsNullOrWhiteSpace(_link)) await ReadAsync();
+    }
+
+    private async Task ReadAsync()
+    {
+        if (_reading) return;
+        _reading = true;
+        try
+        {
+            var result = await Importer.ImportAsync(_link);
+            if (result.Text == null)
+            {
+                Toasts.Error(result.Error ?? "The job post could not be read.");
+                return;
+            }
+
+            await OnImport.InvokeAsync(result.Text);
+            _link = string.Empty;
+            var company = string.IsNullOrWhiteSpace(result.Company) ? $"from {result.Source}" : $"at {result.Company}";
+            Toasts.Success($"Read \"{result.Title}\" {company}. Check the text, then go on.");
+        }
+        finally
+        {
+            _reading = false;
+        }
+    }
+
+    #endregion
+}

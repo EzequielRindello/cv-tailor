@@ -48,6 +48,7 @@
                                                          Error="@_jdError"
                                                          Disabled="_loading"
                                                          HelperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate" />
+                                    <JobPostLink OnImport="s => _jobDescription = s" Disabled="_loading" />
                                     <SampleJobPicker Current="@_jobDescription"
                                                      OnSelect="s => _jobDescription = s"
                                                      Disabled="_loading" />

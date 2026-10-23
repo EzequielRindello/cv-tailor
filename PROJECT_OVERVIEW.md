@@ -23,6 +23,8 @@ Target users: job seekers, mainly software engineers, who adapt one master CV to
 - **API docs:** the built-in OpenAPI document and the Scalar reference page, Development only.
 - **Tests:** xUnit, bUnit, Playwright (installed Chrome or Edge), coverlet; GitHub Actions CI.
 - **No database, no account.** Profiles, history and settings live in the visitor's browser (see the Privacy page).
+- **A job post can come from its link** (APP-04): `JobPostImporter` reads a Greenhouse or Lever link and calls only
+  the board's public API on a fixed host. These are the app's only outbound requests.
 - **A profile can start from a resume** (PROF-05): `ResumeImporter` reads a PDF (PdfPig) or a .docx (OpenXML) in
   memory and `ResumeParser` turns its text into a draft the visitor reviews before saving.
 
@@ -61,7 +63,7 @@ er-cv-generator/
 │   ├── Api/CVController.cs          endpoints only: call the service, return its result
 │   ├── Services/                    CVGeneratorService: validation at the boundary, orchestration, session
 │   ├── Features/                    the domain, one folder per feature, each with its <Feature>Constants.cs
-│   │   ├── Matching/                JobDescriptionParser, SkillDictionary (Data/skills.json), SkillNormalizer, samples
+│   │   ├── Matching/                JobDescriptionParser, SkillDictionary (Data/skills.json), SkillNormalizer, samples, JobPostImporter, HtmlText
 │   │   ├── Analysis/                MatchScoreCalculator, MissingSkillsAnalyzer, KeywordAnalyzer, ATSChecker, JdHighlighter
 │   │   ├── Selection/               CVSelector, RelevanceScorer, SummaryGenerator, PageConstraintHelper, CvCloner
 │   │   ├── Profiles/                ProfileValidator, ProfileHealthChecker, ProfileJson, DateParser, ResumeImporter (PDF/DOCX)

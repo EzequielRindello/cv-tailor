@@ -25,7 +25,7 @@ ErCv.Web/
   Api/              Controllers. No logic: call the service, return its result.
   Services/         CVGeneratorService: request validation, orchestration, session.
   Features/<Name>/  The domain, one folder per feature. Each feature keeps its classes and its <Name>Constants.cs together.
-    Matching/       Parsing the job description, skill aliases and matching, sample job posts
+    Matching/       Parsing the job description, skill aliases and matching, sample job posts, reading a post from its link
     Analysis/       Scores and reports on the generated CV (match, ATS, keywords, gaps, highlights)
     Selection/      Choosing experiences, bullets, skills, projects and the summary; page fit
     Profiles/       Validating, checking and (de)serializing the visitor's profile; date parsing; reading a resume
@@ -137,6 +137,8 @@ Constants classes longer than about 50 lines use topic regions instead (`Scoring
   with a spoofed X-Forwarded-For).
 - The container runs as the non-root `app` user. Do not add `USER root` for runtime steps.
 - No CDN assets: vendor libraries under `wwwroot/lib/`.
+- The only outbound requests are `JobPostImporter`'s, to fixed board API hosts. A pasted link is parsed, never
+  requested; keep it that way for any new source (allowlisted host, strict path pattern, no redirects).
 - Never add a download, install or new package without asking the repo owner first.
 
 ## Tests
