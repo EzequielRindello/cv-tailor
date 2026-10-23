@@ -51,6 +51,21 @@ public class JobPostLinkTests : BunitContext
         Assert.Equal(string.Empty, cut.Find("#job-link").GetAttribute("value"));
     }
 
+    // EDIT-09: the board's company name goes to the page, for the cover letter
+    [Fact]
+    public void The_company_the_board_names_goes_to_the_page()
+    {
+        string? company = null;
+        var cut = Render<JobPostLink>(p => p
+            .Add(c => c.OnImport, (string _) => { })
+            .Add(c => c.OnCompany, (string name) => company = name));
+
+        cut.Find("#job-link").Input(Link);
+        cut.Find("#job-link-read").Click();
+
+        cut.WaitForAssertion(() => Assert.Equal("Stripe", company));
+    }
+
     [Fact]
     public void Enter_reads_the_link_too()
     {

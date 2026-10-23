@@ -1,9 +1,9 @@
 {
   "matchScore": {
-    "overall": 47,
+    "overall": 41,
     "skillsMatched": 3,
     "totalSkills": 5,
-    "keywordsMatched": 3,
+    "keywordsMatched": 1,
     "totalKeywords": 15,
     "seniorityMatch": false,
     "colorClass": "red",
@@ -19,14 +19,15 @@
       "Add 'rust' to cv-master.json if you have experience with this technology",
       "Add 'machine learning' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 20
+    "potentialScoreIncrease": 20,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
       {
         "word": "machine learning",
         "frequency": 2,
-        "presentInCV": true
+        "presentInCV": false
       },
       {
         "word": "go",
@@ -129,10 +130,10 @@
       }
     ],
     "presentInCV": [
-      "machine learning",
       "go",
       "python",
       "ruby",
+      "backend",
       "engineer",
       "user",
       "built",
@@ -151,6 +152,7 @@
       "software"
     ],
     "missingFromCV": [
+      "machine learning",
       "rust",
       "remote",
       "proactive",
@@ -158,8 +160,9 @@
       "coaching",
       "independent"
     ],
-    "keywordDensity": 0.4,
+    "keywordDensity": 0.3,
     "suggestions": [
+      "Add \"machine learning\" to the skills section or bullets if you have used it",
       "Add \"rust\" to the skills section or bullets if you have used it",
       "Mention \"remote\" in a bullet point to reflect this skill",
       "Mention \"proactive\" in a bullet point to reflect this skill",
@@ -183,7 +186,7 @@
       "linkedIn": "linkedin.com/in/alex-rivera-dev",
       "gitHub": "github.com/alexrivera-dev"
     },
-    "summary": "Senior ML Engineer with 9+ years of experience, specializing in Python, Go, Ruby, and Rails. Proven track record of improving backward compatibility and reducing breaking changes by 90%. Strong team collaboration skills.",
+    "summary": "Senior Backend Developer with 9+ years of experience, specializing in Python, Go, Ruby, and Rails. Proven track record of improving backward compatibility and reducing breaking changes by 90%. Strong team collaboration skills.",
     "education": [
       {
         "degree": "B.S. Computer Science",

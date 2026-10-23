@@ -32,7 +32,8 @@
       "Mention 'react native' in relevant project bullet points if you have used it",
       "There are 1 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 33
+    "potentialScoreIncrease": 33,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

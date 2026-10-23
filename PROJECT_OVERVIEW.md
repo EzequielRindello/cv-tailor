@@ -24,7 +24,8 @@ Target users: job seekers, mainly software engineers, who adapt one master CV to
 - **Tests:** xUnit, bUnit, Playwright (installed Chrome or Edge), coverlet; GitHub Actions CI.
 - **No database, no account.** Profiles, history and settings live in the visitor's browser (see the Privacy page).
 - **A job post can come from its link** (APP-04): `JobPostImporter` reads a Greenhouse or Lever link and calls only
-  the board's public API on a fixed host. These are the app's only outbound requests.
+  the board's public API on a fixed host. These are the app's only outbound requests. `POST /api/cv/import-job-post`
+  (APP-07) offers the same import over the API, behind its own per-IP rate limit (`ErCv:ImportRateLimit`).
 - **A profile can start from a resume** (PROF-05): `ResumeImporter` reads a PDF (PdfPig) or a .docx (OpenXML) in
   memory and `ResumeParser` turns its text into a draft the visitor reviews before saving.
 
@@ -53,7 +54,16 @@ GET /api/cv/health                status, timestamp and pdfEngine (ready, starti
 ```
 
 In the UI the result opens in a workspace: preview, scores, the reasons, the highlighted job post, the cover letter
-switch and an editor. Edits only re-render HTML (EDIT-02); documents are rendered when downloaded.
+switch and an editor. Edits only re-render HTML (EDIT-02); documents are rendered when downloaded. The editor also
+lists what the selection or the page fit left out of the profile and adds it back (EDIT-07); if that pushes the CV past
+its page limit it shows the page count, it never leaves anything out for the visitor. Match, gaps, keywords, ATS and the
+highlighted job post are recomputed after an edit, once the edits pause (EDIT-08). Match and gaps measure the CV as it
+stands (the skills and bullets it prints), and the gaps say which missing skills the profile does have. The cover letter names the company (typed, filled by an
+import or a sample, or read from a heading of the post) and can be edited (EDIT-09): what the visitor writes stays when
+the CV changes, and a paragraph the CV made outdated is marked.
+A progress bar follows a generation (parsing, selecting, rendering with the page fit, scoring) and the rendering of an edited
+download (UX-11). A 429 from the API carries an error body and a `Retry-After` (APP-08). The company in the tracker
+updates the open letter (APP-09), and a letter that runs past one page is told so (EDIT-10).
 
 ## Project structure
 
@@ -200,4 +210,4 @@ the suite with line coverage of `Features/` and `Services/` (gate 95%), the brow
 ## Open items
 
 Tracked in `features.md`: the "Open items after" sections and the findings tables. The main ones: scores are not
-recomputed after edits, the cover letter has no company name, and the first public deploy is M5.2 (OPS-06).
+and the first public deploy is M5.3 (OPS-06).

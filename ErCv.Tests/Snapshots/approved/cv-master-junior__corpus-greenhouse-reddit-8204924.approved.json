@@ -23,14 +23,15 @@
       "Add 'rust' to cv-master.json if you have experience with this technology",
       "Add 'machine learning' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 40
+    "potentialScoreIncrease": 40,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
       {
         "word": "machine learning",
         "frequency": 2,
-        "presentInCV": true
+        "presentInCV": false
       },
       {
         "word": "go",
@@ -133,8 +134,8 @@
       }
     ],
     "presentInCV": [
-      "machine learning",
       "python",
+      "backend",
       "engineer",
       "built",
       "users",
@@ -142,12 +143,14 @@
       "engineering",
       "full",
       "code",
+      "developer",
       "years",
       "software",
       "experience",
       "time"
     ],
     "missingFromCV": [
+      "machine learning",
       "go",
       "rust",
       "ruby",
@@ -157,8 +160,9 @@
       "coaching",
       "independent"
     ],
-    "keywordDensity": 0.2,
+    "keywordDensity": 0.1,
     "suggestions": [
+      "Add \"machine learning\" to the skills section or bullets if you have used it",
       "Add \"go\" to the skills section or bullets if you have used it",
       "Add \"rust\" to the skills section or bullets if you have used it",
       "Add \"ruby\" to the skills section or bullets if you have used it",
@@ -191,7 +195,7 @@
       "linkedIn": "linkedin.com/in/sam-carter-dev",
       "gitHub": "github.com/samcarter-dev"
     },
-    "summary": "Junior ML Engineer with 2+ years of experience, specializing in Python.",
+    "summary": "Junior Backend Developer with 2+ years of experience, specializing in Python.",
     "education": [
       {
         "degree": "B.S. Computer Science",

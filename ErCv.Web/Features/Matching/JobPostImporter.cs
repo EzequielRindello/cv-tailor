@@ -115,9 +115,9 @@ public sealed partial class JobPostImporter
     /// <summary>The post's text ("Title", a blank line, the body), or the message for the visitor.</summary>
     public async Task<JobPostImportResult> ImportAsync(string? link, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(link)) return Failed("Paste the link to a job post first.");
+        if (string.IsNullOrWhiteSpace(link)) return Failed("Paste the link to a job post first.", JobPostImportFailure.InvalidLink);
         if (ParseLink(link) is not { } post)
-            return Failed("Only Greenhouse and Lever job links can be read (boards.greenhouse.io/company/jobs/123 or jobs.lever.co/company/id). For other boards, paste the text.");
+            return Failed("Only Greenhouse and Lever job links can be read (boards.greenhouse.io/company/jobs/123 or jobs.lever.co/company/id). For other boards, paste the text.", JobPostImportFailure.InvalidLink);
 
         await Requests.WaitAsync(ct);
         try
@@ -125,15 +125,15 @@ public sealed partial class JobPostImporter
             using var client = _clients.CreateClient(HttpClientName);
             using var response = await client.GetAsync(post.Api, HttpCompletionOption.ResponseHeadersRead, ct);
             if (response.StatusCode == HttpStatusCode.NotFound)
-                return Failed("That job post was not found on the board. It may have been closed.");
+                return Failed("That job post was not found on the board. It may have been closed.", JobPostImportFailure.NotFound);
             if (response.StatusCode != HttpStatusCode.OK)
-                return Failed($"The job board did not answer (HTTP {(int)response.StatusCode}). Try again, or paste the text.");
+                return Failed($"The job board did not answer (HTTP {(int)response.StatusCode}). Try again, or paste the text.", JobPostImportFailure.BoardUnavailable);
 
             var json = await ReadLimitedAsync(response, ct);
-            if (json == null) return Failed("The job board's answer is too large to be a job post.");
+            if (json == null) return Failed("The job board's answer is too large to be a job post.", JobPostImportFailure.Unreadable);
 
             var (title, company, body) = post.Source == SourceGreenhouse ? ReadGreenhouse(json) : ReadLever(json);
-            if (body.Length == 0) return Failed("That job post has no text to read.");
+            if (body.Length == 0) return Failed("That job post has no text to read.", JobPostImportFailure.Unreadable);
 
             var text = HtmlText.Truncate($"{HtmlText.Normalize(title).Replace('\n', ' ')}\n\n{body}", ApiConstants.MaxJobDescriptionLength);
             return new JobPostImportResult(text, title, company, post.Source, null);
@@ -141,12 +141,12 @@ public sealed partial class JobPostImporter
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !ct.IsCancellationRequested)
         {
             _logger.LogWarning(ex, "Job post request to {Host} failed", post.Api.Host);
-            return Failed("The job board could not be reached. Try again, or paste the text.");
+            return Failed("The job board could not be reached. Try again, or paste the text.", JobPostImportFailure.BoardUnavailable);
         }
         catch (JsonException ex)
         {
             _logger.LogWarning(ex, "Job post from {Host} is not the expected JSON", post.Api.Host);
-            return Failed("The job board's answer could not be read. Paste the text instead.");
+            return Failed("The job board's answer could not be read. Paste the text instead.", JobPostImportFailure.Unreadable);
         }
         finally
         {
@@ -201,7 +201,7 @@ public sealed partial class JobPostImporter
     private static string Str(JsonElement e, string name) =>
         e.ValueKind == JsonValueKind.Object && e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : "";
 
-    private static JobPostImportResult Failed(string error) => new(null, null, null, null, error);
+    private static JobPostImportResult Failed(string error, JobPostImportFailure failure) => new(null, null, null, null, error, failure);
 
     #endregion
 }
@@ -210,4 +210,24 @@ public sealed partial class JobPostImporter
 public sealed record JobBoardRequest(string Source, Uri Api);
 
 /// <summary>The job description read from a link, or the message for the visitor.</summary>
-public sealed record JobPostImportResult(string? Text, string? Title, string? Company, string? Source, string? Error);
+public sealed record JobPostImportResult(
+    string? Text, string? Title, string? Company, string? Source, string? Error,
+    JobPostImportFailure Failure = JobPostImportFailure.None);
+
+/// <summary>Why a link could not be read, so the API can answer with the right status (APP-07).</summary>
+public enum JobPostImportFailure
+{
+    None,
+
+    /// <summary>Blank, too long or not a Greenhouse or Lever job link: nothing was requested.</summary>
+    InvalidLink,
+
+    /// <summary>The board has no such post (closed).</summary>
+    NotFound,
+
+    /// <summary>The board did not answer, answered an error, or timed out.</summary>
+    BoardUnavailable,
+
+    /// <summary>The board answered something that is not a usable job post (too large, not JSON, no text).</summary>
+    Unreadable
+}

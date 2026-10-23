@@ -28,7 +28,8 @@
       "Add 'redshift' to cv-master.json if you have experience with this technology",
       "Mention 'kafka' in relevant project bullet points if you have used it"
     ],
-    "potentialScoreIncrease": 28
+    "potentialScoreIncrease": 28,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

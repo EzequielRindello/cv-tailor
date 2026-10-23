@@ -23,7 +23,8 @@
       "Add 'algorithms' to cv-master.json if you have experience with this technology",
       "Add 'machine learning' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 40
+    "potentialScoreIncrease": 40,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
@@ -50,7 +51,7 @@
       {
         "word": "machine learning",
         "frequency": 1,
-        "presentInCV": true
+        "presentInCV": false
       }
     ],
     "softSkillKeywords": [
@@ -119,7 +120,6 @@
     ],
     "presentInCV": [
       "python",
-      "machine learning",
       "experience",
       "years",
       "rest",
@@ -132,14 +132,16 @@
       "algorithms",
       "c++",
       "rust",
+      "machine learning",
       "communication",
       "collaboration"
     ],
-    "keywordDensity": 0.29,
+    "keywordDensity": 0.14,
     "suggestions": [
       "Add \"algorithms\" to the skills section or bullets if you have used it",
       "Add \"c++\" to the skills section or bullets if you have used it",
       "Add \"rust\" to the skills section or bullets if you have used it",
+      "Add \"machine learning\" to the skills section or bullets if you have used it",
       "Mention \"communication\" in a bullet point to reflect this skill",
       "Mention \"collaboration\" in a bullet point to reflect this skill"
     ]
@@ -168,7 +170,7 @@
       "linkedIn": "linkedin.com/in/sam-carter-dev",
       "gitHub": "github.com/samcarter-dev"
     },
-    "summary": "Junior ML Engineer with 2+ years of experience, specializing in Python.",
+    "summary": "Junior Software Engineer with 2+ years of experience, specializing in Python.",
     "education": [
       {
         "degree": "B.S. Computer Science",

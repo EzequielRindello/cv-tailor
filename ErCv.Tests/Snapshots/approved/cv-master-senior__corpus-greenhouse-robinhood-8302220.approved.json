@@ -1,9 +1,9 @@
 {
   "matchScore": {
-    "overall": 34,
+    "overall": 25,
     "skillsMatched": 2,
     "totalSkills": 9,
-    "keywordsMatched": 5,
+    "keywordsMatched": 2,
     "totalKeywords": 15,
     "seniorityMatch": false,
     "colorClass": "red",
@@ -28,7 +28,8 @@
       "Mention 'llm' in relevant project bullet points if you have used it",
       "Mention 'react native' in relevant project bullet points if you have used it"
     ],
-    "potentialScoreIncrease": 22
+    "potentialScoreIncrease": 22,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

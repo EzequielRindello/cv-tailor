@@ -132,6 +132,25 @@ public static partial class JobDescriptionConstants
     /// <summary>Headings of the company's own sections, which name a skill when the company is one ("About MongoDB").</summary>
     public static readonly string[] CompanyHeadingPrefixes = { "about ", "why ", "life at ", "acerca de ", "sobre " };
 
+    // The company is read only from headings that name it ("About Stripe", "Life at Ramp", "Sobre Mercado Libre"),
+    // never from the body: a wrong company is worse than none (EDIT-09)
+    public static readonly string[] CompanyNamePrefixes = { "about ", "life at ", "acerca de ", "sobre " };
+
+    // What follows those prefixes in the posts' own sections ("About the role", "About you"), not a company
+    public static readonly string[] NotACompany =
+    {
+        "the", "this", "you", "us", "your", "our", "me", "el", "la", "los", "las", "este", "esta", "ti", "ustedes",
+        "nosotros", "vos", "role", "team", "job", "position", "company", "opportunity", "puesto", "rol", "equipo", "empresa"
+    };
+
+    // A heading about a program or a section is not about the employer ("About the Binance Accelerator Program")
+    public static readonly string[] NotAnEmployerWord =
+    {
+        "program", "programme", "accelerator", "internship", "fellowship", "benefits", "process", "culture", "values"
+    };
+
+    public const int MaxCompanyWords = 5;
+
     /// <summary>
     /// Words that mark something the post does not require. Under a heading with one of them ("Nice to have",
     /// "Bonus points", "Preferred qualifications") every skill is optional until the next heading; a sentence with

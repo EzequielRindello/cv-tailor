@@ -1,9 +1,9 @@
 {
   "matchScore": {
-    "overall": 37,
+    "overall": 34,
     "skillsMatched": 3,
     "totalSkills": 9,
-    "keywordsMatched": 2,
+    "keywordsMatched": 1,
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "red",
@@ -25,7 +25,8 @@
       "Add 'snowflake' to cv-master.json if you have experience with this technology",
       "Add 'redshift' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 28
+    "potentialScoreIncrease": 28,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

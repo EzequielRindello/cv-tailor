@@ -29,7 +29,8 @@
       "Add 'kubernetes' to cv-master.json if you have experience with this technology",
       "There are 6 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 39
+    "potentialScoreIncrease": 39,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

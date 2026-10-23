@@ -12,6 +12,13 @@
             </div>
         </div>
 
+        @if (PageWarning != null)
+        {
+            <div class="cv-editor-page-warning" id="editor-page-warning" role="status">
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> @PageWarning
+            </div>
+        }
+
         <section class="cv-editor-section" aria-labelledby="editor-sections-title">
             <h6 class="cv-editor-section-title" id="editor-sections-title">Sections</h6>
             @if (Template == CVTemplate.Modern)
@@ -65,7 +72,15 @@
 
                 <div class="bullet-exp-block" @key="ei">
                     <div class="bullet-exp-header">
-                        <div class="bullet-exp-role">@exp.Source.Role</div>
+                        <div class="bullet-exp-role">
+                            @exp.Source.Role
+                            @if (exp.IsAdded)
+                            {
+                                <span class="bullet-added-badge">Added</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="editor-remove-exp-@ei"
+                                        @onclick="() => RemoveExperience(ei)">Remove</button>
+                            }
+                        </div>
                         <div class="exp-company-label">@exp.Source.Company · @exp.Source.StartDate – @exp.Source.EndDate</div>
                     </div>
 
@@ -127,6 +142,10 @@
                                         {
                                             <span class="bullet-edited-badge">Edited</span>
                                         }
+                                        @if (bullet.IsAddedBack)
+                                        {
+                                            <span class="bullet-added-badge">Added</span>
+                                        }
                                     </span>
                                     <span class="bullet-move">
                                         <button type="button" class="bullet-move-btn" id="bullet-edit-btn-@ei-@bi"
@@ -154,11 +173,53 @@
                             </div>
                         }
                     </div>
+
+                    @{
+                        var leftOutBullets = Draft.LeftOutBullets(ei);
+                    }
+                    @if (leftOutBullets.Count > 0)
+                    {
+                        <details class="cv-editor-leftout" id="editor-leftout-@ei">
+                            <summary>More from your profile (@leftOutBullets.Count)</summary>
+                            <ul>
+                                @foreach (var left in leftOutBullets)
+                                {
+                                    var profileIndex = left.ProfileIndex;
+                                    <li>
+                                        <span>@left.Text</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                aria-label="Add bullet: @left.Text"
+                                                @onclick="() => AddBullet(ei, profileIndex)">Add</button>
+                                    </li>
+                                }
+                            </ul>
+                        </details>
+                    }
                 </div>
+            }
+
+            @if (Draft.LeftOutExperiences.Count > 0)
+            {
+                <details class="cv-editor-leftout" id="editor-leftout-experiences">
+                    <summary>Other experience from your profile (@Draft.LeftOutExperiences.Count)</summary>
+                    <ul>
+                        @for (var i = 0; i < Draft.LeftOutExperiences.Count; i++)
+                        {
+                            var index = i;
+                            var left = Draft.LeftOutExperiences[index];
+                            <li>
+                                <span>@left.Role · @left.Company · @left.StartDate – @left.EndDate</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                        aria-label="Add experience: @left.Role at @left.Company"
+                                        @onclick="() => AddExperience(index)">Add</button>
+                            </li>
+                        }
+                    </ul>
+                </details>
             }
         </section>
 
-        @if (Draft.Skills.Count > 0)
+        @if (Draft.Skills.Count > 0 || Draft.LeftOutSkills.Count > 0)
         {
             <section class="cv-editor-section" aria-labelledby="editor-skills-title">
                 <h6 class="cv-editor-section-title" id="editor-skills-title">Skills</h6>
@@ -173,13 +234,33 @@
                                 @onclick="() => ToggleSkill(index)">
                             <i class="bi @(skill.IsIncluded ? "bi-check-lg" : "bi-plus-lg")" aria-hidden="true"></i>
                             @skill.Item
+                            @if (skill.IsAddedBack)
+                            {
+                                <span class="bullet-added-badge">Added</span>
+                            }
                         </button>
                     }
                 </div>
+                @if (Draft.LeftOutSkills.Count > 0)
+                {
+                    <details class="cv-editor-leftout" id="editor-leftout-skills">
+                        <summary>More skills from your profile (@Draft.LeftOutSkills.Count)</summary>
+                        <div class="cv-editor-chips">
+                            @foreach (var left in Draft.LeftOutSkills)
+                            {
+                                var skillName = left;
+                                <button type="button" class="cv-editor-chip" aria-label="Add skill: @left"
+                                        @onclick="() => AddSkill(skillName)">
+                                    <i class="bi bi-plus-lg" aria-hidden="true"></i> @left
+                                </button>
+                            }
+                        </div>
+                    </details>
+                }
             </section>
         }
 
-        @if (Draft.Projects.Count > 0)
+        @if (Draft.Projects.Count > 0 || Draft.LeftOutProjects.Count > 0)
         {
             <section class="cv-editor-section" aria-labelledby="editor-projects-title">
                 <h6 class="cv-editor-section-title" id="editor-projects-title">Projects</h6>
@@ -190,7 +271,30 @@
                     <label class="cv-editor-include cv-editor-project">
                         <input type="checkbox" id="editor-project-@index" checked="@project.IsIncluded" @onchange="() => ToggleProject(index)" />
                         @project.Item.Name
+                        @if (project.IsAddedBack)
+                        {
+                            <span class="bullet-added-badge">Added</span>
+                        }
                     </label>
+                }
+                @if (Draft.LeftOutProjects.Count > 0)
+                {
+                    <details class="cv-editor-leftout" id="editor-leftout-projects">
+                        <summary>More projects from your profile (@Draft.LeftOutProjects.Count)</summary>
+                        <ul>
+                            @for (var i = 0; i < Draft.LeftOutProjects.Count; i++)
+                            {
+                                var index = i;
+                                var left = Draft.LeftOutProjects[index];
+                                <li>
+                                    <span>@left.Name</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            aria-label="Add project: @left.Name"
+                                            @onclick="() => AddProject(index)">Add</button>
+                                </li>
+                            }
+                        </ul>
+                    </details>
                 }
             </section>
         }
@@ -218,6 +322,7 @@
 
     [Parameter, EditorRequired] public CvDraft Draft { get; set; } = default!;
     [Parameter] public CVTemplate Template { get; set; }
+    [Parameter] public string? PageWarning { get; set; }
     [Parameter] public EventCallback OnChanged { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
 
@@ -330,6 +435,46 @@
         _dragExp = NoDrag;
         _dragIdx = NoDrag;
         if (moved) await OnChanged.InvokeAsync();
+    }
+
+    private async Task AddBullet(int expIdx, int profileIndex)
+    {
+        if (!Draft.AddBullet(expIdx, profileIndex)) return;
+
+        _announcement = "Bullet added";
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task AddExperience(int leftOutIndex)
+    {
+        if (!Draft.AddExperience(leftOutIndex)) return;
+
+        _announcement = "Experience added";
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task RemoveExperience(int expIdx)
+    {
+        if (!Draft.RemoveExperience(expIdx)) return;
+
+        _announcement = "Experience removed";
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task AddSkill(string skill)
+    {
+        if (!Draft.AddSkill(skill)) return;
+
+        _announcement = $"{skill} added";
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task AddProject(int leftOutIndex)
+    {
+        if (!Draft.AddProject(leftOutIndex)) return;
+
+        _announcement = "Project added";
+        await OnChanged.InvokeAsync();
     }
 
     private async Task ToggleSummary()

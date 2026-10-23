@@ -1,7 +1,9 @@
+using System.Globalization;
 using System.Net;
 using System.Threading.RateLimiting;
 using ErCv.Web.Components;
 using ErCv.Web.Configuration;
+using ErCv.Web.Constants;
 using ErCv.Web.Features.Analysis;
 using ErCv.Web.Features.CoverLetters;
 using ErCv.Web.Features.Documents;
@@ -13,7 +15,6 @@ using ErCv.Web.UI;
 using Microsoft.AspNetCore.HttpOverrides;
 using Scalar.AspNetCore;
 
-const string ApiRateLimitPolicy = "api";
 const string PortVariable = "PORT";
 const string ErrorPath = "/Error";
 
@@ -40,18 +41,28 @@ builder.Services.AddAuthorization();
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddPolicy(ApiRateLimitPolicy, context =>
+
+    // The same error shape the API uses everywhere (APP-08), and when to come back
+    options.OnRejected = async (context, token) =>
     {
-        var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-        return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+        var response = context.HttpContext.Response;
+        var seconds = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter)
+            ? (int)Math.Ceiling(retryAfter.TotalSeconds)
+            : context.HttpContext.RequestServices.GetRequiredService<ErCvOptions>().RateLimit.WindowSeconds;
+        response.Headers.RetryAfter = Math.Max(seconds, 1).ToString(CultureInfo.InvariantCulture);
+
+        var problem = new Microsoft.AspNetCore.Mvc.ProblemDetails
         {
-            PermitLimit = settings.RateLimit.PermitLimit,
-            Window = TimeSpan.FromSeconds(settings.RateLimit.WindowSeconds),
-            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-            QueueLimit = 0,
-            AutoReplenishment = true
-        });
-    });
+            Status = StatusCodes.Status429TooManyRequests,
+            Title = ApiConstants.TitleTooManyRequests,
+            Detail = ApiConstants.ErrorTooManyRequests
+        };
+        problem.Extensions["error"] = ApiConstants.ErrorTooManyRequests;
+        await response.WriteAsJsonAsync(problem, (System.Text.Json.JsonSerializerOptions?)null, ApiConstants.ProblemJsonContentType, token);
+    };
+    // The limits come from the registered options, not the ones read at startup, so a test can swap them
+    options.AddPolicy(ApiConstants.ApiRateLimitPolicy, context => FixedWindowPerIp(context, o => o.RateLimit));
+    options.AddPolicy(ApiConstants.ImportRateLimitPolicy, context => FixedWindowPerIp(context, o => o.ImportRateLimit));
 });
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -131,13 +142,28 @@ app.UseSession();
 app.UseAuthorization();
 app.UseAntiforgery();
 app.MapStaticAssets();
-app.MapControllers().RequireRateLimiting(ApiRateLimitPolicy);
+app.MapControllers();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Lifetime.ApplicationStopping.Register(() => DocumentRenderer.ShutdownAsync().GetAwaiter().GetResult());
 
 app.Run();
+
+// One counter per client IP (ForwardLimit 1 keeps the IP from being spoofed)
+static RateLimitPartition<string> FixedWindowPerIp(HttpContext context, Func<ErCvOptions, ErCvOptions.RateLimitSettings> limits)
+{
+    var limit = limits(context.RequestServices.GetRequiredService<ErCvOptions>());
+    var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+    return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+    {
+        PermitLimit = limit.PermitLimit,
+        Window = TimeSpan.FromSeconds(limit.WindowSeconds),
+        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+        QueueLimit = 0,
+        AutoReplenishment = true
+    });
+}
 
 // Lets WebApplicationFactory<Program> reach the top-level entry point from the test project
 public partial class Program { }

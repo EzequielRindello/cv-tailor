@@ -37,6 +37,16 @@ public class JobRequirements
 
     public List<string> Keywords { get; set; } = new();
     public string SeniorityLevel { get; set; } = string.Empty;
+
+    /// <summary>The first line of the post, when it is short enough to be a title (MATCH-10); empty otherwise.</summary>
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>The company, when a heading of the post names it ("About Stripe"); null otherwise (EDIT-09).</summary>
+    public string? Company { get; set; }
+
+    /// <summary>The post as written, for the checks that read the whole text and not only its skills and keywords (MATCH-11).</summary>
+    public string Text { get; set; } = string.Empty;
+
     public List<string> RequiredExperience { get; set; } = new();
 }
 

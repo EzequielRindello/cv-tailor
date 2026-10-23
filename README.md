@@ -14,7 +14,7 @@ Your profile and history stay in your browser.
 
 ![The results workspace: CV preview next to the match score](docs/screenshots/workspace.png)
 
-> Live demo: coming with the first deploy (M5.2).
+> Live demo: coming with the first deploy (M5.3).
 
 ---
 
@@ -124,7 +124,7 @@ docker run --rm -m 512m -e PORT=10000 -p 10000:10000 er-cv-generator
 In Development the OpenAPI document is at `/openapi/v1.json` and its reference page at `/scalar`.
 
 **Deploy:** one Docker web service on Render, defined in `render.yaml`, health check at `/api/cv/health`. The first
-public deploy is milestone M5.2.
+public deploy is milestone M5.3.
 
 **Your own profile:** open *My profile*, start from a sample, from your resume (PDF or Word, read into a draft you
 check) or from a JSON file, and save it. It stays in your browser.

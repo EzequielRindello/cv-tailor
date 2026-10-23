@@ -406,12 +406,32 @@ public class CvApiTests
     {
         using var app = new ApiApp();
 
-        var statuses = new List<HttpStatusCode>();
+        var responses = new List<HttpResponseMessage>();
         for (var i = 0; i < 61; i++)
-            statuses.Add((await app.Client.GetAsync("/api/cv/health")).StatusCode);
+            responses.Add(await app.Client.GetAsync("/api/cv/health"));
 
-        Assert.All(statuses.Take(60), s => Assert.Equal(HttpStatusCode.OK, s));
-        Assert.Equal(HttpStatusCode.TooManyRequests, statuses[60]);
+        Assert.All(responses.Take(60), r => Assert.Equal(HttpStatusCode.OK, r.StatusCode));
+        Assert.Equal(HttpStatusCode.TooManyRequests, responses[60].StatusCode);
+    }
+
+    // APP-08: the 429 has the API's error shape and says when to come back
+    [Fact]
+    public async Task A_429_has_a_problem_body_and_a_retry_after()
+    {
+        using var app = new ApiApp();
+        HttpResponseMessage last = null!;
+        for (var i = 0; i < 61; i++)
+            last = await app.Client.GetAsync("/api/cv/health");
+
+        var json = await ApiApp.JsonAsync(last);
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, last.StatusCode);
+        Assert.Equal("application/problem+json", last.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(429, json.GetProperty("status").GetInt32());
+        Assert.Equal("Too many requests", json.GetProperty("title").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(json.GetProperty("error").GetString()));
+        var retryAfter = int.Parse(last.Headers.GetValues("Retry-After").Single());
+        Assert.InRange(retryAfter, 1, 60);
     }
 
     [Fact]

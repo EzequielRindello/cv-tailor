@@ -1,12 +1,12 @@
 {
   "matchScore": {
-    "overall": 66,
+    "overall": 54,
     "skillsMatched": 6,
     "totalSkills": 8,
-    "keywordsMatched": 5,
+    "keywordsMatched": 1,
     "totalKeywords": 15,
     "seniorityMatch": true,
-    "colorClass": "yellow",
+    "colorClass": "red",
     "lowMatchWarning": null
   },
   "missingSkills": {
@@ -20,7 +20,8 @@
       "Add 'kotlin' to cv-master.json if you have experience with this technology",
       "Mention 'distributed systems' in relevant project bullet points if you have used it"
     ],
-    "potentialScoreIncrease": 6
+    "potentialScoreIncrease": 6,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
@@ -126,7 +127,7 @@
       {
         "word": "backend",
         "frequency": 4,
-        "presentInCV": false
+        "presentInCV": true
       },
       {
         "word": "product",
@@ -147,14 +148,14 @@
       "platform",
       "host",
       "global",
+      "backend",
       "metrics",
       "rate",
       "design",
       "service",
       "within",
       "experiments",
-      "infrastructure",
-      "regions"
+      "infrastructure"
     ],
     "missingFromCV": [
       "kotlin",
@@ -189,7 +190,7 @@
       "linkedIn": "linkedin.com/in/alex-rivera-dev",
       "gitHub": "github.com/alexrivera-dev"
     },
-    "summary": "Senior Mobile Developer with 9+ years of experience, specializing in Python, Java, Go, SQL, and A/B Testing. Proven track record of improving backward compatibility and reducing breaking changes by 90%.",
+    "summary": "Senior Backend Developer with 9+ years of experience, specializing in Python, Java, Go, SQL, and A/B Testing. Proven track record of improving backward compatibility and reducing breaking changes by 90%.",
     "education": [
       {
         "degree": "B.S. Computer Science",

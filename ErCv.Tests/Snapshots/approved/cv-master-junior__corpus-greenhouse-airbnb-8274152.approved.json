@@ -28,7 +28,8 @@
       "Mention 'distributed systems' in relevant project bullet points if you have used it",
       "Mention 'a/b testing' in relevant project bullet points if you have used it"
     ],
-    "potentialScoreIncrease": 25
+    "potentialScoreIncrease": 25,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
@@ -134,7 +135,7 @@
       {
         "word": "backend",
         "frequency": 4,
-        "presentInCV": false
+        "presentInCV": true
       },
       {
         "word": "product",
@@ -147,6 +148,7 @@
       "sql",
       "software",
       "engineer",
+      "backend",
       "coverage",
       "code",
       "engineering",
@@ -204,7 +206,7 @@
       "linkedIn": "linkedin.com/in/sam-carter-dev",
       "gitHub": "github.com/samcarter-dev"
     },
-    "summary": "Junior Mobile Developer with 2+ years of experience, specializing in Python and SQL.",
+    "summary": "Junior Backend Developer with 2+ years of experience, specializing in Python and SQL.",
     "education": [
       {
         "degree": "B.S. Computer Science",

@@ -1,6 +1,7 @@
 using ErCv.Collector;
 using ErCv.Tests.Fixtures;
 using ErCv.Web.Features.Matching;
+using ErCv.Web.Features.Selection;
 
 namespace ErCv.Tests.Collector;
 
@@ -94,6 +95,53 @@ public class CorpusTests
         var agree = FixtureLoader.CorpusPostings.Count(p => RelevanceReport.ParserLevel(parser.Parse(p.JobDescription).SeniorityLevel) == p.Seniority);
 
         Assert.True(agree > FixtureLoader.CorpusPostings.Count * 0.85, $"{agree} of {FixtureLoader.CorpusPostings.Count}");
+    }
+
+    // EDIT-09: a company read from a post is the post's own company, or nothing
+    [Fact]
+    public void The_company_read_from_a_real_post_is_its_company_or_nothing()
+    {
+        var parser = new JobDescriptionParser();
+        var found = 0;
+
+        foreach (var post in FixtureLoader.CorpusPostings)
+        {
+            var company = parser.Parse(post.JobDescription).Company;
+            if (company == null) continue;
+
+            found++;
+            Assert.True(string.Equals(company, post.Company, StringComparison.OrdinalIgnoreCase), $"{post.Id}: read '{company}', the post is {post.Company}'s");
+        }
+
+        Assert.True(found > 0, "no post names its company in a heading");
+    }
+
+    // MATCH-10: the summary's role from the real posts. A mobile post reads Mobile; one stray mobile word does not
+    private static string SummaryRole(Posting post)
+    {
+        var cv = ErCv.Tests.Support.Build.Master(new[] { ErCv.Tests.Support.Build.Exp(role: "Developer") });
+        var requirements = new JobDescriptionParser().Parse(post.JobDescription);
+        return new SummaryGenerator().GenerateSummary(cv, requirements, cv.Experience, new List<string>());
+    }
+
+    [Fact]
+    public void Mobile_posts_read_as_mobile()
+    {
+        var mobile = FixtureLoader.CorpusPostings.Where(p => p.RoleFamily == "mobile").ToList();
+
+        Assert.NotEmpty(mobile);
+        Assert.All(mobile, p => Assert.StartsWith("Mobile Developer", SummaryRole(p)));
+    }
+
+    // F29: "a backend language such as Java, Kotlin" is not a mobile post. "backend" is repeated in the post (MATCH-11)
+    // and "distributed systems" is a signal too, so it reads as the backend role it is
+    [Fact]
+    public void A_post_that_names_kotlin_once_reads_as_backend()
+    {
+        var post = FixtureLoader.CorpusPostings.SingleOrDefault(p => p.Id == "greenhouse-airbnb-8274152");
+        if (post == null) return; // a corpus refresh can drop the post
+
+        Assert.StartsWith("Backend Developer", SummaryRole(post));
     }
 
     [Fact]

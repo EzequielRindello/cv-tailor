@@ -30,7 +30,8 @@
       "Mention 'gcp' in relevant project bullet points if you have used it",
       "There are 1 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 38
+    "potentialScoreIncrease": 38,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

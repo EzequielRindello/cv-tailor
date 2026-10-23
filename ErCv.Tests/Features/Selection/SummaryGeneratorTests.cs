@@ -120,7 +120,7 @@ public class SummaryGeneratorTests
     [InlineData(new[] { "react", "css" }, "Frontend Developer")]
     [InlineData(new[] { "kafka", "postgresql" }, "Backend Developer")]
     [InlineData(new[] { "swift", "ios" }, "Mobile Developer")]
-    [InlineData(new[] { "react", "kafka" }, "Full Stack Developer")]
+    [InlineData(new[] { "react", "css", "kafka", "postgresql" }, "Full Stack Developer")]
     [InlineData(new string[0], "Software Engineer")]
     public void Role_type_is_detected_from_jd_signals(string[] skills, string expected)
     {
@@ -129,6 +129,99 @@ public class SummaryGeneratorTests
         var s = Summary(cv, Req(skills: skills));
 
         Assert.StartsWith(expected, s);
+    }
+
+    // MATCH-10 (F29): the Airbnb Payments post says "a backend language such as Java, Kotlin"
+    [Fact]
+    public void A_single_mobile_signal_does_not_set_the_role()
+    {
+        var cv = Master(new[] { Exp(role: "Developer") });
+
+        Assert.StartsWith("Software Engineer", Summary(cv, Req(skills: new[] { "kotlin", "java", "python" })));
+    }
+
+    [Theory]
+    [InlineData("swift", "ios")]
+    [InlineData("android", "kotlin")]
+    public void A_real_mobile_post_still_reads_mobile(string first, string second)
+    {
+        var cv = Master(new[] { Exp(role: "Developer") });
+
+        Assert.StartsWith("Mobile Developer", Summary(cv, Req(skills: new[] { first, second })));
+    }
+
+    [Fact]
+    public void Backend_signals_beat_one_stray_kotlin()
+    {
+        var cv = Master(new[] { Exp(role: "Developer") });
+
+        var s = Summary(cv, Req(skills: new[] { "kotlin", "distributed systems" }, keywords: new[] { "backend" }));
+
+        Assert.StartsWith("Backend Developer", s);
+    }
+
+    // MATCH-11: the Airbnb Payments shape. "backend" is repeated in the post but is not among the 30 most frequent words
+    [Fact]
+    public void A_role_name_the_post_repeats_is_a_signal_even_when_it_is_not_a_keyword()
+    {
+        var cv = Master(new[] { Exp(role: "Developer") });
+        var text = "Software Engineer, Payments\n\nWe build backend services. Our backend language is Kotlin or Java.";
+
+        var s = Summary(cv, Req(skills: new[] { "kotlin", "distributed systems" }, text: text));
+
+        Assert.StartsWith("Backend Developer", s);
+    }
+
+    [Fact]
+    public void A_role_name_mentioned_once_is_a_stray_mention()
+    {
+        var cv = Master(new[] { Exp(role: "Developer") });
+        var text = "Software Engineer\n\nOur backend is Kotlin.";
+
+        var s = Summary(cv, Req(skills: new[] { "kotlin", "distributed systems" }, text: text));
+
+        Assert.StartsWith("Software Engineer", s);
+    }
+
+    [Fact]
+    public void A_tie_falls_back_to_the_default_role()
+    {
+        var cv = Master(new[] { Exp(role: "Developer") });
+
+        Assert.StartsWith("Software Engineer", Summary(cv, Req(skills: new[] { "spark", "airflow", "terraform", "kubernetes" })));
+    }
+
+    [Fact]
+    public void Full_stack_needs_both_sides()
+    {
+        var cv = Master(new[] { Exp(role: "Developer") });
+
+        Assert.StartsWith("Frontend Developer", Summary(cv, Req(skills: new[] { "react", "css", "html", "node.js" })));
+    }
+
+    [Theory]
+    [InlineData("Senior Frontend Engineer", "Frontend Developer")]
+    [InlineData("Staff Backend Engineer", "Backend Developer")]
+    [InlineData("Senior Full-Stack Engineer", "Full Stack Developer")]
+    [InlineData("Site Reliability Engineer", "DevOps Engineer")]
+    public void The_title_decides_when_it_names_a_role(string title, string expected)
+    {
+        var cv = Master(new[] { Exp(role: "Developer") });
+
+        // The Coinbase shape: the body has two mobile signals, the title says otherwise
+        var s = Summary(cv, Req(skills: new[] { "ios", "android" }, title: title));
+
+        Assert.StartsWith(expected, s);
+    }
+
+    [Fact]
+    public void Two_roles_in_the_title_pick_the_one_the_post_supports()
+    {
+        var cv = Master(new[] { Exp(role: "Developer") });
+
+        var s = Summary(cv, Req(skills: new[] { "swift", "ios" }, title: "Backend / Mobile Engineer"));
+
+        Assert.StartsWith("Mobile Developer", s);
     }
 
     // F29: "ui" (a frontend signal) used to match inside "build" and "guide", so a backend post read as full stack

@@ -29,7 +29,8 @@
       "Add 'spring boot' to cv-master.json if you have experience with this technology",
       "There are 4 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 40
+    "potentialScoreIncrease": 40,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

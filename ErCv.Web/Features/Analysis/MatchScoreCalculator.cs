@@ -9,6 +9,10 @@ public class MatchScoreCalculator
 {
     #region Public Methods
 
+    /// <summary>The match of the CV as it stands: the skills and bullets it prints (EDIT-08).</summary>
+    public MatchScore Calculate(GeneratedCV cv, JobRequirements requirements) =>
+        Calculate(CvAsProfile.Of(cv), requirements);
+
     public MatchScore Calculate(CVMaster cv, JobRequirements requirements)
     {
         var allCVSkills = RelevanceScorer.FlattenSkills(cv.Skills);

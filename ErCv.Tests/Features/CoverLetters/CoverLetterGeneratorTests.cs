@@ -155,4 +155,58 @@ public class CoverLetterGeneratorTests
             cursor = at + item.Length;
         }
     }
+
+    // EDIT-09: the company is a fact between two pieces of fixed wording, in the salutation and the closing
+    [Fact]
+    public void A_company_is_named_in_the_salutation_and_the_closing()
+    {
+        var letter = _generator.Generate(Cv(), Req(skills: new[] { "go" }), "Senior Backend Engineer (Go)", Today, "Stripe");
+
+        Assert.Equal("Dear Stripe team,", letter.Salutation);
+        Assert.Equal("Stripe", letter.Company);
+        var closing = letter.Paragraphs[^1];
+        Assert.Contains("help the Stripe team. Thank you for your time and consideration.", closing.Text);
+        Assert.Contains(closing.Parts, p => p.IsFact && p.Text == "Stripe");
+    }
+
+    [Fact]
+    public void Without_a_company_the_wording_stays_generic()
+    {
+        var letter = Letter(Cv());
+
+        Assert.Equal("Dear Hiring Manager,", letter.Salutation);
+        Assert.Null(letter.Company);
+        Assert.Contains("help your team", letter.Paragraphs[^1].Text);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void A_blank_company_is_no_company(string? company)
+    {
+        var letter = _generator.Generate(Cv(), Req(), "Senior Backend Engineer", Today, company);
+
+        Assert.Null(letter.Company);
+        Assert.Equal("Dear Hiring Manager,", letter.Salutation);
+    }
+
+    [Fact]
+    public void The_spanish_letter_names_the_company_too()
+    {
+        var letter = _generator.Generate(Cv(ApiConstants.LanguageSpanish), Req(), "Ingeniero Backend Senior", Today, "Mercado Libre");
+
+        Assert.Equal("Estimado equipo de Mercado Libre:", letter.Salutation);
+        Assert.Contains("aportar al equipo de Mercado Libre. Muchas gracias", letter.Paragraphs[^1].Text);
+    }
+
+    [Fact]
+    public void A_name_that_ends_with_a_period_reads_well_in_both_languages()
+    {
+        var english = _generator.Generate(Cv(), Req(), "Backend Engineer", Today, "Acme Inc.");
+        var spanish = _generator.Generate(Cv(ApiConstants.LanguageSpanish), Req(), "Ingeniero Backend", Today, "Acme Inc.");
+
+        Assert.Equal("Dear Acme Inc. team,", english.Salutation);
+        Assert.Equal("Estimado equipo de Acme Inc.:", spanish.Salutation);
+    }
 }

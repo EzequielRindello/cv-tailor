@@ -20,6 +20,13 @@ public class CVGeneratorService
     private static readonly HashSet<string> SupportedFormats =
         new(StringComparer.OrdinalIgnoreCase) { ApiConstants.FormatPdf, ApiConstants.FormatDocx };
 
+    // Where each phase starts on the progress bar (UX-11); the rendering band is filled by the page fit's renders
+    private const int PercentParsing = 0;
+    private const int PercentSelecting = 10;
+    private const int PercentRendering = 30;
+    private const int PercentScoring = 90;
+    private const int PercentDone = 100;
+
     private static readonly string AllowedFormatsText = string.Join(", ", SupportedFormats);
 
     private static readonly JsonSerializerOptions ProfileReadOptions = new() { PropertyNameCaseInsensitive = true };
@@ -42,6 +49,7 @@ public class CVGeneratorService
     private readonly JdHighlighter _jdHighlighter;
     private readonly PageConstraintHelper _pageConstraint;
     private readonly CoverLetterGenerator _coverLetterGenerator;
+    private readonly JobPostImporter _jobPostImporter;
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<CVGeneratorService> _logger;
     private readonly string _templatesFolder;
@@ -62,7 +70,8 @@ public class CVGeneratorService
         ProfileValidator profileValidator,
         JdHighlighter jdHighlighter,
         PageConstraintHelper pageConstraint,
-        CoverLetterGenerator coverLetterGenerator)
+        CoverLetterGenerator coverLetterGenerator,
+        JobPostImporter jobPostImporter)
     {
         _env = env;
         _logger = logger;
@@ -76,6 +85,7 @@ public class CVGeneratorService
         _jdHighlighter = jdHighlighter;
         _pageConstraint = pageConstraint;
         _coverLetterGenerator = coverLetterGenerator;
+        _jobPostImporter = jobPostImporter;
         _templatesFolder = Path.Combine(_env.ContentRootPath, TemplatePaths.TemplatesFolder);
     }
 
@@ -189,7 +199,7 @@ public class CVGeneratorService
     }
 
     public async Task<(Dictionary<string, byte[]> Documents, AnalysisResult Analysis)> BuildCvAsync(
-        GenerateRequest request, IProgress<GenerationStage>? progress = null)
+        GenerateRequest request, IProgress<GenerationStatus>? progress = null)
     {
         ValidateGenerateRequest(request);
         return await GenerateCVInternalAsync(request, progress);
@@ -200,7 +210,7 @@ public class CVGeneratorService
     /// The profile is validated first; an invalid one raises <see cref="ArgumentException"/> listing the problems.
     /// </summary>
     public async Task<(Dictionary<string, byte[]> Documents, AnalysisResult Analysis)> BuildCvAsync(
-        GenerateRequest request, CVMaster profile, IProgress<GenerationStage>? progress = null)
+        GenerateRequest request, CVMaster profile, IProgress<GenerationStatus>? progress = null)
     {
         ValidateGenerateRequest(request);
         ValidateProfile(profile);
@@ -238,18 +248,27 @@ public class CVGeneratorService
     /// EDIT-03: the cover letter for a CV as it stands, so it follows the edits made in the workspace.
     /// The letter's HTML comes with it; the PDF and DOCX are rendered on download.
     /// </summary>
-    public (CoverLetter Letter, string Html) BuildCoverLetter(GeneratedCV cv, string jobDescription)
+    public (CoverLetter Letter, string Html) BuildCoverLetter(GeneratedCV cv, string jobDescription, string? company = null)
     {
         ValidateEditedCv(cv);
         if (jobDescription.Length > ApiConstants.MaxJobDescriptionLength)
             throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ApiConstants.ErrorJobDescriptionTooLong, ApiConstants.MaxJobDescriptionLength));
 
-        return WriteCoverLetter(cv, _parser.Parse(jobDescription), jobDescription);
+        var requirements = _parser.Parse(jobDescription);
+        return WriteCoverLetter(cv, requirements, jobDescription, CleanCompany(company) ?? requirements.Company);
+    }
+
+    /// <summary>The HTML of a letter the visitor edited (EDIT-09), validated like the CV preview.</summary>
+    public string RenderCoverLetterHtml(CoverLetter letter)
+    {
+        ValidateLetter(letter);
+        return DocumentRenderer.ForCoverLetter(_templatesFolder).RenderCoverLetterHtml(letter);
     }
 
     public async Task<byte[]> RenderCoverLetterAsync(CoverLetter letter, string format)
     {
         var normalized = NormalizeAndValidateFormat(format);
+        ValidateLetter(letter);
         var renderer = DocumentRenderer.ForCoverLetter(_templatesFolder);
 
         return normalized == ApiConstants.FormatDocx
@@ -305,34 +324,35 @@ public class CVGeneratorService
 
     private async Task<(Dictionary<string, byte[]>, AnalysisResult)>
         GenerateCVInternalAsync(
-            GenerateRequest request, IProgress<GenerationStage>? progress = null, CVMaster? profile = null)
+            GenerateRequest request, IProgress<GenerationStatus>? progress = null, CVMaster? profile = null)
     {
-        await ReportAsync(progress, GenerationStage.Parsing);
+        await ReportAsync(progress, GenerationStage.Parsing, PercentParsing);
         var cvMaster = profile ?? await LoadCVMasterAsync(request.ProfileId);
         var requirements = _parser.Parse(request.JobDescription);
 
-        await ReportAsync(progress, GenerationStage.Scoring);
-        var matchScore      = _matchScoreCalc.Calculate(cvMaster, requirements);
-        var missingSkills   = _missingSkillsAnalyzer.Analyze(cvMaster, requirements);
-
-        await ReportAsync(progress, GenerationStage.Selecting);
+        await ReportAsync(progress, GenerationStage.Selecting, PercentSelecting);
         var (selectedCV, explanation) = _selector.SelectWithExplanation(
             cvMaster, requirements, request.AllowTwoPages, request.Language);
         selectedCV.Accent = request.Accent;
         selectedCV.Fonts = request.Fonts;
 
         // The analysis reads the CV after the measured page fit, which can trim more than the selection did
-        await ReportAsync(progress, GenerationStage.Rendering);
+        await ReportAsync(progress, GenerationStage.Rendering, PercentRendering);
         var renderer = DocumentRenderer.ForTemplate(_templatesFolder, request.Template);
         var (generatedCV, previewHtml, documents) =
-            await RenderDocumentsAsync(request.Formats, renderer, selectedCV, request.AllowTwoPages);
+            await RenderDocumentsAsync(request.Formats, renderer, selectedCV, request.AllowTwoPages, progress);
         explanation = CVSelector.FollowFinalCv(explanation, generatedCV);
 
+        await ReportAsync(progress, GenerationStage.Scoring, PercentScoring);
+        // The scores measure the CV as it stands, after the page fit (EDIT-08)
+        var matchScore      = _matchScoreCalc.Calculate(generatedCV, requirements);
+        var missingSkills   = _missingSkillsAnalyzer.Analyze(generatedCV, cvMaster, requirements);
         var keywordAnalysis = _keywordAnalyzer.Analyze(request.JobDescription, generatedCV);
         var atsScore        = _atsChecker.Check(generatedCV, requirements, request.Template);
 
         var analysis = new AnalysisResult
         {
+            Company         = CleanCompany(request.Company) ?? requirements.Company,
             MatchScore      = matchScore,
             MissingSkills   = missingSkills,
             KeywordAnalysis = keywordAnalysis,
@@ -340,21 +360,23 @@ public class CVGeneratorService
             GeneratedCV     = generatedCV,
             PreviewHtml     = previewHtml,
             Explanation     = explanation,
-            JdHighlight     = _jdHighlighter.Build(request.JobDescription, requirements, cvMaster, generatedCV)
+            JdHighlight     = _jdHighlighter.Build(request.JobDescription, requirements, cvMaster, generatedCV),
+            Context         = new AnalysisContext(request.JobDescription, requirements, cvMaster)
         };
 
         if (request.IncludeCoverLetter)
-            (analysis.CoverLetter, analysis.CoverLetterHtml) = WriteCoverLetter(generatedCV, requirements, request.JobDescription);
+            (analysis.CoverLetter, analysis.CoverLetterHtml) = WriteCoverLetter(generatedCV, requirements, request.JobDescription, analysis.Company);
 
+        progress?.Report(new GenerationStatus(GenerationStage.Scoring, PercentDone));
         return (documents, analysis);
     }
 
     // Yielding after each report lets the UI paint the new stage before the next (synchronous) phase starts
-    private static async Task ReportAsync(IProgress<GenerationStage>? progress, GenerationStage stage)
+    private static async Task ReportAsync(IProgress<GenerationStatus>? progress, GenerationStage stage, int percent)
     {
         if (progress == null) return;
 
-        progress.Report(stage);
+        progress.Report(new GenerationStatus(stage, percent));
         await Task.Yield();
     }
 
@@ -388,7 +410,8 @@ public class CVGeneratorService
     /// further if it spills over (MATCH-08), so the preview, the PDF and the DOCX all show the fitted CV.
     /// </summary>
     private async Task<(GeneratedCV Cv, string Html, Dictionary<string, byte[]> Documents)> RenderDocumentsAsync(
-        IEnumerable<string> formats, DocumentRenderer renderer, GeneratedCV cv, bool allowTwoPages)
+        IEnumerable<string> formats, DocumentRenderer renderer, GeneratedCV cv, bool allowTwoPages,
+        IProgress<GenerationStatus>? progress = null)
     {
         var docs = new Dictionary<string, byte[]>();
         var normalized = formats
@@ -407,7 +430,12 @@ public class CVGeneratorService
                     var candidateHtml = renderer.RenderHtml(candidate);
                     return (Html: candidateHtml, Pdf: await renderer.RenderPdfAsync(candidateHtml));
                 },
-                rendered => DocumentRenderer.CountPages(rendered.Pdf));
+                rendered => DocumentRenderer.CountPages(rendered.Pdf),
+                // Each render of the page fit moves the bar through the rendering band (UX-11)
+                (done, total) => progress?.Report(new GenerationStatus(
+                    GenerationStage.Rendering,
+                    PercentRendering + (PercentScoring - PercentRendering) * done / total,
+                    string.Format(CultureInfo.InvariantCulture, ApiConstants.ProgressFitting, done, total))));
 
             html = fitted.Html;
             docs[ApiConstants.FormatPdf] = fitted.Pdf;
@@ -463,9 +491,29 @@ public class CVGeneratorService
             throw new ArgumentException($"Unsupported fonts: {fonts}. Allowed: {string.Join(", ", ApiConstants.FontPairings)}.");
     }
 
-    private (CoverLetter Letter, string Html) WriteCoverLetter(GeneratedCV cv, JobRequirements requirements, string jobDescription)
+    private static void ValidateLetter(CoverLetter letter)
     {
-        var letter = _coverLetterGenerator.Generate(cv, requirements, jobDescription, DateTime.Today);
+        if (letter.Paragraphs.Count > ApiConstants.MaxLetterParagraphs
+            || letter.Paragraphs.Any(p => p.Text.Length > ApiConstants.MaxEditedLetterBlockLength)
+            || letter.Salutation.Length > ApiConstants.MaxEditedLetterBlockLength)
+            throw new ArgumentException(ApiConstants.ErrorLetterInvalid);
+    }
+
+    // The visitor's company name: one line, collapsed spaces, no control characters (EDIT-09). Null when empty.
+    private static string? CleanCompany(string? company)
+    {
+        if (string.IsNullOrWhiteSpace(company)) return null;
+
+        var trimmed = company.Trim();
+        var clean = string.Join(' ', trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+        if (trimmed.Any(char.IsControl) || clean.Length > ApiConstants.MaxCompanyLength)
+            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ApiConstants.ErrorCompanyInvalid, ApiConstants.MaxCompanyLength));
+        return clean;
+    }
+
+    private (CoverLetter Letter, string Html) WriteCoverLetter(GeneratedCV cv, JobRequirements requirements, string jobDescription, string? company)
+    {
+        var letter = _coverLetterGenerator.Generate(cv, requirements, jobDescription, DateTime.Today, company);
         return (letter, DocumentRenderer.ForCoverLetter(_templatesFolder).RenderCoverLetterHtml(letter));
     }
 
@@ -576,6 +624,51 @@ public class CVGeneratorService
     /// RFC 7807 error body. <paramref name="detail"/> is only ever a message written for the client, never an
     /// exception message. The "error" extension keeps the field existing API consumers read.
     /// </summary>
+    /// <summary>
+    /// Reads a job post from its Greenhouse or Lever link (APP-07). The importer checks the link before any request
+    /// (allowlisted hosts, strict patterns), so a refused link costs nothing. Its messages are written for the client.
+    /// </summary>
+    public async Task<IActionResult> ImportJobPostAsync(JobPostImportRequest? request, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _jobPostImporter.ImportAsync(request?.Link, ct);
+            if (result.Error != null)
+            {
+                return result.Failure switch
+                {
+                    JobPostImportFailure.InvalidLink => Problem(StatusCodes.Status400BadRequest, ApiConstants.TitleBadRequest, result.Error),
+                    JobPostImportFailure.NotFound => Problem(StatusCodes.Status404NotFound, ApiConstants.TitleNotFound, result.Error),
+                    _ => Problem(StatusCodes.Status502BadGateway, ApiConstants.TitleBadGateway, result.Error)
+                };
+            }
+
+            return new OkObjectResult(new JobPostImportResponse(
+                result.Text ?? string.Empty, result.Title ?? string.Empty, result.Company ?? string.Empty, result.Source ?? string.Empty));
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogError(ex, "Importing a job post failed");
+            return Problem(StatusCodes.Status500InternalServerError, ApiConstants.ErrorImportingJobPost);
+        }
+    }
+
+    /// <summary>
+    /// EDIT-08: the scores that follow the CV, recomputed on the edited one. The post is not read again: the parser's
+    /// result and the profile come from the generation. Validation stays here, like for the preview.
+    /// </summary>
+    public EditedAnalysis AnalyzeEdited(GeneratedCV cv, AnalysisContext context, CVTemplate template)
+    {
+        ValidateEditedCv(cv);
+
+        return new EditedAnalysis(
+            _matchScoreCalc.Calculate(cv, context.Requirements),
+            _missingSkillsAnalyzer.Analyze(cv, context.Profile, context.Requirements),
+            _keywordAnalyzer.Analyze(context.JobDescription, cv),
+            _atsChecker.Check(cv, context.Requirements, template),
+            _jdHighlighter.Build(context.JobDescription, context.Requirements, context.Profile, cv));
+    }
+
     private static ObjectResult Problem(int status, string title, string? detail = null)
     {
         var problem = new ProblemDetails { Status = status, Title = title, Detail = detail };
@@ -595,7 +688,8 @@ public class CVGeneratorService
             generatedCV     = analysis.GeneratedCV,
             previewHtml     = analysis.PreviewHtml,   // FEATURE-102
             explanation     = analysis.Explanation,
-            coverLetter     = analysis.CoverLetter is { } letter ? CoverLetterText.ToPlainText(letter) : null
+            coverLetter     = analysis.CoverLetter is { } letter ? CoverLetterText.ToPlainText(letter) : null,
+            company         = analysis.Company
         };
 
     private List<object> BuildFileMetadata(Dictionary<string, byte[]> documents) =>

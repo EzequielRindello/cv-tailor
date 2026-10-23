@@ -28,7 +28,8 @@
       "Add 'redis' to cv-master.json if you have experience with this technology",
       "There are 2 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 35
+    "potentialScoreIncrease": 35,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

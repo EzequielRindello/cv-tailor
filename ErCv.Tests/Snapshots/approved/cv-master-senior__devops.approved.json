@@ -1,9 +1,9 @@
 {
   "matchScore": {
-    "overall": 67,
+    "overall": 61,
     "skillsMatched": 11,
     "totalSkills": 17,
-    "keywordsMatched": 7,
+    "keywordsMatched": 5,
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "yellow",
@@ -25,7 +25,8 @@
       "Add 'devops' to cv-master.json if you have experience with this technology",
       "Add 'sre' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 15
+    "potentialScoreIncrease": 15,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

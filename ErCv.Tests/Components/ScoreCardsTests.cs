@@ -107,4 +107,29 @@ public class ScoreCardsTests : BunitContext
 
         Assert.Equal($"Score {shown} out of 100", cut.Find(".score-gauge").GetAttribute("aria-label"));
     }
+
+    // EDIT-08: a skill the profile has but this CV left out is listed apart, with the way back
+    [Fact]
+    public void Gaps_list_the_skills_the_cv_left_out_apart_from_the_ones_the_profile_lacks()
+    {
+        var data = new MissingSkillsAnalysis
+        {
+            RequiredMissing = new List<string> { "Kafka", "Rust" },
+            InProfileNotInCv = new List<string> { "Kafka" }
+        };
+
+        var cut = Render<MissingSkillsCard>(p => p.Add(c => c.Data, data));
+        Assert.Contains("In your profile, left out of this CV", cut.Find("#missing-in-profile").TextContent);
+        Assert.Contains("Kafka", cut.Find("#missing-in-profile").TextContent);
+        Assert.DoesNotContain("Rust", cut.Find("#missing-in-profile").TextContent);
+    }
+
+    [Fact]
+    public void Gaps_show_no_left_out_section_when_everything_missing_is_missing_from_the_profile_too()
+    {
+        var data = new MissingSkillsAnalysis { RequiredMissing = new List<string> { "Rust" } };
+
+        var cut = Render<MissingSkillsCard>(p => p.Add(c => c.Data, data));
+        Assert.Empty(cut.FindAll("#missing-in-profile"));
+    }
 }

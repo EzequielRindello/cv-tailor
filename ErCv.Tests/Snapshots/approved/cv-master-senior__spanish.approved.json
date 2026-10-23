@@ -13,7 +13,8 @@
     "requiredMissing": [],
     "niceToHaveMissing": [],
     "suggestions": [],
-    "potentialScoreIncrease": 0
+    "potentialScoreIncrease": 0,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

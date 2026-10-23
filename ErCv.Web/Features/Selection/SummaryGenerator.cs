@@ -20,17 +20,57 @@ public partial class SummaryGenerator
     private const string FrontendRoleType = "Frontend Developer";
     private const string BackendRoleType = "Backend Developer";
     private const string FullStackRoleType = "Full Stack Developer";
+    private const string MobileRoleType = "Mobile Developer";
+    private const string DataRoleType = "Data Engineer";
+    private const string MlRoleType = "ML Engineer";
+    private const string DevOpsRoleType = "DevOps Engineer";
+
+    // The winning role needs this many distinct signals in the post, and this many more than the runner-up. One
+    // stray mention (F29: Kotlin as "a backend language such as Java, Kotlin") must not set the role, and a tie
+    // must not be decided by the order of RoleTypeSignals
+    private const int MinRoleSignals = 2;
+    private const int MinRoleLead = 1;
+
+    // A role name that the post repeats is a signal too, even when it is not among the 30 most frequent words (the
+    // company's own boilerplate can push it out). Once is a stray mention, so it takes this many (MATCH-11)
+    private const int MinRoleNameMentions = 2;
 
     private static readonly Dictionary<string, string[]> RoleTypeSignals =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            { "Data Engineer",       new[] { "etl","spark","airflow","dbt","pipeline","warehouse","databricks" } },
-            { "ML Engineer",         new[] { "tensorflow","pytorch","machine learning","scikit","mlflow" } },
-            { "DevOps Engineer",     new[] { "terraform","ansible","kubernetes","helm","argocd","infrastructure","sre" } },
-            { FrontendRoleType,      new[] { "react","vue","angular","css","html","figma","tailwind","ui" } },
-            { BackendRoleType,       new[] { "postgresql","mysql","rest api","grpc","kafka","rabbitmq","spring","node.js" } },
-            { "Mobile Developer",    new[] { "swift","kotlin","flutter","react native","ios","android","xcode" } },
+            { DataRoleType,           new[] { "etl","spark","airflow","dbt","pipeline","warehouse","databricks" } },
+            { MlRoleType,             new[] { "tensorflow","pytorch","machine learning","scikit","mlflow" } },
+            { DevOpsRoleType,         new[] { "terraform","ansible","kubernetes","helm","argocd","infrastructure","sre" } },
+            { FrontendRoleType,      new[] { "react","vue","angular","css","html","figma","tailwind","ui","frontend" } },
+            { BackendRoleType,       new[] { "postgresql","mysql","rest api","grpc","kafka","rabbitmq","spring","node.js","backend","distributed systems" } },
+            { MobileRoleType,         new[] { "swift","kotlin","flutter","react native","ios","android","xcode","mobile" } },
             { FullStackRoleType,     new[] { "fullstack","full stack","full-stack","end-to-end" } },
+        };
+
+    // When the title of the post names a role, the title decides (MATCH-10). Narrower than the signal lists on
+    // purpose: no "platform", "api", "server", "data" or "model", which are ambiguous in a title
+    private static readonly Dictionary<string, string[]> TitleRoleSignals =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            { BackendRoleType,    new[] { "backend","back end","back-end" } },
+            { FrontendRoleType,   new[] { "frontend","front end","front-end","ui engineer","web engineer","web developer" } },
+            { FullStackRoleType,  new[] { "full stack","full-stack","fullstack" } },
+            { MobileRoleType,     new[] { "mobile","ios","android","react native","flutter" } },
+            { DevOpsRoleType,     new[] { "devops","sre","site reliability","infrastructure" } },
+            { DataRoleType,       new[] { "data engineer","data engineering","analytics engineer" } },
+            { MlRoleType,         new[] { "machine learning","ml","ai","llm" } },
+        };
+
+    // The words that name a role in the body of the post
+    private static readonly Dictionary<string, string[]> RoleNameTerms =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            { BackendRoleType,   new[] { "backend", "back-end", "back end" } },
+            { FrontendRoleType,  new[] { "frontend", "front-end", "front end" } },
+            { FullStackRoleType, new[] { "full stack", "full-stack", "fullstack" } },
+            { MobileRoleType,    new[] { "mobile" } },
+            { DevOpsRoleType,    new[] { "devops" } },
+            { DataRoleType,      new[] { "data engineer", "data engineering" } },
         };
 
     // Checked in order; the first prefix found in the role wins ("mid" adds nothing to the title)
@@ -173,13 +213,45 @@ public partial class SummaryGenerator
             if (score > 0) scores[kvp.Key] = score;
         }
 
-        if (!scores.Any()) return DefaultRoleType;
+        foreach (var (role, terms) in RoleNameTerms)
+        {
+            var mentions = terms.Sum(term => SkillNormalizer.FindTerm(requirements.Text, term).Count());
+            if (mentions >= MinRoleNameMentions) scores[role] = scores.GetValueOrDefault(role) + 1;
+        }
 
-        var hasFrontend = scores.ContainsKey(FrontendRoleType);
-        var hasBackend = scores.ContainsKey(BackendRoleType);
-        if (hasFrontend && hasBackend) return FullStackRoleType;
+        if (TitleRole(requirements.Title, scores) is { } titled) return titled;
 
-        return scores.OrderByDescending(kvp => kvp.Value).First().Key;
+        // Both sides of the stack, each with a real presence ("React" and "Kafka" alone are not a full stack)
+        if (scores.GetValueOrDefault(FrontendRoleType) >= MinRoleSignals && scores.GetValueOrDefault(BackendRoleType) >= MinRoleSignals)
+            return FullStackRoleType;
+
+        var ranked = scores.OrderByDescending(kvp => kvp.Value).ToList();
+        if (ranked.Count == 0 || ranked[0].Value < MinRoleSignals) return DefaultRoleType;
+        if (ranked.Count > 1 && ranked[0].Value - ranked[1].Value < MinRoleLead) return DefaultRoleType;
+
+        return ranked[0].Key;
+    }
+
+    // The role the title names, or null. With several in the title ("Mobile / Full Stack") the post's own signals
+    // choose, and on a tie the one named first
+    private static string? TitleRole(string title, Dictionary<string, int> scores)
+    {
+        if (string.IsNullOrWhiteSpace(title)) return null;
+
+        var text = JobDescriptionConstants.TitlePunctuation().Replace(title.ToLower(), " ");
+        var named = new List<(string Role, int At)>();
+        foreach (var kvp in TitleRoleSignals)
+        {
+            var at = kvp.Value
+                .SelectMany(signal => SkillNormalizer.FindTerm(text, signal).Select(m => m.Start))
+                .DefaultIfEmpty(-1)
+                .Min();
+            if (at >= 0) named.Add((kvp.Key, at));
+        }
+
+        return named.Count == 0
+            ? null
+            : named.OrderByDescending(x => scores.GetValueOrDefault(x.Role)).ThenBy(x => x.At).First().Role;
     }
 
     private int CalculateTechYearsOfExperience(List<Experience> allExperiences)

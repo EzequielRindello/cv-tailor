@@ -1,9 +1,9 @@
 {
   "matchScore": {
-    "overall": 20,
+    "overall": 17,
     "skillsMatched": 0,
     "totalSkills": 8,
-    "keywordsMatched": 2,
+    "keywordsMatched": 1,
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "red",
@@ -32,7 +32,8 @@
       "Mention 'gcp' in relevant project bullet points if you have used it",
       "There are 1 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 38
+    "potentialScoreIncrease": 38,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

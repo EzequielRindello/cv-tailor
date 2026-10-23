@@ -9,6 +9,9 @@ public class EditingTests : E2ETestBase
 {
     private const string Rewrite = "Rewritten in the browser for this job";
 
+    // More than the sample profile has to add back
+    private const int MaxAddClicks = 60;
+
     public EditingTests(AppFixture app) : base(app)
     {
     }
@@ -56,6 +59,77 @@ public class EditingTests : E2ETestBase
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Undo rewrite" }).ClickAsync();
         await Assertions.Expect(PreviewBody).Not.ToContainTextAsync(Rewrite);
+    }
+
+    // EDIT-07: a skill the CV left out comes back from the profile and shows in the preview
+    [Fact]
+    public async Task A_skill_the_cv_left_out_can_be_added_back()
+    {
+        await GenerateAsync();
+        await OpenEditorAsync();
+        await Page.Locator("#editor-leftout-skills summary").ClickAsync();
+        var add = Page.Locator("#editor-leftout-skills button").First;
+        var skill = (await add.InnerTextAsync()).Trim();
+        await Assertions.Expect(PreviewBody).Not.ToContainTextAsync(skill);
+
+        await add.ClickAsync();
+
+        await Assertions.Expect(PreviewBody).ToContainTextAsync(skill, new() { Timeout = 5000 });
+        await Assertions.Expect(Page.Locator(".cv-editor-chip", new() { HasText = skill }).Locator(".bullet-added-badge")).ToBeVisibleAsync();
+    }
+
+    // EDIT-07: nothing is left out for the visitor; adding more than fits shows the page count instead
+    [Fact]
+    public async Task Adding_more_than_fits_shows_the_page_count_and_trims_nothing()
+    {
+        await GenerateAsync();
+        await OpenEditorAsync();
+        var warning = Page.Locator("#editor-page-warning");
+        await Assertions.Expect(warning).ToHaveCountAsync(0);
+
+        // Add back every experience, bullet and project that was left out (each click re-renders the lists)
+        for (var i = 0; i < MaxAddClicks; i++)
+        {
+            var clicked = await Page.EvaluateAsync<bool>(
+                "() => { const b = document.querySelector('.cv-editor-leftout li button'); if (!b) return false; b.click(); return true; }");
+            if (!clicked) break;
+            await Page.WaitForTimeoutAsync(150);
+        }
+
+        await Assertions.Expect(warning).ToContainTextAsync("pages", new() { Timeout = 15000 });
+    }
+
+    // EDIT-08: the scores follow the edited CV, after a short pause, and say so while they are being recomputed
+    [Fact]
+    public async Task The_match_follows_the_edited_cv()
+    {
+        await GenerateAsync();
+        var skills = Page.Locator("[id^=insights-panel] .breakdown-item", new() { HasText = "Technical skills" });
+        var before = (await skills.InnerTextAsync()).Trim();
+
+        await OpenEditorAsync();
+        var chips = Page.Locator(".cv-editor-chips").First.Locator(".cv-editor-chip.included");
+        for (var i = await chips.CountAsync() - 1; i >= 0; i--)
+            await chips.Nth(i).ClickAsync();
+        await Editor.GetByRole(AriaRole.Button, new() { Name = "Done", Exact = true }).ClickAsync();
+
+        var panel = Page.Locator("#insights-panel");
+        await Assertions.Expect(panel).ToHaveAttributeAsync("aria-busy", "false", new() { Timeout = 10000 });
+        await Assertions.Expect(skills).Not.ToHaveTextAsync(before, new() { Timeout = 10000 });
+    }
+
+    // Moving a section changes nothing the analysis reads, so no "Updating" state appears
+    [Fact]
+    public async Task Moving_a_section_does_not_recompute_the_scores()
+    {
+        await GenerateAsync();
+        await OpenEditorAsync();
+
+        await Page.Locator("#section-up-experience").ClickAsync();
+        await Editor.GetByRole(AriaRole.Button, new() { Name = "Done", Exact = true }).ClickAsync();
+
+        await Assertions.Expect(Page.Locator(".insights-updating")).ToHaveCountAsync(0);
+        await Assertions.Expect(Page.Locator("#insights-panel")).ToHaveAttributeAsync("aria-busy", "false");
     }
 
     [Fact]

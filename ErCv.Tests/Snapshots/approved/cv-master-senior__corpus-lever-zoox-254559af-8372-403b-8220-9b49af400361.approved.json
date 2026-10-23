@@ -1,9 +1,9 @@
 {
   "matchScore": {
-    "overall": 27,
+    "overall": 24,
     "skillsMatched": 1,
     "totalSkills": 5,
-    "keywordsMatched": 3,
+    "keywordsMatched": 2,
     "totalKeywords": 15,
     "seniorityMatch": false,
     "colorClass": "red",
@@ -23,7 +23,8 @@
       "Add 'algorithms' to cv-master.json if you have experience with this technology",
       "Add 'machine learning' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 40
+    "potentialScoreIncrease": 40,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
@@ -50,7 +51,7 @@
       {
         "word": "machine learning",
         "frequency": 1,
-        "presentInCV": true
+        "presentInCV": false
       }
     ],
     "softSkillKeywords": [
@@ -119,7 +120,6 @@
     ],
     "presentInCV": [
       "python",
-      "machine learning",
       "across",
       "pricing",
       "real",
@@ -140,13 +140,15 @@
       "algorithms",
       "c++",
       "rust",
+      "machine learning",
       "communication"
     ],
-    "keywordDensity": 0.43,
+    "keywordDensity": 0.29,
     "suggestions": [
       "Add \"algorithms\" to the skills section or bullets if you have used it",
       "Add \"c++\" to the skills section or bullets if you have used it",
       "Add \"rust\" to the skills section or bullets if you have used it",
+      "Add \"machine learning\" to the skills section or bullets if you have used it",
       "Mention \"communication\" in a bullet point to reflect this skill"
     ]
   },
@@ -174,7 +176,7 @@
       "linkedIn": "linkedin.com/in/alex-rivera-dev",
       "gitHub": "github.com/alexrivera-dev"
     },
-    "summary": "Senior ML Engineer with 9+ years of experience, specializing in Python. Proven track record of improving backward compatibility and reducing breaking changes by 90%. Strong team collaboration skills.",
+    "summary": "Senior Software Engineer with 9+ years of experience, specializing in Python. Proven track record of improving backward compatibility and reducing breaking changes by 90%. Strong team collaboration skills.",
     "education": [
       {
         "degree": "B.S. Computer Science",

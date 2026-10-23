@@ -21,7 +21,8 @@
       "Add 'aws' to cv-master.json if you have experience with this technology",
       "Add 'ci/cd' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 21
+    "potentialScoreIncrease": 21,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

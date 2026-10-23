@@ -20,6 +20,9 @@ public class MissingSkillsAnalysis
     public List<string> NiceToHaveMissing { get; set; } = new();
     public List<string> Suggestions { get; set; } = new();
     public int PotentialScoreIncrease { get; set; }
+
+    /// <summary>Missing from this CV but in the profile (EDIT-08): left out, so the visitor can add them back.</summary>
+    public List<string> InProfileNotInCv { get; set; } = new();
 }
 
 public class KeywordAnalysis
@@ -64,14 +67,17 @@ public class RegenerateRequest
     public bool AllowTwoPages { get; set; } = false;
 }
 
-/// <summary>The phases of generating a CV, reported in this order (UX-06).</summary>
+/// <summary>The phases of generating a CV, reported in this order (UX-06). The scores are computed on the finished CV.</summary>
 public enum GenerationStage
 {
     Parsing,
-    Scoring,
     Selecting,
-    Rendering
+    Rendering,
+    Scoring
 }
+
+/// <summary>Where a generation is (UX-11): its phase, how far along it is (0 to 100) and, while it renders, what it is doing.</summary>
+public record GenerationStatus(GenerationStage Stage, int Percent, string? Detail = null);
 
 public enum CVTemplate
 {
@@ -95,6 +101,9 @@ public class GenerateRequest
 
     /// <summary>EDIT-03: also write a cover letter from the same job post and profile.</summary>
     public bool IncludeCoverLetter { get; set; }
+
+    /// <summary>EDIT-09: the company the cover letter is for. Empty: the one the post names, else none.</summary>
+    public string? Company { get; set; }
 }
 
 public class AnalysisResult
@@ -109,4 +118,11 @@ public class AnalysisResult
     public JdHighlight JdHighlight { get; set; } = new();
     public CoverLetter? CoverLetter { get; set; }
     public string? CoverLetterHtml { get; set; }
+
+    /// <summary>The company the cover letter names (the visitor's, else the post's), or null.</summary>
+    public string? Company { get; set; }
+
+    /// <summary>What the scores are recomputed against after an edit (EDIT-08); never part of an API response.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public ErCv.Web.Features.Analysis.AnalysisContext? Context { get; set; }
 }

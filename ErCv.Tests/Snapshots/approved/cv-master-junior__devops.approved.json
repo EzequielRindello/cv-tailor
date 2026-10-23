@@ -29,7 +29,8 @@
       "Add 'observability' to cv-master.json if you have experience with this technology",
       "There are 6 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 32
+    "potentialScoreIncrease": 32,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

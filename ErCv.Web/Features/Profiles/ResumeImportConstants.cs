@@ -7,11 +7,19 @@ public static class ResumeImportConstants
 {
     #region Limits
 
-    /// <summary>Largest resume accepted. A text resume is well under 1 MB; this leaves room for a photo.</summary>
-    public const long MaxImportBytes = 4 * 1024 * 1024;
+    public const int BytesPerMegabyte = 1024 * 1024;
+
+    /// <summary>Largest resume accepted, in MB. A text resume is well under 1 MB; this leaves room for a photo.</summary>
+    public const int MaxImportMegabytes = 4;
+
+    public const long MaxImportBytes = MaxImportMegabytes * BytesPerMegabyte;
 
     // A resume is one to three pages; the rest of a longer PDF is not read
     public const int MaxPdfPages = 6;
+
+    // A one-page text resume has well over a thousand letters; a scan's watermark or page number has a few dozen.
+    // Below this many letters in the pages that are read, a PDF is an image
+    public const int MinPdfTextLetters = 100;
 
     // A Word file is a zip: refuse one that expands past this before opening it (zip bomb)
     public const long MaxDocxUncompressedBytes = 32 * 1024 * 1024;
@@ -78,6 +86,31 @@ public static class ResumeImportConstants
     #region Text
 
     public const string ItemPrefix = "- ";
+
+    /// <summary>The file types that can be read; the input's <c>accept</c> list and the extension check share them.</summary>
+    public static readonly string[] AcceptedExtensions = { ".pdf", ".docx" };
+
+    public const string Accept =
+        ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+    public const string WrongTypeMessage = "Only PDF and Word (.docx) files can be read.";
+
+    public const string ScannedPdfMessage =
+        "This PDF has no text to read (a scanned resume is an image). Export a text PDF from your editor, or use the Word file.";
+
+    public const string NoTextMessage =
+        "No text was found in the file. A scanned resume (an image) cannot be read. Use a text PDF or a Word file with text.";
+
+    /// <summary>What the limits tooltip tells the visitor, built from the limits above.</summary>
+    public static readonly string[] LimitLines =
+    {
+        $"PDF or Word (.docx) only, up to {MaxImportMegabytes} MB.",
+        $"Only the first {MaxPdfPages} pages of a PDF are read.",
+        "A scanned resume (an image) has no text and is refused.",
+        "In a PDF, bullets with no bullet mark can be joined into one.",
+        "A skill at the end of a line can be cut in two.",
+        "What is read is a draft: check it before saving."
+    };
 
     /// <summary>Links worth keeping from a file's link targets: the ones the profile has a field for.</summary>
     public static readonly string[] ProfileLinkHosts = { "linkedin.com/in/", "github.com/" };

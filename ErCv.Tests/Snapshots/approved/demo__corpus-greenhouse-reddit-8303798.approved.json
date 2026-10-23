@@ -1,9 +1,9 @@
 {
   "matchScore": {
-    "overall": 37,
+    "overall": 28,
     "skillsMatched": 4,
     "totalSkills": 10,
-    "keywordsMatched": 3,
+    "keywordsMatched": 0,
     "totalKeywords": 15,
     "seniorityMatch": false,
     "colorClass": "red",
@@ -27,7 +27,8 @@
       "Add 'grpc' to cv-master.json if you have experience with this technology",
       "There are 1 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 30
+    "potentialScoreIncrease": 30,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
@@ -162,6 +163,7 @@
       "react",
       "rest",
       "software",
+      "engineer",
       "platform",
       "built",
       "developer",
@@ -175,8 +177,7 @@
       "code",
       "junior",
       "level",
-      "production",
-      "data"
+      "production"
     ],
     "missingFromCV": [
       "ci/cd",
@@ -238,7 +239,7 @@
       "linkedIn": "linkedin.com/in/ezequiel-rindello",
       "gitHub": "github.com/EzequielRindello"
     },
-    "summary": "Junior Full Stack Developer with 1+ years of experience, specializing in React, React Router, JavaScript, REST API Design, and TypeScript.",
+    "summary": "Junior Software Engineer with 1+ years of experience, specializing in React, React Router, JavaScript, REST API Design, and TypeScript.",
     "education": [
       {
         "degree": "B.S. Software Development (In Progress)",

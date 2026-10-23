@@ -51,14 +51,28 @@ public class PageConstraintHelper
     /// The render of the returned CV comes back too, so the caller does not render it again.
     /// </summary>
     public async Task<(GeneratedCV Cv, T Render)> FitMeasuredAsync<T>(
-        GeneratedCV source, bool allowTwoPages, Func<GeneratedCV, Task<T>> render, Func<T, int> countPages)
+        GeneratedCV source, bool allowTwoPages, Func<GeneratedCV, Task<T>> render, Func<T, int> countPages,
+        Action<int, int>? onRender = null)
     {
         var maxPages = allowTwoPages ? TwoPages : OnePage;
         var first = await render(source);
-        if (countPages(first) <= maxPages) return (source, first);
+        if (countPages(first) <= maxPages)
+        {
+            onRender?.Invoke(1, 1);
+            return (source, first);
+        }
 
         var stepsAvailable = CountTrimSteps(source);
-        if (stepsAvailable == 0) return (source, first);
+        if (stepsAvailable == 0)
+        {
+            onRender?.Invoke(1, 1);
+            return (source, first);
+        }
+
+        // The first render plus the bisection: about log2 of the steps, so a progress bar knows how far it is (UX-11)
+        var expectedRenders = 1 + (int)Math.Ceiling(Math.Log2(stepsAvailable + 1));
+        var renders = 1;
+        onRender?.Invoke(renders, expectedRenders);
 
         (GeneratedCV Cv, T Render)? fit = null;
         var mostTrimmed = (Cv: source, Render: first);
@@ -71,6 +85,7 @@ public class PageConstraintHelper
             var steps = low + (high - low) / 2;
             var candidate = Trimmed(source, steps);
             var rendered = await render(candidate);
+            onRender?.Invoke(Math.Min(++renders, expectedRenders), expectedRenders);
 
             if (countPages(rendered) <= maxPages)
             {

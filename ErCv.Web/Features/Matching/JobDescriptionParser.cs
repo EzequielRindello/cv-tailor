@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using ErCv.Web.Constants;
 using ErCv.Web.Models;
 
 namespace ErCv.Web.Features.Matching;
@@ -74,6 +75,9 @@ public class JobDescriptionParser
             NiceToHaveSkills = NiceToHaveSkills(jobDescription, skills),
             Keywords = ExtractKeywords(normalizedText),
             SeniorityLevel = ExtractSeniorityLevel(normalizedText),
+            Title = ReadTitle(jobDescription),
+            Text = jobDescription,
+            Company = ReadCompany(jobDescription),
             RequiredExperience = ExtractRequiredExperience(normalizedText)
         };
     }
@@ -213,10 +217,41 @@ public class JobDescriptionParser
     /// The title (the first line) decides when it names a level. Otherwise the first level the body gives the role
     /// ("a senior backend engineer", not "lead the design" or "senior engineers"), then the years asked for.
     /// </summary>
-    private string ExtractSeniorityLevel(string text)
+    // The company named by a heading of the post ("About Stripe", "Life at Ramp:"), kept as written; null when no
+    // heading names one, or it names something else ("About the role"). Accuracy over coverage (EDIT-09)
+    private static string? ReadCompany(string text)
+    {
+        foreach (var line in text.Split('\n'))
+        {
+            var trimmed = line.Trim();
+            if (!IsHeading(trimmed)) continue;
+
+            var prefix = JobDescriptionConstants.CompanyNamePrefixes.FirstOrDefault(p => trimmed.StartsWith(p, StringComparison.OrdinalIgnoreCase));
+            if (prefix == null) continue;
+
+            var name = trimmed[prefix.Length..].Trim().TrimEnd(JobDescriptionConstants.HeadingEnd).Trim();
+            var words = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length == 0 || words.Length > JobDescriptionConstants.MaxCompanyWords || name.Length > ApiConstants.MaxCompanyLength) continue;
+            if (!char.IsUpper(name[0]) && !char.IsDigit(name[0])) continue;
+            if (JobDescriptionConstants.NotACompany.Contains(words[0], StringComparer.OrdinalIgnoreCase)) continue;
+            if (words.Any(w => JobDescriptionConstants.NotAnEmployerWord.Contains(w, StringComparer.OrdinalIgnoreCase))) continue;
+
+            return name;
+        }
+        return null;
+    }
+
+    // The first line is the title when it is short (the corpus and an imported post both start with the title and a blank line)
+    private static string ReadTitle(string text)
     {
         var title = text.TrimStart().Split('\n', 2)[0].Trim();
-        if (title.Length <= JobDescriptionConstants.MaxTitleLength && TitleLevel(title) is { } titleLevel)
+        return title.Length <= JobDescriptionConstants.MaxTitleLength ? title : string.Empty;
+    }
+
+    private string ExtractSeniorityLevel(string text)
+    {
+        var title = ReadTitle(text);
+        if (title.Length > 0 && TitleLevel(title) is { } titleLevel)
             return titleLevel;
 
         var bodyLevel = BodyLevelPatterns

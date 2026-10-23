@@ -1,9 +1,9 @@
 {
   "matchScore": {
-    "overall": 77,
+    "overall": 74,
     "skillsMatched": 9,
     "totalSkills": 10,
-    "keywordsMatched": 8,
+    "keywordsMatched": 7,
     "totalKeywords": 15,
     "seniorityMatch": false,
     "colorClass": "yellow",
@@ -13,7 +13,8 @@
     "requiredMissing": [],
     "niceToHaveMissing": [],
     "suggestions": [],
-    "potentialScoreIncrease": 0
+    "potentialScoreIncrease": 0,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

@@ -33,6 +33,13 @@
                         <form class="generator-form" @onsubmit:preventDefault>
                             <div class="form-title-row">
                                 <h5 class="form-title mb-0">Generate Your CV</h5>
+                                @if (_analysis != null)
+                                {
+                                    <button type="button" id="back-to-results" class="btn btn-outline-secondary btn-sm"
+                                            disabled="@_loading" @onclick="BackToResults">
+                                        <i class="bi bi-arrow-right me-1" aria-hidden="true"></i>Back to your CV
+                                    </button>
+                                }
                                 <button type="button"
                                         class="btn btn-outline-secondary btn-sm history-toggle-btn"
                                         disabled="@_loading"
@@ -48,10 +55,18 @@
                                                          Error="@_jdError"
                                                          Disabled="_loading"
                                                          HelperText="Shortcuts: Ctrl/Cmd+Shift+V paste, Ctrl/Cmd+Enter generate" />
-                                    <JobPostLink OnImport="s => _jobDescription = s" Disabled="_loading" />
+                                    <JobPostLink OnImport="s => _jobDescription = s" OnCompany="c => _company = c" Disabled="_loading" />
                                     <SampleJobPicker Current="@_jobDescription"
                                                      OnSelect="s => _jobDescription = s"
+                                                     OnCompany="c => _company = c"
                                                      Disabled="_loading" />
+                                    <div class="company-field">
+                                        <label class="job-link-label" for="company">Company (optional, named in the cover letter):</label>
+                                        <input id="company" type="text" class="form-control form-control-sm" autocomplete="off"
+                                               placeholder="Left empty, the company the post names is used"
+                                               maxlength="@ApiConstants.MaxCompanyLength" disabled="@_loading"
+                                               @bind="_company" @bind:event="oninput" />
+                                    </div>
                                 </div>
                             }
                             else if (_step == StepProfile)
@@ -139,14 +154,21 @@ else
     <ResultsWorkspace Analysis="_analysis"
                       Documents="_documents"
                       Loading="_loading"
-                      Stage="_stage"
+                      Progress="_progress"
+                      RenderingLabel="@_renderingLabel"
                       @bind-Editing="_showBulletEditor"
                       OnBack="BackToGenerate"
                       OnStartOver="ResetAsync"
                       OnDownload="DownloadAsync"
                       OnDownloadLetter="DownloadLetterAsync"
                       Draft="_draft"
+                      LetterDraft="_letterDraft"
+                      LetterPageWarning="@_letterPageWarning"
+                      OnLetterChanged="RefreshLetter"
+                      OnCompanyChanged="ChangeCompany"
                       Template="_resultTemplate"
+                      PageWarning="@_pageWarning"
+                      ScoresUpdating="_scoresUpdating"
                       OnDraftChanged="OnDraftChanged" />
 }
 
@@ -154,6 +176,9 @@ else
     #region Constants
 
     private const string ViewGenerate = "generate";
+
+    // Toggles and moves come in bursts (Alt+Up/Down repeats): the scores are computed once the edits stop for this long
+    private const int EditAnalysisDebounceMs = 400;
     private const string ViewDetails = "details";
 
     // Composer steps
@@ -163,6 +188,7 @@ else
 
     // Page limit an edited PDF is checked against (it is printed as edited, never trimmed)
     private const int OnePage = 1;
+    private const int LetterPages = 1;
     private const int TwoPages = 2;
 
     // Element ids the page moves focus to
@@ -184,12 +210,35 @@ else
     private AnalysisResult? _analysis;
     private Dictionary<string, byte[]> _documents = new();
     private bool _loading;
-    private GenerationStage _stage;
+    private GenerationStatus _progress = new(GenerationStage.Parsing, 0);
+
+    // UX-11: what is being rendered for a download, so a bar shows and a second click does nothing
+    private string? _renderingLabel;
     private bool _showHistory;
     private bool _showBulletEditor;
 
     // EDIT-01/02: the edits to the CV on screen and the options it was generated with
     private CvDraft? _draft;
+    private string? _pageWarning;
+    private CoverLetterDraft? _letterDraft;
+
+    // EDIT-10: the letter is one page; an edited one that runs longer is told so, never trimmed
+    private string? _letterPageWarning;
+
+    // APP-09: the tracker entry the open result created, so editing its company updates the open letter
+    private long _currentHistoryId;
+    private int _letterMeasureVersion;
+
+    // EDIT-09: the company the cover letter is for. An import or a sample fills it; typing in the post does not change it
+    private string _company = string.Empty;
+
+    // EDIT-08: the scores follow the edited CV. An edit starts a countdown; a newer edit cancels it
+    private bool _scoresUpdating;
+    private CancellationTokenSource? _reanalysis;
+    private string _analyzedFingerprint = string.Empty;
+
+    // Bumped by every edit and reset, so a slow page count never overwrites a newer one (EDIT-07)
+    private int _measureVersion;
     private CVTemplate _resultTemplate;
     private string _resultJobDescription = string.Empty;
     private bool _resultTwoPages;
@@ -255,6 +304,7 @@ else
 
     public async ValueTask DisposeAsync()
     {
+        CancelReanalysis();
         try
         {
             await JS.InvokeVoidAsync(UiConstants.JsUnregisterShortcuts);
@@ -359,11 +409,16 @@ else
 
     private async Task DownloadAsync(string format)
     {
-        if (!_documents.TryGetValue(format, out var bytes)) return;
+        if (!_documents.TryGetValue(format, out var bytes) || _renderingLabel != null) return;
 
         try
         {
-            if (_staleFormats.Contains(format)) bytes = await RenderEditedAsync(format);
+            if (_staleFormats.Contains(format))
+            {
+                _renderingLabel = $"Rendering {format.ToUpperInvariant()}...";
+                StateHasChanged();
+                bytes = await RenderEditedAsync(format);
+            }
 
             using var stream = new MemoryStream(bytes);
             using var reference = new DotNetStreamReference(stream);
@@ -379,14 +434,20 @@ else
             Logger.LogError(ex, "Error downloading {Format}", format);
             Toasts.Error($"Could not download the {format.ToUpperInvariant()} file", "Retry", () => DownloadAsync(format));
         }
+        finally
+        {
+            _renderingLabel = null;
+        }
     }
 
     private async Task DownloadLetterAsync(string format)
     {
-        if (_analysis?.CoverLetter is not { } letter) return;
+        if (_analysis?.CoverLetter is not { } letter || _renderingLabel != null) return;
 
         try
         {
+            _renderingLabel = $"Rendering the cover letter {format.ToUpperInvariant()}...";
+            StateHasChanged();
             var bytes = await CvService.RenderCoverLetterAsync(letter, format);
             using var stream = new MemoryStream(bytes);
             using var reference = new DotNetStreamReference(stream);
@@ -402,6 +463,10 @@ else
             Logger.LogError(ex, "Error downloading the cover letter as {Format}", format);
             Toasts.Error($"Could not download the cover letter {format.ToUpperInvariant()}", "Retry", () => DownloadLetterAsync(format));
         }
+        finally
+        {
+            _renderingLabel = null;
+        }
     }
 
     private async Task GenerateAsync()
@@ -415,17 +480,24 @@ else
         _analysis = null;
         _documents = new();
         _draft = null;
+        _letterDraft = null;
+        _letterPageWarning = null;
+        _letterMeasureVersion++;
+        _currentHistoryId = 0;
+        _pageWarning = null;
+        _measureVersion++;
+        CancelReanalysis();
         _staleFormats = new();
         _showBulletEditor = false;
         _showHistory = false;
-        _stage = GenerationStage.Parsing;
+        _progress = new GenerationStatus(GenerationStage.Parsing, 0);
         _view = ViewDetails;
         StateHasChanged();
 
         // Progress<T> posts to the Blazor sync context, so the callback can touch component state directly
-        var progress = new Progress<GenerationStage>(stage =>
+        var progress = new Progress<GenerationStatus>(value =>
         {
-            _stage = stage;
+            _progress = value;
             StateHasChanged();
         });
 
@@ -441,7 +513,8 @@ else
                 Language = _settings.Language,
                 Accent = _settings.Accent,
                 Fonts = _settings.Fonts,
-                IncludeCoverLetter = _settings.IncludeCoverLetter
+                IncludeCoverLetter = _settings.IncludeCoverLetter,
+                Company = _company
             };
 
             var (documents, analysis) = ActiveProfile is { } profile
@@ -453,7 +526,16 @@ else
             _resultTemplate = request.Template;
             _resultTwoPages = request.AllowTwoPages;
             _resultJobDescription = request.JobDescription;
-            _draft = new CvDraft(analysis.GeneratedCV, DocumentRenderer.DefaultSectionOrder(request.Template));
+            // The profile the CV was made from, so the editor can offer what the selection left out (EDIT-07)
+            var source = ActiveProfile ?? await CvService.GetProfileAsync(_profileId);
+            _draft = new CvDraft(analysis.GeneratedCV, DocumentRenderer.DefaultSectionOrder(request.Template), source);
+            _letterDraft = analysis.CoverLetter is { } letter ? new CoverLetterDraft(letter) : null;
+            _letterPageWarning = null;
+            _letterMeasureVersion++;
+            _pageWarning = null;
+            _measureVersion++;
+            CancelReanalysis();
+            _analyzedFingerprint = Fingerprint(analysis.GeneratedCV);
             _focusResults = true;
             Toasts.Success("CV ready");
             _announcement = $"CV ready. Match score {analysis.MatchScore.Overall} percent. ATS score {analysis.ATSScore.Overall} out of {ATSConstants.MaxScore}.";
@@ -467,8 +549,10 @@ else
                 Language = _settings.Language,
                 Accent = _settings.Accent,
                 Fonts = _settings.Fonts,
-                IncludeCoverLetter = _settings.IncludeCoverLetter
+                IncludeCoverLetter = _settings.IncludeCoverLetter,
+                Company = analysis.Company ?? string.Empty
             });
+            _currentHistoryId = _history.FirstOrDefault()?.Id ?? 0;
         }
         catch (ArgumentException ex)
         {
@@ -488,24 +572,199 @@ else
     }
 
     /// <summary>EDIT-02: every edit re-renders the preview HTML only; the documents are rebuilt when downloaded.</summary>
-    private void OnDraftChanged()
+    private async Task OnDraftChanged()
     {
         if (_analysis == null || _draft == null) return;
 
         var cv = _draft.Build();
+        var version = ++_measureVersion;
         try
         {
             _analysis.PreviewHtml = CvService.RenderPreviewHtml(cv, _resultTemplate);
             _analysis.GeneratedCV = cv;
             _staleFormats = _documents.Keys.ToHashSet();
 
-            // The letter quotes the CV, so it is written again from the edited one
-            if (_analysis.CoverLetter != null)
-                (_analysis.CoverLetter, _analysis.CoverLetterHtml) = CvService.BuildCoverLetter(cv, _resultJobDescription);
+            // The letter quotes the CV, so it is written again from the edited one; what the visitor wrote stays
+            WriteLetter(cv, _analysis.Company);
         }
         catch (ArgumentException ex)
         {
             Toasts.Error(ex.Message);
+            return;
+        }
+
+        ScheduleReanalysis(cv);
+        await MeasureLetterPagesAsync();
+        await MeasurePagesAsync(cv, version);
+    }
+
+    /// <summary>
+    /// EDIT-08: match, gaps, keywords, ATS and the job post's highlights follow the edited CV. Only what the analysis
+    /// reads counts as a change (moving a section does not), and the work waits for the edits to pause.
+    /// </summary>
+    private void ScheduleReanalysis(GeneratedCV cv)
+    {
+        if (_analysis?.Context is not { } context) return;
+
+        CancelReanalysis();
+        if (Fingerprint(cv) == _analyzedFingerprint) return;
+
+        _reanalysis = new CancellationTokenSource();
+        _scoresUpdating = true;
+        _ = ReanalyzeAsync(cv, context, _reanalysis.Token);
+    }
+
+    private async Task ReanalyzeAsync(GeneratedCV cv, AnalysisContext context, CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(EditAnalysisDebounceMs, token);
+            var result = CvService.AnalyzeEdited(cv, context, _resultTemplate);
+            if (token.IsCancellationRequested || _analysis == null) return;
+
+            _analysis.MatchScore = result.MatchScore;
+            _analysis.MissingSkills = result.MissingSkills;
+            _analysis.KeywordAnalysis = result.KeywordAnalysis;
+            _analysis.ATSScore = result.ATSScore;
+            _analysis.JdHighlight = result.JdHighlight;
+            _analyzedFingerprint = Fingerprint(cv);
+            _scoresUpdating = false;
+        }
+        catch (OperationCanceledException)
+        {
+            return; // a newer edit took over
+        }
+        catch (ArgumentException ex)
+        {
+            Toasts.Error(ex.Message);
+            _scoresUpdating = false;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void CancelReanalysis()
+    {
+        _reanalysis?.Cancel();
+        _reanalysis?.Dispose();
+        _reanalysis = null;
+        _scoresUpdating = false;
+    }
+
+    // What the analysis reads of the CV; the order of its sections is not part of it
+    private static string Fingerprint(GeneratedCV cv) =>
+        JsonSerializer.Serialize(new { cv.Summary, cv.Skills, cv.Experience, cv.Projects, cv.Education });
+
+    /// <summary>EDIT-09: writes the letter again for this CV and company; the draft keeps the visitor's edits over it.</summary>
+    private void WriteLetter(GeneratedCV cv, string? company)
+    {
+        if (_analysis?.CoverLetter == null || _letterDraft == null) return;
+
+        var (generated, _) = CvService.BuildCoverLetter(cv, _resultJobDescription, company);
+        _letterDraft.Update(generated);
+        _analysis.Company = generated.Company;
+        ApplyLetter();
+    }
+
+    private void ApplyLetter()
+    {
+        if (_analysis == null || _letterDraft == null) return;
+
+        var letter = _letterDraft.Build();
+        _analysis.CoverLetter = letter;
+        _analysis.CoverLetterHtml = CvService.RenderCoverLetterHtml(letter);
+    }
+
+    /// <summary>The visitor edited a part of the letter: the preview and the downloads follow.</summary>
+    private async Task RefreshLetter()
+    {
+        try
+        {
+            ApplyLetter();
+        }
+        catch (ArgumentException ex)
+        {
+            Toasts.Error(ex.Message);
+            return;
+        }
+
+        await MeasureLetterPagesAsync();
+    }
+
+    private async Task ChangeCompany(string company)
+    {
+        if (_analysis == null) return;
+
+        try
+        {
+            WriteLetter(_analysis.GeneratedCV, company);
+        }
+        catch (ArgumentException ex)
+        {
+            Toasts.Error(ex.Message);
+            return;
+        }
+
+        await MeasureLetterPagesAsync();
+    }
+
+    /// <summary>
+    /// EDIT-10: a letter the visitor wrote in can run past one page. The page count is measured on the real PDF, only
+    /// while the letter has edits or a warning is showing, and nothing is trimmed: the visitor gets the count.
+    /// </summary>
+    private async Task MeasureLetterPagesAsync()
+    {
+        var version = ++_letterMeasureVersion;
+        if (_analysis?.CoverLetter is not { } letter || _letterDraft is not { } draft) return;
+        if (!draft.IsChanged && _letterPageWarning == null) return;
+
+        try
+        {
+            var pdf = await CvService.RenderCoverLetterAsync(letter, ApiConstants.FormatPdf);
+            if (version != _letterMeasureVersion) return;
+
+            var pages = DocumentRenderer.CountPages(pdf);
+            _letterPageWarning = pages > LetterPages
+                ? $"The letter now has {pages} pages. Shorten it to bring it back to {LetterPages}."
+                : null;
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or InvalidOperationException)
+        {
+            // The count is a help; the edit itself already worked
+            Logger.LogWarning(ex, "Could not measure the edited letter's pages");
+        }
+    }
+
+    /// <summary>
+    /// EDIT-07: what the visitor added back can push the CV past its page limit. The page count is measured on the real
+    /// PDF (as in MATCH-08), only while something is added or a warning is showing. Nothing is ever left out for the
+    /// visitor: they get the count and decide.
+    /// </summary>
+    private async Task MeasurePagesAsync(GeneratedCV cv, int version)
+    {
+        if (_draft is not { HasAdditions: true } && _pageWarning == null) return;
+
+        try
+        {
+            var (bytes, pages) = await CvService.RenderEditedDocumentAsync(cv, _resultTemplate, ApiConstants.FormatPdf);
+            if (version != _measureVersion) return;
+
+            var maxPages = _resultTwoPages ? TwoPages : OnePage;
+            _pageWarning = pages > maxPages
+                ? $"The CV now has {pages} pages, over the {maxPages}-page limit. Leave something out to bring it back."
+                : null;
+
+            // The PDF the visitor asked for is already built, so the download does not render it again
+            if (_documents.ContainsKey(ApiConstants.FormatPdf))
+            {
+                _documents[ApiConstants.FormatPdf] = bytes;
+                _staleFormats.Remove(ApiConstants.FormatPdf);
+            }
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or InvalidOperationException)
+        {
+            // The count is a help; the edit itself already worked
+            Logger.LogWarning(ex, "Could not measure the edited CV's pages");
         }
     }
 
@@ -513,6 +772,7 @@ else
     private async Task ReopenHistoryEntry(HistoryEntry entry)
     {
         _jobDescription = entry.JobDescription;
+        _company = entry.Company;
         _jdError = null;
 
         if (entry.TemplateKey != null) _settings.Template = entry.TemplateKey;
@@ -535,6 +795,11 @@ else
     {
         await Store.UpdateHistoryEntryAsync(entry);
         Toasts.Success("Application updated");
+
+        // APP-09: the tracker's company is the letter's company for the result that created the entry
+        if (entry.Id == _currentHistoryId && _letterDraft != null && _analysis != null
+            && !string.Equals(entry.Company?.Trim() ?? string.Empty, _analysis.Company ?? string.Empty, StringComparison.Ordinal))
+            await ChangeCompany(entry.Company ?? string.Empty);
     }
 
     private async Task DeleteHistoryEntry(long id)
@@ -550,6 +815,14 @@ else
         Toasts.Success("History cleared");
     }
 
+    /// <summary>Back to the result that is still open, from the composer (where the history is).</summary>
+    private void BackToResults()
+    {
+        _showHistory = false;
+        _view = ViewDetails;
+        _focusResults = true;
+    }
+
     private async Task BackToGenerate()
     {
         _view = ViewGenerate;
@@ -562,6 +835,7 @@ else
     {
         var defaults = new AppSettings();
         _jobDescription = string.Empty;
+        _company = string.Empty;
         _settings.SelectedFormats = defaults.SelectedFormats;
         _settings.Template = defaults.Template;
         _settings.AllowTwoPages = defaults.AllowTwoPages;
@@ -575,6 +849,13 @@ else
         _analysis = null;
         _documents = new();
         _draft = null;
+        _letterDraft = null;
+        _letterPageWarning = null;
+        _letterMeasureVersion++;
+        _currentHistoryId = 0;
+        _pageWarning = null;
+        _measureVersion++;
+        CancelReanalysis();
         _staleFormats = new();
         _showBulletEditor = false;
         _showHistory = false;
