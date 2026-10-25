@@ -68,7 +68,7 @@ updates the open letter (APP-09), and a letter that runs past one page is told s
 ## Project structure
 
 ```
-er-cv-generator/
+cv-tailor/
 ├── ErCv.Web/
 │   ├── Api/CVController.cs          endpoints only: call the service, return its result
 │   ├── Services/                    CVGeneratorService: validation at the boundary, orchestration, session
@@ -83,7 +83,7 @@ er-cv-generator/
 │   ├── Constants/                   cross-feature constants only (ApiConstants, TemplatePaths)
 │   ├── Configuration/               ErCvOptions (the "ErCv" section of appsettings.json), SecurityHeaders
 │   ├── Models/                      CVMaster, GeneratedCV, requests, analysis results
-│   ├── UI/                          BrowserStore (localStorage), ToastService, ApplicationTracker, UiConstants
+│   ├── UI/                          BrowserStore (localStorage), ToastService, ApplicationTracker, UiConstants (JS names, product name)
 │   ├── Components/                  Pages (Home, Profile, Privacy, Error), Shared (one component per UI piece), Layout
 │   ├── Templates/                   harvard, modern, minimalist, compact, executive, cover-letter, partials/
 │   ├── Data/                        content only: profiles, skills.json, sample-jobs.json
@@ -183,6 +183,8 @@ er-cv-generator/
 
 Errors are RFC 7807 problem details (`application/problem+json`) with an `error` field; a 500 never carries exception
 text. The request body is limited to 2 MB (413 above it) and the API to 60 requests per minute per client IP (429).
+Errors that escape a controller (Kestrel's 413, an unexpected exception) get the same problem shape from
+`Configuration/ApiErrors.cs`; only the UI's pages fall back to the HTML error page.
 
 ## Testing
 
@@ -209,5 +211,6 @@ the suite with line coverage of `Features/` and `Services/` (gate 95%), the brow
 
 ## Open items
 
-Tracked in `features.md`: the "Open items after" sections and the findings tables. The main ones: scores are not
-and the first public deploy is M5.3 (OPS-06).
+Tracked in `features.md`: the "Open items after" sections and the findings tables. The main ones: the optional AI
+features (M6, parked until there is an API key), and what can only be measured on the live instance (memory on the
+free plan, cold start, the client IP behind Render's proxy; OPS-06).

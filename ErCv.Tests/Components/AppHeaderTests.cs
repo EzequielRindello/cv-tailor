@@ -25,6 +25,16 @@ public class AppHeaderTests : BunitContext
     }
 
     [Fact]
+    public void The_wordmark_carries_the_product_name()
+    {
+        var cut = Render<AppHeader>();
+
+        var wordmark = cut.Find(".app-wordmark");
+        Assert.Equal("CV Tailor, home", wordmark.GetAttribute("aria-label"));
+        Assert.Equal("Tailor", cut.Find(".app-wordmark-text").TextContent);
+    }
+
+    [Fact]
     public void On_the_profile_page_the_link_is_marked_active()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo("profile");

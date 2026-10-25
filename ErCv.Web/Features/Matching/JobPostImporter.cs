@@ -18,7 +18,7 @@ public sealed partial class JobPostImporter
 
     /// <summary>The named HttpClient (Program.cs): no redirects, <see cref="RequestTimeout"/>, the app's User-Agent.</summary>
     public const string HttpClientName = "job-posts";
-    public const string UserAgent = "ErCvGenerator/1.0 (+https://github.com/EzequielRindello/er-cv-generator)";
+    public const string UserAgent = "ErCvGenerator/1.0 (+https://github.com/EzequielRindello/cv-tailor)";
     public const string JsonMediaType = "application/json";
     public static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(10);
 

@@ -52,6 +52,21 @@ public class CvMeasuredAnalysisTests
     }
 
     [Fact]
+    public void A_cv_that_left_part_of_the_profile_out_carries_the_profile_match()
+    {
+        var calculator = new MatchScoreCalculator();
+
+        var partial = calculator.Calculate(Cv("Go"), Profile(), Post());
+        var whole = calculator.Calculate(Cv("Go", "Kafka"), Profile(), Post());
+
+        Assert.Equal(calculator.Calculate(Profile(), Post()).Overall, partial.ProfileOverall);
+        Assert.True(partial.ProfileOverall > partial.Overall);
+        Assert.Equal(calculator.Calculate(Cv("Go"), Post()).Overall, partial.Overall);
+        // Nothing left out: no second number
+        Assert.Null(whole.ProfileOverall);
+    }
+
+    [Fact]
     public void The_cv_is_read_without_copying_anything_it_does_not_hold()
     {
         var profile = CvAsProfile.Of(Cv("Go", "SQL"));

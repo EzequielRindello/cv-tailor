@@ -117,6 +117,34 @@ public class CoverLetterApiTests
         return true;
     });
 
+    // EDIT-09: the letter the visitor edited is rendered as written, and the service refuses one past its limits
+    [Fact]
+    public Task An_edited_letter_renders_as_written_and_one_past_the_limits_is_refused() => WithServiceAsync(async s =>
+    {
+        var (_, analysis) = await s.BuildCvAsync(Request(true));
+        var draft = new CoverLetterDraft(analysis.CoverLetter!);
+        var key = draft.Blocks.First(b => b.Key != CoverLetterDraft.SalutationKey).Key;
+        Assert.True(draft.Edit(key, "Written by the visitor"));
+
+        Assert.Contains("Written by the visitor", s.RenderCoverLetterHtml(draft.Build()));
+
+        var tooLong = analysis.CoverLetter!;
+        tooLong.Salutation = new string('a', ApiConstants.MaxEditedLetterBlockLength + 1);
+        var error = Assert.Throws<ArgumentException>(() => s.RenderCoverLetterHtml(tooLong));
+        Assert.Equal(ApiConstants.ErrorLetterInvalid, error.Message);
+        return true;
+    });
+
+    [Fact]
+    public Task A_letter_for_a_post_past_the_length_limit_is_refused() => WithServiceAsync(async s =>
+    {
+        var (_, analysis) = await s.BuildCvAsync(Request(true));
+        var post = new string('a', ApiConstants.MaxJobDescriptionLength + 1);
+
+        Assert.Throws<ArgumentException>(() => s.BuildCoverLetter(analysis.GeneratedCV, post));
+        return true;
+    });
+
     [Fact]
     public Task The_letter_follows_a_rewritten_bullet() => WithServiceAsync(async s =>
     {

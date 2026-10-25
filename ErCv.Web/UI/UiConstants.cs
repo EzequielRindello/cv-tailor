@@ -3,6 +3,13 @@ namespace ErCv.Web.UI;
 /// <summary>Keys and names the UI shares between components, the browser store and wwwroot/js/app.js.</summary>
 public static class UiConstants
 {
+    #region Branding
+
+    // The product name in the UI (header, hero, page titles). The repository is cv-tailor.
+    public const string AppName = "CV Tailor";
+
+    #endregion
+
     #region JS Interop
 
     // Functions of window.cvApp in wwwroot/js/app.js

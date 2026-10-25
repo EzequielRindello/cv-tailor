@@ -2962,6 +2962,23 @@ body:not(:has(#samples)) .app-try-demo {
   color: var(--color-warning);
 }
 
+/* MatchScore.ProfileOverall: the whole profile's match, when it is higher than the CV's (EDIT-08) */
+.match-profile-note {
+  align-items: flex-start;
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  display: flex;
+  font-size: var(--font-size-sm);
+  gap: var(--spacing-xs);
+  margin: var(--spacing-md) 0 0;
+  padding: var(--spacing-sm);
+}
+
+.match-profile-note strong {
+  color: var(--color-text-primary);
+}
+
 .match-breakdown {
   display: flex;
   flex-direction: column;
@@ -3531,6 +3548,11 @@ body:not(:has(#samples)) .app-try-demo {
 
 .privacy-page .main-card a {
   color: var(--color-text-link);
+}
+
+/* Bootstrap's pink code color fails the contrast check on the dark theme */
+.privacy-page code {
+  color: var(--color-text-primary);
 }
 
 .privacy-page li + li {

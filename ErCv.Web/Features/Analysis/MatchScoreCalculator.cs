@@ -13,6 +13,18 @@ public class MatchScoreCalculator
     public MatchScore Calculate(GeneratedCV cv, JobRequirements requirements) =>
         Calculate(CvAsProfile.Of(cv), requirements);
 
+    /// <summary>
+    /// The CV's match plus the profile's when the profile scores higher, so a score lowered by the page fit shows
+    /// what the visitor could add back.
+    /// </summary>
+    public MatchScore Calculate(GeneratedCV cv, CVMaster profile, JobRequirements requirements)
+    {
+        var score = Calculate(cv, requirements);
+        var profileOverall = Calculate(profile, requirements).Overall;
+        if (profileOverall > score.Overall) score.ProfileOverall = profileOverall;
+        return score;
+    }
+
     public MatchScore Calculate(CVMaster cv, JobRequirements requirements)
     {
         var allCVSkills = RelevanceScorer.FlattenSkills(cv.Skills);

@@ -7,7 +7,8 @@
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "red",
-    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive.",
+    "profileOverall": 40
   },
   "missingSkills": {
     "requiredMissing": [
@@ -293,7 +294,7 @@
     ],
     "projects": [
       {
-        "name": "ER CV Generator",
+        "name": "CV Tailor",
         "description": "Resume generator that tailors a CV to a job description without inventing content. ASP.NET Core monolith (.NET 10) with a Blazor Server UI and a REST API, shipped as one Docker service.",
         "technologies": [
           ".NET",
@@ -312,7 +313,7 @@
           "PDF rendering with PuppeteerSharp and DOCX with OpenXML, with page-fit enforcement for one- or two-page CVs",
           "7,500+ automated test cases (unit, API, PDF and DOCX documents) plus Playwright end-to-end tests run in GitHub Actions CI"
         ],
-        "link": "github.com/EzequielRindello/er-cv-generator"
+        "link": "github.com/EzequielRindello/cv-tailor"
       }
     ],
     "sectionOrder": [],

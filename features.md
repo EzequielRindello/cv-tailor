@@ -1,4 +1,4 @@
-# ER CV Generator: Features & Status
+# CV Tailor: Features & Status
 
 Living roadmap and status tracker for the project. It replaces the old `BACKLOG.md`.
 
@@ -94,8 +94,8 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | OPS-03 | README rewrite for portfolio | E9 DevOps | P1 | M | Done |
 | OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Done |
 | OPS-05 | Privacy note | E9 DevOps | P2 | S | Done |
-| OPS-06 | Deploy to Render + live demo link | E9 DevOps | P1 | M | Todo (M5.3) |
-| OPS-07 | Repo ready for visitors: GitHub page, license, releases, templates, and the name decision | E9 DevOps | P1 | S | Todo (M5.3) |
+| OPS-06 | Deploy to Render + live demo link | E9 DevOps | P1 | M | In progress (M5.3, owner: Render) |
+| OPS-07 | Repo ready for visitors: GitHub page, license, releases, templates, and the name decision | E9 DevOps | P1 | S | In progress (M5.3, owner: GitHub settings) |
 | PROF-07 | Resume import: limits tooltip + up-front file validation | E3 Your profile | P1 | S | Done |
 | MATCH-10 | Summary role signals: one stray mention no longer sets the role (F29) | E4 Matching | P1 | M | Done |
 | EDIT-07 | Add back what the selection or the page fit left out | E5 Editing | P1 | L | Done |
@@ -119,8 +119,8 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 4. **M4 Output** (v2.0.5, released): EDIT-01 to EDIT-06, MATCH-08, UX-10.
 5. **M5 Polish & presentation** (v2.0.6, released): OPS-02 to OPS-05, ENG-01, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10. ENG-04 was dropped (Won't do, see the item). Nothing in M5 waits on M6.
 5.1. **M5.1 Smarter input** (v2.0.6.1, released): MATCH-06, PROF-05, APP-04. Read the job post's sections, start a profile from an existing resume, take the job post from its URL. PROF-05's AI-assisted parsing stays with M6. PROF-05 and APP-04 may need new packages (PDF/DOCX reading) and outbound HTTP: both are asked for before they are added.
-5.2. **M5.2 Pre-deploy polish** (v2.0.6.2): PROF-07, MATCH-10, EDIT-07, EDIT-08, EDIT-09, APP-07, and the follow-ups UX-11, MATCH-11, APP-08, EDIT-10, APP-09. Everything the owner wants done before the app goes public (2026-10-23): the resume import warns before a bad file is loaded, the summary stops misreading the role (F29), the M4 open items (add back, rescoring, cover letter), and the job post import over the API behind a per-IP rate limit. Branch `feature/m5-2-pre-deploy-polish`.
-5.3. **M5.3 Deploy** (v2.0.6.3): OPS-06 and OPS-07. The first public deploy, the live demo link the README gets with it, and the repository made ready for visitors (OPS-07, asked by the owner on 2026-10-23). Moved after M5.1 by the owner (2026-10-22), and after M5.2 on 2026-10-23.
+5.2. **M5.2 Pre-deploy polish** (v2.0.6.2, done; ships in one PR with M5.3): PROF-07, MATCH-10, EDIT-07, EDIT-08, EDIT-09, APP-07, and the follow-ups UX-11, MATCH-11, APP-08, EDIT-10, APP-09. Everything the owner wants done before the app goes public (2026-10-23): the resume import warns before a bad file is loaded, the summary stops misreading the role (F29), the M4 open items (add back, rescoring, cover letter), and the job post import over the API behind a per-IP rate limit. Branch `feature/m5-2-pre-deploy-polish`.
+5.3. **M5.3 Deploy** (v2.0.6.3, in progress: files done 2026-10-24, the deploy and the GitHub settings are the owner's, see the "Deploy checklist (owner)" under OPS-06): OPS-06 and OPS-07. The first public deploy, the live demo link the README gets with it, and the repository made ready for visitors (OPS-07, asked by the owner on 2026-10-23). Moved after M5.1 by the owner (2026-10-22), and after M5.2 on 2026-10-23.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05. Parked until the owner has an API key the app can use.
 
 ### Versioning
@@ -234,19 +234,19 @@ A review of the C# code before M3.2, branch `feature/system-hardening`. No behav
 
 ### To review before the deploy (M5.2, owner)
 
-Everything in M5.2 is implemented and its tests pass; these are the things that need the owner's eyes before OPS-06 (M5.3). The owner reviews them on 2026-10-24.
+Everything in M5.2 is implemented and its tests pass; these are the things that needed the owner's eyes before OPS-06 (M5.3). Reviewed on 2026-10-24 (the owner delegated the decisions to Claude, "decide with evidence"; each result says what was decided and why).
 
-| Item | What to check | Why it is open |
+| Item | What was checked | Result |
 |---|---|---|
-| Two roles that may be wrong (MATCH-11) | MongoDB "Senior Software Engineer, App Modernization" and Robinhood "Senior Software Engineer, International" went from Backend to Full Stack because the post names both sides repeatedly. Decide if that is right; if not, raise `MinRoleNameMentions` or require the title to agree before a role-name signal can make Full Stack (`SummaryGenerator`). | The least certain of the 10 role changes measured in MATCH-11 |
-| Match numbers in the demo (EDIT-08) | Match and Gaps now measure the CV as it stands, so the sample matches are lower (mean 42.5 to 36.4 where it changed; TC-01 reads 66). Look at the six samples in the browser. If the first impression is too weak, show the profile's match as a second number or return to option B. | The owner chose option A knowing it changes the numbers, but has not seen the demo with them |
-| Manual pass in the browser | Generate with PDF and watch the progress bar (UX-11); download an edited PDF and see the render bar; add things back in the editor until the page warning shows (EDIT-07); edit a letter past one page (EDIT-10); edit the company of the open entry in History, then "Back to your CV" (APP-09); the resume tooltip and a scanned PDF (PROF-07). | Tests cover each, but nobody has looked at them on screen, in both themes and on a phone width |
-| Resume import with the owner's real PDF (PROF-07) | The scanned-PDF check refuses a PDF with fewer than `MinPdfTextLetters` (100) letters. Run it on the real resume (PDF and Word) and on one scan. | Only checked with generated PDFs |
-| Coverage gate | CI runs `coverage_summary.py --min 95`. Run it locally (command in `CLAUDE.md`) on the M5.2 code: it added a lot of components and a new endpoint. | Not run since M5.2 started |
-| Screenshots and README | `docs/screenshots` and the README hero predate the editor lists, the progress bar, the company field and the letter editor. Retake them before the live link goes in. | Cosmetic, but the README is the portfolio page |
-| Privacy page | It names the job-board request and the resume file. It does not say that a company name typed in step 1 is sent to the server with the request and kept in the browser's history, nor that the API can read a post from a link. | Text only, to keep the page accurate |
-| Repo name and GitHub page (OPS-07) | Choose the repository name before the deploy so the live URL is final; then the About text, topics, license, releases and templates listed in OPS-07. | Needs the owner's decision and the owner's GitHub settings |
-| Render settings (OPS-06) | `ErCv:ImportRateLimit` is in `appsettings.json` (10 per minute per IP). The edit loop now renders a PDF per edit while something is added back or a letter is edited, through the cap of 2 Chrome pages: check it on the free plan's memory and cold start, and the client IP behind Render's proxy. | Only measurable on the real instance |
+| Two roles that may be wrong (MATCH-11) | MongoDB "Senior Software Engineer, App Modernization" and Robinhood "Senior Software Engineer, International" went from Backend to Full Stack. | Done: both stay Full Stack. Robinhood calls the role "Senior Full Stack Software Engineer"; MongoDB requires React and TypeScript and a feature "that spans the entire tech stack". See MATCH-11's notes. No rule change |
+| Match numbers in the demo (EDIT-08) | The six samples in the browser: Backend 40 (red), Frontend 66, Full stack 74, Data 48, DevOps 58, Junior 42. | Done: the first sample read as a red 40. The card now also shows the whole profile's match when it is higher ("Your whole profile matches 46%..."), the main number stays the CV's. See EDIT-08's notes |
+| Manual pass in the browser | A Playwright pass on Edge (no Chrome on the machine) in light, dark and at 390 px: generate with PDF (progress bar caught at "Rendering, step 3 of 4, 30 percent"), download an edited PDF (render bar shown, the PDF saved), add back until "The CV now has 2 pages, over the 1-page limit", a letter past one page ("The letter now has 2 pages"), the company edited in History then "Back to your CV" ("Dear Globex team,"), the resume tooltip. Screenshots reviewed. | Done: every flow works in the three variants; nothing to fix |
+| Resume import with the owner's real PDF (PROF-07) | The owner's real CV as PDF and as three Word files (Harvard, Minimalist, Modern), a PDF made only of a picture of a CV (a scan), and a diploma PDF with little text. | Done: the PDF and the Word files read 2 jobs, 2 schools, 29 skills and 2 or 3 projects; the scan is refused with the scanned-PDF message; the diploma reads as "No resume sections were found". Known limit seen: the project names the owner writes inside a job ("Chamber Mate", "KOORUS") are read as bullets of that job; the visitor reviews the draft (PROF-05's known limits) |
+| Coverage gate | `coverage_summary.py --min 95` on the full suite (15,563 tests). | Done: 98.1% (Services 94.2%, every feature 95.8% or more). Three tests added for M5.2 paths that had none: an edited letter rendered and one past the limits refused, a letter for a post past the length limit, an unexpected import failure is a 500 that leaks nothing |
+| Screenshots and README | `docs/screenshots` retaken from the running app; `ScreenshotTests` now generates with a cover letter and adds `letter.png` (the letter editor that names the company). | Done: README table is 2 by 2 with the letter, the editing bullet names add back, scores that follow and the letter editor |
+| Privacy page | The company typed in step 1 and the API import. | Done: the history line names the company, the server line says the company is sent and only used for the letter, the job-board line names `/api/cv/import-job-post` (its `code` takes the theme's text color: Bootstrap's pink failed the dark-theme contrast check in the axe E2E run). `PrivacyTests.The_privacy_page_names_the_company_and_the_api_import` |
+| Repo name and GitHub page (OPS-07) | The name. | Decided by the owner: `cv-tailor`. The files are in OPS-07; the GitHub settings are the owner's |
+| Render settings (OPS-06) | Memory, cold start and client IP on the real instance. | Open: only measurable on the real instance (step 6 of the deploy checklist under OPS-06). The published app was checked under Kestrel in Production; the image itself is built by CI and Render |
 
 ### Open items after M5.1
 
@@ -1177,12 +1177,33 @@ Notes: a `/privacy` page, linked from the footer. The old footer said "We don't 
 Verify: `PrivacyTests` (bUnit: the configured timeout, the footer link), E2E `The_footer_opens_the_privacy_page_and_it_has_no_serious_violations` (it found the in-text link too faint in dark mode, fixed with the app's link color).
 
 ### OPS-06: Deploy to Render + live demo link
-**Status:** Todo (M5.3) · **Priority:** P1 · **Effort:** M
+**Status:** In progress (M5.3): everything on this side is done; the deploy itself is the owner's (Render account) · **Priority:** P1 · **Effort:** M
 
-- [ ] First deploy from `render.yaml` (Docker, free plan), health check green
-- [ ] Cold-start timing with and without the PDF warm-up (ENG-05)
-- [ ] Live demo link and badge in the README (moved from OPS-03)
-- [ ] Rate limit, security headers and the 413 body limit checked on the deployed instance (TestServer does not enforce the body limit)
+- [ ] First deploy from `render.yaml` (Docker, free plan), health check green (owner, steps below)
+- [ ] Cold-start timing with and without the PDF warm-up (ENG-05) (on the real instance)
+- [x] Live demo link and badge in the README (moved from OPS-03)
+- [x] Rate limit, security headers and the 413 body limit checked under Kestrel in Production (2026-10-24)
+- [ ] The same checks on the deployed instance
+
+Done notes (2026-10-24, before the deploy):
+- `render.yaml` names the service `cv-tailor`, so the URL is `https://cv-tailor.onrender.com` if Render has the name free (it adds a suffix when the name is taken: then change the README badge and link, the About website and `docs/releases/v2.0.6.3.md`).
+- The Docker image was not built locally: besides the two MCR base images the owner allowed, the `Dockerfile` downloads apt packages, the Google Chrome `.deb` and the NuGet packages, which the owner had not allowed. The image is built by CI on every PR (`docker` job in `ci.yml`) and by Render. Docker Desktop was started for it, and its engine never answered on this machine anyway.
+- Instead, the published app (`dotnet publish -c Release`, the same output the image runs) ran under Kestrel with `ASPNETCORE_ENVIRONMENT=Production`, `PORT=10077` and Edge as the PDF engine. The app bound to `PORT`; `/api/cv/health` answered `healthy` with `pdfEngine: ready` (the warm-up); a PDF and DOCX generation took 1.2 s; nosniff, X-Frame-Options, Referrer-Policy and the CSP were on every response; the import limit answered 429 after 10 requests and the API limit after 60, both with `Retry-After` and the problem body; a 3 MB body was refused with 413 by Kestrel.
+- Found and fixed there: in Production the 413 (and any exception that escaped a controller) reached an API client as the UI's HTML error page, because `UseExceptionHandler` re-executed the Blazor `/Error` page for every path. `Configuration/ApiErrors.cs` (`UseApiErrors`, registered inside the app-wide handler, `/api` only) now answers a ProblemDetails like the rest of the API: 413 "Payload too large", 500 "Server error" with a fixed message (the exception is logged, never sent), 400 for Kestrel's other rejections. Re-checked under Kestrel: `application/problem+json` on `/api/cv/generate` and on `/api/cv/import-job-post`; pages are unchanged. The app-wide handler reuses `ApiErrors.StatusOf`. Tests: `ApiErrorsTests` (a TestServer app with the handler: 413 and 500 problems, nothing leaked, pages left alone; the status rule; a 400).
+- Seen, not changed: the home page carries two `Content-Security-Policy` headers, ours and the `frame-ancestors 'self'` ASP.NET Core adds for interactive server components. Both are enforced and both allow the app's own origin, so the result is the same as ours alone.
+- Not measurable here: memory on the free plan with two Chrome pages (the edit loop renders a PDF per edit while something is added back), the cold start, and the client IP behind Render's proxy (`ForwardLimit` 1). They are step 6 of the checklist below.
+
+### Deploy checklist (owner)
+
+In this order. Everything before step 5 is local or on GitHub; step 5 creates the public URL.
+
+1. **Review and commit** the working copy on `feature/m5-2-pre-deploy-polish` (suggested commits in the handoff), push it, open the PR "v2.0.6.3: M5.2 Pre-deploy polish and M5.3 Deploy", wait for CI (build, tests with the coverage and badge check, browser tests, Docker image build) and merge it.
+2. **Rename the repository** to `cv-tailor`: GitHub, Settings, General, Repository name. GitHub redirects the old URLs.
+3. **Point the clone at the new name:** `git remote set-url origin https://github.com/EzequielRindello/cv-tailor.git`, then `git fetch` to check it. The local folder can keep its name.
+4. **Line endings, once:** nothing to run. The index is already LF; the CRLF files in the working copy turn LF as Git rewrites them, and until then Git says "CRLF will be replaced by LF" for the ones you touch.
+5. **Render:** New, Blueprint, connect `EzequielRindello/cv-tailor`, branch `master`; it reads `render.yaml` and creates the free Docker service `cv-tailor`. Wait for the first build (Chrome is installed in the image, several minutes) and a green health check. Note the URL Render gives: if it is not `cv-tailor.onrender.com`, update the README badge and link, and `docs/releases/v2.0.6.3.md`.
+6. **Check the live instance**, then tick OPS-06: open the URL after it has slept (15 minutes idle) and time the first page (cold start); `curl https://<url>/api/cv/health` shows `pdfEngine: ready` a few seconds after start (warm-up); generate with PDF, edit the CV adding things back, and look at Render's Metrics for memory (512 MB); send a 3 MB body to `/api/cv/generate` (413 with a JSON body); 61 quick `GET /api/cv/profiles` give a 429 with `Retry-After`; the response headers carry nosniff, X-Frame-Options, Referrer-Policy and the CSP; the rate limit counts per visitor (Render's logs show your IP, not Render's).
+7. **GitHub settings and releases:** the OPS-07 list below, and the tags and releases in `docs/releases/README.md`.
 
 ---
 
@@ -1259,6 +1280,7 @@ Done notes:
 - `Home`: after an edit, `ScheduleReanalysis` waits `EditAnalysisDebounceMs` (400 ms) for the edits to pause, cancelling the previous wait, then runs `AnalyzeEdited` and shows the new scores. A fingerprint of what the analysis reads (summary, skills, experience, projects, education; not the section order) skips the work when nothing changed (moving a section, toggling twice). It is cancelled when a new CV is generated, on reset and on dispose. While it waits, `ResultsWorkspace` marks the insights panel `aria-busy`, dims it and shows an "Updating scores" `role="status"` badge. The scores are on the insights panel, which the editor replaces while it is open, so a visitor sees them when they close the editor.
 - Measurement: `AnalyzeEdited` takes a median of 13.8 ms on the longest corpus post (8,837 characters), well under the debounce. That is why there is no per-word cache: the planned `EditAnalysisContext` with a cache per CV part would add state and risk for a cost nobody can feel. The test fails above 150 ms, so a slow regression shows. Revisit if a post or a profile ever makes it slow.
 - Tests: `CvMeasuredAnalysisTests` (a left-out skill is a gap of the CV, adding it back raises the match, the CV measure is never above the profile's, `CvAsProfile`), `EditedCvTests` (unedited equals generated, a keyword leaves when its bullets and skill do, the timing), `ScoreCardsTests` (the left-out section), E2E `The_match_follows_the_edited_cv` and `Moving_a_section_does_not_recompute_the_scores`.
+- Reviewed in the browser before the deploy (2026-10-24): the six samples read Backend 40 (red, "Weak Match", 2/7 skills), Frontend 66, Full stack 74, Data 48, DevOps 58, Junior 42. Backend is the first sample a visitor clicks, and a red 40 there reads as "the app does not work" when the profile actually holds more. So the card now also shows the whole profile's match when it is higher: `MatchScore.ProfileOverall` (null otherwise), set by `MatchScoreCalculator.Calculate(GeneratedCV, CVMaster, JobRequirements)` at generation and after every edit, and printed under the breakdown as "Your whole profile matches 46%. This CV prints part of it: add back what was left out from the editor." (`#match-profile-note`). The main number stays the CV's (option A), the history still keeps it. Snapshots: only the new field (a number in the 36 cases where the CV measure is lower, null in the rest). Tests: `CvMeasuredAnalysisTests.A_cv_that_left_part_of_the_profile_out_carries_the_profile_match`, `ScoreCardsTests.The_profile_match_is_shown_only_when_the_card_has_one`.
 
 ### EDIT-09: Cover letter: company name, salutation, editable text
 **Status:** Done (M5.2) · **Priority:** P1 · **Effort:** M
@@ -1324,6 +1346,7 @@ Done notes:
 - Measured over the 194 corpus posts with the same profile: 10 roles changed. Airbnb Payments, Coinbase "Senior Software Engineer", Datadog "Distributed Systems", MongoDB "Data Pipeline" and Supabase "SDK Engineer - Python" Software Engineer to Backend; Figma "Data Platform Engineer" and Skroutz "Business Intelligence Engineer" to Data Engineer; Vercel "Design Engineer" to Frontend; MongoDB "App Modernization" and Robinhood "International" Backend to Full Stack (both sides named repeatedly). The two Full Stack changes are the least certain.
 - Snapshots: only the four Airbnb Payments cases changed (summary role and the keyword knock-on); no score, ATS or selection.
 - Tests: `SummaryGeneratorTests` (a repeated role name counts, a single one does not), `CorpusTests.A_post_that_names_kotlin_once_reads_as_backend`.
+- Reviewed before the deploy (2026-10-24): both Full Stack changes stay. Robinhood "International" says "As a Senior Full Stack Software Engineer" and asks for React/TypeScript and Go/Python services. MongoDB "App Modernization" leans backend but requires React and TypeScript (or the will to work across the full stack), names "backend and frontend services" and a feature "that spans the entire tech stack". No rule change, no snapshot change.
 
 ### APP-08: A 429 answers with a body and Retry-After
 **Status:** Done (M5.2) · **Priority:** P2 · **Effort:** S
@@ -1361,9 +1384,9 @@ Done notes:
 - Not done: letter to tracker.
 
 ### OPS-07: Repo ready for visitors
-**Status:** Todo (M5.3) · **Priority:** P1 · **Effort:** S
+**Status:** In progress (M5.3): the files are done; the GitHub settings are the owner's · **Priority:** P1 · **Effort:** S
 
-The GitHub page today is empty: no description, no website, no topics, no releases, no license (the owner's list, 2026-10-23). Most of it is GitHub's own settings, which only the owner can change; the files go in a PR. Do it together with OPS-06, when the live link exists.
+The GitHub page today is empty: no description, no website, no topics, no releases, no license (the owner's list, 2026-10-23). Most of it is GitHub's own settings, which only the owner can change; the files go in a PR.
 
 Settings on GitHub (owner, in the web UI):
 - [ ] **About**: a one-sentence description (the README's tagline: "Tailored to every job. Nothing invented."), the live demo as the **website**, and **topics** (for example `aspnet-core`, `blazor`, `csharp`, `dotnet`, `resume`, `cv-generator`, `ats`, `job-search`, `playwright`, `bunit`, `docker`, `render`)
@@ -1371,18 +1394,26 @@ Settings on GitHub (owner, in the web UI):
 - [ ] **Social preview** image (1280 x 640) made from `docs/screenshots`, so a shared link has a picture
 - [ ] **Pin** the repository on the owner's profile
 - [ ] **Branch protection** on `master`: require the CI checks and a PR (solo repo, so no required reviewers), delete merged branches automatically
-- [ ] Turn on **secret scanning** and Dependabot alerts (Dependabot updates are already configured, OPS-02); consider **CodeQL** (code scanning) as a second workflow
+- [ ] Turn on **secret scanning**, Dependabot alerts and **private vulnerability reporting** (`SECURITY.md` and the issue template link to it; Settings, Security); consider **CodeQL** (code scanning) as a second workflow
+- [ ] Create an **`idea`** label (the idea issue template applies it; `bug` exists by default)
 
-Files (a PR):
-- [ ] **LICENSE** (the owner decides which; MIT is the usual for a portfolio project). The README then names it
-- [ ] **Releases**: a tag and release notes for each milestone (v2.0.2, v2.0.3, v2.0.4, v2.0.4.1, v2.0.5, v2.0.6, v2.0.6.1, v2.0.6.2, v2.0.6.3), written from the milestone list and Done notes in this file; the latest one links the live demo. Nothing is tagged today
-- [ ] README: the live demo link and badge (OPS-06), a **real coverage badge** (today it is a static "98%" image, `features.md#test-10-coverage`), "run it locally" and "run the tests" sections checked on a clean clone, retaken screenshots (also in the review list above)
-- [ ] `SECURITY.md` (how to report a problem; the app takes no accounts and stores nothing server-side), a short `CONTRIBUTING.md` that points at `CLAUDE.md` for the conventions, an issue template (bug, idea) and a PR template (the checklist of `CLAUDE.md`: build with 0 warnings, tests, snapshots, no em dashes)
-- [ ] `.gitattributes` to settle line endings: Git warns "LF will be replaced by CRLF" on most files today because the files and the Windows checkout disagree
-- [ ] Tidy the working copy: the stray `cvm-api/` folder (only `bin`, `obj` and `Properties`, an old project name) and the `bash.exe.stackdump` files that tools leave; they are not tracked, but they sit in the tree
-- [ ] The corpus refresh workflow opens PRs: check its title and labels read well on the public page
+Files:
+- [x] **LICENSE**: MIT (owner, 2026-10-24), named in the README with a badge and a License section
+- [x] **Releases**: drafts for every milestone in `docs/releases/` (v2.0.2 to v2.0.6.3), with the commit each tag points at and the commands
+- [ ] The tags and releases themselves (owner; nothing is tagged today)
+- [x] README: live demo link and badge, a **real coverage badge**, screenshots retaken
+- [ ] "Run it locally" and "run the tests" checked on a clean clone (needs the commits; the commands were checked on this working copy)
+- [x] `SECURITY.md`, `CONTRIBUTING.md` (points at `CLAUDE.md`), issue templates (bug, idea, blank issues off, the vulnerability link) and a PR template (the checklist of `CLAUDE.md`)
+- [x] `.gitattributes`: `* text=auto eol=lf` plus the binary types
+- [x] Tidy the working copy: `cvm-api/` and the `bash.exe.stackdump` files deleted, `*.stackdump` ignored by Git and Docker
+- [ ] The corpus refresh workflow opens PRs: check its title and labels read well on the public page (owner, on the next refresh)
 
-Decision pending: **the repository name.** The owner is not convinced by `er-cv-generator` ("ER" are the owner's initials, which says nothing to a visitor). A good name is short, says what the app does, and works as the Render URL (`<name>.onrender.com`). Ideas to choose from: `tailored-cv`, `cv-tailor`, `honest-cv` (the promise is "nothing invented"), `cv-fit`. To do once it is chosen: rename in Settings (GitHub redirects the old address, so existing links keep working); `git remote set-url origin` on every clone; update the badges and links in the README, the `render.yaml` repo and service name, `corpus-refresh.yml` if it names the repo, `PROJECT_OVERVIEW.md`, and the Render service (reconnect the repo). The code namespaces (`ErCv.*`) and the solution name can stay: renaming them is a large, separate change. Do the rename before the first deploy, so the live URL is final.
+Decided by the owner (2026-10-24): **the repository name is `cv-tailor`**. Renamed in the files: README (title, badges, links, Docker commands), `render.yaml` (service name), the CI image tag, the GitHub link in the app header, the User-Agent of the job post importer and of the corpus collector (and `corpus/README.md`), `PROJECT_OVERVIEW.md`, this file's title, and the project in the owner's demo profile (`Data/cv-master.json`: "CV Tailor" with the new link; four snapshots changed by those two strings only). `corpus-refresh.yml` does not name the repository. Kept on purpose: the solution (`er-cv-generator.sln`), the `ErCv.*` namespaces, and `DocumentConstants.ChromiumCacheAppFolder` (renaming it would make PuppeteerSharp download Chrome again on machines that have it cached). The product name in the UI is **CV Tailor** too (owner, 2026-10-25): `UiConstants.AppName` feeds the header (wordmark "CV Tailor", aria-label "CV Tailor, home"), the hero eyebrow, the page titles ("CV Tailor - Resumes tailored to every job", "My profile - CV Tailor", "Privacy - CV Tailor") and the error page link; `AppHeaderTests` checks the wordmark, and the README screenshots were retaken with it.
+
+Done notes (2026-10-24):
+- Coverage badge: `coverage_summary.py --badge docs/coverage-badge.json` reads the committed shields.io endpoint file and fails CI when it is more than a point (`BADGE_TOLERANCE`) away from the measured coverage; `--write-badge` rewrites it. The README badge reads that file from `master` through shields.io (already used for the static badges), so it shows the real number without a coverage service or a CI job that pushes. Written from the full run: 98%. Checked: missing file, write, check, a stale 90% file (fails with the command to fix it).
+- `.gitattributes`: the index already held LF for every text file, so nothing was renormalized and the diff is only the new file. `core.autocrlf=true` on the owner's machine had turned 448 files into CRLF in the working copy; with `eol=lf` Git now says "CRLF will be replaced by LF" for those until it rewrites them, instead of the old warning on every LF file.
+- Release notes: one file per version, written from the milestone list and the Done notes; `docs/releases/README.md` maps each version to its merge commit (v2.0.6.2 to the M5.2 commit `f498026`, because M5.2 and M5.3 ship in one PR) and has the `git tag` and `gh release` commands.
 
 ---
 

@@ -1,0 +1,13 @@
+# Line endings (OPS-07). The repository has always stored LF; this makes it the rule for every clone, so Git stops
+# warning "LF will be replaced by CRLF" on Windows and the files match what CI and the Linux container read.
+# Nothing was renormalized: the index already held LF for every text file.
+* text=auto eol=lf
+
+# Binary files: never converted or diffed as text
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.pdf   binary
+*.docx  binary
+*.woff  binary
+*.woff2 binary

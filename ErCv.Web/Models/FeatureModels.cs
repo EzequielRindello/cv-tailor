@@ -12,6 +12,9 @@ public class MatchScore
     public bool SeniorityMatch { get; set; }
     public string ColorClass { get; set; } = string.Empty;
     public string? LowMatchWarning { get; set; }
+
+    /// <summary>The whole profile's match when it is higher than the CV's: what adding back could reach. Null otherwise.</summary>
+    public int? ProfileOverall { get; set; }
 }
 
 public class MissingSkillsAnalysis

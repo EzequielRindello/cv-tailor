@@ -125,3 +125,6 @@ scratchpad/
 
 # Snapshot tests (TEST-08): what a run produced when it differs from the approved file
 *.received.json
+
+# Crash dumps Git Bash (MSYS) leaves in whatever folder it ran in
+*.stackdump

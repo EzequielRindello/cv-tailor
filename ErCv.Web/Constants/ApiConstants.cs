@@ -102,6 +102,7 @@ public static class ApiConstants
     public const string TitleNotFound = "Not found";
     public const string TitleBadGateway = "Job board unavailable";
     public const string TitleTooManyRequests = "Too many requests";
+    public const string TitleServerError = "Server error";
     public const string ProblemJsonContentType = "application/problem+json";
 
     #endregion
@@ -120,6 +121,9 @@ public static class ApiConstants
     public const string ErrorLetterInvalid = "The cover letter is too long";
     public const string ErrorCompanyInvalid = "The company name must be one line of at most {0} characters";
     public const string ErrorTooManyRequests = "Too many requests. Wait a moment and try again.";
+    public const string ErrorRequestTooLarge = "The request is too large.";
+    public const string ErrorRequestUnreadable = "The request could not be read.";
+    public const string ErrorUnexpected = "Something went wrong. Try again in a moment.";
     public const string ErrorImportingJobPost = "Error reading the job post";
     public const string ErrorRegeneratingCv = "Error regenerating CV";
     public const string ErrorDownloadingFile = "Error downloading file";

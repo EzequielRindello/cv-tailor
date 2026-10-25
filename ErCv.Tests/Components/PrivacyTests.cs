@@ -22,6 +22,18 @@ public class PrivacyTests : BunitContext
         Assert.NotNull(cut.Find("a[href='/profile']"));
     }
 
+    // The company typed in step 1 goes to the server and into the history; the API reads a post from a link too
+    [Fact]
+    public void The_privacy_page_names_the_company_and_the_api_import()
+    {
+        Services.AddSingleton(new ErCvOptions());
+
+        var cut = Render<Privacy>();
+
+        Assert.Equal(2, cut.FindAll("li").Count(li => li.TextContent.Contains("company name")));
+        Assert.Contains("/api/cv/import-job-post", cut.Markup);
+    }
+
     [Fact]
     public void The_footer_links_to_the_privacy_page()
     {

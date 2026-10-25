@@ -1,0 +1,33 @@
+name: Bug
+description: Something does not work as it should
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what you got instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The sample or a short job post, the template and options you picked. Leave out personal data from your profile.
+      placeholder: |
+        1. Pick the "Backend" sample
+        2. Choose the Modern template, PDF
+        3. Click Generate CV
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: The live demo, a local run or the API, and the browser.
+      placeholder: Live demo, Firefox 140
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots, the error message, the response of the API.

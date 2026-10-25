@@ -129,10 +129,10 @@ else
         ExceptionHandlingPath = ErrorPath,
         CreateScopeForErrors = true,
         // Kestrel rejects an oversized body (RequestSizeLimit) with this exception; answer its 413, not a 500
-        StatusCodeSelector = ex => ex is BadHttpRequestException badRequest
-            ? badRequest.StatusCode
-            : StatusCodes.Status500InternalServerError
+        StatusCodeSelector = ApiErrors.StatusOf
     });
+    // The API's errors stay JSON (the handler above renders the UI's HTML error page)
+    app.UseApiErrors();
     app.UseHsts();
 }
 

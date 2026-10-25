@@ -51,6 +51,20 @@ public class ScoreCardsTests : BunitContext
         Assert.Empty(fine.FindAll(".match-low-warning"));
     }
 
+    // EDIT-08: the whole profile's match is shown next to the CV's only when it is higher
+    [Fact]
+    public void The_profile_match_is_shown_only_when_the_card_has_one()
+    {
+        var score = Match(40, "red");
+        score.ProfileOverall = 52;
+
+        var withProfile = Render<MatchScoreCard>(p => p.Add(c => c.Data, score));
+        var without = Render<MatchScoreCard>(p => p.Add(c => c.Data, Match(40, "red")));
+
+        Assert.Contains("52%", withProfile.Find("#match-profile-note").TextContent);
+        Assert.Empty(without.FindAll("#match-profile-note"));
+    }
+
     [Fact]
     public void The_breakdown_marks_what_falls_short()
     {

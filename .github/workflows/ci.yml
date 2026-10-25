@@ -52,8 +52,11 @@ jobs:
 
       # Fails the job under 95% line coverage of Features/ and Services/ (98% when set), and writes the table to the
       # job summary. Two copies of the report exist (the trx logger copies it); they are identical.
+      # It also fails when docs/coverage-badge.json (the README badge, OPS-07) is more than a point off the measure.
       - name: Coverage
-        run: python3 .github/scripts/coverage_summary.py "$(find test-results -name coverage.cobertura.xml | head -n 1)" --min 95
+        run: >
+          python3 .github/scripts/coverage_summary.py "$(find test-results -name coverage.cobertura.xml | head -n 1)"
+          --min 95 --badge docs/coverage-badge.json
 
       - name: Upload test results
         if: always()
@@ -107,5 +110,5 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Build image
-        run: docker build --tag er-cv-generator:ci .
+        run: docker build --tag cv-tailor:ci .
 

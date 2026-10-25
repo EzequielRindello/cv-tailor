@@ -13,7 +13,7 @@ public sealed class PoliteHttp
     #region Constants
 
     public const string UserAgentProduct = "ErCvCorpusCollector";
-    public const string UserAgent = UserAgentProduct + "/1.0 (+https://github.com/EzequielRindello/er-cv-generator)";
+    public const string UserAgent = UserAgentProduct + "/1.0 (+https://github.com/EzequielRindello/cv-tailor)";
     public const long MaxResponseBytes = 64L * 1024 * 1024;
 
     private const string JsonMediaType = "application/json";

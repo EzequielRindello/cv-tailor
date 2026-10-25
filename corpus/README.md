@@ -41,7 +41,7 @@ Text is the post body as plain text: paragraphs and "- " bullets, no HTML, em da
 
 ## How the collector behaves
 
-- User-Agent: `ErCvCorpusCollector/1.0 (+https://github.com/EzequielRindello/er-cv-generator)`.
+- User-Agent: `ErCvCorpusCollector/1.0 (+https://github.com/EzequielRindello/cv-tailor)`.
 - `robots.txt` is read once per host before anything else. Rules for this agent, else for `*`, are honored (longest match wins). As in RFC 9309, a 4xx answer means no rules and a 5xx or no answer means the host is skipped.
 - At most one request per host every 1.5 s, or the host's `Crawl-delay` if longer. Redirects are not followed (they could reach a host whose `robots.txt` was not read). 60 s timeout, 64 MB response cap.
 - Only the documented public endpoints below, no pages are scraped, nothing is sent but GET requests.

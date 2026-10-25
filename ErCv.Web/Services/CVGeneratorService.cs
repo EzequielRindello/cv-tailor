@@ -345,7 +345,7 @@ public class CVGeneratorService
 
         await ReportAsync(progress, GenerationStage.Scoring, PercentScoring);
         // The scores measure the CV as it stands, after the page fit (EDIT-08)
-        var matchScore      = _matchScoreCalc.Calculate(generatedCV, requirements);
+        var matchScore      = _matchScoreCalc.Calculate(generatedCV, cvMaster, requirements);
         var missingSkills   = _missingSkillsAnalyzer.Analyze(generatedCV, cvMaster, requirements);
         var keywordAnalysis = _keywordAnalyzer.Analyze(request.JobDescription, generatedCV);
         var atsScore        = _atsChecker.Check(generatedCV, requirements, request.Template);
@@ -662,7 +662,7 @@ public class CVGeneratorService
         ValidateEditedCv(cv);
 
         return new EditedAnalysis(
-            _matchScoreCalc.Calculate(cv, context.Requirements),
+            _matchScoreCalc.Calculate(cv, context.Profile, context.Requirements),
             _missingSkillsAnalyzer.Analyze(cv, context.Profile, context.Requirements),
             _keywordAnalyzer.Analyze(context.JobDescription, cv),
             _atsChecker.Check(cv, context.Requirements, template),

@@ -1,8 +1,10 @@
-# ER CV Generator
+# CV Tailor
 
-[![CI](https://github.com/EzequielRindello/er-cv-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/EzequielRindello/er-cv-generator/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-98%25-brightgreen)](features.md#test-10-coverage)
+[![CI](https://github.com/EzequielRindello/cv-tailor/actions/workflows/ci.yml/badge.svg)](https://github.com/EzequielRindello/cv-tailor/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FEzequielRindello%2Fcv-tailor%2Fmaster%2Fdocs%2Fcoverage-badge.json)](features.md#test-10-coverage)
+[![Live demo](https://img.shields.io/badge/demo-cv--tailor.onrender.com-0f766e)](https://cv-tailor.onrender.com)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512bd4)](https://dotnet.microsoft.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **Tailored to every job. Nothing invented.** Paste a job description and get a CV built only from your real
 experience: the app picks the roles, bullets, skills and projects that match the post, writes a summary from your own
@@ -14,7 +16,8 @@ Your profile and history stay in your browser.
 
 ![The results workspace: CV preview next to the match score](docs/screenshots/workspace.png)
 
-> Live demo: coming with the first deploy (M5.3).
+> **Live demo: [cv-tailor.onrender.com](https://cv-tailor.onrender.com)**. It runs on Render's free plan, so the first
+> visit after a quiet spell has to wake it up first (Render's cold start); then it answers right away.
 
 ---
 
@@ -29,13 +32,16 @@ Your profile and history stay in your browser.
 - **Fits the page for real.** One or two pages, measured on the rendered PDF, not estimated.
 - **Explains itself.** Why each item was chosen, a match score with its breakdown, missing skills, keyword coverage,
   an ATS check with fixes, and the job post with every skill highlighted and linked to where it appears in the CV.
-- **Lets you finish it.** Edit the CV with a live preview: leave bullets out, rewrite or reorder them, move sections.
-  Five templates, six accents, four font pairings, English or Spanish headings.
+- **Lets you finish it.** Edit the CV with a live preview: leave bullets out, rewrite or reorder them, move sections,
+  add back what the selection left out, and watch the scores follow. Edit the cover letter too. Five templates, six
+  accents, four font pairings, English or Spanish headings.
 - **Tracks applications.** The last 50 CVs stay in your browser with their status, company and notes.
 
-| Compose | Edit with a live preview | The post, highlighted (dark mode) |
-|---|---|---|
-| ![Composer](docs/screenshots/composer.png) | ![Editor](docs/screenshots/editor.png) | ![Job post tab](docs/screenshots/job-post-dark.png) |
+| Compose | Edit with a live preview |
+|---|---|
+| ![Composer](docs/screenshots/composer.png) | ![Editor](docs/screenshots/editor.png) |
+| **A cover letter that names the company** | **The post, highlighted (dark mode)** |
+| ![Cover letter editor](docs/screenshots/letter.png) | ![Job post tab](docs/screenshots/job-post-dark.png) |
 
 ---
 
@@ -79,7 +85,7 @@ the data shapes and the design decisions; [`CLAUDE.md`](CLAUDE.md) has the codin
 
 ## Testing strategy
 
-About 14,800 tests, most of them run over every profile and job post (hand-written cases plus one real post per role
+About 15,600 tests, most of them run over every profile and job post (hand-written cases plus one real post per role
 family from the corpus).
 
 | Layer | What it proves |
@@ -117,14 +123,13 @@ PDF export needs Chrome: set `PUPPETEER_EXECUTABLE_PATH` to an installed Chrome,
 first use. With Docker (the image Render builds, Chrome included):
 
 ```
-docker build -t er-cv-generator .
-docker run --rm -m 512m -e PORT=10000 -p 10000:10000 er-cv-generator
+docker build -t cv-tailor .
+docker run --rm -m 512m -e PORT=10000 -p 10000:10000 cv-tailor
 ```
 
 In Development the OpenAPI document is at `/openapi/v1.json` and its reference page at `/scalar`.
 
-**Deploy:** one Docker web service on Render, defined in `render.yaml`, health check at `/api/cv/health`. The first
-public deploy is milestone M5.3.
+**Deploy:** one Docker web service on Render, defined in `render.yaml`, health check at `/api/cv/health`.
 
 **Your own profile:** open *My profile*, start from a sample, from your resume (PDF or Word, read into a draft you
 check) or from a JSON file, and save it. It stays in your browser.
@@ -154,5 +159,11 @@ CV in memory only while it builds it. The details are on the app's Privacy page 
 
 ## Roadmap and version
 
-Current version: **2.0.6.1** (M5.1 Smarter input). Each milestone ships as one version; the roadmap, the findings and the
+Current version: **2.0.6.3** (M5.3 Deploy). Each milestone ships as one version; the roadmap, the findings and the
 reasoning behind each decision are in [`features.md`](features.md).
+
+---
+
+## License
+
+[MIT](LICENSE). Security problems: see [`SECURITY.md`](SECURITY.md). Contributions: [`CONTRIBUTING.md`](CONTRIBUTING.md).

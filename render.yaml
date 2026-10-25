@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: er-cv-generator
+    name: cv-tailor
     runtime: docker
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/cv/health

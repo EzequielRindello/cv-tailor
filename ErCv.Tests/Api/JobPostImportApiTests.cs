@@ -150,6 +150,19 @@ public class JobPostImportApiTests
     }
 
     [Fact]
+    public async Task An_unexpected_failure_is_a_500_that_leaks_no_exception_text()
+    {
+        using var app = App(FakeHttp.Throws(new InvalidOperationException("secret internal detail")));
+
+        var response = await Import(app.Client, GreenhouseLink);
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Contains(ApiConstants.ErrorImportingJobPost, body);
+        Assert.DoesNotContain("secret internal detail", body);
+    }
+
+    [Fact]
     public async Task An_answer_that_is_not_json_is_a_502()
     {
         using var app = App(FakeHttp.Json("<html>not json</html>"));
