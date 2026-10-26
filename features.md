@@ -95,7 +95,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Done |
 | OPS-05 | Privacy note | E9 DevOps | P2 | S | Done |
 | OPS-06 | Deploy to Render + live demo link | E9 DevOps | P1 | M | Done (M5.3; checks after the merge in "Open items after M5.3") |
-| OPS-07 | Repo ready for visitors: GitHub page, license, releases, templates, and the name decision | E9 DevOps | P1 | S | In progress (M5.3, owner: GitHub settings) |
+| OPS-07 | Repo ready for visitors: GitHub page, license, releases, templates, and the name decision | E9 DevOps | P1 | S | Done (M5.3; tags and releases after the merge) |
 | PROF-07 | Resume import: limits tooltip + up-front file validation | E3 Your profile | P1 | S | Done |
 | MATCH-10 | Summary role signals: one stray mention no longer sets the role (F29) | E4 Matching | P1 | M | Done |
 | EDIT-07 | Add back what the selection or the page fit left out | E5 Editing | P1 | L | Done |
@@ -120,7 +120,7 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 5. **M5 Polish & presentation** (v2.0.6, released): OPS-02 to OPS-05, ENG-01, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10. ENG-04 was dropped (Won't do, see the item). Nothing in M5 waits on M6.
 5.1. **M5.1 Smarter input** (v2.0.6.1, released): MATCH-06, PROF-05, APP-04. Read the job post's sections, start a profile from an existing resume, take the job post from its URL. PROF-05's AI-assisted parsing stays with M6. PROF-05 and APP-04 may need new packages (PDF/DOCX reading) and outbound HTTP: both are asked for before they are added.
 5.2. **M5.2 Pre-deploy polish** (v2.0.6.2, released: PR #20, which also carried the M5.3 files): PROF-07, MATCH-10, EDIT-07, EDIT-08, EDIT-09, APP-07, and the follow-ups UX-11, MATCH-11, APP-08, EDIT-10, APP-09. Everything the owner wants done before the app goes public (2026-10-23): the resume import warns before a bad file is loaded, the summary stops misreading the role (F29), the M4 open items (add back, rescoring, cover letter), and the job post import over the API behind a per-IP rate limit. Branch `feature/m5-2-pre-deploy-polish`.
-5.3. **M5.3 Deploy** (v2.0.6.3, released: live at https://cv-tailor-9z6e.onrender.com since 2026-10-26; the PR `feature/m5-3-deploy` closes it, and what can only be checked once it is deployed is in "Open items after M5.3"): OPS-06 and OPS-07. The first public deploy, the live demo link the README gets with it, and the repository made ready for visitors (OPS-07, asked by the owner on 2026-10-23). Moved after M5.1 by the owner (2026-10-22), and after M5.2 on 2026-10-23.
+5.3. **M5.3 Deploy** (v2.0.6.3, released: live at https://cv-tailor-9z6e.onrender.com since 2026-10-26; PR #21 (`feature/m5-3-deploy`) closes it, and what can only be checked once it is deployed is in "Open items after M5.3"): OPS-06 and OPS-07. The first public deploy, the live demo link the README gets with it, and the repository made ready for visitors (OPS-07, asked by the owner on 2026-10-23). Moved after M5.1 by the owner (2026-10-22), and after M5.2 on 2026-10-23.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05. Parked until the owner has an API key the app can use.
 
 ### Versioning
@@ -253,7 +253,7 @@ Everything in M5.2 is implemented and its tests pass; these are the things that 
 
 ### Open items after M5.3
 
-Every item in M5.3 is Done once the owner's GitHub settings are ticked in OPS-07. Left for later:
+Every item in M5.3 is Done. Left for right after the merge, and for later:
 
 | Item | Why it is not in M5.3 | Owner |
 |---|---|---|
@@ -1404,18 +1404,18 @@ Done notes:
 - Not done: letter to tracker.
 
 ### OPS-07: Repo ready for visitors
-**Status:** In progress (M5.3): the files are done; the GitHub settings are the owner's · **Priority:** P1 · **Effort:** S
+**Status:** Done (M5.3, 2026-10-26; the tags and releases come right after the merge, see "Open items after M5.3") · **Priority:** P1 · **Effort:** S
 
-The GitHub page today is empty: no description, no website, no topics, no releases, no license (the owner's list, 2026-10-23). Most of it is GitHub's own settings, which only the owner can change; the files go in a PR.
+The GitHub page today is empty: no description, no website, no topics, no releases, no license (the owner's list, 2026-10-23). The repository was private until 2026-10-26, which is why secret scanning, CodeQL, private vulnerability reporting and the ruleset could not be turned on and the coverage badge (read from `master` by shields.io) did not show; the owner made it public that day. Most of it is GitHub's own settings, which only the owner can change; the files go in a PR.
 
 Settings on GitHub (owner, in the web UI):
-- [ ] **About**: a one-sentence description (the README's tagline: "Tailored to every job. Nothing invented."), the live demo as the **website**, and **topics** (for example `aspnet-core`, `blazor`, `csharp`, `dotnet`, `resume`, `cv-generator`, `ats`, `job-search`, `playwright`, `bunit`, `docker`, `render`)
-- [ ] Hide the empty sections in the About gear: **Packages** and **Deployments** (nothing is published as a package); keep **Releases**
-- [ ] **Social preview** image (1280 x 640) made from `docs/screenshots`, so a shared link has a picture (the image is `docs/social-preview.png`, the wordmark, the tagline and the workspace and letter screenshots, taken with headless Edge; the owner uploads it in Settings, General)
-- [ ] **Pin** the repository on the owner's profile
-- [ ] **Branch protection** on `master`: require the CI checks and a PR (solo repo, so no required reviewers), delete merged branches automatically
-- [ ] Turn on **secret scanning**, Dependabot alerts and **private vulnerability reporting** (`SECURITY.md` and the issue template link to it; Settings, Security); consider **CodeQL** (code scanning) as a second workflow
-- [ ] Create an **`idea`** label (the idea issue template applies it; `bug` exists by default)
+- [x] **About**: a one-sentence description (the README's tagline: "Tailored to every job. Nothing invented."), the live demo as the **website**, and **topics** (for example `aspnet-core`, `blazor`, `csharp`, `dotnet`, `resume`, `cv-generator`, `ats`, `job-search`, `playwright`, `bunit`, `docker`, `render`) (set with `gh repo edit`, 2026-10-26: the tagline plus one sentence, the live URL, those 12 topics)
+- [x] Hide the empty sections in the About gear: **Packages** and **Deployments** (nothing is published as a package); keep **Releases**
+- [x] **Social preview** image (1280 x 640) made from `docs/screenshots`, so a shared link has a picture (the image is `docs/social-preview.png`, the wordmark, the tagline and the workspace and letter screenshots, taken with headless Edge; uploaded by the owner on 2026-10-26, `usesCustomOpenGraphImage` is true)
+- [x] **Pin** the repository on the owner's profile (2026-10-26)
+- [x] **Branch protection** on `master`: require the CI checks and a PR (solo repo, so no required reviewers), delete merged branches automatically (a ruleset `master` on the default branch: no deletion, no force push, a PR with 0 approvals, the checks `Build and test`, `Browser tests (Playwright)` and `Docker image build`; merged branches deleted automatically)
+- [x] Turn on **secret scanning**, Dependabot alerts and **private vulnerability reporting** (`SECURITY.md` and the issue template link to it; Settings, Security); consider **CodeQL** (code scanning) as a second workflow (all on, 2026-10-26: secret scanning with push protection, Dependabot alerts, private vulnerability reporting, and CodeQL through GitHub's default setup, so no workflow file in the repo)
+- [x] Create an **`idea`** label (the idea issue template applies it; `bug` exists by default)
 
 Files:
 - [x] **LICENSE**: MIT (owner, 2026-10-24), named in the README with a badge and a License section
