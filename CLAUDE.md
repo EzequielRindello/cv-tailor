@@ -14,7 +14,8 @@ Roadmap, versioning and PR naming live in `features.md`. Architecture overview: 
 - Snapshots (TEST-08): `dotnet test ErCv.Tests --filter Category=Snapshot`; after an intended change, review the
   `.received.json` files and approve with `ERCV_SNAPSHOTS=approve` set (also drops snapshots no case uses)
 - Coverage (TEST-10): add `--settings ErCv.Tests/coverage.runsettings --collect:"XPlat Code Coverage"` to a test run,
-  then `python .github/scripts/coverage_summary.py <coverage.cobertura.xml> --min 95` (CI does both)
+  then `python .github/scripts/coverage_summary.py <coverage.cobertura.xml> --min 95 --badge docs/coverage-badge.json`
+  (CI does both, and fails when the README badge is more than a point off; add `--write-badge` to rewrite it)
 - Corpus tool: `dotnet run --project ErCv.Collector -- refresh | report | samples | check` (`samples` re-picks the app samples offline, run it after changing the parser or `Data/skills.json`)
 - Style fixes the tooling can apply: `dotnet format style er-cv-generator.sln --diagnostics IDE0005 IDE0161`
 
@@ -121,7 +122,8 @@ Constants classes longer than about 50 lines use topic regions instead (`Scoring
   session sizes), in `ProfileJson.MaxImportBytes` and in `ResumeImportConstants` (resume size, pages, zip expansion,
   read time). An uploaded resume is read in memory through `ResumeImporter` and never stored.
 - The API body limit is `[RequestSizeLimit]` on `CVController`. Kestrel enforces it (TestServer does not, so it is
-  verified in the container); `Program.cs` maps the resulting `BadHttpRequestException` to its 413.
+  verified under Kestrel); `Configuration/ApiErrors.cs` answers the resulting `BadHttpRequestException` with a 413
+  problem on `/api` routes (the UI keeps its HTML error page).
 - Error responses go through `CVGeneratorService.Problem`: the client gets a message written for it, never
   `ex.Message` of an unexpected exception. Log the exception instead.
 - CV templates use `{{ }}` only (HTML-escaped). Never `{{{ }}}`. Links are written as `https://{{Link}}`.

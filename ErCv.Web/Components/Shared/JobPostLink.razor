@@ -27,6 +27,9 @@
 
     /// <summary>The job description read from the link; the page puts it in the editor.</summary>
     [Parameter] public EventCallback<string> OnImport { get; set; }
+
+    /// <summary>The company the board names (EDIT-09), when it does; Lever gives none.</summary>
+    [Parameter] public EventCallback<string> OnCompany { get; set; }
     [Parameter] public bool Disabled { get; set; }
 
     #endregion
@@ -59,6 +62,7 @@
             }
 
             await OnImport.InvokeAsync(result.Text);
+            if (!string.IsNullOrWhiteSpace(result.Company)) await OnCompany.InvokeAsync(result.Company);
             _link = string.Empty;
             var company = string.IsNullOrWhiteSpace(result.Company) ? $"from {result.Source}" : $"at {result.Company}";
             Toasts.Success($"Read \"{result.Title}\" {company}. Check the text, then go on.");

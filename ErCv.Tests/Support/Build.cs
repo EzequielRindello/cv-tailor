@@ -28,8 +28,12 @@ public static class Build
         string[]? skills = null,
         string[]? keywords = null,
         string seniority = "mid-level",
-        string[]? niceToHave = null) => new()
+        string[]? niceToHave = null,
+        string title = "",
+        string text = "") => new()
     {
+        Title = title,
+        Text = text,
         TechnicalSkills = (skills ?? Array.Empty<string>()).ToList(),
         NiceToHaveSkills = (niceToHave ?? Array.Empty<string>()).ToList(),
         Keywords = (keywords ?? Array.Empty<string>()).ToList(),
@@ -94,5 +98,31 @@ public static class Build
             main.Document.Save();
         }
         return stream.ToArray();
+    }
+
+    /// <summary>A PDF with one blank page and, when given, a line of text on it (a scanner's watermark).</summary>
+    public static byte[] ScannedPdf(string? watermark = null)
+    {
+        var builder = new UglyToad.PdfPig.Writer.PdfDocumentBuilder();
+        var page = builder.AddPage(UglyToad.PdfPig.Content.PageSize.A4);
+        if (watermark != null)
+            page.AddText(watermark, 10, new UglyToad.PdfPig.Core.PdfPoint(50, 50),
+                builder.AddStandard14Font(UglyToad.PdfPig.Fonts.Standard14Fonts.Standard14Font.Helvetica));
+        return builder.Build();
+    }
+
+    /// <summary>A PDF with a text layer: one line per line given, from the top of the page.</summary>
+    public static byte[] ResumePdf(IEnumerable<string> lines)
+    {
+        var builder = new UglyToad.PdfPig.Writer.PdfDocumentBuilder();
+        var page = builder.AddPage(UglyToad.PdfPig.Content.PageSize.A4);
+        var font = builder.AddStandard14Font(UglyToad.PdfPig.Fonts.Standard14Fonts.Standard14Font.Helvetica);
+        var y = 800.0;
+        foreach (var line in lines)
+        {
+            page.AddText(line, 11, new UglyToad.PdfPig.Core.PdfPoint(50, y), font);
+            y -= 16;
+        }
+        return builder.Build();
     }
 }

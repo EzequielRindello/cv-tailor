@@ -1,0 +1,138 @@
+@using ErCv.Web.Features.CoverLetters
+
+<div class="card bullet-editor-card letter-editor-card">
+    <div class="card-body">
+        <div class="cv-editor-head">
+            <h5 class="bullet-editor-title">
+                <i class="bi bi-envelope-paper bullet-title-icon" aria-hidden="true"></i>
+                Edit cover letter
+            </h5>
+            <div class="bullet-editor-subtitle">
+                What you write is yours: it stays when the CV changes. A paragraph you did not touch keeps following the CV.
+            </div>
+        </div>
+
+        @if (PageWarning != null)
+        {
+            <div class="cv-editor-page-warning" id="letter-page-warning" role="status">
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> @PageWarning
+            </div>
+        }
+
+        <section class="cv-editor-section">
+            <label class="cv-editor-section-title" for="letter-company">Company</label>
+            <input id="letter-company" type="text" class="form-control form-control-sm" autocomplete="off"
+                   maxlength="@ApiConstants.MaxCompanyLength"
+                   value="@Draft.Company"
+                   placeholder="Named in the greeting and the closing"
+                   @onchange="ChangeCompany" />
+        </section>
+
+        @for (var i = 0; i < Draft.Blocks.Count; i++)
+        {
+            var index = i;
+            var block = Draft.Blocks[index];
+            <section class="cv-editor-section letter-block" id="letter-block-@index">
+                <label class="cv-editor-section-title" for="letter-text-@index">
+                    @LabelOf(block.Key)
+                    @if (block.IsEdited)
+                    {
+                        <span class="bullet-edited-badge">Edited</span>
+                    }
+                </label>
+                <textarea id="letter-text-@index" class="form-control form-control-sm"
+                          rows="@(block.Key == CoverLetterDraft.SalutationKey ? 1 : 5)"
+                          maxlength="@ApiConstants.MaxEditedLetterBlockLength"
+                          value="@block.Text"
+                          @onchange="e => ChangeBlock(block.Key, e.Value?.ToString())"></textarea>
+                @if (_errors.TryGetValue(block.Key, out var error))
+                {
+                    <div class="field-error mt-1" role="alert">@error</div>
+                }
+                @if (block.IsOutdated)
+                {
+                    <div class="letter-outdated" id="letter-outdated-@index" role="status">
+                        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                        The CV changed since you edited this.
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => Revert(block.Key)">Use the new text</button>
+                    </div>
+                }
+                else if (block.IsEdited)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-secondary mt-1" @onclick="() => Revert(block.Key)">Undo my edit</button>
+                }
+            </section>
+        }
+
+        <div class="bullet-editor-actions">
+            <button type="button" class="btn btn-primary btn-sm" @onclick="OnClose">Done</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    #region Parameters
+
+    [Parameter, EditorRequired] public CoverLetterDraft Draft { get; set; } = default!;
+    [Parameter] public string? PageWarning { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    /// <summary>The visitor typed another company: the letter is written again with it.</summary>
+    [Parameter] public EventCallback<string> OnCompanyChanged { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    #endregion
+
+    #region State
+
+    private readonly Dictionary<string, string> _errors = new();
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task ChangeBlock(string key, string? text)
+    {
+        if (!Draft.Edit(key, text))
+        {
+            _errors[key] = string.IsNullOrWhiteSpace(text)
+                ? "This part of the letter cannot be empty."
+                : $"This part of the letter can be at most {ApiConstants.MaxEditedLetterBlockLength} characters.";
+            return;
+        }
+
+        _errors.Remove(key);
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task Revert(string key)
+    {
+        Draft.Revert(key);
+        _errors.Remove(key);
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task ChangeCompany(ChangeEventArgs e)
+    {
+        await OnCompanyChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private static string LabelOf(string key)
+    {
+        if (key == CoverLetterDraft.SalutationKey) return "Greeting";
+        if (key == CoverLetterConstants.OpeningKey) return "Opening";
+        if (key == CoverLetterConstants.ClosingKey) return "Closing";
+
+        // "experience:Role|Company|start|end"
+        if (!key.StartsWith(CoverLetterConstants.ExperienceKeyPrefix, StringComparison.Ordinal)) return "Paragraph";
+
+        var parts = key[CoverLetterConstants.ExperienceKeyPrefix.Length..].Split('|');
+        return parts.Length > 1 ? $"About your role as {parts[0]} at {parts[1]}" : "About a role";
+    }
+
+    #endregion
+}

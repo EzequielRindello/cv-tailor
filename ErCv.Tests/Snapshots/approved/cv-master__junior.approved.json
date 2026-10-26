@@ -7,7 +7,8 @@
     "totalKeywords": 15,
     "seniorityMatch": false,
     "colorClass": "yellow",
-    "lowMatchWarning": null
+    "lowMatchWarning": null,
+    "profileOverall": null
   },
   "missingSkills": {
     "requiredMissing": [
@@ -17,7 +18,8 @@
     "suggestions": [
       "Add 'css' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 8
+    "potentialScoreIncrease": 8,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
@@ -147,7 +149,7 @@
       "linkedIn": "linkedin.com/in/alex-rivera-dev",
       "gitHub": "github.com/alexrivera-dev"
     },
-    "summary": "Senior Full Stack Developer with 9+ years of experience, specializing in JavaScript, Node.js, React, SQL, and Git. Proven track record of achieving 70%. Strong mentoring skills.",
+    "summary": "Senior Frontend Developer with 9+ years of experience, specializing in JavaScript, Node.js, React, SQL, and Git. Proven track record of achieving 70%. Strong mentoring skills.",
     "education": [
       {
         "degree": "B.S. Computer Science",

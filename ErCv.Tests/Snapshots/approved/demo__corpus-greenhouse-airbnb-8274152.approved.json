@@ -1,13 +1,14 @@
 {
   "matchScore": {
-    "overall": 32,
+    "overall": 29,
     "skillsMatched": 1,
     "totalSkills": 8,
-    "keywordsMatched": 4,
+    "keywordsMatched": 3,
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "red",
-    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive.",
+    "profileOverall": 32
   },
   "missingSkills": {
     "requiredMissing": [
@@ -30,7 +31,8 @@
       "Mention 'distributed systems' in relevant project bullet points if you have used it",
       "Mention 'a/b testing' in relevant project bullet points if you have used it"
     ],
-    "potentialScoreIncrease": 31
+    "potentialScoreIncrease": 31,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
@@ -224,7 +226,7 @@
       "linkedIn": "linkedin.com/in/ezequiel-rindello",
       "gitHub": "github.com/EzequielRindello"
     },
-    "summary": "Junior Mobile Developer with 1+ years of experience, specializing in SQL and SQL Server.",
+    "summary": "Junior Backend Developer with 1+ years of experience, specializing in SQL and SQL Server.",
     "education": [
       {
         "degree": "B.S. Software Development (In Progress)",

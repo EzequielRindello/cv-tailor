@@ -63,6 +63,17 @@
             <span><i class="stack-dot seniority"></i>Seniority <strong>@Math.Round(seniorityPts)/@seniorityMax</strong></span>
         </div>
 
+        @if (Data.ProfileOverall is int profileOverall)
+        {
+            <p class="match-profile-note" id="match-profile-note">
+                <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
+                <span>
+                    Your whole profile matches <strong>@profileOverall%</strong>. This CV prints part of it: add back
+                    what was left out from the editor.
+                </span>
+            </p>
+        }
+
         @if (!string.IsNullOrEmpty(Data.LowMatchWarning))
         {
             <p class="match-low-warning">

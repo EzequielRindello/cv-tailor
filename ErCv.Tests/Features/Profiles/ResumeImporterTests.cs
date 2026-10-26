@@ -46,7 +46,7 @@ public class ResumeImporterTests
     {
         var result = await ResumeImporter.ImportAsync("{\"header\":{\"fullName\":\"Jane\"}}"u8.ToArray());
 
-        Assert.Equal("Only PDF and Word (.docx) files can be read.", result.Error);
+        Assert.Equal(ResumeImportConstants.WrongTypeMessage, result.Error);
     }
 
     [Theory]
@@ -73,6 +73,56 @@ public class ResumeImporterTests
     {
         var result = await ResumeImporter.ImportAsync(ResumeDocx(Array.Empty<string>()));
 
-        Assert.Equal("No text was found in the file. A scanned resume (an image) cannot be read.", result.Error);
+        Assert.Equal(ResumeImportConstants.NoTextMessage, result.Error);
     }
+
+    [Fact]
+    public async Task A_scanned_pdf_is_refused_before_it_is_parsed()
+    {
+        var result = await ResumeImporter.ImportAsync(ScannedPdf());
+
+        Assert.Equal(ResumeImportConstants.ScannedPdfMessage, result.Error);
+    }
+
+    [Fact]
+    public async Task A_pdf_with_only_a_scanner_watermark_is_refused()
+    {
+        var result = await ResumeImporter.ImportAsync(ScannedPdf("Scanned with CamScanner"));
+
+        Assert.Equal(ResumeImportConstants.ScannedPdfMessage, result.Error);
+    }
+
+    [Fact]
+    public async Task A_text_pdf_is_not_mistaken_for_a_scan()
+    {
+        var pdf = ResumePdf(new[]
+        {
+            "Jane Doe", "jane@doe.dev", "EXPERIENCE", "Platform Engineer at Acme Corporation 2020 - Present",
+            "Built the billing API and the reporting pipeline", "SKILLS", "Languages: C#, SQL, TypeScript"
+        });
+
+        var result = await ResumeImporter.ImportAsync(pdf);
+
+        Assert.NotEqual(ResumeImportConstants.ScannedPdfMessage, result.Error);
+        Assert.Equal("Jane Doe", result.Profile?.Header.FullName);
+    }
+
+    [Theory]
+    [InlineData("jane.pdf", 1000, null)]
+    [InlineData("JANE.PDF", 1000, null)]
+    [InlineData("jane.docx", 1000, null)]
+    public void A_pdf_or_word_file_within_the_limit_can_go_on(string name, long size, string? expected) =>
+        Assert.Equal(expected, ResumeImporter.UploadError(name, size));
+
+    [Theory]
+    [InlineData("jane.doc")]
+    [InlineData("notes.txt")]
+    [InlineData("resume")]
+    public void Any_other_type_is_refused_by_its_name(string name) =>
+        Assert.Equal(ResumeImportConstants.WrongTypeMessage, ResumeImporter.UploadError(name, 1000));
+
+    [Fact]
+    public void A_pdf_over_the_limit_gets_the_size_message() =>
+        Assert.Equal(ResumeImporter.SizeError(ResumeImportConstants.MaxImportBytes + 1),
+            ResumeImporter.UploadError("jane.pdf", ResumeImportConstants.MaxImportBytes + 1));
 }

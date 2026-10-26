@@ -364,4 +364,28 @@ public class JobDescriptionParserTests
 
         Assert.Empty(r.NiceToHaveSkills.Except(r.TechnicalSkills));
     }
+
+    // EDIT-09: the company comes only from a heading that names it; accuracy over coverage
+    [Theory]
+    [InlineData("Backend Engineer\n\nAbout Stripe\nWe build payments.", "Stripe")]
+    [InlineData("Backend Engineer\n\nAbout Stripe:\nWe build payments.", "Stripe")]
+    [InlineData("Backend Engineer\n\nLife at Ramp\nWe ship.", "Ramp")]
+    [InlineData("Ingeniero Backend\n\nSobre Mercado Libre\nSomos...", "Mercado Libre")]
+    [InlineData("Ingeniero Backend\n\nAcerca de Globant\nSomos...", "Globant")]
+    public void The_company_is_read_from_a_heading_that_names_it(string post, string expected) =>
+        Assert.Equal(expected, _parser.Parse(post).Company);
+
+    [Theory]
+    [InlineData("Backend Engineer\n\nAbout the role\nYou will build.")]
+    [InlineData("Backend Engineer\n\nAbout you\nYou have five years.")]
+    [InlineData("Backend Engineer\n\nAbout us\nWe are great.")]
+    [InlineData("Backend Engineer\n\nAbout working here\nWe are great.")]
+    [InlineData("Backend Engineer\n\nSobre el puesto\nBuscamos.")]
+    [InlineData("Backend Engineer\n\nWe build the future. About Stripe is a sentence that goes on and on, so it is not a heading.")]
+    [InlineData("Backend Engineer\n\nAbout one two three four five six seven\nText")]
+    [InlineData("Backend Engineer\n\nAbout the Binance Accelerator Program\nText")]
+    [InlineData("Backend Engineer\n\nAbout Binance Accelerator Program\nText")]
+    [InlineData("")]
+    public void Anything_else_is_no_company(string post) =>
+        Assert.Null(_parser.Parse(post).Company);
 }

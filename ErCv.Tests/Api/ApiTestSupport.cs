@@ -23,12 +23,17 @@ public sealed class ApiApp : IDisposable
     /// <summary>Another browser: same app, its own cookie jar and therefore its own session.</summary>
     public HttpClient NewClient() => _factory.CreateClient();
 
-    public ApiApp(bool warmUpPdfEngine = false)
+    /// <param name="configure">Replaces services for this app only (a fake HTTP client, small rate limits).</param>
+    public ApiApp(bool warmUpPdfEngine = false, Action<IServiceCollection>? configure = null)
     {
-        _factory = warmUpPdfEngine
+        _factory = warmUpPdfEngine && configure == null
             ? _root
             : _root.WithWebHostBuilder(host => host.ConfigureServices(services =>
-                services.Remove(services.Single(s => s.ImplementationType == typeof(PdfEngineWarmUp)))));
+            {
+                if (!warmUpPdfEngine)
+                    services.Remove(services.Single(s => s.ImplementationType == typeof(PdfEngineWarmUp)));
+                configure?.Invoke(services);
+            }));
         Client = _factory.CreateClient();
     }
 

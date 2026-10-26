@@ -7,7 +7,8 @@
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "red",
-    "lowMatchWarning": null
+    "lowMatchWarning": null,
+    "profileOverall": null
   },
   "missingSkills": {
     "requiredMissing": [
@@ -17,7 +18,8 @@
     "suggestions": [
       "Add 'llm' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 17
+    "potentialScoreIncrease": 17,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
@@ -151,7 +153,7 @@
       "linkedIn": "linkedin.com/in/sam-carter-dev",
       "gitHub": "github.com/samcarter-dev"
     },
-    "summary": "Junior Software Engineer with 2+ years of experience, specializing in Python and SQL.",
+    "summary": "Junior ML Engineer with 2+ years of experience, specializing in Python and SQL.",
     "education": [
       {
         "degree": "B.S. Computer Science",

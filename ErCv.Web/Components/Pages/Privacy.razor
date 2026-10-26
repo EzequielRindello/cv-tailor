@@ -1,7 +1,7 @@
 @page "/privacy"
 @inject ErCvOptions Options
 
-<PageTitle>Privacy - CV Generator</PageTitle>
+<PageTitle>@($"Privacy - {UiConstants.AppName}")</PageTitle>
 
 @* OPS-05. Every statement here is checked against the code: update this page when what is stored or sent changes. *@
 <div class="container app-shell py-4 py-lg-5 privacy-page">
@@ -19,7 +19,7 @@
             <h2 class="privacy-section-title" id="privacy-browser">Saved in your browser</h2>
             <ul>
                 <li>Your settings: template, formats, page mode, language, accent, fonts and theme.</li>
-                <li>Your generation history, up to 50 entries, with each job description and the application details you add.</li>
+                <li>Your generation history, up to 50 entries, with each job description, the company name (the one you typed in step 1 or the one read from the post) and the application details you add.</li>
                 <li>The profile you save on <a href="/profile">My profile</a>.</li>
             </ul>
             <p>
@@ -34,8 +34,8 @@
         <div class="card-body form-card-body">
             <h2 class="privacy-section-title" id="privacy-server">What the server sees</h2>
             <ul>
-                <li>When you generate a CV, the job description and the profile are sent to the server to build it.</li>
-                <li>When you read a job post from its Greenhouse or Lever link, the server asks that job board's public API for the post. Only the board and the post id from your link are sent to it.</li>
+                <li>When you generate a CV, the job description, the company name if there is one and the profile are sent to the server to build it. The company is only used to name it in the cover letter.</li>
+                <li>When you read a job post from its Greenhouse or Lever link, the server asks that job board's public API for the post. Only the board and the post id from your link are sent to it. The API can do the same for a link sent to it (<code>/api/cv/import-job-post</code>).</li>
                 <li>When you start your profile from your resume, the file is sent to the server, read in memory and dropped. Only the fields read from it come back to the page; nothing is kept.</li>
                 <li>While this page is open, the server keeps the generated CV in memory so you can edit and download it. It is gone when you close the page.</li>
                 <li>Through the API, the generated files stay in a server-side session for up to @Options.Session.IdleTimeoutMinutes minutes of inactivity, so they can be downloaded.</li>

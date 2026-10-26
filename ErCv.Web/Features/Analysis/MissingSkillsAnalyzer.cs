@@ -8,6 +8,18 @@ public class MissingSkillsAnalyzer
 {
     #region Public Methods
 
+    /// <summary>
+    /// The skills the post asks for that this CV does not show (EDIT-08). Of those, the ones the profile does have are
+    /// listed apart: they were left out of this CV, not missing from the person.
+    /// </summary>
+    public MissingSkillsAnalysis Analyze(GeneratedCV cv, CVMaster profile, JobRequirements requirements)
+    {
+        var analysis = Analyze(CvAsProfile.Of(cv), requirements);
+        var all = analysis.RequiredMissing.Concat(analysis.NiceToHaveMissing);
+        analysis.InProfileNotInCv = all.Where(skill => IsInProfile(profile, skill)).ToList();
+        return analysis;
+    }
+
     public MissingSkillsAnalysis Analyze(CVMaster cv, JobRequirements requirements)
     {
         var allCVSkills = RelevanceScorer.FlattenSkills(cv.Skills);

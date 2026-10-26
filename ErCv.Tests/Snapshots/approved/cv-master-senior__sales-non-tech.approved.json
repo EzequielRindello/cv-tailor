@@ -1,19 +1,21 @@
 {
   "matchScore": {
-    "overall": 23,
+    "overall": 14,
     "skillsMatched": 0,
     "totalSkills": 1,
-    "keywordsMatched": 3,
+    "keywordsMatched": 0,
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "red",
-    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive.",
+    "profileOverall": 23
   },
   "missingSkills": {
     "requiredMissing": [],
     "niceToHaveMissing": [],
     "suggestions": [],
-    "potentialScoreIncrease": 0
+    "potentialScoreIncrease": 0,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [],
@@ -119,7 +121,7 @@
       "linkedIn": "linkedin.com/in/alex-rivera-dev",
       "gitHub": "github.com/alexrivera-dev"
     },
-    "summary": "Senior Data Engineer with 9+ years of experience, specializing in REST API Design, Docker, TypeScript, and Python. Proven track record of improving backward compatibility and reducing breaking changes by 90%. Strong communication skills.",
+    "summary": "Senior Software Engineer with 9+ years of experience, specializing in REST API Design, Docker, TypeScript, and Python. Proven track record of improving backward compatibility and reducing breaking changes by 90%. Strong communication skills.",
     "education": [
       {
         "degree": "B.S. Computer Science",

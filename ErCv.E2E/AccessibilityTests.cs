@@ -92,6 +92,7 @@ public class AccessibilityTests : E2ETestBase
     public async Task History_panel_with_application_details_open_has_no_serious_violations()
     {
         await GenerateAsync();
+        await WaitForHistoryEntriesAsync(1);
         await OpenHomeAsync();
         await Button("History", exact: true).ClickAsync();
         await Page.Locator(".history-item").GetByRole(AriaRole.Button, new() { Name = "Details" }).ClickAsync();

@@ -10,8 +10,6 @@ public static class ResumeImporter
 {
     #region Constants
 
-    private const int BytesPerMegabyte = 1024 * 1024;
-
     private static readonly SemaphoreSlim Readers = new(ResumeImportConstants.MaxConcurrentReads);
 
     #endregion
@@ -24,7 +22,7 @@ public static class ResumeImporter
         if (SizeError(bytes.Length) is { } tooLarge) return Failed(tooLarge);
 
         var format = ResumeText.Detect(bytes);
-        if (format == null) return Failed("Only PDF and Word (.docx) files can be read.");
+        if (format == null) return Failed(ResumeImportConstants.WrongTypeMessage);
 
         await Readers.WaitAsync();
         try
@@ -40,10 +38,19 @@ public static class ResumeImporter
         }
     }
 
+    /// <summary>
+    /// The message for a file the visitor picked that cannot be read, from its name and size alone (nothing is
+    /// read yet): a type other than PDF or Word, or over the size limit. Null when it can go on.
+    /// </summary>
+    public static string? UploadError(string fileName, long bytes) =>
+        !ResumeImportConstants.AcceptedExtensions.Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase)
+            ? ResumeImportConstants.WrongTypeMessage
+            : SizeError(bytes);
+
     /// <summary>The message for a file over the size limit, or null when it fits (checked before the upload is read).</summary>
     public static string? SizeError(long bytes) =>
         bytes > ResumeImportConstants.MaxImportBytes
-            ? $"The file is larger than {ResumeImportConstants.MaxImportBytes / BytesPerMegabyte} MB."
+            ? $"The file is larger than {ResumeImportConstants.MaxImportMegabytes} MB."
             : null;
 
     public static int SkillCount(Skills skills) =>
@@ -59,6 +66,10 @@ public static class ResumeImporter
         string text;
         try
         {
+            // A scan can carry a watermark or a page number as text, so "some text" is not enough to read it
+            if (format == ResumeFormat.Pdf && !ResumeText.HasTextLayer(bytes))
+                return Failed(ResumeImportConstants.ScannedPdfMessage);
+
             text = format == ResumeFormat.Pdf ? ResumeText.FromPdf(bytes) : ResumeText.FromDocx(bytes);
         }
         catch (Exception)
@@ -68,7 +79,7 @@ public static class ResumeImporter
         }
 
         if (string.IsNullOrWhiteSpace(text))
-            return Failed("No text was found in the file. A scanned resume (an image) cannot be read.");
+            return Failed(ResumeImportConstants.NoTextMessage);
 
         var profile = ResumeParser.Parse(text, linesWrap: format == ResumeFormat.Pdf);
         var found = profile.Experience.Count + profile.Education.Count + profile.Projects.Count + SkillCount(profile.Skills);

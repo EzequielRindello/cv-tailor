@@ -4,6 +4,7 @@ using ErCv.Web.Features.CoverLetters;
 using ErCv.Web.Features.Documents;
 using ErCv.Web.Features.Matching;
 using ErCv.Web.Features.Selection;
+using ErCv.Web.Models;
 
 namespace ErCv.Tests.Invariants;
 
@@ -44,9 +45,25 @@ public class CoverLetterInvariantTests
         var cv = new CVSelector().SelectAndAdaptCV(master, requirements, allowTwoPages: false, language);
         var labels = CvLabels.For(language);
 
-        var letter = new CoverLetterGenerator().Generate(cv, requirements, jd, DateTime.Today);
+        // No company, one the visitor typed, and the one the post names (when it names one)
+        foreach (var company in new[] { null, "Acme Corp", requirements.Company }.Distinct())
+            AssertLetterIsMadeOfFixedWordingAndFacts(profile, jd, language, master, requirements, cv, labels, company);
+    }
+
+    private static void AssertLetterIsMadeOfFixedWordingAndFacts(
+        string profile, string jd, string language, CVMaster master, JobRequirements requirements,
+        GeneratedCV cv, CvLabels labels, string? company)
+    {
+        var letter = new CoverLetterGenerator().Generate(cv, requirements, jd, DateTime.Today, company);
+        var phrases = language == ApiConstants.LanguageSpanish ? CoverLetterConstants.Spanish : CoverLetterConstants.English;
+
+        // The salutation is the generic one, or the company between its two pieces of wording
+        Assert.Equal(
+            company == null ? phrases.Salutation : phrases.SalutationCompanyLead + company + phrases.SalutationCompanyEnd,
+            letter.Salutation);
 
         var facts = new HashSet<string>(StringComparer.Ordinal);
+        if (company != null) facts.Add(company);
         if (CoverLetterGenerator.JobTitle(jd) is { } title) facts.Add(title);
         foreach (var exp in cv.Experience)
         {

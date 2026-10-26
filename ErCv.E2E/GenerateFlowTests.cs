@@ -188,7 +188,7 @@ public class GenerateFlowTests : E2ETestBase
         await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
 
         var stages = await Page.EvaluateAsync<string[]>("window.__stages");
-        var canonical = new[] { "Parsing", "Scoring", "Selecting", "Rendering" };
+        var canonical = new[] { "Parsing", "Selecting", "Rendering", "Scoring" };
 
         Assert.True(stages.Length >= 2, $"Expected several stages, saw: {string.Join(", ", stages)}");
         Assert.All(stages, s => Assert.Contains(s, canonical));

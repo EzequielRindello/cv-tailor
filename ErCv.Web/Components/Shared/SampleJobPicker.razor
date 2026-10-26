@@ -12,7 +12,7 @@
                     class="sample-chip @(active ? "active" : "")"
                     aria-pressed="@(active ? "true" : "false")"
                     disabled="@Disabled"
-                    @onclick="() => OnSelect.InvokeAsync(sample.Text)">
+                    @onclick="() => SelectAsync(sample)">
                 @sample.Label
             </button>
         }
@@ -38,6 +38,9 @@
 
     [Parameter] public string Current { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> OnSelect { get; set; }
+
+    /// <summary>The sample's company (EDIT-09), so the cover letter can name it.</summary>
+    [Parameter] public EventCallback<string> OnCompany { get; set; }
     [Parameter] public bool Disabled { get; set; }
 
     #endregion
@@ -49,6 +52,16 @@
 
     // Shown while the editor is empty or holds one of the samples (so another can be picked); hidden once the user has their own text
     private bool Visible => string.IsNullOrWhiteSpace(Current) || ActiveSample != null;
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task SelectAsync(SampleJobDescription sample)
+    {
+        await OnSelect.InvokeAsync(sample.Text);
+        await OnCompany.InvokeAsync(sample.Company);
+    }
 
     #endregion
 }

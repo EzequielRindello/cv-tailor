@@ -14,6 +14,9 @@ public class CoverLetter
     public Header Header { get; set; } = new();
     public string Date { get; set; } = string.Empty;
     public string? JobTitle { get; set; }
+
+    /// <summary>The company the letter is for, quoted in the salutation and the closing; null when unknown (EDIT-09).</summary>
+    public string? Company { get; set; }
     public string Subject { get; set; } = string.Empty;
     public string Salutation { get; set; } = string.Empty;
     public List<CoverLetterParagraph> Paragraphs { get; set; } = new();
@@ -22,9 +25,24 @@ public class CoverLetter
 
 public class CoverLetterParagraph
 {
+    /// <summary>
+    /// Names the paragraph's subject ("opening", "closing", or the experience it is about), so an edit stays with
+    /// its paragraph when the letter is written again (EDIT-09).
+    /// </summary>
+    public string Key { get; set; } = string.Empty;
+
     public List<CoverLetterPart> Parts { get; set; } = new();
 
-    public string Text => string.Concat(Parts.Select(p => p.Text));
+    /// <summary>The visitor's own text for this paragraph (EDIT-09); null while it is the generated one.</summary>
+    public string? EditedText { get; set; }
+
+    public bool IsEdited => EditedText != null;
+
+    /// <summary>What the app wrote from the parts, whether or not the visitor changed it.</summary>
+    public string GeneratedText => string.Concat(Parts.Select(p => p.Text));
+
+    /// <summary>What the letter says: the visitor's text if they edited this paragraph, else the generated one.</summary>
+    public string Text => EditedText ?? GeneratedText;
 }
 
 /// <summary>A piece of a paragraph. <see cref="IsFact"/> parts are quoted verbatim from the CV or the job post.</summary>

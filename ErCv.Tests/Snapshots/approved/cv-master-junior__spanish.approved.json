@@ -7,13 +7,15 @@
     "totalKeywords": 15,
     "seniorityMatch": false,
     "colorClass": "red",
-    "lowMatchWarning": null
+    "lowMatchWarning": null,
+    "profileOverall": null
   },
   "missingSkills": {
     "requiredMissing": [],
     "niceToHaveMissing": [],
     "suggestions": [],
-    "potentialScoreIncrease": 0
+    "potentialScoreIncrease": 0,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

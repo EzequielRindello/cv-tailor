@@ -1,13 +1,14 @@
 {
   "matchScore": {
-    "overall": 48,
+    "overall": 42,
     "skillsMatched": 4,
     "totalSkills": 8,
-    "keywordsMatched": 3,
+    "keywordsMatched": 1,
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "red",
-    "lowMatchWarning": null
+    "lowMatchWarning": null,
+    "profileOverall": 48
   },
   "missingSkills": {
     "requiredMissing": [
@@ -21,7 +22,8 @@
       "Add 'incident response' to cv-master.json if you have experience with this technology",
       "Add 'sre' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 19
+    "potentialScoreIncrease": 19,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

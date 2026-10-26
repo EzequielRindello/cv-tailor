@@ -113,11 +113,15 @@ public class HardeningTests
         {
             ["ErCv:RateLimit:PermitLimit"] = "60",
             ["ErCv:RateLimit:WindowSeconds"] = "60",
+            ["ErCv:ImportRateLimit:PermitLimit"] = "10",
+            ["ErCv:ImportRateLimit:WindowSeconds"] = "60",
             ["ErCv:Session:IdleTimeoutMinutes"] = "10"
         }));
 
         Assert.Equal(60, options.RateLimit.PermitLimit);
         Assert.Equal(60, options.RateLimit.WindowSeconds);
+        Assert.Equal(10, options.ImportRateLimit.PermitLimit);
+        Assert.Equal(60, options.ImportRateLimit.WindowSeconds);
         Assert.Equal(10, options.Session.IdleTimeoutMinutes);
     }
 
@@ -129,8 +133,30 @@ public class HardeningTests
         {
             ["ErCv:RateLimit:PermitLimit"] = "0",
             ["ErCv:RateLimit:WindowSeconds"] = "60",
+            ["ErCv:ImportRateLimit:PermitLimit"] = "10",
+            ["ErCv:ImportRateLimit:WindowSeconds"] = "60",
             ["ErCv:Session:IdleTimeoutMinutes"] = "10"
         })));
+    }
+
+    // APP-07: the import limit is required, positive, and not looser than the API's
+    [Theory]
+    [InlineData("0", "60")]
+    [InlineData("10", "0")]
+    [InlineData("61", "60")]
+    [InlineData("2", "1")]
+    public void The_import_limit_must_be_positive_and_stricter_than_the_api_limit(string permit, string window)
+    {
+        var config = Config(new()
+        {
+            ["ErCv:RateLimit:PermitLimit"] = "60",
+            ["ErCv:RateLimit:WindowSeconds"] = "60",
+            ["ErCv:ImportRateLimit:PermitLimit"] = permit,
+            ["ErCv:ImportRateLimit:WindowSeconds"] = window,
+            ["ErCv:Session:IdleTimeoutMinutes"] = "10"
+        });
+
+        Assert.Throws<InvalidOperationException>(() => ErCvOptions.Load(config));
     }
 
     private static string Header(HttpResponseMessage response, string name) =>

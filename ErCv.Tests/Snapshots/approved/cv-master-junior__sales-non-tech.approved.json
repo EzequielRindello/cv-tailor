@@ -7,13 +7,15 @@
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "red",
-    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive.",
+    "profileOverall": null
   },
   "missingSkills": {
     "requiredMissing": [],
     "niceToHaveMissing": [],
     "suggestions": [],
-    "potentialScoreIncrease": 0
+    "potentialScoreIncrease": 0,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [],
@@ -120,7 +122,7 @@
       "linkedIn": "linkedin.com/in/sam-carter-dev",
       "gitHub": "github.com/samcarter-dev"
     },
-    "summary": "Junior Data Engineer with 2+ years of experience, specializing in Python, React, Express, and Flask. Strong communication skills.",
+    "summary": "Junior Software Engineer with 2+ years of experience, specializing in Python, React, Express, and Flask. Strong communication skills.",
     "education": [
       {
         "degree": "B.S. Computer Science",

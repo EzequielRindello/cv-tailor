@@ -116,6 +116,30 @@ public class MyProfileTests : E2ETestBase
         Assert.Null(await Page.EvaluateAsync<string?>("() => localStorage.getItem('cv-generator-my-profile')"));
     }
 
+    // PROF-07: the limits are explained by a tooltip a keyboard reaches, and a wrong type is refused up front
+    [Fact]
+    public async Task Resume_import_limits_are_reachable_by_keyboard_and_a_wrong_type_is_refused()
+    {
+        await OpenProfilePageAsync();
+
+        await Page.Locator("#resume-import-info").FocusAsync();
+        var tooltip = Page.Locator("#resume-import-limits");
+        await Assertions.Expect(tooltip).ToBeVisibleAsync();
+        await Assertions.Expect(tooltip).ToContainTextAsync("MB");
+        await Assertions.Expect(tooltip).ToContainTextAsync("pages");
+        await Page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(tooltip).ToBeHiddenAsync();
+
+        await Page.Locator("#profile-import-resume").SetInputFilesAsync(new FilePayload
+        {
+            Name = "notes.txt",
+            MimeType = "text/plain",
+            Buffer = "just text"u8.ToArray()
+        });
+
+        await Assertions.Expect(Page.Locator(".app-toast").Filter(new() { HasText = "Only PDF and Word" })).ToBeVisibleAsync();
+    }
+
     private static byte[] WordResume(params string[] lines)
     {
         using var stream = new MemoryStream();

@@ -836,6 +836,79 @@ h1, h2, h3, .form-title {
   white-space: nowrap;
 }
 
+.company-field {
+  margin-top: var(--spacing-md);
+}
+
+/* EDIT-08: the scores are being recomputed */
+.insights-panel.is-updating > :not(.insights-updating) {
+  opacity: 0.55;
+}
+
+.insights-updating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background: var(--color-warning-soft);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.suggestion-hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* EDIT-07: what the visitor added back from the profile */
+.bullet-added-badge {
+  background: var(--color-success-soft);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  margin-left: var(--spacing-xs);
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.cv-editor-leftout {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.cv-editor-leftout summary {
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.cv-editor-leftout ul {
+  margin: var(--spacing-xs) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cv-editor-leftout li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) 0;
+}
+
+.cv-editor-page-warning {
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
 
 /* ===== CVPreview.css ===== */
 .cv-preview-frame-wrapper {
@@ -1259,6 +1332,51 @@ h1, h2, h3, .form-title {
 /* ===== Generation progress and skeletons (UX-06) ===== */
 .gen-progress {
   width: 100%;
+}
+
+/* UX-11: the native progress element keeps its role and value, and needs no inline style (the CSP) */
+.gen-bar,
+.render-bar {
+  accent-color: var(--color-primary-500);
+  appearance: none;
+  background: var(--color-bg-hover);
+  border: 0;
+  border-radius: var(--radius-pill);
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.gen-bar {
+  margin-bottom: var(--spacing-sm);
+}
+
+.render-bar {
+  margin: var(--spacing-xs) 0;
+}
+
+.gen-bar::-webkit-progress-bar,
+.render-bar::-webkit-progress-bar {
+  background: var(--color-bg-hover);
+}
+
+.gen-bar::-webkit-progress-value,
+.render-bar::-webkit-progress-value {
+  background: var(--color-primary-500);
+  transition: width 0.25s ease;
+}
+
+.gen-bar::-moz-progress-bar,
+.render-bar::-moz-progress-bar {
+  background: var(--color-primary-500);
+}
+
+.gen-detail {
+  color: var(--color-text-secondary);
+  display: block;
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
 }
 
 .gen-steps {
@@ -2844,6 +2962,23 @@ body:not(:has(#samples)) .app-try-demo {
   color: var(--color-warning);
 }
 
+/* MatchScore.ProfileOverall: the whole profile's match, when it is higher than the CV's (EDIT-08) */
+.match-profile-note {
+  align-items: flex-start;
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  display: flex;
+  font-size: var(--font-size-sm);
+  gap: var(--spacing-xs);
+  margin: var(--spacing-md) 0 0;
+  padding: var(--spacing-sm);
+}
+
+.match-profile-note strong {
+  color: var(--color-text-primary);
+}
+
 .match-breakdown {
   display: flex;
   flex-direction: column;
@@ -3415,6 +3550,11 @@ body:not(:has(#samples)) .app-try-demo {
   color: var(--color-text-link);
 }
 
+/* Bootstrap's pink code color fails the contrast check on the dark theme */
+.privacy-page code {
+  color: var(--color-text-primary);
+}
+
 .privacy-page li + li {
   margin-top: var(--spacing-xs);
 }
@@ -3460,6 +3600,63 @@ body:not(:has(#samples)) .app-try-demo {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-sm);
+}
+
+.resume-import {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.resume-import-info {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border: 0;
+  background: none;
+  color: var(--color-text-tertiary);
+}
+
+.resume-import-info:hover,
+.resume-import-info:focus-visible {
+  color: var(--color-text-primary);
+}
+
+/* Always in the DOM so aria-describedby resolves; hidden until hover, keyboard focus or a tap */
+.resume-import-limits {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: var(--z-tooltip);
+  width: max-content;
+  max-width: min(320px, 80vw);
+  margin-bottom: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--font-size-xs);
+  visibility: hidden;
+  opacity: 0;
+}
+
+.resume-import-limits ul {
+  margin: 0;
+  padding-left: var(--spacing-md);
+}
+
+.resume-import-info:hover + .resume-import-limits,
+.resume-import-info:focus-visible + .resume-import-limits,
+.resume-import-limits.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.resume-import-info + .resume-import-limits.dismissed {
+  visibility: hidden;
+  opacity: 0;
 }
 
 .profile-toolbar .btn,

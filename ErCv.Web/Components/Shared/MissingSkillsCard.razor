@@ -13,7 +13,7 @@
                     Skills Coverage
                 </h5>
             </div>
-            <p class="all-clear-text">All required skills are present in your CV Master!</p>
+            <p class="all-clear-text">All the skills the post asks for are on this CV.</p>
         }
         else
         {
@@ -55,6 +55,16 @@
                             <li class="skill-pill nice"><span class="visually-hidden">Nice to have: </span>@s</li>
                         }
                     </ul>
+
+                    @if (Data.InProfileNotInCv.Count > 0)
+                    {
+                        <div class="suggestions" id="missing-in-profile">
+                            <div class="group-label">In your profile, left out of this CV</div>
+                            <p class="suggestion-hint">
+                                @string.Join(", ", Data.InProfileNotInCv). Add them back from the editor.
+                            </p>
+                        </div>
+                    }
 
                     @if (Data.Suggestions.Count > 0)
                     {

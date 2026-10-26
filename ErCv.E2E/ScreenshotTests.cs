@@ -37,14 +37,25 @@ public class ScreenshotTests : E2ETestBase
         await ShotAsync(folder, "composer.png");
 
         await GoToOptionsAsync();
+        await Page.GetByRole(AriaRole.Checkbox, new() { Name = "Also write a cover letter" }).CheckAsync();
         await Button("Generate CV").ClickAsync();
         await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
         await ShotAsync(folder, "workspace.png");
 
+        // The editor with the skills the CV left out open, ready to be added back (EDIT-07)
         await Button("Edit", exact: true).ClickAsync();
         await Assertions.Expect(Page.Locator(".bullet-editor-card")).ToBeVisibleAsync();
+        await Page.Locator("#editor-leftout-skills summary").ClickAsync();
         await ShotAsync(folder, "editor.png");
         await Button("Done", exact: true).ClickAsync();
+
+        // The cover letter that names the company, open in its editor (EDIT-09)
+        await Button("Cover letter", exact: true).ClickAsync();
+        await Button("Edit", exact: true).ClickAsync();
+        await Assertions.Expect(Page.Locator("#letter-company")).ToBeVisibleAsync();
+        await ShotAsync(folder, "letter.png");
+        await Button("Done", exact: true).ClickAsync();
+        await Button("CV", exact: true).ClickAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Switch to dark theme" }).ClickAsync();
         await Page.GetByRole(AriaRole.Tab, new() { Name = "Job" }).ClickAsync();

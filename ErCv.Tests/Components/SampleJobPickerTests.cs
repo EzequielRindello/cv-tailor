@@ -10,6 +10,23 @@ public class SampleJobPickerTests : BunitContext
     private IRenderedComponent<SampleJobPicker> Render(string current) =>
         Render<SampleJobPicker>(p => p.Add(c => c.Current, current));
 
+    // EDIT-09: choosing a sample also gives its company, so the cover letter can name it
+    [Fact]
+    public void Choosing_a_sample_gives_its_text_and_its_company()
+    {
+        var sample = SampleJobDescriptions.All[0];
+        string? text = null, company = null;
+        var cut = Render<SampleJobPicker>(p => p
+            .Add(c => c.Current, "")
+            .Add(c => c.OnSelect, (string t) => text = t)
+            .Add(c => c.OnCompany, (string c) => company = c));
+
+        cut.FindAll("button.sample-chip")[0].Click();
+
+        Assert.Equal(sample.Text, text);
+        Assert.Equal(sample.Company, company);
+    }
+
     [Fact]
     public void Shows_one_chip_per_sample()
     {

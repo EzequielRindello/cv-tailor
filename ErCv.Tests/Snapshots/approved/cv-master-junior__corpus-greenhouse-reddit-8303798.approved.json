@@ -7,7 +7,8 @@
     "totalKeywords": 15,
     "seniorityMatch": false,
     "colorClass": "red",
-    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive.",
+    "profileOverall": null
   },
   "missingSkills": {
     "requiredMissing": [
@@ -25,7 +26,8 @@
       "Add 'grpc' to cv-master.json if you have experience with this technology",
       "Add 'system design' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 25
+    "potentialScoreIncrease": 25,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
@@ -164,7 +166,6 @@
       "engineer",
       "built",
       "users",
-      "developer",
       "experience",
       "automated",
       "full",
@@ -220,7 +221,7 @@
       "linkedIn": "linkedin.com/in/sam-carter-dev",
       "gitHub": "github.com/samcarter-dev"
     },
-    "summary": "Junior Full Stack Developer with 2+ years of experience, specializing in React, JavaScript, TypeScript, and CI/CD.",
+    "summary": "Junior Software Engineer with 2+ years of experience, specializing in React, JavaScript, TypeScript, and CI/CD.",
     "education": [
       {
         "degree": "B.S. Computer Science",

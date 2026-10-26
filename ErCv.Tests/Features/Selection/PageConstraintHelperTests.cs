@@ -224,6 +224,34 @@ public class PageConstraintHelperTests
         Assert.InRange(calls.Count, 2, 8);
     }
 
+    // UX-11: every render is reported with the number the search expects, never past it, so a progress bar can follow
+    [Fact]
+    public async Task Measured_fit_reports_each_render_against_the_expected_total()
+    {
+        var calls = new List<GeneratedCV>();
+        var reports = new List<(int Done, int Total)>();
+        var input = Oversized(experiences: 5, bulletsEach: 8, bulletChars: 50);
+
+        await _helper.FitMeasuredAsync(input, false, FakeRender(calls), r => TotalBullets(r) > 12 ? 2 : 1,
+            (done, total) => reports.Add((done, total)));
+
+        Assert.Equal(calls.Count, reports.Count);
+        Assert.Equal(Enumerable.Range(1, reports.Count), reports.Select(r => r.Done));
+        Assert.All(reports, r => Assert.InRange(r.Done, 1, r.Total));
+        Assert.Single(reports.Select(r => r.Total).Distinct());
+    }
+
+    [Fact]
+    public async Task Measured_fit_reports_one_of_one_when_the_cv_already_fits()
+    {
+        var reports = new List<(int Done, int Total)>();
+
+        await _helper.FitMeasuredAsync(Oversized(experiences: 2, bulletsEach: 2, bulletChars: 50), false,
+            FakeRender(new List<GeneratedCV>()), _ => 1, (done, total) => reports.Add((done, total)));
+
+        Assert.Equal((1, 1), Assert.Single(reports));
+    }
+
     [Fact]
     public async Task Measured_fit_allows_two_pages_in_two_page_mode()
     {

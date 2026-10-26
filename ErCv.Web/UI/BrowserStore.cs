@@ -77,6 +77,7 @@ public class BrowserStore
         {
             Id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             JobTitle = ExtractJobTitle(jobDescription),
+            Company = options?.Company ?? string.Empty,
             GeneratedAt = DateTime.UtcNow.ToString(TimestampFormat),
             MatchScore = matchScore,
             Template = template,

@@ -7,21 +7,27 @@
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "yellow",
-    "lowMatchWarning": null
+    "lowMatchWarning": null,
+    "profileOverall": null
   },
   "missingSkills": {
     "requiredMissing": [
+      "observability",
       "grpc",
       "distributed systems",
       "event-driven"
     ],
     "niceToHaveMissing": [],
     "suggestions": [
+      "Add 'observability' to cv-master.json if you have experience with this technology",
       "Add 'grpc' to cv-master.json if you have experience with this technology",
       "Add 'distributed systems' to cv-master.json if you have experience with this technology",
       "Add 'event-driven' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 11
+    "potentialScoreIncrease": 14,
+    "inProfileNotInCv": [
+      "observability"
+    ]
   },
   "keywordAnalysis": {
     "technicalKeywords": [

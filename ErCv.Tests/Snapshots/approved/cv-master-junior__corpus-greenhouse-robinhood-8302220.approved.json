@@ -7,7 +7,8 @@
     "totalKeywords": 15,
     "seniorityMatch": false,
     "colorClass": "red",
-    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive.",
+    "profileOverall": null
   },
   "missingSkills": {
     "requiredMissing": [
@@ -32,7 +33,8 @@
       "Mention 'react native' in relevant project bullet points if you have used it",
       "There are 1 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 33
+    "potentialScoreIncrease": 33,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [

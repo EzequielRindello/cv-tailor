@@ -4,7 +4,7 @@
 {
     <div class="details-fullscreen" aria-busy="true">
         <div class="results-actionbar">
-            <GenerationProgress Current="Stage" />
+            <GenerationProgress Value="Progress" />
         </div>
 
         <div class="details-layout">
@@ -60,7 +60,7 @@ else
                     var f = format;
                     <button type="button"
                             class="btn @(f == Documents.Keys.First() ? "btn-primary" : "btn-outline-primary")"
-                            disabled="@Loading"
+                            disabled="@(Loading || RenderingLabel != null)"
                             aria-label="Download @FormatLabel(f)"
                             @onclick="() => OnDownload.InvokeAsync(f)">
                         <i class="bi bi-download me-1" aria-hidden="true"></i>
@@ -82,6 +82,11 @@ else
                 </button>
             </div>
         </div>
+
+        @if (RenderingLabel != null)
+        {
+            <progress class="render-bar" id="render-bar" aria-label="@RenderingLabel">@RenderingLabel</progress>
+        }
 
         <div class="pane-switch" role="group" aria-label="Show preview or insights">
             <button type="button"
@@ -113,7 +118,7 @@ else
                 {
                     <CVPreview Html="@Analysis.CoverLetterHtml" Title="Cover letter">
                         <Actions>
-                            <CoverLetterActions Letter="Analysis.CoverLetter" OnDownload="OnDownloadLetter" Disabled="Loading" />
+                            <CoverLetterActions Letter="Analysis.CoverLetter" OnDownload="OnDownloadLetter" Disabled="@(Loading || RenderingLabel != null)" />
                         </Actions>
                     </CVPreview>
                 }
@@ -128,10 +133,19 @@ else
             </div>
 
             <div class="details-analysis-panel">
-                @if (Editing && Draft != null)
+                @if (Editing && _showLetter && LetterDraft != null)
+                {
+                    <CoverLetterEditor Draft="LetterDraft"
+                                       PageWarning="@LetterPageWarning"
+                                       OnChanged="OnLetterChanged"
+                                       OnCompanyChanged="OnCompanyChanged"
+                                       OnClose="() => EditingChanged.InvokeAsync(false)" />
+                }
+                else if (Editing && Draft != null)
                 {
                     <CvEditor Draft="Draft"
                               Template="Template"
+                              PageWarning="@PageWarning"
                               OnChanged="OnDraftChanged"
                               OnClose="() => EditingChanged.InvokeAsync(false)" />
                 }
@@ -154,7 +168,12 @@ else
                             </button>
                         }
                     </div>
-                    <div class="insights-panel" id="insights-panel" role="tabpanel" aria-labelledby="insights-tab-@_tab">
+                    <div class="insights-panel @(ScoresUpdating ? "is-updating" : "")" id="insights-panel" role="tabpanel"
+                         aria-labelledby="insights-tab-@_tab" aria-busy="@(ScoresUpdating ? "true" : "false")">
+                        @if (ScoresUpdating)
+                        {
+                            <div class="insights-updating" role="status"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Updating scores</div>
+                        }
                         @switch (_tab)
                         {
                             case "match":
@@ -201,7 +220,10 @@ else
     [Parameter] public AnalysisResult? Analysis { get; set; }
     [Parameter] public Dictionary<string, byte[]> Documents { get; set; } = new();
     [Parameter] public bool Loading { get; set; }
-    [Parameter] public GenerationStage Stage { get; set; }
+    [Parameter] public GenerationStatus Progress { get; set; } = new(GenerationStage.Parsing, 0);
+
+    /// <summary>UX-11: what is being rendered for a download ("Rendering PDF..."), or null. Shows a bar and holds the buttons.</summary>
+    [Parameter] public string? RenderingLabel { get; set; }
     [Parameter] public bool Editing { get; set; }
     [Parameter] public EventCallback<bool> EditingChanged { get; set; }
     [Parameter] public EventCallback OnBack { get; set; }
@@ -209,7 +231,22 @@ else
     [Parameter] public EventCallback<string> OnDownload { get; set; }
     [Parameter] public EventCallback<string> OnDownloadLetter { get; set; }
     [Parameter] public CvDraft? Draft { get; set; }
+
+    /// <summary>EDIT-09: the cover letter being edited, when there is one.</summary>
+    [Parameter] public CoverLetterDraft? LetterDraft { get; set; }
+
+    /// <summary>EDIT-10: set when the edited letter runs past one page.</summary>
+    [Parameter] public string? LetterPageWarning { get; set; }
+    [Parameter] public EventCallback OnLetterChanged { get; set; }
+    [Parameter] public EventCallback<string> OnCompanyChanged { get; set; }
     [Parameter] public CVTemplate Template { get; set; }
+
+    /// <summary>EDIT-07: set when what the visitor added back makes the CV run past its page limit.</summary>
+    [Parameter] public string? PageWarning { get; set; }
+
+    /// <summary>EDIT-08: the scores are being recomputed for the edited CV.</summary>
+    [Parameter] public bool ScoresUpdating { get; set; }
+
     [Parameter] public EventCallback OnDraftChanged { get; set; }
 
     #endregion

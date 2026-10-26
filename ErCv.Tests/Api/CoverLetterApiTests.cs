@@ -1,6 +1,7 @@
 using DocumentFormat.OpenXml.Packaging;
 using ErCv.Tests.Fixtures;
 using ErCv.Web.Constants;
+using ErCv.Web.Features.CoverLetters;
 using ErCv.Web.Features.Documents;
 using ErCv.Web.Features.Editing;
 using ErCv.Web.Models;
@@ -40,6 +41,109 @@ public class CoverLetterApiTests
         Assert.Null(without.CoverLetter);
         Assert.Null(without.CoverLetterHtml);
     }
+
+    // EDIT-09: the visitor's company wins over the post's, and it is checked at the boundary
+    [Fact]
+    public async Task A_company_in_the_request_is_named_in_the_letter_and_returned()
+    {
+        var request = Request(true);
+        request.Company = "  Stripe   Payments ";
+
+        var analysis = await WithServiceAsync(async s => (await s.BuildCvAsync(request)).Analysis);
+
+        Assert.Equal("Stripe Payments", analysis.Company);
+        Assert.Equal("Dear Stripe Payments team,", analysis.CoverLetter!.Salutation);
+        Assert.Contains("Dear Stripe Payments team,", analysis.CoverLetterHtml);
+    }
+
+    [Fact]
+    public async Task Without_a_company_the_one_the_post_names_is_used_or_none()
+    {
+        var request = Request(true);
+        request.JobDescription = "Backend Engineer\n\nAbout Stripe\nWe build payments. Go and Kafka.";
+
+        var named = await WithServiceAsync(async s => (await s.BuildCvAsync(request)).Analysis);
+        var none = await WithServiceAsync(async s => (await s.BuildCvAsync(Request(true))).Analysis);
+
+        Assert.Equal("Stripe", named.Company);
+        Assert.Equal("Dear Stripe team,", named.CoverLetter!.Salutation);
+        Assert.Null(none.Company);
+        Assert.Equal("Dear Hiring Manager,", none.CoverLetter!.Salutation);
+    }
+
+    [Theory]
+    [InlineData("Line one\nLine two")]
+    [InlineData("Bell\u0007")]
+    public async Task A_company_that_is_not_one_line_is_refused(string company)
+    {
+        var request = Request(true);
+        request.Company = company;
+
+        await WithServiceAsync(async s =>
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => s.BuildCvAsync(request));
+            return true;
+        });
+    }
+
+    [Fact]
+    public async Task A_company_that_is_too_long_is_refused()
+    {
+        var request = Request(true);
+        request.Company = new string('a', ApiConstants.MaxCompanyLength + 1);
+
+        await WithServiceAsync(async s =>
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => s.BuildCvAsync(request));
+            return true;
+        });
+    }
+
+    // EDIT-10: a letter made of blocks at their cap runs past one page, and is printed as written (never trimmed)
+    [Fact]
+    public Task A_letter_edited_to_the_cap_runs_to_several_pages_and_is_not_trimmed() => WithServiceAsync(async s =>
+    {
+        var (_, analysis) = await s.BuildCvAsync(Request(true));
+        var draft = new CoverLetterDraft(analysis.CoverLetter!);
+        var words = string.Join(" ", Enumerable.Repeat("delivered", ApiConstants.MaxEditedLetterBlockLength / 10));
+        foreach (var block in draft.Blocks.Where(b => b.Key != CoverLetterDraft.SalutationKey))
+            Assert.True(draft.Edit(block.Key, words));
+
+        var pdf = await s.RenderCoverLetterAsync(draft.Build(), "pdf");
+        var short1 = await s.RenderCoverLetterAsync(analysis.CoverLetter!, "pdf");
+
+        Assert.True(DocumentRenderer.CountPages(pdf) > 1);
+        Assert.Equal(1, DocumentRenderer.CountPages(short1));
+        return true;
+    });
+
+    // EDIT-09: the letter the visitor edited is rendered as written, and the service refuses one past its limits
+    [Fact]
+    public Task An_edited_letter_renders_as_written_and_one_past_the_limits_is_refused() => WithServiceAsync(async s =>
+    {
+        var (_, analysis) = await s.BuildCvAsync(Request(true));
+        var draft = new CoverLetterDraft(analysis.CoverLetter!);
+        var key = draft.Blocks.First(b => b.Key != CoverLetterDraft.SalutationKey).Key;
+        Assert.True(draft.Edit(key, "Written by the visitor"));
+
+        Assert.Contains("Written by the visitor", s.RenderCoverLetterHtml(draft.Build()));
+
+        var tooLong = analysis.CoverLetter!;
+        tooLong.Salutation = new string('a', ApiConstants.MaxEditedLetterBlockLength + 1);
+        var error = Assert.Throws<ArgumentException>(() => s.RenderCoverLetterHtml(tooLong));
+        Assert.Equal(ApiConstants.ErrorLetterInvalid, error.Message);
+        return true;
+    });
+
+    [Fact]
+    public Task A_letter_for_a_post_past_the_length_limit_is_refused() => WithServiceAsync(async s =>
+    {
+        var (_, analysis) = await s.BuildCvAsync(Request(true));
+        var post = new string('a', ApiConstants.MaxJobDescriptionLength + 1);
+
+        Assert.Throws<ArgumentException>(() => s.BuildCoverLetter(analysis.GeneratedCV, post));
+        return true;
+    });
 
     [Fact]
     public Task The_letter_follows_a_rewritten_bullet() => WithServiceAsync(async s =>

@@ -1,13 +1,14 @@
 {
   "matchScore": {
-    "overall": 40,
+    "overall": 34,
     "skillsMatched": 1,
     "totalSkills": 3,
-    "keywordsMatched": 3,
+    "keywordsMatched": 1,
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "red",
-    "lowMatchWarning": null
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive.",
+    "profileOverall": 40
   },
   "missingSkills": {
     "requiredMissing": [
@@ -19,7 +20,8 @@
       "Add 'python' to cv-master.json if you have experience with this technology",
       "Add 'llm' to cv-master.json if you have experience with this technology"
     ],
-    "potentialScoreIncrease": 33
+    "potentialScoreIncrease": 33,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
@@ -175,7 +177,7 @@
       "linkedIn": "linkedin.com/in/ezequiel-rindello",
       "gitHub": "github.com/EzequielRindello"
     },
-    "summary": "Junior Software Engineer with 1+ years of experience, specializing in SQL and SQL Server.",
+    "summary": "Junior ML Engineer with 1+ years of experience, specializing in SQL and SQL Server.",
     "education": [
       {
         "degree": "B.S. Software Development (In Progress)",
@@ -292,7 +294,7 @@
     ],
     "projects": [
       {
-        "name": "ER CV Generator",
+        "name": "CV Tailor",
         "description": "Resume generator that tailors a CV to a job description without inventing content. ASP.NET Core monolith (.NET 10) with a Blazor Server UI and a REST API, shipped as one Docker service.",
         "technologies": [
           ".NET",
@@ -311,7 +313,7 @@
           "PDF rendering with PuppeteerSharp and DOCX with OpenXML, with page-fit enforcement for one- or two-page CVs",
           "7,500+ automated test cases (unit, API, PDF and DOCX documents) plus Playwright end-to-end tests run in GitHub Actions CI"
         ],
-        "link": "github.com/EzequielRindello/er-cv-generator"
+        "link": "github.com/EzequielRindello/cv-tailor"
       }
     ],
     "sectionOrder": [],

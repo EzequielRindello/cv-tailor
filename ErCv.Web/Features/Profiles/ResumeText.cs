@@ -30,6 +30,22 @@ public static class ResumeText
     }
 
     /// <summary>
+    /// Whether the pages that are read have a text layer: at least <see cref="ResumeImportConstants.MinPdfTextLetters"/>
+    /// letters. A scanned resume is an image, and some scanners print a watermark or a page number as text over it.
+    /// </summary>
+    public static bool HasTextLayer(byte[] bytes)
+    {
+        using var document = PdfDocument.Open(bytes);
+        var letters = 0;
+        foreach (var page in document.GetPages().Take(ResumeImportConstants.MaxPdfPages))
+        {
+            letters += page.Letters.Count(l => l.Value.Any(char.IsLetter));
+            if (letters >= ResumeImportConstants.MinPdfTextLetters) return true;
+        }
+        return false;
+    }
+
+    /// <summary>
     /// The text of a PDF, its first <see cref="ResumeImportConstants.MaxPdfPages"/> pages, top to bottom. Words far
     /// apart on a line are joined with " | " (a right-aligned date). A two-column page is read one column after
     /// the other. The LinkedIn and GitHub addresses behind links ("LinkedIn" printed, the address in the link)

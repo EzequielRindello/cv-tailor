@@ -4,3 +4,4 @@
 .vs/
 testing/
 *.md
+*.stackdump

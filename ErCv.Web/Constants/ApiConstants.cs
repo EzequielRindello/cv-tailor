@@ -19,7 +19,22 @@ public static class ApiConstants
 
     // EDIT-01: a rewritten bullet; the editor's textarea and the service check share it
     public const int MaxEditedBulletLength = 600;
+
+    // The cover letter the visitor edits (EDIT-09): the salutation and each paragraph, and the paragraphs in a letter
+    // (the opening, two experiences, the closing, and the paragraphs of experiences no longer written about)
+    public const int MaxEditedLetterBlockLength = 1500;
+    public const int MaxLetterParagraphs = 6;
     public const long MaxRequestBodyBytes = 2 * 1024 * 1024;
+
+    // The job post import takes one link (at most JobPostImporter.MaxLinkLength characters) in a small JSON body
+    public const long MaxImportRequestBytes = 8 * 1024;
+
+    // A company name is a short line (EDIT-09): the parser, the request check and the field share this limit
+    public const int MaxCompanyLength = 100;
+
+    // Named rate limit policies (Program.cs); the import one is stricter and replaces "api" on its endpoint
+    public const string ApiRateLimitPolicy = "api";
+    public const string ImportRateLimitPolicy = "import";
 
     #endregion
 
@@ -85,6 +100,10 @@ public static class ApiConstants
     public const string TitlePayloadTooLarge = "Payload too large";
     public const string TitleProfileNotFound = "Profile not found";
     public const string TitleNotFound = "Not found";
+    public const string TitleBadGateway = "Job board unavailable";
+    public const string TitleTooManyRequests = "Too many requests";
+    public const string TitleServerError = "Server error";
+    public const string ProblemJsonContentType = "application/problem+json";
 
     #endregion
 
@@ -97,7 +116,15 @@ public static class ApiConstants
     public const string ErrorUnsupportedFormat = "Unsupported format: {0}. Allowed formats: {1}.";
     public const string ErrorUnsupportedFormats = "Unsupported format(s): {0}. Allowed formats: {1}.";
     public const string ErrorGeneratedCvRequired = "GeneratedCV is required";
+    public const string ProgressFitting = "Fitting the page ({0} of {1})";
     public const string ErrorGeneratingCv = "Error generating CV";
+    public const string ErrorLetterInvalid = "The cover letter is too long";
+    public const string ErrorCompanyInvalid = "The company name must be one line of at most {0} characters";
+    public const string ErrorTooManyRequests = "Too many requests. Wait a moment and try again.";
+    public const string ErrorRequestTooLarge = "The request is too large.";
+    public const string ErrorRequestUnreadable = "The request could not be read.";
+    public const string ErrorUnexpected = "Something went wrong. Try again in a moment.";
+    public const string ErrorImportingJobPost = "Error reading the job post";
     public const string ErrorRegeneratingCv = "Error regenerating CV";
     public const string ErrorDownloadingFile = "Error downloading file";
     public const string ErrorLoadingProfiles = "Error loading profiles";

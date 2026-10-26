@@ -16,8 +16,9 @@ public class CoverLetterGenerator
 {
     #region Public Methods
 
-    public CoverLetter Generate(GeneratedCV cv, JobRequirements requirements, string jobDescription, DateTime today)
+    public CoverLetter Generate(GeneratedCV cv, JobRequirements requirements, string jobDescription, DateTime today, string? company = null)
     {
+        company = string.IsNullOrWhiteSpace(company) ? null : company.Trim();
         var phrases = cv.Language == ApiConstants.LanguageSpanish ? Spanish : English;
         var labels = CvLabels.For(cv.Language);
         var jobTitle = JobTitle(jobDescription);
@@ -31,7 +32,8 @@ public class CoverLetterGenerator
             Date = string.Format(phrases.DateFormat, today.Day, phrases.MonthNames[today.Month - 1], today.Year),
             JobTitle = jobTitle,
             Subject = jobTitle == null ? string.Empty : phrases.Subject + jobTitle,
-            Salutation = phrases.Salutation,
+            Company = company,
+            Salutation = company == null ? phrases.Salutation : phrases.SalutationCompanyLead + company + phrases.SalutationCompanyEnd,
             Closing = phrases.SignOff
         };
 
@@ -44,7 +46,7 @@ public class CoverLetterGenerator
         for (var i = 0; i < experiences.Count; i++)
             letter.Paragraphs.Add(ExperienceParagraph(experiences[i], i == 0, phrases, labels));
 
-        letter.Paragraphs.Add(ClosingParagraph(cv, requirements, phrases));
+        letter.Paragraphs.Add(ClosingParagraph(cv, requirements, phrases, company));
         return letter;
     }
 
@@ -64,7 +66,7 @@ public class CoverLetterGenerator
 
     private static CoverLetterParagraph Opening(GeneratedCV cv, string? jobTitle, Phrases phrases)
     {
-        var paragraph = new CoverLetterParagraph();
+        var paragraph = new CoverLetterParagraph { Key = OpeningKey };
         if (jobTitle != null)
         {
             Fixed(paragraph, phrases.ApplyForTitle);
@@ -83,7 +85,8 @@ public class CoverLetterGenerator
 
     private static CoverLetterParagraph ExperienceParagraph(Experience exp, bool first, Phrases phrases, CvLabels labels)
     {
-        var paragraph = new CoverLetterParagraph();
+        // Keyed by the experience, not its position: another experience can come to be written about
+        var paragraph = new CoverLetterParagraph { Key = ExperienceKeyPrefix + ExperienceExplanation.KeyOf(exp) };
         Fixed(paragraph, first ? phrases.FirstRole : phrases.NextRole);
         Fact(paragraph, exp.Role);
         if (!string.IsNullOrWhiteSpace(exp.Company))
@@ -112,9 +115,9 @@ public class CoverLetterGenerator
         return paragraph;
     }
 
-    private static CoverLetterParagraph ClosingParagraph(GeneratedCV cv, JobRequirements requirements, Phrases phrases)
+    private static CoverLetterParagraph ClosingParagraph(GeneratedCV cv, JobRequirements requirements, Phrases phrases, string? company)
     {
-        var paragraph = new CoverLetterParagraph();
+        var paragraph = new CoverLetterParagraph { Key = ClosingKey };
 
         // Only skills that are both on the CV and in the post: the letter names nothing the profile does not list
         var shared = (cv.Skills ?? new List<string>())
@@ -137,7 +140,17 @@ public class CoverLetterGenerator
             Fixed(paragraph, phrases.SkillsEnd + " ");
         }
 
-        Fixed(paragraph, phrases.ClosingParagraph);
+        if (company == null)
+        {
+            Fixed(paragraph, phrases.ClosingParagraph);
+        }
+        else
+        {
+            // The company is a fact: it is the visitor's or the post's, between two fixed pieces of wording
+            Fixed(paragraph, phrases.ClosingCompanyLead);
+            Fact(paragraph, company);
+            Fixed(paragraph, phrases.ClosingCompanyEnd);
+        }
         return paragraph;
     }
 

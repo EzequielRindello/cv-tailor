@@ -7,7 +7,8 @@
     "totalKeywords": 15,
     "seniorityMatch": true,
     "colorClass": "red",
-    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive."
+    "lowMatchWarning": "Low match detected: this job description may not align with your profile, so the generated CV may not be competitive.",
+    "profileOverall": null
   },
   "missingSkills": {
     "requiredMissing": [
@@ -29,7 +30,8 @@
       "Add 'observability' to cv-master.json if you have experience with this technology",
       "There are 6 more required skills: review the full JSON"
     ],
-    "potentialScoreIncrease": 32
+    "potentialScoreIncrease": 32,
+    "inProfileNotInCv": []
   },
   "keywordAnalysis": {
     "technicalKeywords": [
