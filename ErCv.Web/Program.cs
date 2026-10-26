@@ -17,6 +17,8 @@ using Scalar.AspNetCore;
 
 const string PortVariable = "PORT";
 const string ErrorPath = "/Error";
+// Cloudflare's edge, then Render's own proxy (F32)
+const int TrustedProxyHops = 2;
 
 var builder = WebApplication.CreateBuilder(args);
 var settings = ErCvOptions.Load(builder.Configuration);
@@ -74,9 +76,11 @@ builder.Services.AddSession(options =>
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    // Render's proxy is not on a fixed, known network. Trusting only the last hop (the one Render appends) is what
-    // stops a client from spoofing X-Forwarded-For to get a fresh rate limit partition, so keep this at 1.
-    options.ForwardLimit = 1;
+    // Render's proxies are not on a fixed, known network. A request reaches the app through Cloudflare and then
+    // Render, so X-Forwarded-For ends with "client, Cloudflare edge". Trusting exactly those two hops gives the
+    // client's address; anything a client writes into the header itself sits further left and is ignored.
+    // With 1 hop the key was the Cloudflare edge, which changes between requests, so the limit never applied.
+    options.ForwardLimit = TrustedProxyHops;
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
@@ -150,7 +154,7 @@ app.Lifetime.ApplicationStopping.Register(() => DocumentRenderer.ShutdownAsync()
 
 app.Run();
 
-// One counter per client IP (ForwardLimit 1 keeps the IP from being spoofed)
+// One counter per client IP (ForwardLimit keeps the IP from being spoofed)
 static RateLimitPartition<string> FixedWindowPerIp(HttpContext context, Func<ErCvOptions, ErCvOptions.RateLimitSettings> limits)
 {
     var limit = limits(context.RequestServices.GetRequiredService<ErCvOptions>());

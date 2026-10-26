@@ -1,8 +1,10 @@
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <header class="app-topbar" id="app-header">
     <div class="app-topbar-inner">
-        <a class="app-wordmark" href="/" aria-label="@($"{UiConstants.AppName}, home")">
+        <a class="app-wordmark" href="/" aria-label="@($"{UiConstants.AppName}, home")"
+           @onclick="GoHome" @onclick:preventDefault>
             <span class="app-wordmark-mark" aria-hidden="true">CV</span>
             <span class="app-wordmark-text">Tailor</span>
         </a>
@@ -64,10 +66,27 @@
 
     #region Event Handlers
 
+    /// <summary>
+    /// The router ignores a link to the page already open, so on the home page the wordmark reloads it: a fresh
+    /// composer, like starting over. Settings, history and the profile live in the browser and survive the reload.
+    /// </summary>
+    private void GoHome() => Navigation.NavigateTo(Navigation.BaseUri, forceLoad: IsOnHome());
+
     private async Task ToggleThemeAsync()
     {
         _theme = _theme == ThemeDark ? ThemeLight : ThemeDark;
         await JS.InvokeVoidAsync(UiConstants.JsSetTheme, _theme);
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private bool IsOnHome()
+    {
+        var path = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var end = path.IndexOfAny(['?', '#']);
+        return (end < 0 ? path : path[..end]).Length == 0;
     }
 
     #endregion

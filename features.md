@@ -94,8 +94,8 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 | OPS-03 | README rewrite for portfolio | E9 DevOps | P1 | M | Done |
 | OPS-04 | PROJECT_OVERVIEW refresh | E9 DevOps | P2 | S | Done |
 | OPS-05 | Privacy note | E9 DevOps | P2 | S | Done |
-| OPS-06 | Deploy to Render + live demo link | E9 DevOps | P1 | M | In progress (M5.3, owner: Render) |
-| OPS-07 | Repo ready for visitors: GitHub page, license, releases, templates, and the name decision | E9 DevOps | P1 | S | In progress (M5.3, owner: GitHub settings) |
+| OPS-06 | Deploy to Render + live demo link | E9 DevOps | P1 | M | Done (M5.3; checks after the merge in "Open items after M5.3") |
+| OPS-07 | Repo ready for visitors: GitHub page, license, releases, templates, and the name decision | E9 DevOps | P1 | S | Done (M5.3; tags and releases after the merge) |
 | PROF-07 | Resume import: limits tooltip + up-front file validation | E3 Your profile | P1 | S | Done |
 | MATCH-10 | Summary role signals: one stray mention no longer sets the role (F29) | E4 Matching | P1 | M | Done |
 | EDIT-07 | Add back what the selection or the page fit left out | E5 Editing | P1 | L | Done |
@@ -119,8 +119,8 @@ Priority: **P0** (do first) to **P3** (nice to have). Effort: **S** (hours), **M
 4. **M4 Output** (v2.0.5, released): EDIT-01 to EDIT-06, MATCH-08, UX-10.
 5. **M5 Polish & presentation** (v2.0.6, released): OPS-02 to OPS-05, ENG-01, ENG-05, ENG-06, TEST-06, TEST-08, TEST-09, TEST-10. ENG-04 was dropped (Won't do, see the item). Nothing in M5 waits on M6.
 5.1. **M5.1 Smarter input** (v2.0.6.1, released): MATCH-06, PROF-05, APP-04. Read the job post's sections, start a profile from an existing resume, take the job post from its URL. PROF-05's AI-assisted parsing stays with M6. PROF-05 and APP-04 may need new packages (PDF/DOCX reading) and outbound HTTP: both are asked for before they are added.
-5.2. **M5.2 Pre-deploy polish** (v2.0.6.2, done; ships in one PR with M5.3): PROF-07, MATCH-10, EDIT-07, EDIT-08, EDIT-09, APP-07, and the follow-ups UX-11, MATCH-11, APP-08, EDIT-10, APP-09. Everything the owner wants done before the app goes public (2026-10-23): the resume import warns before a bad file is loaded, the summary stops misreading the role (F29), the M4 open items (add back, rescoring, cover letter), and the job post import over the API behind a per-IP rate limit. Branch `feature/m5-2-pre-deploy-polish`.
-5.3. **M5.3 Deploy** (v2.0.6.3, in progress: files done 2026-10-24, the deploy and the GitHub settings are the owner's, see the "Deploy checklist (owner)" under OPS-06): OPS-06 and OPS-07. The first public deploy, the live demo link the README gets with it, and the repository made ready for visitors (OPS-07, asked by the owner on 2026-10-23). Moved after M5.1 by the owner (2026-10-22), and after M5.2 on 2026-10-23.
+5.2. **M5.2 Pre-deploy polish** (v2.0.6.2, released: PR #20, which also carried the M5.3 files): PROF-07, MATCH-10, EDIT-07, EDIT-08, EDIT-09, APP-07, and the follow-ups UX-11, MATCH-11, APP-08, EDIT-10, APP-09. Everything the owner wants done before the app goes public (2026-10-23): the resume import warns before a bad file is loaded, the summary stops misreading the role (F29), the M4 open items (add back, rescoring, cover letter), and the job post import over the API behind a per-IP rate limit. Branch `feature/m5-2-pre-deploy-polish`.
+5.3. **M5.3 Deploy** (v2.0.6.3, released: live at https://cv-tailor-9z6e.onrender.com since 2026-10-26; PR #21 (`feature/m5-3-deploy`) closes it, and what can only be checked once it is deployed is in "Open items after M5.3"): OPS-06 and OPS-07. The first public deploy, the live demo link the README gets with it, and the repository made ready for visitors (OPS-07, asked by the owner on 2026-10-23). Moved after M5.1 by the owner (2026-10-22), and after M5.2 on 2026-10-23.
 6. **M6 Optional AI** (v2.0.7): AI-01 to AI-05. Parked until the owner has an API key the app can use.
 
 ### Versioning
@@ -198,6 +198,7 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 | F28 | Text depended on the server's culture. The ATS density issue used `{0:P0}`: "12%" on Windows (en-US) and "12 %" on Linux, where .NET runs with the invariant culture, so the first CI run of the M5 merge failed 44 snapshots, and the Render container would have shown "12 %". `{0:N0}` in the job description length error and the character counter would print "100.000" under a German or Spanish culture. | Fixed in `fix/culture-independent-text` (no version change): the ATS gets a whole percent rounded half to even (the "P0" rounding), the counts are formatted with the invariant culture, the ATS messages lost their em dashes. `GenerationSnapshotTests.Generation_does_not_depend_on_the_culture` generates every case under the invariant, es-AR, de-DE and fr-FR cultures against the same snapshots; `ATSCheckerTests` and `HardeningTests` pin the two messages |
 | F26 | E2E `Toasts_have_no_serious_violations` failed now and then: "CV ready" is usually still on screen when the download toast appears, so the bare `.app-toast` locator matched two toasts (Playwright strict mode). It passed only when the assertion ran before the second toast was added. | Fixed: the test waits for the "Download started" toast |
 | F31 | E2E `Reopening_a_past_generation_restores_its_options_and_generates_again` failed on the M5.2/M5.3 PR (#20): the history entry is written to localStorage just after the results show, and the test left the page in between, so the entry was lost and "Re-open" never appeared. EDIT-07 widened the gap (the profile is loaded after the result is set). A race of the tests, not the app: a visitor does not leave within milliseconds. | Fixed: `WaitForHistoryEntriesAsync` moved from `ApplicationTrackerTests` to `E2ETestBase` and called before leaving the page in the three `PersistenceAndShortcutTests` that do it and in the history accessibility test |
+| F32 | The API rate limit did not apply on Render: 63 quick requests from one client all answered 200. The response comes from Cloudflare (`Server: cloudflare`, `CF-RAY`), so a request passes Cloudflare's edge and then Render's proxy; with `ForwardLimit` 1 the partition key was the Cloudflare edge address, which changes between requests. | Fixed: `ForwardLimit` is `TrustedProxyHops` (2), so the key is the client's address and an address the client writes in front is still ignored; CLAUDE.md and PROJECT_OVERVIEW updated. `JobPostImportApiTests` now send Render's header shape (client, then a changing edge). To verify on the live instance after the deploy: 429 after 60, also with a made-up `X-Forwarded-For` per request |
 
 ### UX polish after M5
 
@@ -213,6 +214,7 @@ Branch `feature/m5-ux-polish`. Visual and interaction fixes asked for by the own
 | U6 | "Profile" link in the header (marked active on `/profile`); the link inside the step 2 card is gone. | Done. `AppHeaderTests` |
 | U7 | Save buttons are disabled when there is nothing new: the profile page compares the editor with what is saved (a field typed in and erased counts as empty), the bullet editor compares with the current text. | Done. `ProfileFieldsTests`, `CvEditorTests`, E2E `Save_is_enabled_only_while_there_is_something_new_to_save` |
 | U8 | Checkboxes (PDF, Word, cover letter) in the app's colors instead of Bootstrap's blue. | Done (manual check) |
+| U9 | The CV Tailor wordmark in the header starts over: on the home page it reloads it (the router ignores a link to the page already open, so it did nothing), from another page it goes home as before. Settings, history and the profile are in the browser and survive the reload. Asked by the owner on 2026-10-26 (M5.3). | Done. `AppHeaderTests`, E2E `The_wordmark_on_the_home_page_starts_over_from_an_empty_composer` |
 | F30 | Template thumbnails in step 2 sometimes do not show until another template is picked (reported by the owner). Picking a template does not refetch the thumbnails, so they were loaded and only not drawn. Not reproduced: fresh load, cold server, and back from `/profile` all showed them. | Closed (owner, 2026-10-23): it no longer happens. Reopen with the steps if it comes back |
 
 ### System hardening (between M3 and M3.2)
@@ -247,7 +249,18 @@ Everything in M5.2 is implemented and its tests pass; these are the things that 
 | Screenshots and README | `docs/screenshots` retaken from the running app; `ScreenshotTests` now generates with a cover letter and adds `letter.png` (the letter editor that names the company). | Done: README table is 2 by 2 with the letter, the editing bullet names add back, scores that follow and the letter editor |
 | Privacy page | The company typed in step 1 and the API import. | Done: the history line names the company, the server line says the company is sent and only used for the letter, the job-board line names `/api/cv/import-job-post` (its `code` takes the theme's text color: Bootstrap's pink failed the dark-theme contrast check in the axe E2E run). `PrivacyTests.The_privacy_page_names_the_company_and_the_api_import` |
 | Repo name and GitHub page (OPS-07) | The name. | Decided by the owner: `cv-tailor`. The files are in OPS-07; the GitHub settings are the owner's |
-| Render settings (OPS-06) | Memory, cold start and client IP on the real instance. | Open: only measurable on the real instance (step 6 of the deploy checklist under OPS-06). The published app was checked under Kestrel in Production; the image itself is built by CI and Render |
+| Render settings (OPS-06) | Memory, cold start and client IP on the real instance. | Partly checked live on 2026-10-26 (health, headers, 413, PDF; the rate limit failed and was fixed, F32). The rest is in "Open items after M5.3" |
+
+### Open items after M5.3
+
+Every item in M5.3 is Done. Left for right after the merge, and for later:
+
+| Item | Why it is not in M5.3 | Owner |
+|---|---|---|
+| The rate limit on the live instance (F32): 429 after 60 quick requests, also with a made-up `X-Forwarded-For` per request | Only measurable once the M5.3 PR is deployed. | Claude, right after the merge |
+| Cold start (the first page after 15 minutes idle) and memory in Render's Metrics while a CV with PDF is generated and edited | Needs the owner's browser and the Render dashboard. | Owner, right after the merge |
+| Tags and GitHub releases v2.0.2 to v2.0.6.3 | v2.0.6.3 points at the merge commit of the M5.3 PR. | Owner, right after the merge (`docs/releases/README.md`) |
+| Optional AI (E7), including PROF-05's AI-assisted parsing | Unchanged. | M6 (parked until there is an API key the app can use) |
 
 ### Open items after M5.1
 
@@ -1178,9 +1191,9 @@ Notes: a `/privacy` page, linked from the footer. The old footer said "We don't 
 Verify: `PrivacyTests` (bUnit: the configured timeout, the footer link), E2E `The_footer_opens_the_privacy_page_and_it_has_no_serious_violations` (it found the in-text link too faint in dark mode, fixed with the app's link color).
 
 ### OPS-06: Deploy to Render + live demo link
-**Status:** In progress (M5.3): everything on this side is done; the deploy itself is the owner's (Render account) · **Priority:** P1 · **Effort:** M
+**Status:** Done (M5.3): live at https://cv-tailor-9z6e.onrender.com since 2026-10-26; the rate limit fix (F32), the cold start and the memory are checked on the instance the M5.3 PR deploys ("Open items after M5.3") · **Priority:** P1 · **Effort:** M
 
-- [ ] First deploy from `render.yaml` (Docker, free plan), health check green (owner, steps below)
+- [x] First deploy (Docker, free plan, Oregon), health check green (owner, 2026-10-26; created as a plain web service with `render.yaml`'s values, not as a Blueprint)
 - [ ] Cold-start timing with and without the PDF warm-up (ENG-05) (on the real instance)
 - [x] Live demo link and badge in the README (moved from OPS-03)
 - [x] Rate limit, security headers and the 413 body limit checked under Kestrel in Production (2026-10-24)
@@ -1193,6 +1206,12 @@ Done notes (2026-10-24, before the deploy):
 - Found and fixed there: in Production the 413 (and any exception that escaped a controller) reached an API client as the UI's HTML error page, because `UseExceptionHandler` re-executed the Blazor `/Error` page for every path. `Configuration/ApiErrors.cs` (`UseApiErrors`, registered inside the app-wide handler, `/api` only) now answers a ProblemDetails like the rest of the API: 413 "Payload too large", 500 "Server error" with a fixed message (the exception is logged, never sent), 400 for Kestrel's other rejections. Re-checked under Kestrel: `application/problem+json` on `/api/cv/generate` and on `/api/cv/import-job-post`; pages are unchanged. The app-wide handler reuses `ApiErrors.StatusOf`. Tests: `ApiErrorsTests` (a TestServer app with the handler: 413 and 500 problems, nothing leaked, pages left alone; the status rule; a 400).
 - Seen, not changed: the home page carries two `Content-Security-Policy` headers, ours and the `frame-ancestors 'self'` ASP.NET Core adds for interactive server components. Both are enforced and both allow the app's own origin, so the result is the same as ours alone.
 - Not measurable here: memory on the free plan with two Chrome pages (the edit loop renders a PDF per edit while something is added back), the cold start, and the client IP behind Render's proxy (`ForwardLimit` 1). They are step 6 of the checklist below.
+
+Done notes (2026-10-26, on the live instance):
+- The URL is `https://cv-tailor-9z6e.onrender.com`: the name `cv-tailor` was taken on Render, so it added a suffix. README badge and link and `docs/releases/v2.0.6.3.md` point at it.
+- Checked live: `/api/cv/health` answers `healthy` with `pdfEngine: ready` (0.4 s, warm); nosniff, X-Frame-Options, Referrer-Policy and the CSP on the home page; a 3.2 MB body to `/api/cv/generate` is a 413 with the JSON problem body; a generation with PDF and DOCX through the API took 4.5 s on 0.1 CPU.
+- Failed live: the API rate limit. 63 quick `GET /api/cv/profiles` all answered 200, no 429 (F32). Fixed on branch `feature/m5-3-deploy`; checked again after it is deployed.
+- Still open: the cold start (open the URL after 15 minutes idle) and the memory in Render's Metrics while a CV with PDF is generated and edited.
 
 ### Deploy checklist (owner)
 
@@ -1385,36 +1404,36 @@ Done notes:
 - Not done: letter to tracker.
 
 ### OPS-07: Repo ready for visitors
-**Status:** In progress (M5.3): the files are done; the GitHub settings are the owner's · **Priority:** P1 · **Effort:** S
+**Status:** Done (M5.3, 2026-10-26; the tags and releases come right after the merge, see "Open items after M5.3") · **Priority:** P1 · **Effort:** S
 
-The GitHub page today is empty: no description, no website, no topics, no releases, no license (the owner's list, 2026-10-23). Most of it is GitHub's own settings, which only the owner can change; the files go in a PR.
+The GitHub page today is empty: no description, no website, no topics, no releases, no license (the owner's list, 2026-10-23). The repository was private until 2026-10-26, which is why secret scanning, CodeQL, private vulnerability reporting and the ruleset could not be turned on and the coverage badge (read from `master` by shields.io) did not show; the owner made it public that day. Most of it is GitHub's own settings, which only the owner can change; the files go in a PR.
 
 Settings on GitHub (owner, in the web UI):
-- [ ] **About**: a one-sentence description (the README's tagline: "Tailored to every job. Nothing invented."), the live demo as the **website**, and **topics** (for example `aspnet-core`, `blazor`, `csharp`, `dotnet`, `resume`, `cv-generator`, `ats`, `job-search`, `playwright`, `bunit`, `docker`, `render`)
-- [ ] Hide the empty sections in the About gear: **Packages** and **Deployments** (nothing is published as a package); keep **Releases**
-- [ ] **Social preview** image (1280 x 640) made from `docs/screenshots`, so a shared link has a picture
-- [ ] **Pin** the repository on the owner's profile
-- [ ] **Branch protection** on `master`: require the CI checks and a PR (solo repo, so no required reviewers), delete merged branches automatically
-- [ ] Turn on **secret scanning**, Dependabot alerts and **private vulnerability reporting** (`SECURITY.md` and the issue template link to it; Settings, Security); consider **CodeQL** (code scanning) as a second workflow
-- [ ] Create an **`idea`** label (the idea issue template applies it; `bug` exists by default)
+- [x] **About**: a one-sentence description (the README's tagline: "Tailored to every job. Nothing invented."), the live demo as the **website**, and **topics** (for example `aspnet-core`, `blazor`, `csharp`, `dotnet`, `resume`, `cv-generator`, `ats`, `job-search`, `playwright`, `bunit`, `docker`, `render`) (set with `gh repo edit`, 2026-10-26: the tagline plus one sentence, the live URL, those 12 topics)
+- [x] Hide the empty sections in the About gear: **Packages** and **Deployments** (nothing is published as a package); keep **Releases**
+- [x] **Social preview** image (1280 x 640) made from `docs/screenshots`, so a shared link has a picture (the image is `docs/social-preview.png`, the wordmark, the tagline and the workspace and letter screenshots, taken with headless Edge; uploaded by the owner on 2026-10-26, `usesCustomOpenGraphImage` is true)
+- [x] **Pin** the repository on the owner's profile (2026-10-26)
+- [x] **Branch protection** on `master`: require the CI checks and a PR (solo repo, so no required reviewers), delete merged branches automatically (a ruleset `master` on the default branch: no deletion, no force push, a PR with 0 approvals, the checks `Build and test`, `Browser tests (Playwright)` and `Docker image build`; merged branches deleted automatically)
+- [x] Turn on **secret scanning**, Dependabot alerts and **private vulnerability reporting** (`SECURITY.md` and the issue template link to it; Settings, Security); consider **CodeQL** (code scanning) as a second workflow (all on, 2026-10-26: secret scanning with push protection, Dependabot alerts, private vulnerability reporting, and CodeQL through GitHub's default setup, so no workflow file in the repo)
+- [x] Create an **`idea`** label (the idea issue template applies it; `bug` exists by default)
 
 Files:
 - [x] **LICENSE**: MIT (owner, 2026-10-24), named in the README with a badge and a License section
 - [x] **Releases**: drafts for every milestone in `docs/releases/` (v2.0.2 to v2.0.6.3), with the commit each tag points at and the commands
 - [ ] The tags and releases themselves (owner; nothing is tagged today)
 - [x] README: live demo link and badge, a **real coverage badge**, screenshots retaken
-- [ ] "Run it locally" and "run the tests" checked on a clean clone (needs the commits; the commands were checked on this working copy)
+- [x] "Run it locally" and "run the tests" checked on a clean clone (2026-10-26: `master` at `a2407a7` cloned from GitHub, `dotnet build` with 0 warnings, the fast tests 2954 passed, `dotnet run --project ErCv.Web` with `PORT` served the home page and `/profile`, health `ready`)
 - [x] `SECURITY.md`, `CONTRIBUTING.md` (points at `CLAUDE.md`), issue templates (bug, idea, blank issues off, the vulnerability link) and a PR template (the checklist of `CLAUDE.md`)
 - [x] `.gitattributes`: `* text=auto eol=lf` plus the binary types
 - [x] Tidy the working copy: `cvm-api/` and the `bash.exe.stackdump` files deleted, `*.stackdump` ignored by Git and Docker
-- [ ] The corpus refresh workflow opens PRs: check its title and labels read well on the public page (owner, on the next refresh)
+- [x] The corpus refresh workflow opens PRs: its title reads well on the public page (PR #12: "chore: refresh job post corpus (2026-10-21)", by github-actions, no labels; none needed)
 
 Decided by the owner (2026-10-24): **the repository name is `cv-tailor`**. Renamed in the files: README (title, badges, links, Docker commands), `render.yaml` (service name), the CI image tag, the GitHub link in the app header, the User-Agent of the job post importer and of the corpus collector (and `corpus/README.md`), `PROJECT_OVERVIEW.md`, this file's title, and the project in the owner's demo profile (`Data/cv-master.json`: "CV Tailor" with the new link; four snapshots changed by those two strings only). `corpus-refresh.yml` does not name the repository. Kept on purpose: the solution (`er-cv-generator.sln`), the `ErCv.*` namespaces, and `DocumentConstants.ChromiumCacheAppFolder` (renaming it would make PuppeteerSharp download Chrome again on machines that have it cached). The product name in the UI is **CV Tailor** too (owner, 2026-10-25): `UiConstants.AppName` feeds the header (wordmark "CV Tailor", aria-label "CV Tailor, home"), the hero eyebrow, the page titles ("CV Tailor - Resumes tailored to every job", "My profile - CV Tailor", "Privacy - CV Tailor") and the error page link; `AppHeaderTests` checks the wordmark, and the README screenshots were retaken with it.
 
 Done notes (2026-10-24):
 - Coverage badge: `coverage_summary.py --badge docs/coverage-badge.json` reads the committed shields.io endpoint file and fails CI when it is more than a point (`BADGE_TOLERANCE`) away from the measured coverage; `--write-badge` rewrites it. The README badge reads that file from `master` through shields.io (already used for the static badges), so it shows the real number without a coverage service or a CI job that pushes. Written from the full run: 98%. Checked: missing file, write, check, a stale 90% file (fails with the command to fix it).
 - `.gitattributes`: the index already held LF for every text file, so nothing was renormalized and the diff is only the new file. `core.autocrlf=true` on the owner's machine had turned 448 files into CRLF in the working copy; with `eol=lf` Git now says "CRLF will be replaced by LF" for those until it rewrites them, instead of the old warning on every LF file.
-- Release notes: one file per version, written from the milestone list and the Done notes; `docs/releases/README.md` maps each version to its merge commit (v2.0.6.2 to the M5.2 commit `f498026`, because M5.2 and M5.3 ship in one PR) and has the `git tag` and `gh release` commands.
+- Release notes: one file per version, written from the milestone list and the Done notes; `docs/releases/README.md` maps each version to its merge commit (v2.0.6.2 to the merge of PR #20, `a2407a7`; it was first `f498026` while M5.2 and M5.3 were to ship in one PR, and M5.3 got its own PR on 2026-10-26) and has the `git tag` and `gh release` commands.
 
 ---
 
