@@ -21,10 +21,6 @@ public class ApplicationTrackerTests : E2ETestBase
         await Button("History", exact: true).ClickAsync();
     }
 
-    // The entry is saved just after the results show; leaving the page before that loses it (a race of the tests, not the app)
-    private Task WaitForHistoryEntriesAsync(int count) =>
-        Page.WaitForFunctionAsync("n => JSON.parse(localStorage.getItem('cv-generator-history') || '[]').length >= n", count);
-
     [Fact]
     public async Task Application_details_and_status_are_kept_after_a_reload_and_can_be_filtered()
     {

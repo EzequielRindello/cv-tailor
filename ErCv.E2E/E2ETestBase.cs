@@ -120,6 +120,13 @@ public abstract class E2ETestBase : IAsyncLifetime
         await Assertions.Expect(Page.Locator("iframe[title='CV Preview']")).ToBeVisibleAsync();
     }
 
+    /// <summary>
+    /// The results show before the history entry is written to localStorage, so a test that leaves the page right
+    /// after generating waits for it first, or the entry is lost with the navigation.
+    /// </summary>
+    protected Task WaitForHistoryEntriesAsync(int count) =>
+        Page.WaitForFunctionAsync("n => JSON.parse(localStorage.getItem('cv-generator-history') || '[]').length >= n", count);
+
     /// <summary>Clicks a template or page-option card by its label, like a user (the radio inside is visually hidden).</summary>
     protected async Task ChooseCardAsync(string name)
     {

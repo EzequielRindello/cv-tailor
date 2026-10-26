@@ -24,6 +24,7 @@ public class PersistenceAndShortcutTests : E2ETestBase
         await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "Word" }), true);
         await Button("Generate CV").ClickAsync();
         await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
+        await WaitForHistoryEntriesAsync(1);
 
         await OpenHomeAsync();
 
@@ -58,6 +59,7 @@ public class PersistenceAndShortcutTests : E2ETestBase
         await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "Word" }), true);
         await Button("Generate CV").ClickAsync();
         await Assertions.Expect(ResultsRegion).ToBeVisibleAsync();
+        await WaitForHistoryEntriesAsync(1);
 
         // Come back, change everything, then re-open the old generation
         await OpenHomeAsync();
@@ -92,6 +94,7 @@ public class PersistenceAndShortcutTests : E2ETestBase
         await SetCheckedAsync(Page.GetByRole(AriaRole.Checkbox, new() { Name = "Word" }), true);
         await Button("Generate CV").ClickAsync();
         await Assertions.Expect(PreviewBody).ToContainTextAsync("Tester");
+        await WaitForHistoryEntriesAsync(1);
 
         await Page.EvaluateAsync("() => localStorage.removeItem('cv-generator-my-profile')");
         await OpenHomeAsync();
