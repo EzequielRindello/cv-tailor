@@ -44,10 +44,11 @@ public class JobPostImportApiTests
         Session = new ErCvOptions.SessionSettings { IdleTimeoutMinutes = 10 }
     };
 
-    private static Task<HttpResponseMessage> Import(HttpClient client, string? link, string? forwardedFor = null)
+    private static Task<HttpResponseMessage> Import(HttpClient client, string? link, string? forwardedFor = null, string? cloudflareIp = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, Route) { Content = JsonContent.Create(new { link }) };
         if (forwardedFor != null) request.Headers.Add("X-Forwarded-For", forwardedFor);
+        if (cloudflareIp != null) request.Headers.Add("CF-Connecting-IP", cloudflareIp);
         return client.SendAsync(request);
     }
 
@@ -197,25 +198,49 @@ public class JobPostImportApiTests
     {
         using var app = App(FakeHttp.Json(GreenhouseJob), importPermits: 1);
 
-        // As on Render: the client, then the Cloudflare edge, which changes between requests (F32)
-        await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1, 172.70.0.1");
-        var sameIp = await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1, 172.70.0.2");
-        var otherIp = await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.2, 172.70.0.1");
+        await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1");
+        var sameIp = await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1");
+        var otherIp = await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.2");
 
         Assert.Equal(HttpStatusCode.TooManyRequests, sameIp.StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, otherIp.StatusCode);
     }
 
-    // Only the two proxy hops are trusted, so an address the client writes in front of them buys nothing
+    // ForwardLimit 1: only the last hop (the proxy's own) is trusted, so a made-up first address buys nothing
     [Fact]
     public async Task A_spoofed_forwarded_for_does_not_give_a_fresh_limit()
     {
         using var app = App(FakeHttp.Json(GreenhouseJob), importPermits: 1);
 
-        await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1, 172.70.0.1");
-        var spoofed = await Import(app.Client, RefusedLink, forwardedFor: "198.51.100.9, 203.0.113.1, 172.70.0.2");
+        await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1");
+        var spoofed = await Import(app.Client, RefusedLink, forwardedFor: "198.51.100.9, 203.0.113.1");
 
         Assert.Equal(HttpStatusCode.TooManyRequests, spoofed.StatusCode);
+    }
+
+    // As on Render (F32): the last hop is a proxy that changes between requests, Cloudflare's header names the visitor
+    [Fact]
+    public async Task Behind_cloudflare_the_limit_follows_the_visitor_not_the_proxy()
+    {
+        using var app = App(FakeHttp.Json(GreenhouseJob), importPermits: 1);
+
+        await Import(app.Client, RefusedLink, forwardedFor: "172.70.0.1", cloudflareIp: "203.0.113.1");
+        var sameVisitor = await Import(app.Client, RefusedLink, forwardedFor: "198.51.100.9, 172.70.0.2", cloudflareIp: "203.0.113.1");
+        var otherVisitor = await Import(app.Client, RefusedLink, forwardedFor: "172.70.0.1", cloudflareIp: "203.0.113.2");
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, sameVisitor.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, otherVisitor.StatusCode);
+    }
+
+    [Fact]
+    public async Task A_cloudflare_header_that_is_not_an_address_falls_back_to_the_connection()
+    {
+        using var app = App(FakeHttp.Json(GreenhouseJob), importPermits: 1);
+
+        await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1", cloudflareIp: "not-an-ip");
+        var again = await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1", cloudflareIp: "also-not");
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, again.StatusCode);
     }
 
     [Fact]

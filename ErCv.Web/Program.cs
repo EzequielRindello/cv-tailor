@@ -17,8 +17,8 @@ using Scalar.AspNetCore;
 
 const string PortVariable = "PORT";
 const string ErrorPath = "/Error";
-// Cloudflare's edge, then Render's own proxy (F32)
-const int TrustedProxyHops = 2;
+// Set by Cloudflare, in front of Render, to the visitor's address; a request that sends its own is refused at the edge (F32)
+const string CloudflareClientIpHeader = "CF-Connecting-IP";
 
 var builder = WebApplication.CreateBuilder(args);
 var settings = ErCvOptions.Load(builder.Configuration);
@@ -76,11 +76,9 @@ builder.Services.AddSession(options =>
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    // Render's proxies are not on a fixed, known network. A request reaches the app through Cloudflare and then
-    // Render, so X-Forwarded-For ends with "client, Cloudflare edge". Trusting exactly those two hops gives the
-    // client's address; anything a client writes into the header itself sits further left and is ignored.
-    // With 1 hop the key was the Cloudflare edge, which changes between requests, so the limit never applied.
-    options.ForwardLimit = TrustedProxyHops;
+    // Render's proxy is not on a fixed, known network. Trusting only the last hop is what stops a client from
+    // spoofing X-Forwarded-For; on Render that hop is a proxy, so the rate limiter reads Cloudflare's header instead.
+    options.ForwardLimit = 1;
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
@@ -154,11 +152,13 @@ app.Lifetime.ApplicationStopping.Register(() => DocumentRenderer.ShutdownAsync()
 
 app.Run();
 
-// One counter per client IP (ForwardLimit keeps the IP from being spoofed)
+// One counter per client IP: Cloudflare's header on Render, the connection's address anywhere else
 static RateLimitPartition<string> FixedWindowPerIp(HttpContext context, Func<ErCvOptions, ErCvOptions.RateLimitSettings> limits)
 {
     var limit = limits(context.RequestServices.GetRequiredService<ErCvOptions>());
-    var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+    var key = IPAddress.TryParse(context.Request.Headers[CloudflareClientIpHeader].ToString(), out var visitor)
+        ? visitor.ToString()
+        : context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
     return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
     {
         PermitLimit = limit.PermitLimit,

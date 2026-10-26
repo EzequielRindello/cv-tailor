@@ -198,7 +198,7 @@ Found by the relevance report over 194 real posts (`corpus/report.md`). Not fixe
 | F28 | Text depended on the server's culture. The ATS density issue used `{0:P0}`: "12%" on Windows (en-US) and "12 %" on Linux, where .NET runs with the invariant culture, so the first CI run of the M5 merge failed 44 snapshots, and the Render container would have shown "12 %". `{0:N0}` in the job description length error and the character counter would print "100.000" under a German or Spanish culture. | Fixed in `fix/culture-independent-text` (no version change): the ATS gets a whole percent rounded half to even (the "P0" rounding), the counts are formatted with the invariant culture, the ATS messages lost their em dashes. `GenerationSnapshotTests.Generation_does_not_depend_on_the_culture` generates every case under the invariant, es-AR, de-DE and fr-FR cultures against the same snapshots; `ATSCheckerTests` and `HardeningTests` pin the two messages |
 | F26 | E2E `Toasts_have_no_serious_violations` failed now and then: "CV ready" is usually still on screen when the download toast appears, so the bare `.app-toast` locator matched two toasts (Playwright strict mode). It passed only when the assertion ran before the second toast was added. | Fixed: the test waits for the "Download started" toast |
 | F31 | E2E `Reopening_a_past_generation_restores_its_options_and_generates_again` failed on the M5.2/M5.3 PR (#20): the history entry is written to localStorage just after the results show, and the test left the page in between, so the entry was lost and "Re-open" never appeared. EDIT-07 widened the gap (the profile is loaded after the result is set). A race of the tests, not the app: a visitor does not leave within milliseconds. | Fixed: `WaitForHistoryEntriesAsync` moved from `ApplicationTrackerTests` to `E2ETestBase` and called before leaving the page in the three `PersistenceAndShortcutTests` that do it and in the history accessibility test |
-| F32 | The API rate limit did not apply on Render: 63 quick requests from one client all answered 200. The response comes from Cloudflare (`Server: cloudflare`, `CF-RAY`), so a request passes Cloudflare's edge and then Render's proxy; with `ForwardLimit` 1 the partition key was the Cloudflare edge address, which changes between requests. | Fixed: `ForwardLimit` is `TrustedProxyHops` (2), so the key is the client's address and an address the client writes in front is still ignored; CLAUDE.md and PROJECT_OVERVIEW updated. `JobPostImportApiTests` now send Render's header shape (client, then a changing edge). To verify on the live instance after the deploy: 429 after 60, also with a made-up `X-Forwarded-For` per request |
+| F32 | The API rate limit did not apply on Render: 63 quick requests from one client all answered 200. The response comes from Cloudflare (`Server: cloudflare`, `CF-RAY`), so a request passes Cloudflare's edge and then Render's proxy, and the last `X-Forwarded-For` hop is a proxy whose address changes between requests. A first fix trusted two hops (PR #21) and still gave 62 answers of 200 on the live instance. Probed live: a request that sends its own `CF-Connecting-IP` is refused by Cloudflare with 403, while a forged `X-Forwarded-For`, `True-Client-IP` or `X-Real-IP` goes through. | Fixed (branch `fix/rate-limit-cloudflare-ip`): the limiter keys on `CF-Connecting-IP` when it holds an address, and on the connection's address otherwise (local runs, tests, a host without Cloudflare); `ForwardLimit` is back to 1. `JobPostImportApiTests`: the visitor behind a changing proxy, a header that is not an address. CLAUDE.md and PROJECT_OVERVIEW updated. To verify live after the deploy: 429 after 60 quick requests |
 
 ### UX polish after M5
 
@@ -257,9 +257,9 @@ Every item in M5.3 is Done. Left for right after the merge, and for later:
 
 | Item | Why it is not in M5.3 | Owner |
 |---|---|---|
-| The rate limit on the live instance (F32): 429 after 60 quick requests, also with a made-up `X-Forwarded-For` per request | Only measurable once the M5.3 PR is deployed. | Claude, right after the merge |
-| Cold start (the first page after 15 minutes idle) and memory in Render's Metrics while a CV with PDF is generated and edited | Needs the owner's browser and the Render dashboard. | Owner, right after the merge |
-| Tags and GitHub releases v2.0.2 to v2.0.6.3 | v2.0.6.3 points at the merge commit of the M5.3 PR. | Owner, right after the merge (`docs/releases/README.md`) |
+| The rate limit on the live instance (F32): 429 after 60 quick requests | The two-hop fix of PR #21 did not work live; the `CF-Connecting-IP` fix is PR #22. | Checked live right after #22 is deployed, before the v2.0.6.3 release |
+| Cold start and memory | Checked on 2026-10-26. Cold start: not measured (closed by the owner on 2026-10-26: not needed; Render warns a free instance can take 50 seconds or more to wake). Memory: the free plan does not show it (Render keeps memory and CPU metrics for paid plans); three generations with PDF and DOCX at the same time all answered 200 in about 14 s, and Render's events show no restart or out-of-memory. | Closed |
+| Tags and GitHub releases v2.0.2 to v2.0.6.3 | v2.0.2 to v2.0.6.2 tagged and released on 2026-10-26. v2.0.6.3 goes on the merge of PR #22 (the F32 fix), so it has the rate limit that works live. | Released right after #22 is merged |
 | Optional AI (E7), including PROF-05's AI-assisted parsing | Unchanged. | M6 (parked until there is an API key the app can use) |
 
 ### Open items after M5.1
@@ -1194,10 +1194,10 @@ Verify: `PrivacyTests` (bUnit: the configured timeout, the footer link), E2E `Th
 **Status:** Done (M5.3): live at https://cv-tailor-9z6e.onrender.com since 2026-10-26; the rate limit fix (F32), the cold start and the memory are checked on the instance the M5.3 PR deploys ("Open items after M5.3") · **Priority:** P1 · **Effort:** M
 
 - [x] First deploy (Docker, free plan, Oregon), health check green (owner, 2026-10-26; created as a plain web service with `render.yaml`'s values, not as a Blueprint)
-- [ ] Cold-start timing with and without the PDF warm-up (ENG-05) (on the real instance)
+- [ ] Cold-start timing with the PDF warm-up (ENG-05) on the real instance: Won't do, not measured (closed by the owner on 2026-10-26: not needed; Render warns a free instance can take 50 seconds or more to wake) (2026-10-26)
 - [x] Live demo link and badge in the README (moved from OPS-03)
 - [x] Rate limit, security headers and the 413 body limit checked under Kestrel in Production (2026-10-24)
-- [ ] The same checks on the deployed instance
+- [x] The same checks on the deployed instance (2026-10-26: headers, 413 and the PDF engine pass; the rate limit needed F32, PR #22)
 
 Done notes (2026-10-24, before the deploy):
 - `render.yaml` names the service `cv-tailor`, so the URL is `https://cv-tailor.onrender.com` if Render has the name free (it adds a suffix when the name is taken: then change the README badge and link, the About website and `docs/releases/v2.0.6.3.md`).
@@ -1210,8 +1210,8 @@ Done notes (2026-10-24, before the deploy):
 Done notes (2026-10-26, on the live instance):
 - The URL is `https://cv-tailor-9z6e.onrender.com`: the name `cv-tailor` was taken on Render, so it added a suffix. README badge and link and `docs/releases/v2.0.6.3.md` point at it.
 - Checked live: `/api/cv/health` answers `healthy` with `pdfEngine: ready` (0.4 s, warm); nosniff, X-Frame-Options, Referrer-Policy and the CSP on the home page; a 3.2 MB body to `/api/cv/generate` is a 413 with the JSON problem body; a generation with PDF and DOCX through the API took 4.5 s on 0.1 CPU.
-- Failed live: the API rate limit. 63 quick `GET /api/cv/profiles` all answered 200, no 429 (F32). Fixed on branch `feature/m5-3-deploy`; checked again after it is deployed.
-- Still open: the cold start (open the URL after 15 minutes idle) and the memory in Render's Metrics while a CV with PDF is generated and edited.
+- Failed live: the API rate limit. 63 quick `GET /api/cv/profiles` all answered 200, no 429 (F32). The two-hop fix of PR #21 did not help on the live instance; keyed on Cloudflare's `CF-Connecting-IP` in `fix/rate-limit-cloudflare-ip` (see F32).
+- Cold start, measured after 16 minutes without traffic: not measured (closed by the owner on 2026-10-26: not needed; Render warns a free instance can take 50 seconds or more to wake). Memory is not shown on the free plan; three PDF generations at the same time all answered 200 and Render shows no restart.
 
 ### Deploy checklist (owner)
 
@@ -1420,7 +1420,7 @@ Settings on GitHub (owner, in the web UI):
 Files:
 - [x] **LICENSE**: MIT (owner, 2026-10-24), named in the README with a badge and a License section
 - [x] **Releases**: drafts for every milestone in `docs/releases/` (v2.0.2 to v2.0.6.3), with the commit each tag points at and the commands
-- [ ] The tags and releases themselves (owner; nothing is tagged today)
+- [x] The tags and releases themselves (2026-10-26: v2.0.2 to v2.0.6.2; v2.0.6.3 on the merge of PR #22)
 - [x] README: live demo link and badge, a **real coverage badge**, screenshots retaken
 - [x] "Run it locally" and "run the tests" checked on a clean clone (2026-10-26: `master` at `a2407a7` cloned from GitHub, `dotnet build` with 0 warnings, the fast tests 2954 passed, `dotnet run --project ErCv.Web` with `PORT` served the home page and `/profile`, health `ready`)
 - [x] `SECURITY.md`, `CONTRIBUTING.md` (points at `CLAUDE.md`), issue templates (bug, idea, blank issues off, the vulnerability link) and a PR template (the checklist of `CLAUDE.md`)
