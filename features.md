@@ -257,9 +257,9 @@ Every item in M5.3 is Done. Left for right after the merge, and for later:
 
 | Item | Why it is not in M5.3 | Owner |
 |---|---|---|
-| The rate limit on the live instance (F32): 429 after 60 quick requests | The two-hop fix of PR #21 did not work live; the `CF-Connecting-IP` fix ships in its own PR. | Claude, right after the merge |
-| Cold start (the first page after 15 minutes idle) and memory in Render's Metrics while a CV with PDF is generated and edited | Needs the owner's browser and the Render dashboard. | Owner, right after the merge |
-| Tags and GitHub releases v2.0.2 to v2.0.6.3 | v2.0.2 to v2.0.6.2 were tagged on 2026-10-26 (pushed by the owner); v2.0.6.3 goes on the merge of the F32 fix PR, so it has the rate limit that works live. | Owner pushes the tags, Claude creates the releases (`docs/releases/README.md`) |
+| The rate limit on the live instance (F32): 429 after 60 quick requests | The two-hop fix of PR #21 did not work live; the `CF-Connecting-IP` fix is PR #22. | Checked live right after #22 is deployed, before the v2.0.6.3 release |
+| Cold start and memory | Checked on 2026-10-26. Cold start: not measured (closed by the owner on 2026-10-26: not needed; Render warns a free instance can take 50 seconds or more to wake). Memory: the free plan does not show it (Render keeps memory and CPU metrics for paid plans); three generations with PDF and DOCX at the same time all answered 200 in about 14 s, and Render's events show no restart or out-of-memory. | Closed |
+| Tags and GitHub releases v2.0.2 to v2.0.6.3 | v2.0.2 to v2.0.6.2 tagged and released on 2026-10-26. v2.0.6.3 goes on the merge of PR #22 (the F32 fix), so it has the rate limit that works live. | Released right after #22 is merged |
 | Optional AI (E7), including PROF-05's AI-assisted parsing | Unchanged. | M6 (parked until there is an API key the app can use) |
 
 ### Open items after M5.1
@@ -1194,10 +1194,10 @@ Verify: `PrivacyTests` (bUnit: the configured timeout, the footer link), E2E `Th
 **Status:** Done (M5.3): live at https://cv-tailor-9z6e.onrender.com since 2026-10-26; the rate limit fix (F32), the cold start and the memory are checked on the instance the M5.3 PR deploys ("Open items after M5.3") · **Priority:** P1 · **Effort:** M
 
 - [x] First deploy (Docker, free plan, Oregon), health check green (owner, 2026-10-26; created as a plain web service with `render.yaml`'s values, not as a Blueprint)
-- [ ] Cold-start timing with and without the PDF warm-up (ENG-05) (on the real instance)
+- [ ] Cold-start timing with the PDF warm-up (ENG-05) on the real instance: Won't do, not measured (closed by the owner on 2026-10-26: not needed; Render warns a free instance can take 50 seconds or more to wake) (2026-10-26)
 - [x] Live demo link and badge in the README (moved from OPS-03)
 - [x] Rate limit, security headers and the 413 body limit checked under Kestrel in Production (2026-10-24)
-- [ ] The same checks on the deployed instance
+- [x] The same checks on the deployed instance (2026-10-26: headers, 413 and the PDF engine pass; the rate limit needed F32, PR #22)
 
 Done notes (2026-10-24, before the deploy):
 - `render.yaml` names the service `cv-tailor`, so the URL is `https://cv-tailor.onrender.com` if Render has the name free (it adds a suffix when the name is taken: then change the README badge and link, the About website and `docs/releases/v2.0.6.3.md`).
@@ -1211,7 +1211,7 @@ Done notes (2026-10-26, on the live instance):
 - The URL is `https://cv-tailor-9z6e.onrender.com`: the name `cv-tailor` was taken on Render, so it added a suffix. README badge and link and `docs/releases/v2.0.6.3.md` point at it.
 - Checked live: `/api/cv/health` answers `healthy` with `pdfEngine: ready` (0.4 s, warm); nosniff, X-Frame-Options, Referrer-Policy and the CSP on the home page; a 3.2 MB body to `/api/cv/generate` is a 413 with the JSON problem body; a generation with PDF and DOCX through the API took 4.5 s on 0.1 CPU.
 - Failed live: the API rate limit. 63 quick `GET /api/cv/profiles` all answered 200, no 429 (F32). The two-hop fix of PR #21 did not help on the live instance; keyed on Cloudflare's `CF-Connecting-IP` in `fix/rate-limit-cloudflare-ip` (see F32).
-- Still open: the cold start (open the URL after 15 minutes idle) and the memory in Render's Metrics while a CV with PDF is generated and edited.
+- Cold start, measured after 16 minutes without traffic: not measured (closed by the owner on 2026-10-26: not needed; Render warns a free instance can take 50 seconds or more to wake). Memory is not shown on the free plan; three PDF generations at the same time all answered 200 and Render shows no restart.
 
 ### Deploy checklist (owner)
 
@@ -1420,7 +1420,7 @@ Settings on GitHub (owner, in the web UI):
 Files:
 - [x] **LICENSE**: MIT (owner, 2026-10-24), named in the README with a badge and a License section
 - [x] **Releases**: drafts for every milestone in `docs/releases/` (v2.0.2 to v2.0.6.3), with the commit each tag points at and the commands
-- [ ] The tags and releases themselves (owner; nothing is tagged today)
+- [x] The tags and releases themselves (2026-10-26: v2.0.2 to v2.0.6.2; v2.0.6.3 on the merge of PR #22)
 - [x] README: live demo link and badge, a **real coverage badge**, screenshots retaken
 - [x] "Run it locally" and "run the tests" checked on a clean clone (2026-10-26: `master` at `a2407a7` cloned from GitHub, `dotnet build` with 0 warnings, the fast tests 2954 passed, `dotnet run --project ErCv.Web` with `PORT` served the home page and `/profile`, health `ready`)
 - [x] `SECURITY.md`, `CONTRIBUTING.md` (points at `CLAUDE.md`), issue templates (bug, idea, blank issues off, the vulnerability link) and a PR template (the checklist of `CLAUDE.md`)
