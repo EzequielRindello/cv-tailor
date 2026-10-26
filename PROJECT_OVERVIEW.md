@@ -204,7 +204,7 @@ the suite with line coverage of `Features/` and `Services/` (gate 95%), the brow
 ## Security and hosting
 
 - Security headers (nosniff, frame options, referrer policy, CSP), HSTS outside Development, a non-root container.
-- Forwarded headers trust two hops (Cloudflare's edge and Render's proxy), so the rate limiter counts the visitor's address and a spoofed `X-Forwarded-For` cannot dodge it.
+- The rate limiter counts the visitor's address from Cloudflare's `CF-Connecting-IP` (Cloudflare refuses a request that sets it), or the connection's address without Cloudflare; forwarded headers trust one hop, so a spoofed `X-Forwarded-For` cannot dodge it.
 - At most 2 PDF renders at a time: the Blazor UI is not rate limited, so this cap protects the instance.
 - Chrome is launched in the background at startup and a failed launch is retried by the next PDF (ENG-05).
 - Memory: capped at 512 MB (the free plan), 6 concurrent PDF generations peaked around 250 MiB.

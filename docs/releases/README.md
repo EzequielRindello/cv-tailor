@@ -14,11 +14,11 @@ so the history reads the same as the releases.
 | v2.0.6 | M5 Polish & presentation | `1c6b069` | #15 |
 | v2.0.6.1 | M5.1 Smarter input | `68ecef6` | #18, #19 |
 | v2.0.6.2 | M5.2 Pre-deploy polish | `a2407a7` | #20 (also carried the M5.3 files) |
-| v2.0.6.3 | M5.3 Deploy | the merge commit of the M5.3 PR | #21 (live URL, F32, U9, closing) |
+| v2.0.6.3 | M5.3 Deploy | the merge commit of the F32 fix PR, so the tag has the rate limit that works live | #21 (live URL, U9, closing), and the F32 fix PR |
 
 ## Creating them (owner)
 
-With the GitHub CLI, from the repository root, once the M5.3 PR (#21) is merged (replace `MERGE` with its commit):
+With the GitHub CLI, from the repository root, once the F32 fix PR is merged (replace `MERGE` with its merge commit):
 
 ```
 git tag -a v2.0.2 785e24a -m "v2.0.2: M1 Foundation"
