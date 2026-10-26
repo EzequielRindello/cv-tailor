@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/EzequielRindello/cv-tailor/actions/workflows/ci.yml/badge.svg)](https://github.com/EzequielRindello/cv-tailor/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FEzequielRindello%2Fcv-tailor%2Fmaster%2Fdocs%2Fcoverage-badge.json)](features.md#test-10-coverage)
-[![Live demo](https://img.shields.io/badge/demo-cv--tailor.onrender.com-0f766e)](https://cv-tailor.onrender.com)
+[![Live demo](https://img.shields.io/badge/demo-cv--tailor--9z6e.onrender.com-0f766e)](https://cv-tailor-9z6e.onrender.com)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512bd4)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -16,7 +16,7 @@ Your profile and history stay in your browser.
 
 ![The results workspace: CV preview next to the match score](docs/screenshots/workspace.png)
 
-> **Live demo: [cv-tailor.onrender.com](https://cv-tailor.onrender.com)**. It runs on Render's free plan, so the first
+> **Live demo: [cv-tailor-9z6e.onrender.com](https://cv-tailor-9z6e.onrender.com)**. It runs on Render's free plan, so the first
 > visit after a quiet spell has to wake it up first (Render's cold start); then it answers right away.
 
 ---

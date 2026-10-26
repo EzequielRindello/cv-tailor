@@ -13,12 +13,12 @@ so the history reads the same as the releases.
 | v2.0.5 | M4 Output | `8594f56` | #14 |
 | v2.0.6 | M5 Polish & presentation | `1c6b069` | #15 |
 | v2.0.6.1 | M5.1 Smarter input | `68ecef6` | #18, #19 |
-| v2.0.6.2 | M5.2 Pre-deploy polish | `f498026` (the M5.2 commit; it ships in the same PR as M5.3) | the M5.2/M5.3 PR |
-| v2.0.6.3 | M5.3 Deploy | the merge commit of the M5.2/M5.3 PR | the M5.2/M5.3 PR |
+| v2.0.6.2 | M5.2 Pre-deploy polish | `a2407a7` | #20 (also carried the M5.3 files) |
+| v2.0.6.3 | M5.3 Deploy | the merge commit of the M5.3 PR | the M5.3 PR (live URL, F32, U9, closing) |
 
 ## Creating them (owner)
 
-With the GitHub CLI, from the repository root, once the M5.2/M5.3 PR is merged (replace `MERGE` with its commit):
+With the GitHub CLI, from the repository root, once the M5.3 PR is merged (replace `MERGE` with its commit):
 
 ```
 git tag -a v2.0.2 785e24a -m "v2.0.2: M1 Foundation"
@@ -28,7 +28,7 @@ git tag -a v2.0.4.1 b4f518c -m "v2.0.4.1: M3.2 Real-post fixes"
 git tag -a v2.0.5 8594f56 -m "v2.0.5: M4 Output"
 git tag -a v2.0.6 1c6b069 -m "v2.0.6: M5 Polish & presentation"
 git tag -a v2.0.6.1 68ecef6 -m "v2.0.6.1: M5.1 Smarter input"
-git tag -a v2.0.6.2 f498026 -m "v2.0.6.2: M5.2 Pre-deploy polish"
+git tag -a v2.0.6.2 a2407a7 -m "v2.0.6.2: M5.2 Pre-deploy polish"
 git tag -a v2.0.6.3 MERGE -m "v2.0.6.3: M5.3 Deploy"
 git push origin --tags
 ```

@@ -212,4 +212,15 @@ public class GenerateFlowTests : E2ETestBase
         await Button("Start over").ClickAsync();
         await Assertions.Expect(JobDescription).ToHaveValueAsync("");
     }
+
+    [Fact]
+    public async Task The_wordmark_on_the_home_page_starts_over_from_an_empty_composer()
+    {
+        await GenerateAsync();
+
+        await Page.GetByRole(AriaRole.Link, new() { Name = "CV Tailor, home" }).ClickAsync();
+
+        await Assertions.Expect(ResultsRegion).ToHaveCountAsync(0);
+        await Assertions.Expect(JobDescription).ToHaveValueAsync("");
+    }
 }

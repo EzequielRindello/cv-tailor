@@ -135,8 +135,9 @@ Constants classes longer than about 50 lines use topic regions instead (`Scoring
   the instance.
 - `Configuration/SecurityHeaders.cs` sets nosniff, X-Frame-Options, Referrer-Policy and a CSP. The preview iframe
   inherits the CSP: test the preview after changing it.
-- `ForwardedHeaders.ForwardLimit` stays 1 (only Render's own hop is trusted, so the rate limiter cannot be dodged
-  with a spoofed X-Forwarded-For).
+- `ForwardedHeaders.ForwardLimit` stays 2 (`TrustedProxyHops`: Cloudflare's edge and Render's proxy). The client's
+  address is the one before those two hops; with 1 the key was the edge, which changes per request (F32), and with
+  more a spoofed X-Forwarded-For would dodge the rate limiter.
 - The container runs as the non-root `app` user. Do not add `USER root` for runtime steps.
 - No CDN assets: vendor libraries under `wwwroot/lib/`.
 - The only outbound requests are `JobPostImporter`'s, to fixed board API hosts. A pasted link is parsed, never

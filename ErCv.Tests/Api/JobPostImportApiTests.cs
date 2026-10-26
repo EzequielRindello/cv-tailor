@@ -197,22 +197,23 @@ public class JobPostImportApiTests
     {
         using var app = App(FakeHttp.Json(GreenhouseJob), importPermits: 1);
 
-        await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1");
-        var sameIp = await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1");
-        var otherIp = await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.2");
+        // As on Render: the client, then the Cloudflare edge, which changes between requests (F32)
+        await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1, 172.70.0.1");
+        var sameIp = await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1, 172.70.0.2");
+        var otherIp = await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.2, 172.70.0.1");
 
         Assert.Equal(HttpStatusCode.TooManyRequests, sameIp.StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, otherIp.StatusCode);
     }
 
-    // ForwardLimit 1: only the last hop (the proxy's own) is trusted, so a made-up first address buys nothing
+    // Only the two proxy hops are trusted, so an address the client writes in front of them buys nothing
     [Fact]
     public async Task A_spoofed_forwarded_for_does_not_give_a_fresh_limit()
     {
         using var app = App(FakeHttp.Json(GreenhouseJob), importPermits: 1);
 
-        await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1");
-        var spoofed = await Import(app.Client, RefusedLink, forwardedFor: "198.51.100.9, 203.0.113.1");
+        await Import(app.Client, RefusedLink, forwardedFor: "203.0.113.1, 172.70.0.1");
+        var spoofed = await Import(app.Client, RefusedLink, forwardedFor: "198.51.100.9, 203.0.113.1, 172.70.0.2");
 
         Assert.Equal(HttpStatusCode.TooManyRequests, spoofed.StatusCode);
     }
