@@ -15,7 +15,7 @@
 		<!-- PROF-05: reads the text of an uploaded resume PDF -->
 		<PackageReference Include="PdfPig" Version="0.1.16" />
 		<PackageReference Include="PuppeteerSharp" Version="25.15.0" />
-		<PackageReference Include="Scalar.AspNetCore" Version="2.18.5" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.19.0" />
 		<PackageReference Include="Stubble.Core" Version="1.10.8" />
 	</ItemGroup>
 
