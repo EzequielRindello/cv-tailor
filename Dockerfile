@@ -1,11 +1,11 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 WORKDIR /src
 COPY ErCv.Web/ErCv.Web.csproj ErCv.Web/
 RUN dotnet restore ErCv.Web/ErCv.Web.csproj
 COPY ErCv.Web/ ErCv.Web/
 RUN dotnet publish ErCv.Web/ErCv.Web.csproj -c Release -o /app
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:11.0
 # Chrome for PDF rendering. Ubuntu's "chromium" package is a snap stub that does not run in containers,
 # so install the official Chrome .deb. PuppeteerSharp skips its own download when the path is set.
 RUN apt-get update \
